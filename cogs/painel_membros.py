@@ -56,7 +56,7 @@ class RemoverZeradoModal(discord.ui.Modal, title="Remover registro de jogo zerad
 
 GUIA_MEMBROS = {
     "conquistas": ("🏛️ Conquistas e troféus", "**Coliseu e conquistas:** abra o painel de platinas, runs, desafios e rankings.\n**Caçador de troféus:** acompanhe troféus e colecionáveis de um jogo.\n**Buscar um jogo:** informe o nome do jogo no formulário para iniciar uma pesquisa."),
-    "jogos": ("🎮 Minha biblioteca", "**Meus jogos zerados:** abra sua lista e use as opções disponíveis para registrar ou consultar jogos.\n**Excluir jogo zerado:** informe o número do registro que deseja remover. Confira o número antes de prosseguir; a remoção altera seus dados."),
+    "jogos": ("🎮 Minha biblioteca", "**Platinas:** consulte suas conquistas e registros aprovados.\n**Zerados:** registre e consulte seus jogos concluídos.\n**Runs e desafios:** acesse seus registros, tempos e recordes."),
     "progresso": ("🛡️ Nível e recompensas", "**Meu nível e XP:** consulte sua patente, experiência acumulada e progresso.\n**Ranking de XP:** compare a experiência dos membros.\n**Loja de recompensas:** consulte itens disponíveis e use seus Denários nas opções oferecidas."),
     "ajuda": ("🧠 Preferências e suporte", "**Minha memória na Nara:** acesse as opções de memória pessoal da assistente.\n**Ajuda e tutoriais:** encontre instruções para os recursos da comunidade.\n**Dica:** os botões abrem respostas privadas; você pode voltar ao painel para escolher outra função."),
     "perfil": ("👤 Meu perfil", "**Meu perfil:** consulte sua patente, nível, XP, Denários, quantidade de platinas e jogos zerados, além das posições nos rankings."),
@@ -101,10 +101,11 @@ MEMBROS_CATEGORIAS = {
     },
     "biblioteca": {
         "titulo": "📚 Minha biblioteca",
-        "descricao": "Consulte seus jogos concluídos e gerencie seus registros.",
+        "descricao": "Acesse suas platinas, jogos zerados e runs e desafios.",
         "acoes": [
-            ("zerados", "Meus jogos zerados", "✅", discord.ButtonStyle.success),
-            ("remover_zerado", "Excluir um registro", "🗑️", discord.ButtonStyle.danger),
+            ("biblioteca_platinas", "Platinas", "🏆", discord.ButtonStyle.primary),
+            ("zerados", "Zerados", "✅", discord.ButtonStyle.success),
+            ("biblioteca_runs", "Runs e desafios", "⚔️", discord.ButtonStyle.danger),
         ],
     },
     "progresso": {
@@ -161,6 +162,21 @@ async def _executar_acao_membro(interaction: discord.Interaction, bot: commands.
         if cog is None:
             return await interaction.response.send_message("A pesquisa de jogos está indisponível no momento.", ephemeral=True)
         return await interaction.response.send_modal(BuscarJogoModal(cog))
+
+    if action == "biblioteca_platinas":
+        cog = bot.get_cog("Platinas")
+        if cog is None:
+            return await interaction.response.send_message("O painel de platinas está indisponível no momento.", ephemeral=True)
+        from cogs.platinas import PainelView
+        view = PainelView(cog, interaction.user)
+        return await interaction.response.send_message(embed=await view.embed(), view=view, ephemeral=True)
+
+    if action == "biblioteca_runs":
+        cog = bot.get_cog("Soulslike")
+        if cog is None:
+            return await interaction.response.send_message("O painel de runs e desafios está indisponível no momento.", ephemeral=True)
+        from cogs.soulslike import CentralView
+        return await interaction.response.send_message(content=cog.texto_central(), view=CentralView(cog), ephemeral=True)
 
     if action == "zerados":
         cog = bot.get_cog("Zerados")
@@ -274,7 +290,7 @@ class MembrosVoltarButton(discord.ui.Button):
                 "**Bem-vindo à sua central de jogos e conquistas.**\n\n"
                 "Escolha uma categoria para encontrar a função desejada:\n"
                 "🎮 **Jogos e conquistas:** Coliseu (Platinas, Zerados, Runs e desafios) e Caçador.\n"
-                "📚 **Minha biblioteca:** jogos zerados e gerenciamento de registros.\n"
+                "📚 **Minha biblioteca:** Platinas, Zerados e Runs e desafios.\n"
                 "🏆 **Meu progresso:** nível, XP, ranking e Loja.\n"
                 "👤 **Meu perfil:** estatísticas, patente e rankings pessoais.\n"
                 "🏛️ **Meu Santuário:** espaço pessoal e galeria de platinas.\n"
@@ -379,7 +395,7 @@ class PainelMembros(commands.Cog):
             description=(
                 "**Bem-vindo à sua central de jogos e conquistas.**\n\n"
                 "🎮 **Jogos e conquistas:** Coliseu (Platinas, Zerados, Runs e desafios) e Caçador.\n"
-                "📚 **Minha biblioteca:** consulte jogos zerados e gerencie registros.\n"
+                "📚 **Minha biblioteca:** acesse Platinas, Zerados e Runs e desafios.\n"
                 "🏆 **Meu progresso:** acompanhe nível, XP, ranking e Loja.\n"
                 "👤 **Meu perfil:** veja suas estatísticas e posições nos rankings.\n"
                 "🏛️ **Meu Santuário:** personalize seu espaço e galeria de platinas.\n"
