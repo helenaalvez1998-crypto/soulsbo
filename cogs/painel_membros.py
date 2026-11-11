@@ -138,6 +138,15 @@ MEMBROS_CATEGORIAS = {
             ("catalogos", "Abrir catálogo de jogos e mods", "🎮", discord.ButtonStyle.primary),
         ],
     },
+    "comunidade": {
+        "titulo": "📡 Comunidade e novidades",
+        "descricao": "Acompanhe as novidades da comunidade, transmissões, vídeos, notícias de games e ofertas publicadas nos canais configurados do servidor.",
+        "acoes": [
+            ("ajuda", "Central de ajuda", "📖", discord.ButtonStyle.primary),
+            ("perfil", "Meu perfil e atividade", "👤", discord.ButtonStyle.secondary),
+            ("santuario", "Meu Santuário", "🏛️", discord.ButtonStyle.success),
+        ],
+    },
 }
 
 
@@ -366,6 +375,7 @@ class PainelMembrosView(discord.ui.View):
             ("preferencias", "Preferências", "🧠"),
             ("ajuda", "Ajuda e suporte", "❔"),
             ("catalogos", "Catálogos", "📚"),
+            ("comunidade", "Comunidade", "📡"),
         ]
         for index, (key, label, emoji) in enumerate(categorias):
             self.add_item(MembrosCategoriaButton(self, key, label, emoji, row=index // 3))
@@ -400,6 +410,7 @@ class PainelMembros(commands.Cog):
                 "👤 **Meu perfil:** veja suas estatísticas e posições nos rankings.\n"
                 "🏛️ **Meu Santuário:** personalize seu espaço e galeria de platinas.\n"
                 "🧠 **Preferências:** acesse suas opções pessoais da Nara.\n"
+                "📡 **Comunidade:** acompanhe vídeos, lives, notícias e ofertas nos canais do servidor.\n"
                 "❔ **Ajuda e suporte:** encontre tutoriais e orientações.\n\n"
                 "**Como usar:** escolha uma categoria para abrir as ações relacionadas. "
                 "Cada submenu explica o que você pode fazer.\n\n"

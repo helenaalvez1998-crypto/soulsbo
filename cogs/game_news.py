@@ -493,3 +493,8 @@ class NewsChannelSelect(discord.ui.ChannelSelect):
         channel = self.values[0]
         self.cog._set_config("channel_id", channel.id)
         await interaction.response.send_message(f"Canal do Radar de Games definido: {channel.mention}.", ephemeral=True)
+
+
+async def setup(bot):
+    """Ponto de entrada exigido pelo carregador de extensões do discord.py."""
+    await bot.add_cog(GameNewsCog(bot))

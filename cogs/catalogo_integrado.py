@@ -1546,3 +1546,8 @@ class CatalogoIntegrado(commands.Cog):
             mods = conn.execute("SELECT COUNT(*) FROM mods WHERE status='aprovado'").fetchone()[0]
             mods_pendentes = conn.execute("SELECT COUNT(*) FROM mods WHERE status='pendente'").fetchone()[0]
         return {"jogos": jogos, "jogos_pendentes": jogos_pendentes, "mods": mods, "mods_pendentes": mods_pendentes}
+
+
+async def setup(bot):
+    """Ponto de entrada exigido pelo carregador de extensões do discord.py."""
+    await bot.add_cog(CatalogoIntegrado(bot))

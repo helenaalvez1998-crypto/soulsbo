@@ -501,6 +501,122 @@ class HistoricoAuditoriaView(discord.ui.View):
 
 
 
+ADMIN_
+
+class PublicarPaineisView(discord.ui.View):
+    """Publica/atualiza os painéis persistentes existentes e fixa a mensagem no canal escolhido."""
+
+    def __init__(self, bot, user_id: int):
+        super().__init__(timeout=300)
+        self.bot = bot
+        self.user_id = user_id
+        self.tipo = "principal"
+        self.canal = None
+        opcoes = [
+            discord.SelectOption(label="Painel principal (Coliseu)", value="principal", emoji="🎮"),
+            discord.SelectOption(label="Painel de Platinas", value="platinas", emoji="🏆"),
+            discord.SelectOption(label="Painel de Jogos Zerados", value="zerados", emoji="✅"),
+            discord.SelectOption(label="Central de Ajuda da NARA", value="ajuda", emoji="📚"),
+            discord.SelectOption(label="Catálogo de Jogos e Mods", value="catalogo", emoji="🕹️"),
+        ]
+        seletor = discord.ui.Select(placeholder="1. Escolha o painel", options=opcoes)
+        seletor.callback = self._selecionar_tipo
+        self.add_item(seletor)
+        canais = discord.ui.ChannelSelect(
+            channel_types=[discord.ChannelType.text],
+            placeholder="2. Escolha o canal de publicação",
+            min_values=1, max_values=1,
+        )
+        canais.callback = self._selecionar_canal
+        self.add_item(canais)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        from cogs.platinas import eh_moderador
+        if interaction.user.id != self.user_id or not await eh_moderador(interaction.user, self.bot.db):
+            await interaction.response.send_message("Acesso restrito à equipe autorizada.", ephemeral=True)
+            return False
+        return True
+
+    async def _selecionar_tipo(self, interaction: discord.Interaction):
+        self.tipo = interaction.data["values"][0]
+        await interaction.response.send_message("Painel selecionado. Agora escolha o canal e clique em **Publicar e fixar**.", ephemeral=True)
+
+    async def _selecionar_canal(self, interaction: discord.Interaction):
+        self.canal = self.children[1].values[0]
+        await interaction.response.send_message(f"Canal selecionado: {self.canal.mention}", ephemeral=True)
+
+    @discord.ui.button(label="Publicar e fixar", emoji="📌", style=discord.ButtonStyle.success, row=2)
+    async def publicar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.canal is None:
+            return await interaction.response.send_message("Selecione primeiro um canal de texto.", ephemeral=True)
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        canal = self.canal
+        try:
+            if self.tipo == "catalogo":
+                from cogs.catalogo_integrado import main_content, MainView, get_config, set_config
+                cog = self.bot.get_cog("CatalogoIntegrado")
+                if cog is None:
+                    return await interaction.followup.send("O módulo de catálogo não está carregado.", ephemeral=True)
+                key = f"catalogo_msg_{canal.id}"
+                message = None
+                old_id = get_config(key)
+                if old_id:
+                    try:
+                        message = await canal.fetch_message(int(old_id))
+                    except (discord.NotFound, discord.Forbidden, discord.HTTPException, ValueError):
+                        message = None
+                if message:
+                    await message.edit(content=main_content(), embed=None, attachments=[], view=MainView())
+                else:
+                    message = await canal.send(content=main_content(), view=MainView())
+                set_config(key, str(message.id))
+            else:
+                from utils import upsert_panel
+                if self.tipo == "principal":
+                    cog = self.bot.get_cog("Platinas")
+                    from cogs.platinas import ColiseuView
+                    view = ColiseuView(cog)
+                    key, marker, content = f"panel:principal:{canal.guild.id}:{canal.id}", "nara:painel:principal*", view.texto()
+                    kwargs = {"content": content, "embeds": [], "view": view}
+                elif self.tipo == "platinas":
+                    cog = self.bot.get_cog("Platinas")
+                    from cogs.platinas import PainelPublicoView
+                    view = PainelPublicoView(cog)
+                    key, marker = f"panel:platinas:{canal.guild.id}:{canal.id}", "plat:painel"
+                    kwargs = {"content": "🏆 **NARA — PLATINAS**\nRegistre suas conquistas e consulte suas platinas.\n\nClique no botão abaixo para abrir seu painel pessoal.", "view": view}
+                elif self.tipo == "zerados":
+                    cog = self.bot.get_cog("Zerados")
+                    from cogs.zerados import ZeradosPublicoView
+                    view = ZeradosPublicoView(cog)
+                    key, marker = f"panel:zerados:{canal.guild.id}:{canal.id}", "zer:painel"
+                    kwargs = {"content": "# ✅ Jogos Zerados\n\nRegistre seus jogos concluídos, consulte sua lista e acompanhe o ranking.", "embeds": [], "view": view}
+                else:
+                    from nara_help_panel import PainelAjudaPublicoView
+                    embed = discord.Embed(
+                        title="📚 Central de Ajuda da Nara",
+                        description="Escolha uma opção para consultar orientações sobre os recursos da NARA.",
+                        color=discord.Color.dark_teal(),
+                    )
+                    key, marker = f"panel:ajuda:{canal.guild.id}:{canal.id}", "nara:ajuda"
+                    kwargs = {"embed": embed, "view": PainelAjudaPublicoView(self.bot)}
+                message, _created = await upsert_panel(self.bot, canal, key, marker=marker, **kwargs)
+                if self.tipo in ("platinas", "zerados"):
+                    await self.bot.db.set_kv(f"rotating:channel:{self.tipo}:{canal.guild.id}", str(canal.id))
+            try:
+                if not message.pinned:
+                    await message.pin(reason=f"Painel persistente publicado pelo /adm por {interaction.user}")
+                status_pin = "e fixado"
+            except discord.Forbidden:
+                status_pin = "publicado, mas não foi possível fixar (permissão Gerenciar mensagens ausente)"
+            except discord.HTTPException:
+                status_pin = "publicado, mas o Discord recusou a fixação"
+            await interaction.followup.send(f"✅ Painel **{self.tipo}** publicado/atualizado em {canal.mention} {status_pin}.", ephemeral=True)
+        except Exception:
+            log.exception("Falha ao publicar painel %s pelo /adm", self.tipo)
+            await interaction.followup.send("Não foi possível publicar o painel. Confira as permissões do bot e os logs.", ephemeral=True)
+
+
+
 ADMIN_CATEGORIAS = {
     "servidor": {
         "titulo": "⚙️ Servidor e configurações",
@@ -542,6 +658,13 @@ ADMIN_CATEGORIAS = {
             ("status", "Ver status e configurações", "📊"),
         ],
     },
+    "paineis": {
+        "titulo": "📌 Publicação de painéis",
+        "descricao": "Publique, atualize e fixe os painéis persistentes da NARA.",
+        "acoes": [
+            ("publicar_paineis", "Postar / atualizar painéis fixos", "📌"),
+        ],
+    },
     "catalogos": {
         "titulo": "📚 Catálogos de jogos e mods",
         "descricao": "Administre a biblioteca de jogos, os envios da comunidade e o catálogo de mods.",
@@ -555,6 +678,45 @@ ADMIN_CATEGORIAS = {
         "descricao": "Configure o monitoramento RSS e o canal de notícias de games.",
         "acoes": [
             ("radar_games", "Configurar Radar de Games", "📡"),
+            ("youtube_status", "Status do YouTube", "📺"),
+            ("youtube_test_video", "Testar aviso de vídeo", "🎬"),
+            ("youtube_test_live", "Testar aviso de live", "🔴"),
+            ("ofertas_status", "Status de ofertas", "🏷️"),
+            ("ofertas_preview", "Prévia de oferta", "🛍️"),
+        ],
+    },
+    "cargos": {
+        "titulo": "🎭 Cargos e acesso",
+        "descricao": "Gerencie os painéis de verificação e seleção de cargos. As ações de edição de opções permanecem protegidas pelas permissões do Discord.",
+        "acoes": [
+            ("post_verificacao", "Publicar painel de verificação", "🛡️"),
+            ("post_cargos", "Publicar painel de cargos", "🎭"),
+        ],
+    },
+    "publicacoes": {
+        "titulo": "📌 Publicações e painéis",
+        "descricao": "Publique e atualize os painéis fixos dos sistemas da NARA, incluindo Coliseu, loja, santuários e central de ajuda.",
+        "acoes": [
+            ("publicar_paineis", "Gerenciador de painéis", "📌"),
+            ("post_coliseu", "Publicar painel do Coliseu", "⚔️"),
+            ("post_loja", "Publicar painel da loja", "🪙"),
+            ("post_santuario", "Publicar painel de santuários", "🏛️"),
+            ("post_ajuda", "Publicar central de ajuda", "📖"),
+        ],
+    },
+    "inteligencia": {
+        "titulo": "🤖 NARA IA e inteligência",
+        "descricao": "Consulte indicadores de uso da assistente, estado dos provedores e recursos de IA.",
+        "acoes": [
+            ("ia_relatorio", "Relatório de uso da NARA IA", "📊"),
+            ("ia_provedores", "Status dos provedores IA", "🧠"),
+        ],
+    },
+    "cacador": {
+        "titulo": "🏆 Caçador de Troféus",
+        "descricao": "Acesse a administração do catálogo de troféus, importações, validações, publicação e histórico.",
+        "acoes": [
+            ("cacador_admin", "Abrir administração do Caçador", "🏆"),
         ],
     },
 }
@@ -605,6 +767,15 @@ async def _executar_acao_admin(interaction: discord.Interaction, bot, action: st
         return await interaction.response.edit_message(embed=await view.embed(), view=view)
     if action == "status":
         return await _abrir_status(interaction, bot)
+    if action == "publicar_paineis":
+        from cogs.platinas import eh_moderador
+        if not await eh_moderador(interaction.user, bot.db):
+            return await interaction.response.send_message("Acesso restrito à moderação.", ephemeral=True)
+        view = PublicarPaineisView(bot, interaction.user.id)
+        return await interaction.response.edit_message(
+            content="## 📌 Publicar e fixar painéis\nEscolha o painel, selecione o canal e confirme. Se já existir, a mensagem será atualizada.",
+            embed=None, attachments=[], view=view,
+        )
     if action in ("catalogo_jogos", "catalogo_mods"):
         cog = bot.get_cog("CatalogoIntegrado")
         if cog is None:
@@ -636,6 +807,68 @@ async def _executar_acao_admin(interaction: discord.Interaction, bot, action: st
             "Use o seletor para definir o canal, adicione fontes RSS, consulte os feeds ou envie uma mensagem de teste."
         )
         return await interaction.response.edit_message(content=texto, embed=None, attachments=[], view=NewsAdminView(cog))
+    # Ações administrativas existentes nos Cogs originais: o painel central
+    # chama os mesmos callbacks para evitar duplicar regras de negócio.
+    # Como a chamada interna não passa pelos checks do app command, repetimos
+    # aqui a exigência de Gerenciar Servidor antes de executar essas operações.
+    acoes_restritas = {
+        "youtube_status", "youtube_test_video", "youtube_test_live",
+        "ofertas_status", "ofertas_preview", "ia_relatorio", "ia_provedores",
+        "post_ajuda", "post_verificacao", "post_cargos", "post_coliseu",
+        "post_loja", "post_santuario", "cacador_admin",
+    }
+    if action in acoes_restritas and not (
+        interaction.user.guild_permissions.manage_guild
+        or interaction.user.guild_permissions.administrator
+    ):
+        return await interaction.response.send_message(
+            "Esta ação exige a permissão **Gerenciar Servidor** (ou Administrador).",
+            ephemeral=True,
+        )
+    if action in ("youtube_status", "youtube_test_video", "youtube_test_live"):
+        cog = bot.get_cog("YouTube")
+        if cog is None:
+            return await interaction.response.send_message("O módulo do YouTube não está carregado.", ephemeral=True)
+        metodo = {"youtube_status": "status_youtube", "youtube_test_video": "teste_video", "youtube_test_live": "teste_live"}[action]
+        return await getattr(type(cog), metodo).callback(cog, interaction)
+    if action in ("ofertas_status", "ofertas_preview"):
+        cog = bot.get_cog("Ofertas")
+        if cog is None:
+            return await interaction.response.send_message("O monitor de ofertas não está carregado.", ephemeral=True)
+        metodo = "status_ofertas" if action == "ofertas_status" else "previa_oferta"
+        return await getattr(type(cog), metodo).callback(cog, interaction)
+    if action in ("ia_relatorio", "ia_provedores", "post_ajuda"):
+        cog = bot.get_cog("NaraIA")
+        if cog is None:
+            return await interaction.response.send_message("O módulo de IA não está carregado.", ephemeral=True)
+        metodo = {"ia_relatorio": "nara_relatorio", "ia_provedores": "gemini_status_command", "post_ajuda": "painel_ajuda_nara_command"}[action]
+        return await getattr(type(cog), metodo).callback(cog, interaction)
+    if action in ("post_verificacao", "post_cargos"):
+        cog = bot.get_cog("Cargos")
+        if cog is None:
+            return await interaction.response.send_message("O módulo de cargos não está carregado.", ephemeral=True)
+        metodo = "painel_verificacao" if action == "post_verificacao" else "painel_cargos"
+        return await getattr(type(cog), metodo).callback(cog, interaction)
+    if action == "post_coliseu":
+        cog = bot.get_cog("Colizeu")
+        if cog is None:
+            return await interaction.response.send_message("O módulo do Coliseu não está carregado.", ephemeral=True)
+        return await type(cog).painel_colizeu.callback(cog, interaction)
+    if action == "post_loja":
+        cog = bot.get_cog("Loja")
+        if cog is None:
+            return await interaction.response.send_message("O módulo da loja não está carregado.", ephemeral=True)
+        return await type(cog).painel_loja.callback(cog, interaction)
+    if action == "post_santuario":
+        cog = bot.get_cog("Santuario")
+        if cog is None:
+            return await interaction.response.send_message("O módulo de santuários não está carregado.", ephemeral=True)
+        return await type(cog).painel_santuarios.callback(cog, interaction)
+    if action == "cacador_admin":
+        cog = bot.get_cog("CacadorTrofeus")
+        if cog is None:
+            return await interaction.response.send_message("O Caçador de Troféus não está carregado.", ephemeral=True)
+        return await type(cog).catalogo_admin.callback(cog, interaction)
     if action == "auto_setup":
         return await _executar_configuracao_automatica(interaction, bot)
     if action == "reset":
@@ -714,8 +947,13 @@ class AdminMainView(discord.ui.View):
             ("sistemas", "Sistemas", "🎮"),
             ("economia", "Economia", "🪙"),
             ("diagnostico", "Diagnóstico", "📊"),
+            ("paineis", "Painéis", "📌"),
             ("catalogos", "Catálogos", "📚"),
-            ("radar", "Radar de Games", "📡"),
+            ("radar", "Radar e conteúdo", "📡"),
+            ("cargos", "Cargos e acesso", "🎭"),
+            ("publicacoes", "Publicações", "📌"),
+            ("inteligencia", "NARA IA", "🤖"),
+            ("cacador", "Caçador", "🏆"),
         ]
         for index, (key, label, emoji) in enumerate(categorias):
             self.add_item(AdminCategoriaButton(bot, key, label, emoji, row=index // 3, user_id=user_id))
@@ -1208,7 +1446,7 @@ async def _executar_configuracao_automatica(interaction: discord.Interaction, bo
     for key, channel_name, topic, privado in specs:
         channel = discord.utils.get(category.text_channels, name=channel_name)
         if channel is None:
-            overwrites = None
+            overwrites = {}
             if privado:
                 overwrites = {
                     guild.default_role: discord.PermissionOverwrite(view_channel=False),
