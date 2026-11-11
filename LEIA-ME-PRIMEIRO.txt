@@ -1,0 +1,17 @@
+SOULSBOT — LEIA PRIMEIRO
+
+1. Extraia todos os arquivos do ZIP para uma pasta do projeto.
+2. Leia INSTALACAO_E_ATUALIZACAO.md e INSTALACAO_FINAL_NARA.md.
+3. Instale Python 3.11 ou superior e as dependências com: python -m pip install -r requirements.txt
+4. Execute python configurar_bot.py. O assistente cria/atualiza .env e pede o token Discord. Uma chave Gemini é necessária para conversa livre; as chaves reserva/terceira são opcionais. Tavily é opcional e usada pelos fluxos de pesquisa do Caçador.
+5. No Discord Developer Portal, habilite Message Content Intent, Server Members Intent e Voice States.
+6. Configure os IDs de canais/cargos no .env ou pelo painel administrativo quando disponível.
+7. Inicie com python bot.py. Confira os logs e siga a lista de verificação em INSTALACAO_FINAL_NARA.md.
+8. Perguntas frequentes, consultas SQLite e a Central de Ajuda acessada pelo botão no /nara funciona localmente sem Gemini. Conversa generativa exige chave Gemini válida.
+9. Depois de sincronizar os comandos, use /nara para abrir a central interativa dos membros. /adm abre a central administrativa; /colizeu (Z) continua sendo um comando de moderação.
+
+IA: NARA_CONVERSA_ENABLED=true controla o papo livre; NARA_CHAT_IA_ENABLED controla a pesquisa factual com ferramentas; IA_ACOES_MODERACAO=false mantém concessão de XP por IA desligada. Tavily é opcional.
+
+ATUALIZAÇÃO: pare o bot, faça backup de .env e data/, extraia os arquivos novos sobre o projeto e reinicie. Nunca apague data/colizeu.db.
+
+O ZIP não contém credenciais, token Discord, arquivo .env, banco SQLite nem dados da sua comunidade. Não compartilhe esses arquivos.

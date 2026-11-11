@@ -1,0 +1,64 @@
+SOULSBOT + NARA — INÍCIO RÁPIDO
+================================
+
+ANTES DE COMEÇAR
+- Use Windows 10/11 ou Linux.
+- Instale Python 3.11 ou superior.
+- Você precisa do token do seu bot Discord.
+- Para respostas generativas da Nara, precisa de uma chave da API Gemini.
+- Nunca envie tokens ou chaves nesta conversa ou em canais públicos.
+
+WINDOWS
+1. Extraia a pasta NARA inteira para um local permanente.
+2. Abra a pasta extraída.
+3. Dê duplo clique em INICIAR_WINDOWS.bat.
+4. Na primeira execução, informe no terminal o token Discord e a chave Gemini.
+   A digitação das credenciais fica oculta. Pressione Enter para manter
+   credenciais já salvas em .env.
+5. Informe o ID do servidor (GUILD_ID) quando solicitado; 0 mantém a sincronização
+   global de comandos, que pode demorar para aparecer.
+6. O instalador cria .venv, instala requirements.txt, grava .env e inicia bot.py.
+
+LINUX
+1. Extraia a pasta NARA inteira para um local permanente.
+2. Abra um terminal dentro da pasta.
+3. Execute: chmod +x iniciar_linux.sh
+4. Execute: ./iniciar_linux.sh
+5. Informe o token Discord, a chave Gemini e o ID do servidor quando solicitado.
+
+CONFIGURAÇÃO NO DISCORD DEVELOPER PORTAL
+- Ative Message Content Intent.
+- Ative Server Members Intent.
+- Mantenha Voice States habilitado para os recursos de voz.
+- Convide o bot com os escopos bot e applications.commands.
+- Dê ao bot as permissões necessárias para visualizar canais, ler histórico,
+  enviar mensagens, incorporar links e usar comandos de aplicação.
+
+COMO A NARA RESPONDE
+- Mencione a Nara ou responda a uma mensagem dela para conversar.
+- NARA_CONVERSA_ENABLED=true habilita conversa livre com Gemini.
+- NARA_CHAT_IA_ENABLED=false desliga somente pesquisa factual com ferramentas;
+  não desliga o papo livre.
+- O FAQ e as consultas locais do NARA continuam locais.
+- Tavily é opcional; só é necessária para os fluxos de pesquisa web do Caçador.
+
+SEGURANÇA E LIMITES
+- O ZIP não contém token Discord, chave Gemini, .env nem banco de dados privado.
+- O configurador guarda as credenciais localmente em .env. Não compartilhe esse arquivo.
+- Sem token Discord, o bot não conecta. Sem chave Gemini válida, as funções locais
+  continuam disponíveis, mas a conversa generativa não funciona.
+- As permissões e a sincronização de comandos precisam ser verificadas no seu servidor.
+- Este pacote foi testado automaticamente, mas não foi homologado com as credenciais
+  nem no servidor Discord real do proprietário.
+
+DOCUMENTAÇÃO
+Leia INSTALACAO_E_ATUALIZACAO.md e README.md para as opções completas.
+
+CONFIGURAÇÃO VISUAL PELO DISCORD
+1. Convide o bot com permissões de Gerenciar Canais, Gerenciar Cargos, Ver Canais, Enviar Mensagens, Incorporar Links, Anexar Arquivos e Ler Histórico.
+2. Execute /adm no servidor.
+3. Clique em “Configuração Automática” para criar a categoria e os canais oficiais do NARA.
+4. Em /adm > Cargos, selecione o cargo da equipe de moderação. O bot concederá acesso desse cargo à Central privada de Aprovação.
+5. Use /adm > Canais para trocar individualmente qualquer destino. As escolhas ficam salvas por servidor no SQLite.
+
+A configuração automática não cria cargos, não publica mensagens de teste e não altera/apaga canais existentes. Chaves externas (Discord, Gemini, YouTube, Tavily etc.) continuam precisando ser fornecidas pelo administrador no ambiente seguro da hospedagem.
