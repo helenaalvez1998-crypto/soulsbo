@@ -500,9 +500,6 @@ class HistoricoAuditoriaView(discord.ui.View):
         return True
 
 
-
-ADMIN_
-
 class PublicarPaineisView(discord.ui.View):
     """Publica/atualiza os painéis persistentes existentes e fixa a mensagem no canal escolhido."""
 
