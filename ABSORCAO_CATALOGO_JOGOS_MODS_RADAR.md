@@ -31,3 +31,11 @@ Para reaproveitar os dados do bot antigo:
 - O ZIP original fornecido continha o código do segundo bot, mas não continha `jogos.db`, as capas, as capas de mods nem configurações da instalação em produção. Portanto, o código foi integrado, mas a recuperação dos registros históricos depende de copiar os dados reais.
 - A homologação real no Discord ainda é necessária para validar permissões, upload de imagens, publicação RSS, canal de avisos e comportamento dos menus com a versão instalada de `discord.py`.
 - O bot antigo ainda não deve ser removido do servidor até concluir essa homologação e conferir que os dados foram preservados.
+
+
+## Centrais `/nara` e `/adm` — consolidação
+
+- `/nara` organiza acesso de membros a jogos/conquistas, biblioteca (Platinas, Zerados e Runs e desafios), progresso, preferências, ajuda, catálogos e comunidade.
+- `/adm` agrega configurações do servidor, moderação, sistemas, economia, diagnóstico, publicação de painéis, catálogos, radar/conteúdo, cargos/acesso, NARA IA e administração do Caçador de Troféus.
+- Ações internas que reutilizam callbacks de comandos administrativos repetem a verificação de `Gerenciar Servidor`/`Administrador` antes de executar.
+- Os comandos slash públicos permanecem restritos a `/nara` e `/adm`.
