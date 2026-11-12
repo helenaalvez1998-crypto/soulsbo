@@ -104,7 +104,11 @@ class Colizeu(commands.Cog):
                     return msg.attachments[0].url
             except discord.HTTPException:
                 pass
-        return platina.get("proof_url")
+        # sqlite3.Row oferece acesso por chave, mas não implementa dict.get().
+        # A consulta pode não incluir proof_url em esquemas antigos; verifique
+        # as colunas presentes antes de acessar.
+        colunas = platina.keys() if hasattr(platina, "keys") else ()
+        return platina["proof_url"] if "proof_url" in colunas else None
 
     async def _catalogo_platinas(self, guild: discord.Guild, platinas) -> discord.File | None:
         """Gera uma folha visual com uma miniatura por jogo platinado."""
