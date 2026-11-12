@@ -539,8 +539,33 @@ class PublicarPaineisView(discord.ui.View):
         await interaction.response.send_message("Painel selecionado. Agora escolha o canal e clique em **Publicar e fixar**.", ephemeral=True)
 
     async def _selecionar_canal(self, interaction: discord.Interaction):
-        self.canal = self.children[1].values[0]
-        await interaction.response.send_message(f"Canal selecionado: {self.canal.mention}", ephemeral=True)
+        # ChannelSelect pode entregar o snowflake como string dependendo da
+        # versão/adapter do discord.py. Resolver sempre para um objeto de canal.
+        valores = interaction.data.get("values", []) if interaction.data else []
+        canal_id = valores[0] if valores else None
+        try:
+            canal_id = int(canal_id)
+        except (TypeError, ValueError):
+            canal_id = None
+
+        canal = interaction.guild.get_channel(canal_id) if interaction.guild and canal_id else None
+        if canal is None and canal_id:
+            try:
+                canal = await self.bot.fetch_channel(canal_id)
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                canal = None
+
+        if not isinstance(canal, discord.TextChannel):
+            return await interaction.response.send_message(
+                "Não consegui resolver o canal selecionado. Escolha um canal de texto deste servidor.",
+                ephemeral=True,
+            )
+
+        self.canal = canal
+        await interaction.response.send_message(
+            f"Canal selecionado: {canal.mention}",
+            ephemeral=True,
+        )
 
     @discord.ui.button(label="Publicar e fixar", emoji="📌", style=discord.ButtonStyle.success, row=2)
     async def publicar(self, interaction: discord.Interaction, button: discord.ui.Button):
