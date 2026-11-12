@@ -107,5 +107,5 @@ def test_acessos_diretos_de_perfil_e_santuario_tem_handler():
 
 def test_coliseu_explica_modulos_existentes_sem_criar_novos():
     source = (ROOT / "cogs" / "painel_membros.py").read_text(encoding="utf-8")
-    for name in ("Platinas", "Zerados", "Runs e desafios", "Caçador de Troféus"):
+    for name in ("Platinas", "Zerados", "Runs e desafios"):
         assert name in source

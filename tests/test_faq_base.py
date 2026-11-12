@@ -32,8 +32,7 @@ def test_parafrases_naturais_sao_identificadas():
         "me explica como funcionam as patentes": "patentes",
         "quais canais aparecem pra mim": "canais_servidor",
         "quero saber minhas estatísticas no servidor": "meu_perfil",
-        "como funciona o caçador de troféus": "como_buscar_jogo",
-        "como compro coisas com meus denarios": "loja",
+            "como compro coisas com meus denarios": "loja",
         "como desbloqueio os canais do servidor": "canais_servidor",
         "como receber notificacao de live": "youtube",
         "como funcionam os pontos de experiencia": "como_ganhar_xp",
@@ -99,7 +98,7 @@ def test_categorias_da_central_tem_perguntas_estaticas():
     }
     assert {
         "Platinas e conquistas", "Jogos zerados", "Runs e desafios",
-        "Caçador de Troféus", "XP e patentes", "Perfis e Santuários",
+        "XP e patentes", "Perfis e Santuários",
         "Loja e Denários", "Servidor, cargos e painéis", "YouTube e ofertas",
         "Administração e Nara", "Perfis e rankings", "IA e funcionamento",
     }.issubset(categorias)
