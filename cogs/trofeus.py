@@ -807,6 +807,7 @@ class ConfirmarPesquisaJogo(discord.ui.Button):
         resultado = await p.cog.pesquisar_e_importar(
             candidate, query=p.query, identity_sources=p.sources, solicitante_id=p.user_id,
             job_id=p.job_id, admin=_eh_admin(interaction), actor_id=interaction.user.id,
+            guild_id=interaction.guild_id,
         )
         if resultado.game is not None:
             painel = PainelJogoView(p.cog, p.user_id, resultado.game)
@@ -911,7 +912,7 @@ class ConfirmarValidacaoCatalogo(ViewDono):
         await interaction.response.edit_message(
             content=(f"Registros de **{_md(self.game_name)}** marcados como revisados "
                      f"({result['items']} itens e {result['trophies']} troféus). "
-                     "Agora execute `/catalogo_auditar` e depois `/catalogo_publicar` se a auditoria estiver aprovada."),
+                     "Agora use `/adm` → Caçador para auditar e publicar, se aprovado."),
             view=None,
         )
 
@@ -921,10 +922,64 @@ class ConfirmarValidacaoCatalogo(ViewDono):
         await interaction.response.edit_message(content="Validação cancelada.", view=None)
 
 
+class ModalAcaoCatalogo(discord.ui.Modal):
+    def __init__(self, cog, acao: str):
+        nomes = {"catalogo_auditar": "Auditar catálogo", "catalogo_validar": "Validar revisão humana",
+                 "catalogo_publicar": "Publicar catálogo", "catalogo_rejeitar": "Rejeitar catálogo",
+                 "catalogo_despublicar": "Despublicar catálogo", "catalogo_retentar": "Retentar pedido"}
+        super().__init__(title=nomes[acao], timeout=180)
+        self.cog, self.acao = cog, acao
+        self.identificador = discord.ui.TextInput(label="Número do pedido" if acao == "catalogo_retentar" else "Slug do catálogo",
+            placeholder="Ex.: 12" if acao == "catalogo_retentar" else "Ex.: lies-of-p", max_length=120)
+        self.add_item(self.identificador)
+        if acao in {"catalogo_rejeitar", "catalogo_despublicar"}:
+            self.motivo = discord.ui.TextInput(label="Motivo", style=discord.TextStyle.paragraph,
+                required=acao == "catalogo_rejeitar", max_length=500)
+            self.add_item(self.motivo)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        if not _eh_admin(interaction):
+            return await interaction.response.send_message("Permissão Gerenciar Servidor necessária.", ephemeral=True)
+        valor = str(self.identificador.value).strip()
+        if self.acao == "catalogo_retentar":
+            try:
+                pedido = int(valor)
+                if pedido < 1: raise ValueError()
+            except ValueError:
+                return await interaction.response.send_message("Informe um número de pedido válido.", ephemeral=True)
+            return await type(self.cog).catalogo_retentar.callback(self.cog, interaction, pedido)
+        if not valor:
+            return await interaction.response.send_message("Informe o slug do catálogo.", ephemeral=True)
+        if self.acao in {"catalogo_rejeitar", "catalogo_despublicar"}:
+            return await getattr(type(self.cog), self.acao).callback(
+                self.cog, interaction, valor, str(self.motivo.value).strip())
+        return await getattr(type(self.cog), self.acao).callback(self.cog, interaction, valor)
+
+
+class SelecionarAcaoCatalogo(discord.ui.Select):
+    def __init__(self):
+        super().__init__(placeholder="Auditar, validar, publicar, rejeitar ou retentar…", min_values=1, max_values=1,
+            options=[discord.SelectOption(label=nome, value=acao) for nome, acao in [
+                ("Auditar fontes e cobertura", "catalogo_auditar"),
+                ("Confirmar revisão humana", "catalogo_validar"),
+                ("Publicar catálogo", "catalogo_publicar"),
+                ("Rejeitar catálogo", "catalogo_rejeitar"),
+                ("Despublicar catálogo", "catalogo_despublicar"),
+                ("Retentar pesquisa da fila", "catalogo_retentar"),
+                ("Ver histórico", "catalogo_historico")]])
+
+    async def callback(self, interaction: discord.Interaction):
+        cog = self.view.cog
+        if self.values[0] == "catalogo_historico":
+            return await type(cog).catalogo_historico.callback(cog, interaction, "")
+        await interaction.response.send_modal(ModalAcaoCatalogo(cog, self.values[0]))
+
+
 class PainelAdminCacador(ViewDono):
     def __init__(self, cog, user_id):
         super().__init__(user_id, timeout=300)
         self.cog = cog
+        self.add_item(SelecionarAcaoCatalogo())
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id or not _eh_admin(interaction):
@@ -1110,7 +1165,7 @@ class CacadorTrofeus(commands.Cog):
     # ---------- pesquisa e importação ----------
     async def pesquisar_e_importar(self, candidate: dict, *, query: str, identity_sources: list,
                                    solicitante_id: int, job_id: int | None = None, admin: bool = False,
-                                   actor_id: int | None = None) -> ResultadoPesquisa:
+                                   actor_id: int | None = None, guild_id: int | None = None) -> ResultadoPesquisa:
         """Pesquisa o catálogo de um título confirmado, sem duplicar pedidos e sem perder falhas."""
         db = self.bot.db
         actor_id = actor_id or solicitante_id
@@ -1186,11 +1241,12 @@ class CacadorTrofeus(commands.Cog):
                 f"O pedido **#{job_id}** foi preservado na fila. Você pode tentar de novo pelo mesmo botão, "
                 "sem criar um registro duplicado. Nenhum catálogo foi publicado.")
 
-        await self._avisar_moderacao(
-            interaction.guild_id,
-            f"📥 Novo catálogo aguardando revisão: **{result['name']}** (`{result['slug']}`) — "
-            f"{result['items_received']} itens, {result['trophies_received']} troféus. "
-            f"Use `/catalogo_auditar` e `/catalogo_validar`.")
+        if guild_id is not None:
+            await self._avisar_moderacao(
+                guild_id,
+                f"📥 Novo catálogo aguardando revisão: **{result['name']}** (`{result['slug']}`) — "
+                f"{result['items_received']} itens, {result['trophies_received']} troféus. "
+                f"Revise em `/adm` → Caçador: Auditar e Validar.")
         return ResultadoPesquisa(True, (
             "**Pesquisa concluída — catálogo em revisão**\n"
             f"Jogo identificado: **{_md(titulo)}**\n"
@@ -1242,12 +1298,12 @@ class CacadorTrofeus(commands.Cog):
             title="⚙️ Administração — Caçador de Troféus",
             description=(
                 "**Fluxo de trabalho**\n"
-                "1. `/catalogo_fila`: consulte solicitações e erros (`/catalogo_retentar` retoma um pedido).\n"
+                "1. **Ver fila de jogos**: consulte solicitações e erros.\n"
                 "2. Use **Pesquisar jogo** em `/nara` para identificar o título oficial e gerar o catálogo.\n"
-                "3. `/catalogo_auditar`: confira fontes e cobertura.\n"
-                "4. `/catalogo_validar`: confirme que a revisão humana foi feita.\n"
-                "5. `/catalogo_publicar` ou `/catalogo_rejeitar`: decida o destino.\n"
-                "6. `/catalogo_despublicar` tira do ar; `/catalogo_historico` mostra tudo que mudou.\n\n"
+                "3. **Auditar**: confira fontes e cobertura pelo seletor abaixo.\n"
+                "4. **Validar**: confirme a revisão humana pelo seletor.\n"
+                "5. **Publicar** ou **Rejeitar**: decida o destino.\n"
+                "6. **Despublicar**, **Retentar** e **Histórico** também estão no seletor.\n\n"
                 "Apenas membros com **Gerenciar servidor** podem administrar. A publicação nunca é automática."
             ),
             color=config.COR_OURO,
@@ -1443,7 +1499,8 @@ class CacadorTrofeus(commands.Cog):
         if isinstance(candidato, dict) and candidato.get("canonical_title"):
             r = await self.pesquisar_e_importar(
                 candidato, query=job["game_name"], identity_sources=[], solicitante_id=int(job["requested_by"]),
-                job_id=int(job["id"]), admin=True, actor_id=interaction.user.id)
+                job_id=int(job["id"]), admin=True, actor_id=interaction.user.id,
+                guild_id=interaction.guild_id)
             return await interaction.followup.send(r.mensagem, ephemeral=True)
         # Pedido ainda sem título confirmado: o administrador confirma a identidade.
         try:
