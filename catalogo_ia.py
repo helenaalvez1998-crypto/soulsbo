@@ -257,35 +257,21 @@ Escopo informado: {scope}
 Incluir DLC: {"sim" if incluir_dlc else "não"}
 Plataformas: {", ".join(candidato.get("platforms", []))}
 
-OBJETIVO: construir um catálogo de platina/100% que explique COMO obter cada conquista e
-transforme requisitos compostos em checklists individuais.
-
-HIERARQUIA DE FONTES A CONSULTAR (use as que forem relevantes à plataforma):
-- PlayStation: PSHUB (pshub.com.br), Platina Brasil (platinabrasil.com.br), PSN Tracker
-  (psntracker.app), PSNProfiles e PowerPyx.
-- Guias multiplataforma: Firekeeper (firekeeper.gg), PowerPyx e TrueTrophies.
-- Xbox: XCT.live e TrueAchievements.
-- Steam: Steam Community/SteamDB para a lista de achievements e guias comunitários.
-- Para requisitos concretos: wiki especializada do jogo (Fandom/Gamepedia/wiki oficial),
-  guias de localização e walkthroughs.
-Esses domínios são alvos de pesquisa, não garantia de que exista guia para este jogo.
-Use somente páginas que realmente aparecerem nas fontes anexadas. Não invente URLs.
-
-PROCEDIMENTO OBRIGATÓRIO:
-1. Identifique a lista de troféus/conquistas e a cobertura total por plataforma/edição.
-2. Investigue cada troféu separadamente: condição exata, modo, capítulo/região, pré-requisitos,
-   escolhas, pontos sem retorno, online, DLC e possíveis bugs/versões relevantes.
-3. Se o texto do troféu disser "todos/as" (magias, armas, finais, colecionáveis etc.),
-   procure a lista completa dos elementos exigidos. Crie um registro em items para CADA elemento
-   encontrado e conecte-o ao troféu correspondente em requirements.
-4. Para cada requisito, informe localização, método de obtenção, pré-requisitos e se é perdível.
-5. Compare guias e wikis. Se houver divergência, descreva-a em coverage_notes; não escolha
-   silenciosamente uma versão como verdade.
-6. Não copie conteúdo extenso. Parafraseie em português brasileiro e mantenha a URL da evidência.
-
-Não invente localização, requisitos, nomes oficiais ou troféus. Se não houver evidência,
-marque a lacuna em coverage_notes e não fabrique um item. Diferencie ausência de evidência
- de inexistência do requisito. Não declare cobertura completa sem prova de lista completa.
+OBJETIVO: montar primeiro a lista de troféus/conquistas e, quando aplicável, decompor
+cada conquista em requisitos marcáveis (itens, armas, magias, colecionáveis, chefes,
+missões, desafios ou ações).
+Priorize fontes oficiais para a lista de troféus e wikis/guias reconhecidos para explicar
+como desbloquear cada um.
+Não copie conteúdo extenso. Parafraseie em português. Não invente localização, requisitos,
+nomes oficiais ou troféus. Se não tiver evidência suficiente, omita o registro ou marque
+a lacuna em coverage_notes.
+IMPORTANTE: nem todo jogo tem uma lista independente de itens/colecionáveis. "items" pode
+ser uma lista vazia. Requisitos podem ser descritos diretamente em "requirements" como
+passos, ações, chefes ou condições, mesmo quando não correspondem a um item coletável.
+A ausência de items NÃO invalida um catálogo que tenha troféus sustentados por fontes.
+Para troféus, use a lista completa APENAS se encontrar uma fonte confiável de cobertura completa.
+Se não puder assegurar completude, declare isso em coverage_notes e retorne apenas os registros
+que conseguiu verificar. Não invente que o catálogo é completo.
 
 Retorne SOMENTE JSON neste formato:
 {{
@@ -312,39 +298,11 @@ REGRAS:
 - Não invente URL. Se não encontrar fonte específica, não inclua o registro.
 - Respeite o escopo do jogo base/DLC informado.
 """
-    # Busca orientada por tipo de fonte. Mantemos o limite de quatro consultas
-    # do Tavily Free, mas cada consulta combina fontes especializadas diferentes.
-    # Firekeeper cobre PSN/Steam/Xbox; as demais fontes são priorizadas por plataforma.
-    plataformas_norm = " ".join(str(x).casefold() for x in candidato.get("platforms", []))
-    busca_ps = any(x in plataformas_norm for x in ("playstation", "ps4", "ps5", "ps3"))
-    busca_xbox = "xbox" in plataformas_norm
-    busca_steam = any(x in plataformas_norm for x in ("steam", "pc"))
-    if not (busca_ps or busca_xbox or busca_steam):
-        # Se a identidade ainda não especificou plataforma, investigar as três.
-        busca_ps = busca_xbox = busca_steam = True
-
-    dominios_plataforma = []
-    if busca_ps:
-        dominios_plataforma.extend((
-            "site:pshub.com.br", "site:platinabrasil.com.br",
-            "site:psntracker.app", "site:psnprofiles.com",
-        ))
-    if busca_xbox:
-        dominios_plataforma.extend(("site:xct.live", "site:trueachievements.com"))
-    if busca_steam:
-        dominios_plataforma.extend(("site:steamcommunity.com", "site:steamdb.info"))
-    dominios_plataforma.append("site:firekeeper.gg")
-    dominios = " OR ".join(dict.fromkeys(dominios_plataforma))
-
     search_queries = [
-        # Fonte principal: lista oficial e guias específicos de cada plataforma.
-        f'"{title}" trophy achievement list complete guide {dominios}',
-        # Guias de rota, perdíveis e instruções por troféu.
-        f'"{title}" trophy guide roadmap missable walkthrough PowerPyx Firekeeper PSHUB Platina Brasil XCT',
-        # Wikis e bases de dados para decompor conquistas em itens concretos.
-        f'"{title}" wiki all weapons spells magic skills collectibles locations quest requirements',
-        # Busca de lacunas: nomes de troféus e requisitos específicos, incluindo DLC.
-        f'"{title}" all achievements trophies DLC item checklist locations requirements TrueTrophies PSNProfiles',
+        f'"{title}" official trophy achievement list base game DLC',
+        f'"{title}" complete collectibles weapons armor accessories spells locations guide',
+        f'"{title}" missable trophies collectibles requirements guide',
+        f'"{title}" all trophies achievements platinum requirements walkthrough',
     ]
     text, sources = await _generate(prompt, search_queries)
     if not sources:
@@ -392,11 +350,25 @@ REGRAS:
         trophy["requirements"] = reqs
         trophies.append(trophy)
     data["items"], data["trophies"] = items[:10000], trophies[:2000]
-    if not data["items"] or not data["trophies"]:
+    # Um catálogo de troféus não precisa ter itens colecionáveis independentes.
+    # Jogos focados em história, combate, desafios ou finais podem não ter itens
+    # que devam virar checkboxes. A condição mínima é haver ao menos um troféu
+    # sustentado por uma URL HTTPS retornada pela pesquisa. A completude continua
+    # pendente de auditoria humana.
+    if not data["trophies"]:
+        notes = str(data.get("coverage_notes", "")).strip()
+        detail = f" Observação da pesquisa: {notes}" if notes else ""
         raise RuntimeError(
-            "As fontes encontradas não sustentaram pelo menos um item e um troféu. "
-            "O catálogo não será salvo como se estivesse completo."
+            "A pesquisa não conseguiu validar nenhum troféu/conquista com as fontes "
+            "retornadas. O jogo foi identificado, mas o catálogo não pode ser criado "
+            "ainda. Tente novamente com o título e a edição/ano exatos." + detail
         )
+    if not data["items"]:
+        notes = str(data.get("coverage_notes", "")).strip()
+        missing = "Nenhum item colecionável independente foi confirmado; isso não impede "
+        missing += "o cadastro dos troféus. Os requisitos podem ser passos, chefes, finais "
+        missing += "ou ações descritos diretamente em cada conquista."
+        data["coverage_notes"] = (notes + " " + missing).strip()[:1500]
     data["status"] = "review"
     data["research_sources"] = len(valid_urls)
     data["coverage_notes"] = str(data.get("coverage_notes", ""))[:1500]
