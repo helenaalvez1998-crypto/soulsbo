@@ -9,29 +9,6 @@ import config
 from levels import nivel_por_xp, patente_por_nivel, barra_progresso
 
 
-class BuscarJogoModal(discord.ui.Modal, title="Pesquisar jogo no Caçador"):
-    def __init__(self, cog):
-        super().__init__(timeout=180)
-        self.cog = cog
-        self.nome = discord.ui.TextInput(
-            label="Nome do jogo",
-            placeholder="Digite o título, por exemplo: Elden Ring",
-            min_length=2,
-            max_length=120,
-        )
-        self.add_item(self.nome)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        await self.cog.identificar_e_confirmar(interaction, self.nome.value)
-
-    async def on_error(self, interaction: discord.Interaction, error: Exception):
-        if interaction.response.is_done():
-            await interaction.followup.send("Não foi possível concluir a pesquisa. Confira o nome do jogo e tente novamente. Se continuar, avise a moderação.", ephemeral=True)
-        else:
-            await interaction.response.send_message("Não foi possível concluir a pesquisa. Confira o nome do jogo e tente novamente. Se continuar, avise a moderação.", ephemeral=True)
-
-
 class RemoverZeradoModal(discord.ui.Modal, title="Remover registro de jogo zerado"):
     def __init__(self, cog):
         super().__init__(timeout=180)
@@ -55,7 +32,6 @@ class RemoverZeradoModal(discord.ui.Modal, title="Remover registro de jogo zerad
 
 
 GUIA_MEMBROS = {
-    "conquistas": ("🏛️ Conquistas e troféus", "**Coliseu e conquistas:** abra o painel de platinas, runs, desafios e rankings.\n**Caçador de troféus:** acompanhe troféus e colecionáveis de um jogo.\n**Buscar um jogo:** informe o nome do jogo no formulário para iniciar uma pesquisa."),
     "jogos": ("🎮 Minha biblioteca", "**Platinas:** consulte suas conquistas e registros aprovados.\n**Zerados:** registre e consulte seus jogos concluídos.\n**Runs e desafios:** acesse seus registros, tempos e recordes."),
     "progresso": ("🛡️ Nível e recompensas", "**Meu nível e XP:** consulte sua patente, experiência acumulada e progresso.\n**Ranking de XP:** compare a experiência dos membros.\n**Loja de recompensas:** consulte itens disponíveis e use seus Denários nas opções oferecidas."),
     "ajuda": ("🧠 Preferências e suporte", "**Minha memória na Nara:** acesse as opções de memória pessoal da assistente.\n**Ajuda e tutoriais:** encontre instruções para os recursos da comunidade.\n**Dica:** os botões abrem respostas privadas; você pode voltar ao painel para escolher outra função."),
@@ -71,7 +47,6 @@ class GuiaMembrosSelect(discord.ui.Select):
             min_values=1,
             max_values=1,
             options=[
-                discord.SelectOption(label="Conquistas e troféus", value="conquistas", description="Coliseu, Caçador e pesquisa de jogos", emoji="🏛️"),
                 discord.SelectOption(label="Jogos zerados", value="jogos", description="Registrar, consultar e excluir registros", emoji="🎮"),
                 discord.SelectOption(label="Nível, XP e loja", value="progresso", description="Progresso, ranking e recompensas", emoji="🛡️"),
                 discord.SelectOption(label="Memória e ajuda", value="ajuda", description="Preferências pessoais e tutoriais", emoji="🧠"),
@@ -92,11 +67,9 @@ class GuiaMembrosSelect(discord.ui.Select):
 MEMBROS_CATEGORIAS = {
     "jogos": {
         "titulo": "🎮 Jogos e conquistas",
-        "descricao": "Entre no Coliseu para acessar **Platinas**, **Zerados**, **Runs e desafios** e o **Caçador de Troféus**. Você também pode pesquisar jogos.",
+        "descricao": "Entre no Coliseu para acessar **Platinas**, **Zerados** e **Runs e desafios**.",
         "acoes": [
             ("coliseu", "Abrir Coliseu", "🏛️", discord.ButtonStyle.primary),
-            ("cacador", "Caçador de troféus", "📜", discord.ButtonStyle.secondary),
-            ("buscar_jogo", "Pesquisar jogo", "🔎", discord.ButtonStyle.secondary),
         ],
     },
     "biblioteca": {
@@ -159,18 +132,6 @@ async def _executar_acao_membro(interaction: discord.Interaction, bot: commands.
         from cogs.platinas import ColiseuView
         view = ColiseuView(cog, interaction.user)
         return await interaction.response.send_message(content=view.texto(), view=view, ephemeral=True)
-
-    if action == "cacador":
-        cog = bot.get_cog("CacadorTrofeus")
-        if cog is None:
-            return await interaction.response.send_message("O Caçador de Troféus está indisponível no momento.", ephemeral=True)
-        return await cog.abrir(interaction)
-
-    if action == "buscar_jogo":
-        cog = bot.get_cog("CacadorTrofeus")
-        if cog is None:
-            return await interaction.response.send_message("A pesquisa de jogos está indisponível no momento.", ephemeral=True)
-        return await interaction.response.send_modal(BuscarJogoModal(cog))
 
     if action == "biblioteca_platinas":
         cog = bot.get_cog("Platinas")
@@ -430,7 +391,7 @@ class PainelMembros(commands.Cog):
         # pelos botões. Removê-los da árvore reduz a lista pública do Discord sem
         # duplicar a lógica nem quebrar os fluxos internos.
         comandos_membros = (
-            "coliseu", "cacador", "jogo_buscar", "zerados", "remover_zerado",
+            "coliseu", "zerados", "remover_zerado",
             "loja", "nivel", "ranking-xp", "nara_memoria", "central_ajuda", "comandos",
         )
         for nome in comandos_membros:

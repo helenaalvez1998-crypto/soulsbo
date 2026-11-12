@@ -594,7 +594,7 @@ class NaraIA(commands.Cog):
 
         respostas = {
             "identidade": "Sou a Nara, assistente do NARA. Cuido das informações do servidor, dos painéis e das consultas que o bot consegue fazer.",
-            "capacidades": "Consigo consultar seu perfil, XP, patente, Denários, platinas, jogos zerados, runs, rankings e loja; também explico os sistemas do NARA. Também converso, tiro dúvidas gerais e uso minha IA quando a pergunta foge do FAQ; catálogo de troféus é no **Pesquisar jogo** no `/nara`.",
+            "capacidades": "Consigo consultar seu perfil, XP, patente, Denários, platinas, jogos zerados, runs, rankings e loja; também explico os sistemas do NARA. Também converso, tiro dúvidas gerais e uso minha IA quando a pergunta foge do FAQ; pesquisa automática de guias está temporariamente desativada.",
             "ajuda": "**Atalhos do NARA**\n• `/nara` — platinas, runs, rankings e santuários.\n• **Jogos zerados** no `/nara` — registrar e consultar jogos finalizados.\n• **Remover zerado** no `/nara` — remover um registro seu de zerado.\n• **Meu nível** no `/nara` — seu nível, XP e progresso.\n• **Ranking XP** no `/nara` — ranking de XP.\n• **Caçador de Troféus** no `/nara` — abrir o Caçador de Troféus.\n• **Pesquisar jogo** no `/nara` — identificar jogo e pesquisar catálogo de troféus.\n• **Loja** no `/nara` — loja de itens cosméticos.\nUse os painéis para abrir formulários e consultar detalhes.",
             "como_registrar_platina": "Para registrar uma platina: abra `/nara`, entre em **Platinas** e escolha registrar. Preencha jogo, plataforma, data e envie o comprovante no formulário. A platina só entra no perfil e gera recompensa depois da aprovação da moderação.",
             "como_registrar_zerado": "Se você terminou um jogo sem platinar, abra **Jogos zerados** no `/nara` ou `/nara` e escolha **Zerados**. Informe jogo, plataforma e data; o comprovante é opcional. O pedido segue para a Central de Aprovação. Se a platina desse mesmo jogo e plataforma já foi aprovada, não precisa cadastrar de novo: ele já aparece automaticamente nos seus zerados.",
@@ -607,7 +607,6 @@ class NaraIA(commands.Cog):
             "perfil_outro_membro": "Abra `/nara` e use o menu de membros para escolher outra pessoa e consultar o perfil público, como patente, nível, XP e estatísticas de jogo. Saldo e inventário continuam privados.",
             "como_registrar_run": "Abra `/nara` e entre em **Runs**. Informe jogo, desafio, tempo, build e comprovante. A run fica pendente até a moderação revisar.",
             "como_comprovante": "Os prints não são analisados pela conversa da Nara. Para comprovar platina ou run, abra `/nara` e envie o arquivo no formulário específico; a moderação revisa o registro.",
-            "como_buscar_jogo": "Use **Pesquisar jogo** no `/nara` e informe o nome do jogo, mesmo que seja uma abreviação. O comando procura primeiro no catálogo já existente. Se não encontrar, usa pesquisa com fontes para sugerir o título oficial; você confirma o candidato e o catálogo fica em revisão, sem publicação automática.",
             "privacidade": "Seu saldo de Denários e seu inventário são privados e só são consultados para você. Rankings são públicos e mostram posição/estatísticas de jogo, não seu saldo ou inventário.",
             "como_chamar_nara": "Marque meu usuário com @Nara ou responda a uma mensagem minha. Nos canais configurados para dúvidas, também respondo a perguntas frequentes reconhecidas localmente. Papo livre só quando você me marca.",
             "loja": "A loja usa Denários e vende apenas itens cosméticos, como cores de perfil e títulos. Use **Loja** no `/nara` para consultar itens, preços e requisitos de nível. Comprar/equipar não aumenta atributos nem XP.",
@@ -887,7 +886,7 @@ class NaraIA(commands.Cog):
 
         if rota == "pedir_mencao":
             texto = (
-                "Essa pergunta precisa de pesquisa com fontes. Me marque na mensagem ou use **Pesquisar jogo** no `/nara` "
+                "Essa pergunta precisa de pesquisa com fontes, recurso que está temporariamente indisponível. "
                 "para identificar o jogo e preparar o catálogo. Não consumo quota automaticamente no canal."
             )
             if tem_imagem:
@@ -895,7 +894,7 @@ class NaraIA(commands.Cog):
             return await message.reply(texto, allowed_mentions=sem_mencao)
         if rota == "catalogo":
             texto = (
-                "Para pesquisar **jogos, troféus, platinas, DLCs e colecionáveis**, use **Pesquisar jogo** no `/nara` "
+                "Para consultar os recursos disponíveis, abra a Central de Ajuda pelo `/nara`. "
                 "com o nome do jogo. O comando procura primeiro no catálogo local; se não encontrar, "
                 "usa a pesquisa com fontes, pede sua confirmação do título e cria um rascunho para revisão. "
                 "Assim a quota só é usada quando realmente precisamos pesquisar um catálogo."
@@ -923,7 +922,7 @@ class NaraIA(commands.Cog):
         if rota == "pesquisa_chat_desativada":
             texto = (
                 "Desativei a pesquisa conversacional para preservar a quota. Não vou chamar o Gemini para guias ou perguntas abertas no chat. "
-                "Para pesquisar jogos, troféus, platinas, DLCs e colecionáveis, use **Pesquisar jogo** no `/nara`; ele consulta primeiro o catálogo local "
+                "Para consultar os recursos disponíveis, abra a Central de Ajuda pelo `/nara`. "
                 "e só chama a pesquisa externa quando não encontra dados existentes."
             )
             if tem_imagem:
@@ -932,7 +931,7 @@ class NaraIA(commands.Cog):
         if rota == "pesquisa_nao_suportada":
             texto = (
                 "Não vou inventar uma pesquisa: no chat, minhas fontes automáticas estão configuradas para "
-                "Elden Ring. Para catálogo de troféus/platinas de outros jogos, use **Pesquisar jogo** no `/nara`."
+                "Elden Ring. Para outros títulos, posso oferecer apenas informações gerais quando houver contexto suficiente."
             )
             if tem_imagem:
                 texto += "\n\n_Não abri nem analisei o print; considerei somente o texto._"

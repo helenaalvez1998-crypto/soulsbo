@@ -734,13 +734,6 @@ ADMIN_CATEGORIAS = {
             ("ia_provedores", "Status dos provedores IA", "🧠"),
         ],
     },
-    "cacador": {
-        "titulo": "🏆 Caçador de Troféus",
-        "descricao": "Acesse a administração do catálogo de troféus, importações, validações, publicação e histórico.",
-        "acoes": [
-            ("cacador_admin", "Abrir administração do Caçador", "🏆"),
-        ],
-    },
 }
 
 
@@ -837,7 +830,7 @@ async def _executar_acao_admin(interaction: discord.Interaction, bot, action: st
         "youtube_status", "youtube_test_video", "youtube_test_live",
         "ofertas_status", "ofertas_preview", "ia_relatorio", "ia_provedores",
         "post_ajuda", "post_verificacao", "post_cargos", "post_coliseu",
-        "post_loja", "post_santuario", "cacador_admin",
+        "post_loja", "post_santuario",
     }
     if action in acoes_restritas and not (
         interaction.user.guild_permissions.manage_guild
@@ -886,11 +879,6 @@ async def _executar_acao_admin(interaction: discord.Interaction, bot, action: st
         if cog is None:
             return await interaction.response.send_message("O módulo de santuários não está carregado.", ephemeral=True)
         return await type(cog).painel_santuarios.callback(cog, interaction)
-    if action == "cacador_admin":
-        cog = bot.get_cog("CacadorTrofeus")
-        if cog is None:
-            return await interaction.response.send_message("O Caçador de Troféus não está carregado.", ephemeral=True)
-        return await type(cog).catalogo_admin.callback(cog, interaction)
     if action == "auto_setup":
         return await _executar_configuracao_automatica(interaction, bot)
     if action == "reset":
@@ -975,7 +963,6 @@ class AdminMainView(discord.ui.View):
             ("cargos", "Cargos e acesso", "🎭"),
             ("publicacoes", "Publicações", "📌"),
             ("inteligencia", "NARA IA", "🤖"),
-            ("cacador", "Caçador", "🏆"),
         ]
         for index, (key, label, emoji) in enumerate(categorias):
             self.add_item(AdminCategoriaButton(bot, key, label, emoji, row=index // 3, user_id=user_id))

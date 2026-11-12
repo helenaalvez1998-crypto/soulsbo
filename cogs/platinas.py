@@ -262,7 +262,6 @@ class ColiseuView(discord.ui.View):
             "**🏆 Platinas** — registrar conquistas, consultar perfil e ranking.\n"
             "**✅ Zerados** — registrar jogos finalizados, sem precisar de platina.\n"
             "**⚔️ Runs e desafios** — registrar tempos, conferir regras e recordes.\n"
-            "**📜 Caçador de Troféus** — acompanhar coleções e conquistas.\n\n"
             "_Escolha uma área abaixo. A navegação acontece nesta mesma mensagem._"
         )
 
@@ -291,15 +290,6 @@ class ColiseuView(discord.ui.View):
             await interaction.response.send_message(embed=await view.embed(), view=view, ephemeral=True)
         else:
             await interaction.response.edit_message(content=None, embed=await view.embed(), view=view)
-
-    @discord.ui.button(label="Caçador de Troféus", emoji="📜", style=discord.ButtonStyle.secondary, custom_id="nara:coliseu:cacador", row=1)
-    async def abrir_cacador(self, interaction: discord.Interaction, button: discord.ui.Button):
-        cog = self.platinas_cog.bot.get_cog("CacadorTrofeus")
-        if cog is None:
-            return await interaction.response.send_message(
-                "O Caçador de Troféus ainda não está disponível. Avise a moderação.", ephemeral=True
-            )
-        await cog.abrir(interaction, editar=(self.user_id is not None))
 
     @discord.ui.button(label="Runs e desafios", emoji="⚔️", style=discord.ButtonStyle.danger, custom_id="nara:coliseu:runs", row=0)
     async def abrir_runs(self, interaction: discord.Interaction, button: discord.ui.Button):
