@@ -7,7 +7,6 @@ A navegação dos membros foi centralizada em um único comando: `/nara`. Ele ab
 Use `/nara` para abrir os botões:
 
 - **Coliseu** — platinas, runs, desafios, rankings, perfil e Santuários.
-- **Caçador de Troféus** — coleções e troféus por jogo.
 - **Jogos zerados** — registrar finalizações, consultar lista e ranking.
 - **Loja** — comprar cosméticos com Denários.
 - **Meu nível** — consultar XP, nível e patente.
@@ -40,7 +39,6 @@ Os painéis e formulários são privados. A navegação usa as funções existen
 3. `/editar_painel_cargos` — editar título e texto.
 4. `/cargo_painel` — adicionar, editar ou remover opções.
 
-### 3. Catálogo do Caçador de Troféus
 
 O fluxo é sequencial: consultar fila → preparar catálogo → auditar → validar manualmente → publicar ou rejeitar.
 

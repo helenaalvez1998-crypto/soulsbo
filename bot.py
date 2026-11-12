@@ -33,7 +33,7 @@ EXTENSOES = (
     "cogs.admin", "cogs.perfil", "cogs.platinas", "cogs.loja", "cogs.ranking",
     "cogs.colizeu", "cogs.cargos", "cogs.progressao", "cogs.youtube",
     "cogs.ofertas", "cogs.zerados", "cogs.santuario", "cogs.soulslike",
-    "cogs.transmissoes", "cogs.nara_ia", "cogs.trofeus", "cogs.painel_rotativo",
+    "cogs.transmissoes", "cogs.nara_ia", "cogs.painel_rotativo",
     "cogs.painel_membros", "cogs.catalogo_integrado", "cogs.game_news",
 )
 

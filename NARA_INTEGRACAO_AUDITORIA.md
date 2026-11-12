@@ -23,7 +23,6 @@ O listener mantém a seguinte precedência:
 3. **Ferramentas do NARA:** pedidos imperativos roteados para o registro real de ferramentas; risco, validações, permissões e confirmações permanecem no núcleo já existente.
 4. **Conversa livre:** continua sendo controlada por `NARA_CONVERSA_ENABLED`, com limites de cooldown e quota próprios.
 5. **Pesquisa factual no chat:** controlada separadamente por `NARA_CHAT_IA_ENABLED` e limitada às ferramentas de leitura habilitadas.
-6. **Caçador de Troféus:** `/jogo_buscar` continua como fluxo independente.
 
 ### Composição dos prompts
 

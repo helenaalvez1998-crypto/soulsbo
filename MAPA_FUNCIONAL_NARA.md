@@ -17,7 +17,6 @@
 1. Platinas e conquistas
 2. Jogos zerados
 3. Runs e desafios
-4. Caçador de Troféus
 5. XP e patentes
 6. Perfis e rankings
 7. Perfis e Santuários
@@ -108,7 +107,6 @@ Quando o nível muda, o bot tenta sincronizar o cargo da patente. Os cargos prec
 - Aprovação concede **100 XP**; novo recorde global para aquela combinação jogo/desafio concede mais **100 XP** (200 XP total). O código não concede Denários por run.
 - Administradores podem cadastrar jogos/desafios e suas regras pela família `/soulslike`. Uma run aprovada pode ser invalidada por `/soulslike invalidar`, saindo do ranking e mantendo registro de auditoria.
 
-## 6. Caçador de Troféus
 
 - `/cacador` abre o painel de jogos com catálogos publicados.
 - `/jogo_buscar <nome>` tenta resolver título/alias/catálogo local primeiro. Se não encontra, identifica candidatos e solicita confirmação do título antes de uma pesquisa completa.

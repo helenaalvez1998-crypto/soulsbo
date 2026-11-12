@@ -14,7 +14,6 @@ Respostas fixas são carregadas do JSON e enviadas diretamente ao Discord. Consu
 - `python -m unittest discover -s tests -q`: 47 aprovados.
 - `python -m compileall -q .`: concluído sem erros.
 - 247 frases cadastradas verificadas individualmente contra sua intenção esperada.
-- Paráfrases de registro de platina, remoção de zerado, consulta de jogos finalizados, avisos de live, saldo, patentes, canais, perfil, Caçador de Troféus e rankings verificadas.
 - Perguntas de OBS/streaming externo não são absorvidas pelo FAQ e continuam fora do escopo local documentado.
 
 ## Limitações

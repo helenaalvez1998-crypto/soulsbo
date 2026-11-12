@@ -1,0 +1,11 @@
+PAUSA TEMPORARIA DA PESQUISA AUTOMATICA DE GUIAS/TROFEUS
+
+- A extensao cogs.trofeus foi removida da lista de extensoes carregadas em bot.py.
+- Os botoes/menus do Caçador e a pesquisa de jogo foram removidos dos paineis /nara e /adm.
+- A documentacao/FAQ nao anuncia mais esse recurso.
+- O codigo do Caçador e as tabelas do banco NAO foram apagados; permanecem no projeto para reativacao futura.
+- Os sistemas normais de Platinas, Jogos Zerados e Runs continuam ativos.
+
+Instalacao: copiar os arquivos do ZIP para os mesmos caminhos em /data/app, sobrescrevendo.
+Nao substituir .env, banco de dados, pasta data/ ou arquivos de credenciais.
+Reiniciar o bot e confirmar a sincronizacao dos comandos /nara e /adm.

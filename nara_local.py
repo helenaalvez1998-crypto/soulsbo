@@ -2,7 +2,7 @@
 
 Este módulo é offline: não chama rede, modelo, OCR nem lê anexos. Ele classifica
 consultas locais, pedidos de ferramentas, pesquisa explícita e fallback conversacional.
-Pesquisa de troféus/platinas é encaminhada ao Caçador (**Pesquisar jogo** no `/nara`).
+Pesquisa automática de guias de troféus está temporariamente desativada.
 """
 from __future__ import annotations
 
@@ -306,33 +306,17 @@ def _tem_pedido_explicito(t: str) -> bool:
 
 
 def is_pesquisa_de_catalogo(mensagem: str) -> bool:
-    """Detecta pedidos para catálogo de jogo/troféus, que devem usar **Pesquisar jogo** no `/nara`."""
-    t = normalizar(mensagem)
-    if not t or not _tem_pedido_explicito(t):
-        return False
-    if classificar_resposta_local(mensagem) in {
-        "como_registrar_platina", "como_comprovante", "minhas_platinas", "como_buscar_jogo"
-    }:
-        # A pergunta sobre como usar o catálogo é FAQ; não é uma busca.
-        return False
-    termos_catalogo = (
-        "trofeu", "trofeus", "platina", "platinar", "conquista", "conquistas", "100 por cento",
-        "coletavel", "coletaveis", "colecionavel", "colecionaveis", "perdivel", "perdiveis", "missavel",
-        "missaveis", "lista completa", "todos os itens",
-    )
-    # Se o usuário omitir o título, ainda encaminhamos ao comando para ele informar
-    # o jogo. Não mandamos essa solicitação incompleta para o modelo conversacional.
-    return any(term in t for term in termos_catalogo)
+    """Pesquisa automática de catálogos temporariamente desativada."""
+    return False
 
 
 def is_pesquisa_de_jogo(mensagem: str) -> bool:
     """Pesquisa conversacional por wiki. Nesta versão, o conjunto de fontes de chat é Elden Ring.
 
-    Catálogo de troféus/platinas de qualquer jogo não passa por aqui: é encaminhado para
-    **Pesquisar jogo** no `/nara`, cuja integração usa Tavily Free para busca web e Gemini para análise/revisão própria.
+    A pesquisa automática de catálogos de troféus está temporariamente desativada.
     """
     t = normalizar(mensagem)
-    if not t or is_pesquisa_de_catalogo(mensagem) or not _tem_pedido_explicito(t):
+    if not t or not _tem_pedido_explicito(t):
         return False
     # Ferramentas `buscar_wiki`/`abrir_pagina` só permitem fontes de Elden Ring. Não
     # enviar pedidos de outros jogos para esse conjunto de ferramentas.
@@ -347,7 +331,7 @@ def is_pesquisa_de_jogo(mensagem: str) -> bool:
 def is_pesquisa_nao_suportada(mensagem: str) -> bool:
     """Pesquisa explícita de jogo que não cabe nas fontes de chat habilitadas."""
     t = normalizar(mensagem)
-    if not t or is_pesquisa_de_catalogo(mensagem) or is_pesquisa_de_jogo(mensagem):
+    if not t or is_pesquisa_de_jogo(mensagem):
         return False
     if not _tem_pedido_explicito(t):
         return False
@@ -390,8 +374,6 @@ def decidir_rota(mensagem: str, *, direcionada: bool, canal_livre: bool,
     intent = classificar_resposta_local(texto)
     if intent:
         return "local", intent
-    if is_pesquisa_de_catalogo(texto):
-        return ("catalogo", None) if direcionada else ("pedir_mencao", None)
     if is_pesquisa_de_jogo(texto):
         return ("gemini", None) if direcionada else ("pedir_mencao", None)
     if is_pesquisa_nao_suportada(texto):
@@ -406,7 +388,7 @@ def aplicar_politica_de_quota(rota: str, *, chat_ia_ativa: bool = False) -> str:
 
     `NARA_CHAT_IA_ENABLED` habilita a rota de pesquisa compatível com ferramentas.
     `NARA_CONVERSA_ENABLED` controla separadamente a conversa curta sem ferramentas.
-    **Pesquisar jogo** no `/nara` é um comando separado e não passa por este roteador de chat.
+    A pesquisa automática de catálogos está desativada temporariamente.
     """
     if rota == "gemini" and not chat_ia_ativa:
         return "pesquisa_chat_desativada"
@@ -417,9 +399,8 @@ def resposta_local_fallback(mensagem: str) -> str:
     t = normalizar(mensagem)
     if any(x in t for x in ("jogo", "elden", "souls", "boss", "chefe", "trofeu", "platina", "conquista", "dlc")):
         return (
-            "Isso exige informação específica de um jogo. Para pesquisar troféus, platina e colecionáveis, "
-            "use **Pesquisar jogo** no `/nara` com o nome do jogo. Para guias gerais, eu só consulto fontes de Elden Ring "
-            "nesta conversa; prefiro não inventar dados de outros títulos."
+            "Consigo conversar sobre jogos e ajudar com informações gerais, mas a pesquisa automática de guias e checklists está temporariamente indisponível. "
+            "Prefiro não inventar requisitos de troféus ou conquistas."
         )
     return (
         "Essa pergunta não parece ser do nosso universo. Eu sou a NARA desta comunidade, não uma central de respostas para qualquer assunto. "

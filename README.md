@@ -11,7 +11,6 @@ Bot de Discord (discord.py) com perfis, XP, patentes, registro/aprovação de pl
 ## Requisitos
 - Python **3.11 ou superior** (Python 3.13 recomendado para novas implantações).
 - Bot criado no Discord Developer Portal com as intents necessárias habilitadas.
-- `DISCORD_TOKEN` para inicialização; pelo menos uma chave Gemini (`GEMINI_API_KEY` ou `GEMINI_BACKUP_API_KEY`) para conversa livre; uma segunda chave de outro projeto é opcional para failover. `TAVILY_API_KEY` só é necessária para pesquisa web do Caçador.
 
 ## Rodar localmente
 ```bash
@@ -35,7 +34,6 @@ O projeto está preparado para iniciar com `python bot.py`. Na FadeHost, configu
 
 ## Comandos e navegação
 
-- `/nara` abre a **central interativa dos membros**, com botões para Coliseu, Caçador de Troféus, jogos zerados, loja, nível, ranking XP, pesquisa de jogos, memória e Central de Ajuda.
 - Os antigos comandos individuais dos membros foram retirados da lista slash e passaram a ser acessados pelos botões do `/nara`; seus fluxos originais e regras de permissão foram preservados.
 - `/colizeu` (com **Z**) é administrativo: atualiza a mensagem informativa e os rankings do canal do Colizeu.
 
@@ -171,12 +169,10 @@ Versão leve das platinas para quem quer registrar os jogos que finalizou, sem p
 - O perfil mostra a contagem de ✅ Zerados ao lado das platinas.
 
 
-### Caçador de Troféus — pesquisa assistida por IA
 
 Veja `CACADOR_TROFEUS.md`. Configure `GEMINI_API_KEY` como principal e `GEMINI_BACKUP_API_KEY` de outro projeto Google como reserva. Depois use **Pesquisar jogo** no `/nara` para identificar o título, confirmar o candidato e gerar catálogo em revisão. A publicação exige auditoria e validação administrativa.
 
 
-## Caçador de Troféus e pesquisa de jogos
 
 A ação **Pesquisar jogo** no `/nara` reconhece títulos/aliases existentes sem consumir modelo ou usa Tavily Free para buscar fontes e Gemini principal para analisar; se o primeiro Gemini falhar, tenta o segundo projeto Gemini. A pesquisa aprofundada começa após confirmação do título e fica em revisão administrativa; a IA não publica automaticamente. Configure `GEMINI_API_KEY`, `GEMINI_BACKUP_API_KEY` de projetos distintos e `TAVILY_API_KEY` do plano gratuito. Os modelos são definidos por `GEMINI_MODEL` e `GEMINI_BACKUP_MODEL`. Em erro de quota ou `429`, consulte `/gemini_status` para ver o estado dos dois circuit breakers.
 
@@ -192,7 +188,6 @@ O botão **Central de ajuda** no `/nara` abre o painel privado com 12 categorias
 
 ## Central de Aprovação
 
-Configure `MOD_CHANNEL_ID` (ou o campo **Canal central de aprovação/moderação** em `/adm`) para um único canal privado da equipe. Cards de platinas, runs Soulslike e jogos zerados são enviados para esse canal. Moderadores aprovam/rejeitam nos botões do próprio card. Quando um catálogo do Caçador de Troféus termina a pesquisa, o aviso de revisão também chega aqui; a auditoria e publicação continuam pelos comandos `/catalogo_*`. O jogo zerado só entra no perfil/ranking e só recebe XP/Denários após aprovação. Os canais `PLATINAS_CHANNEL_ID`, `SOULSLIKE_CHANNEL_ID` e `ZERADOS_CHANNEL_ID` continuam sendo destinos de anúncios públicos pós-aprovação. O bot precisa visualizar/enviar mensagens, anexar arquivos e incorporar links na Central de Aprovação. Registros de zerados existentes antes da atualização são preservados como aprovados; somente novos envios entram na fila. Ao atualizar, mantenha o banco `data/colizeu.db` e configure/confira o canal em `/adm`.
 
 ## Configuração visual por servidor
 

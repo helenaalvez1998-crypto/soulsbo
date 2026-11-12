@@ -6,7 +6,6 @@ O bot funciona primeiro sem serviços externos. Para tarefas que exigem IA, usa 
 
 1. **FAQ local:** respostas prontas, sem rede e sem tokens.
 2. **SQLite local:** perfil, XP, saldo, platinas, zerados, runs, inventário e rankings.
-3. **Caçador de Troféus:** `/jogo_buscar` procura catálogo/alias local primeiro; se não resolver, usa Gemini principal e depois o segundo projeto Gemini em caso de quota/indisponibilidade.
 4. **Conversa econômica (personalidade da Nara):** o que o FAQ/SQLite não resolve, quando alguém marca a Nara, vira UMA chamada curta ao Gemini: prompt pequeno (`prompts/nara_conversa.md`), sem ferramentas, sem histórico, sem imagens, resposta limitada a `NARA_CONVERSA_MAX_TOKENS`.
 5. **Pesquisa com ferramentas (wiki Elden Ring):** continua desligada por padrão (`NARA_CHAT_IA_ENABLED=false`).
 6. **Se a IA cair ou o limite acabar:** a Nara responde local, com personalidade, e o FAQ/SQLite seguem normais.

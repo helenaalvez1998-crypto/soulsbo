@@ -13,7 +13,6 @@
 2. Crie um ambiente virtual: `python -m venv .venv`.
 3. Ative o ambiente e instale: `pip install -r requirements.txt`.
 4. Execute `python configurar_bot.py`; o assistente cria/atualiza `.env` e solicita o token Discord e pelo menos uma chave Gemini sem exibir os valores digitados. Também é possível copiar `.env.example` para `.env` manualmente.
-5. Configure `TAVILY_API_KEY` apenas se quiser habilitar as pesquisas do Caçador.
 6. `NARA_CONVERSA_ENABLED=true` mantém a conversa livre ativa. `NARA_CHAT_IA_ENABLED=false` desliga apenas a pesquisa factual com ferramentas, não o papo livre.
 7. Mantenha `OFFERS_SHOW_DESCRIPTION=false` para evitar chamadas extras de tradução.
 8. No Discord Developer Portal, habilite **Message Content Intent**, **Server Members Intent** e **Voice States**, conforme os recursos usados.

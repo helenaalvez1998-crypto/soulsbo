@@ -27,7 +27,6 @@ Execute:
 python configurar_bot.py
 ```
 
-O assistente cria ou atualiza `.env`, oculta os segredos digitados e preserva as demais configurações existentes. Informe o **DISCORD_TOKEN**. Para conversa generativa, informe pelo menos uma chave **GEMINI_API_KEY**; as chaves `GEMINI_BACKUP_API_KEY` e `GEMINI_THIRD_API_KEY` são opcionais, mas devem ser de projetos Google distintos para circuit breakers independentes. `TAVILY_API_KEY` é opcional e só habilita a pesquisa externa do Caçador.
 
 Nunca envie `.env`, token Discord, chaves Gemini/Tavily ou `data/colizeu.db` em chats, tickets ou repositórios públicos.
 
@@ -57,7 +56,6 @@ Depois que o bot conectar e sincronizar comandos:
 
 - Execute `/nara` e teste os botões da central dos membros, incluindo Central de Ajuda e Memória da Nara.
 - Faça uma pergunta FAQ num canal listado em `IA_CANAIS_LIVRES`; fora desses canais, mencione a Nara.
-- Teste os botões **Meu nível**, **Coliseu**, **Jogos zerados**, **Loja** e **Caçador de Troféus** dentro de `/nara`.
 - Como administrador, abra `/adm` e confira canais, cargos e recompensas personalizados.
 - Como moderador, publique os painéis necessários: `/painel_principal`, `/painel_platinas`, `/postar_painel_zerados`, `/painel_santuarios`, `/painel_cargos` e `/painel_loja`. Publique apenas os que realmente utilizar.
 - Confira a atribuição de um cargo de teste e a hierarquia do bot antes de liberar cargos autoatribuíveis aos membros.
@@ -74,4 +72,3 @@ A conversa da Nara não analisa prints/imagens. Use os formulários específicos
 
 ## Central de Aprovação
 
-Configure `MOD_CHANNEL_ID` (ou o campo **Canal central de aprovação/moderação** em `/adm`) para um único canal privado da equipe. Cards de platinas, runs Soulslike e jogos zerados são enviados para esse canal. Moderadores aprovam/rejeitam nos botões do próprio card. Quando um catálogo do Caçador de Troféus termina a pesquisa, o aviso de revisão também chega aqui; a auditoria e publicação continuam pelos comandos `/catalogo_*`. O jogo zerado só entra no perfil/ranking e só recebe XP/Denários após aprovação. Os canais `PLATINAS_CHANNEL_ID`, `SOULSLIKE_CHANNEL_ID` e `ZERADOS_CHANNEL_ID` continuam sendo destinos de anúncios públicos pós-aprovação. O bot precisa visualizar/enviar mensagens, anexar arquivos e incorporar links na Central de Aprovação. Registros de zerados existentes antes da atualização são preservados como aprovados; somente novos envios entram na fila. Ao atualizar, mantenha o banco `data/colizeu.db` e configure/confira o canal em `/adm`.

@@ -25,7 +25,7 @@ PROMPT_IDENTIDADE_PATH = Path(__file__).resolve().parent / "prompts" / "nara.md"
 PROMPT_MINIMO = (
     "Você é Nara, IA do servidor NARA: inteligente, espontânea, levemente debochada, sem ser hostil. "
     "Responda em português brasileiro, em 1 a 4 frases, sem inventar fatos. Para troféus/platinas de jogos "
-    "abra `/nara` e use o botão **Pesquisar jogo**. Você não vê imagens nem executa ações nesta conversa."
+    "a pesquisa automática de guias de jogos está temporariamente desativada. Você não vê imagens nem executa ações nesta conversa."
 )
 
 
