@@ -235,6 +235,26 @@ class PainelJogoView(discord.ui.View):
             label="Receitas de Linhagem", emoji="🔥", style=discord.ButtonStyle.link,
             url=f"{base_url}/linhagens", row=1,
         ))
+        self.add_item(discord.ui.Button(
+            label="Transmutação", emoji="🧪", style=discord.ButtonStyle.link,
+            url=f"{base_url}/transmutacao", row=3,
+        ))
+        self.add_item(discord.ui.Button(
+            label="Rituais Ancestrais", emoji="🔥", style=discord.ButtonStyle.link,
+            url=f"{base_url}/rituais-ancestrais", row=3,
+        ))
+        self.add_item(discord.ui.Button(
+            label="Biblioteca de Cartas", emoji="🃏", style=discord.ButtonStyle.link,
+            url=f"{base_url}/biblioteca-cartas", row=3,
+        ))
+        self.add_item(discord.ui.Button(
+            label="Cartas Geradas", emoji="✦", style=discord.ButtonStyle.link,
+            url=f"{base_url}/cartas-geradas", row=3,
+        ))
+        self.add_item(discord.ui.Button(
+            label="Ateliê de Arte", emoji="🎨", style=discord.ButtonStyle.link,
+            url=f"{base_url}/atelie-arte", row=3,
+        ))
         if callback_voltar is not None:
             voltar = discord.ui.Button(label="Voltar aos Jogos", emoji="↩️", style=discord.ButtonStyle.secondary, row=1)
             voltar.callback = self._voltar

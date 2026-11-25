@@ -681,6 +681,18 @@ def registrar_rotas(bot, app: web.Application) -> None:
             return web.Response(text="Página da Forja indisponível.", status=503)
         return web.FileResponse(page)
 
+    async def evolucao_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "evolucao.html"
+        if not page.is_file():
+            return web.Response(text="Página de Evolução indisponível.", status=503)
+        return web.FileResponse(page)
+
+    async def apostas_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "apostas.html"
+        if not page.is_file():
+            return web.Response(text="Página de Apostas indisponível.", status=503)
+        return web.FileResponse(page)
+
     async def forja_list(request: web.Request) -> web.Response:
         uid = auth(request)
         if uid is None:
@@ -743,11 +755,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/transmutacao", transmutacao_page)
     app.router.add_get("/evolucao", evolucao_page)
     app.router.add_get("/apostas", apostas_page)
-    app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
-    app.router.add_get("/api/gwent/apostas/torneios", apostas_list_torneios)
-    app.router.add_post("/api/gwent/apostas/denarios", apostas_denarios)
-    app.router.add_post("/api/gwent/apostas/cartas", apostas_cartas)
-    app.router.add_post("/api/gwent/apostas/torneio", apostas_torneio)
     app.router.add_get("/api/gwent/transmutacao", transmutacao_list)
     app.router.add_post("/api/gwent/transmutacao/preview", transmutacao_preview)
     app.router.add_post("/api/gwent/transmutacao/execute", transmutacao_execute)
@@ -993,11 +1000,97 @@ def registrar_rotas(bot, app: web.Application) -> None:
         except (ValueError, TypeError) as e:
             return web.json_response({"error": str(e)}, status=400)
 
-    # Rotas de API de apostas
-    app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
+    async def catalogo_cartas_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "catalogo-cartas.html"
+        if not page.is_file():
+            return web.Response(text="Biblioteca de cartas indisponível.", status=503)
+        return web.FileResponse(page)
 
-    # Rota para página de apostas
-    app.router.add_get("/apostas", apostas_page)
+    async def catalogo_cartas_api(request: web.Request) -> web.Response:
+        """Catálogo público de modelos; não depende de o jogador possuir a carta."""
+        try:
+            from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75, HABILIDADES
+            ids_pacote = {str(c.id) for c in CARTAS_PACOTE}
+            ids_expansao_v75 = {str(c.id) for c in CARTAS_EXPANSAO_V75}
+            items = []
+            for carta in CARTAS_POR_ID.values():
+                data = carta.para_dict()
+                habilidade_id = str(data.get("habilidade") or "")
+                habilidade = HABILIDADES.get(habilidade_id, {})
+                fileira_raw = str(data.get("fileira") or carta.fileira)
+                fileira_labels = {
+                    "melee": "Corpo a corpo",
+                    "ranged": "Longa distância",
+                    "siege": "Cerco",
+                    "agile": "Ágil",
+                    "any": "Qualquer fileira",
+                    "special": "Especial",
+                }
+                items.append({
+                    "card_id": str(carta.id),
+                    "nome": str(carta.nome),
+                    "categoria": str(data.get("categoria") or carta.categoria),
+                    "faccao": str(data.get("faccao") or carta.tipo),
+                    "fileira": fileira_labels.get(fileira_raw.casefold(), fileira_raw),
+                    "raridade": str(carta.raridade),
+                    "poder": int(carta.poder),
+                    "custo": int(carta.custo),
+                    "habilidade": str(habilidade.get("nome") or habilidade_id or "Sem habilidade"),
+                    "habilidade_texto": str(habilidade.get("texto") or carta.descricao or ""),
+                    "descricao": str(carta.descricao or ""),
+                    "no_pacote": str(carta.id) in ids_pacote,
+                    "expansao_v75": str(carta.id) in ids_expansao_v75,
+                })
+            ordem = {nome: i for i, nome in enumerate(("Singular", "Primordial", "Mítica", "Lendária", "Épica", "Rara", "Comum"))}
+            items.sort(key=lambda item: (ordem.get(item["raridade"], 99), item["nome"].casefold()))
+            return web.json_response({
+                "total": len(items),
+                "total_pacote": len(ids_pacote),
+                "total_expansao_v75": sum(1 for item in items if item["expansao_v75"]),
+                "cartas": items,
+            }, headers={"Cache-Control": "public, max-age=300"})
+        except Exception:
+            import logging
+            logging.getLogger("site_hub").exception("Falha ao montar o catálogo público de cartas.")
+            return web.json_response({"error": "Não foi possível carregar o catálogo de cartas."}, status=500)
+
+    async def tutorial_page(request: web.Request) -> web.Response:
+        """Serve a página estática de tutorial do site."""
+        page = Path(__file__).resolve().parent / "site" / "tutorial.html"
+        if not page.is_file():
+            return web.Response(text="Página de tutorial indisponível.", status=503)
+        return web.FileResponse(page)
+
+    async def conquistas_page(request: web.Request) -> web.Response:
+        """Informa que a interface de conquistas ainda não está implementada."""
+        return web.Response(
+            text="A página de conquistas ainda não está disponível.",
+            status=501,
+            content_type="text/plain",
+        )
+
+    async def conquistas_list(request: web.Request) -> web.Response:
+        """Endpoint reservado para a listagem de conquistas."""
+        if auth(request) is None:
+            return web.json_response({"error": "Autenticação necessária."}, status=401)
+        return web.json_response(
+            {"error": "O sistema de listagem de conquistas ainda não está implementado."},
+            status=501,
+            headers={"Cache-Control": "no-store"},
+        )
+
+    async def conquistas_registrar(request: web.Request) -> web.Response:
+        """Endpoint reservado para registrar progresso de conquistas."""
+        if auth(request) is None:
+            return web.json_response({"error": "Autenticação necessária."}, status=401)
+        return web.json_response(
+            {"error": "O registro de conquistas ainda não está implementado."},
+            status=501,
+            headers={"Cache-Control": "no-store"},
+        )
+
+    # Registrar endpoints de apostas somente após declarar todos os handlers.
+    app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
     app.router.add_get("/api/gwent/apostas/torneios", apostas_list_torneios)
     app.router.add_post("/api/gwent/apostas/denarios", apostas_denarios)
     app.router.add_post("/api/gwent/apostas/cartas", apostas_cartas)
@@ -1006,6 +1099,10 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/rituais-ancestrais", rituais_page)
     app.router.add_get("/api/gwent/rituais-ancestrais", rituais_list)
     app.router.add_post("/api/gwent/rituais-ancestrais", rituais_execute)
+
+    # Biblioteca pública do catálogo completo de modelos de cartas.
+    app.router.add_get("/biblioteca-cartas", catalogo_cartas_page)
+    app.router.add_get("/api/gwent/catalogo-cartas", catalogo_cartas_api)
 
     # Rotas de tutorial
     app.router.add_get('/tutorial', tutorial_page)
