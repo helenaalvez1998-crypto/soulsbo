@@ -241,6 +241,91 @@ def registrar_rotas(bot, app: web.Application) -> None:
             return web.Response(text="Página de Linhagens indisponível.", status=503)
         return web.FileResponse(page)
 
+    async def evolucao_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "evolucao.html"
+        if not page.is_file():
+            return web.Response(text="Página de Evolução indisponível.", status=503)
+        return web.FileResponse(page)
+
+    async def apostas_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "apostas.html"
+        if not page.is_file():
+            return web.Response(text="Página de Apostas indisponível.", status=503)
+        return web.FileResponse(page)
+
+    async def tutorial_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "tutorial.html"
+        if not page.is_file():
+            return web.Response(text="Página de Tutorial indisponível.", status=503)
+        return web.FileResponse(page)
+
+    async def conquistas_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "conquistas.html"
+        if not page.is_file():
+            return web.Response(text="Página de Conquistas indisponível.", status=503)
+        return web.FileResponse(page)
+
+    async def conquistas_list(request: web.Request) -> web.Response:
+        uid = auth(request)
+        if uid is None:
+            return web.json_response({"error": "Autenticação necessária."}, status=401)
+        rows = await bot.db._all(
+            """SELECT cc.id, cc.conquista, cc.progresso, cc.total, cc.desbloqueada_em,
+                    ccu.desbloqueada, ccu.data_desbloqueio
+               FROM cartas_conquistas cc
+               LEFT JOIN cartas_conquista_usuario ccu
+                 ON ccu.conquista_id = cc.id AND ccu.user_id = ?
+              WHERE cc.user_id = ?
+              ORDER BY cc.desbloqueada_em DESC""",
+            (uid, uid),
+        )
+        return web.json_response(
+            {"conquistas": [dict(r) for r in rows]},
+            headers={"Cache-Control": "no-store"},
+        )
+
+    async def conquistas_registrar(request: web.Request) -> web.Response:
+        uid = auth(request)
+        if uid is None:
+            return web.json_response({"error": "Autenticação necessária."}, status=401)
+        if not bot._api_origin_ok(request):
+            return web.json_response({"error": "Origem não autorizada."}, status=403)
+        try:
+            body = await request.json()
+        except (ValueError, TypeError, AttributeError):
+            return web.json_response({"error": "Dados inválidos."}, status=400)
+        conquista = str(body.get("conquista", "")).strip()
+        progresso = int(body.get("progresso", 0))
+        total = int(body.get("total", 0))
+        if not conquista:
+            return web.json_response({"error": "Nome da conquista é obrigatório."}, status=400)
+        try:
+            async with bot.db.transaction() as tx:
+                await tx.conn.execute(
+                    "INSERT OR IGNORE INTO users(user_id) VALUES (?)", (int(uid),)
+                )
+                await tx.conn.execute(
+                    """INSERT INTO cartas_conquistas(user_id, conquista, progresso, total)
+                       VALUES (?, ?, ?, ?)""",
+                    (int(uid), conquista, progresso, total),
+                )
+                row = await tx._one(
+                    "SELECT id FROM cartas_conquistas WHERE user_id=? AND conquista=? ORDER BY id DESC LIMIT 1",
+                    (int(uid), conquista),
+                )
+                await tx.conn.execute(
+                    """INSERT OR IGNORE INTO cartas_conquista_usuario(user_id, conquista_id, desbloqueada)
+                       VALUES (?, ?, 1)""",
+                    (int(uid), row["id"]),
+                )
+        except Exception as exc:
+            return web.json_response({"error": str(exc)}, status=400)
+        return web.json_response(
+            {"ok": True, "mensagem": f"Conquista '{conquista}' registrada com sucesso."},
+            headers={"Cache-Control": "no-store"},
+        )
+
+
     async def linhagens_list(request: web.Request) -> web.Response:
         uid = auth(request)
         if uid is None:
@@ -771,7 +856,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/api/gwent/forja", forja_list)
     app.router.add_post("/api/gwent/forja", forja_action)
 
-    # ── Evolução com Risco (Forja das Almas) ──────────────────────────────
     async def evolucao_list(request: web.Request) -> web.Response:
         """Lista cartas disponíveis para evolução com risco."""
         uid = auth(request)

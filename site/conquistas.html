@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0a10"><title>Aposta das Almas — Site de Apostas</title>
+<style>
+:root{--bg:#0b0a10;--panel:#15131d;--line:rgba(197,170,112,.2);--gold:#d8bb7a;--text:#f0e9df;--muted:#a7a7b2;--radius:14px;--shadow:0 18px 48px rgba(0,0,0,.34)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,sans-serif}
+header{padding:18px 0 12px;border-bottom:1px solid var(--line);margin-bottom:24px}
+header h1{margin:0;font-size:20px;color:var(--gold)}
+header p{margin:4px 0 0;color:var(--muted);font-size:12px}
+main{max-width:960px;margin:0 auto;padding:0 16px 60px}
+.tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.tab{padding:8px 16px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;border-radius:6px;font-size:13px;transition:all .2s}
+.tab:hover,.tab.active{border-color:var(--gold);color:var(--gold);background:rgba(216,187,122,.05)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;color:var(--gold);font-size:16px}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+input,select{padding:8px 12px;border:1px solid var(--line);background:#0f0e14;color:var(--text);border-radius:6px;font-size:13px}
+button{padding:8px 16px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;border-radius:6px;font-size:13px;transition:all .2s}
+button:hover{border-color:var(--gold);color:var(--gold)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--gold);color:#0b0a10;font-weight:600}
+button.primary:hover{opacity:.9}
+.info{font-size:12px;color:var(--muted);margin-top:8px}
+.success{color:#7dc67d}.error{color:#e06c75}
+.hidden{display:none}
+#status{padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;display:none}
+#status.show{display:block}
+#status.success{background:rgba(125,198,125,.1);color:#7dc67d}
+#status.error{background:rgba(224,108,117,.1);color:#e06c75}
+</style></head><body>
+<header><h1>⚔️ Aposta das Almas</h1><p>Sistema de apostas do Coliseu</p></header>
+<main>
+<div id="status"></div>
+<div class="tabs">
+<button class="tab active" data-tab="denarios">Denários</button>
+<button class="tab" data-tab="cartas">Cartas</button>
+<button class="tab" data-tab="torneio">Torneio</button>
+</div>
+<div id="tab-denarios" class="tab-content">
+<div class="card">
+<h3>Aposta de Denários</h3>
+<div class="row">
+<select id="tipo-aposta"><option value="rankeada">Ranqueada</option><option value="casual">Casual</option><option value="torneio">Torneio</option><option value="pve_chefe">PvE Chefe</option></select>
+<input type="number" id="valor-aposta" placeholder="Valor (Den.)" min="1" value="100">
+<button class="primary" onclick="fazerApostaDenarios()">Apostar</button>
+</div>
+<p class="info" id="info-aposta">Selecione o tipo e valor da aposta.</p>
+</div>
+</div>
+<div id="tab-cartas" class="tab-content hidden">
+<div class="card">
+<h3>Aposta de Cartas (Wager)</h3>
+<p>Selecione uma carta sua e uma carta do oponente para apostar.</p>
+<div class="row">
+<select id="minha-carta"><option value="">— Minha carta —</option></select>
+<span style="color:var(--gold)">VS</span>
+<select id="carta-oponente"><option value="">— Carta do oponente —</option></select>
+</div>
+<div class="row" style="margin-top:8px">
+<select id="modo-aposta"><option value="amigavel">Amigável (sem risco)</option><option value="arriscada">Arriscada (perde a carta)</option><option value="lendaria">Lendária (Mítica+)</option><option value="blind">Blind Wager (oculta)</option></select>
+<button class="primary" onclick="fazerApostaCarta()">Apostar Carta</button>
+</div>
+<p class="info" id="info-carta">Diferença máxima de raridade: 1 nível.</p>
+</div>
+</div>
+<div id="tab-torneio" class="tab-content hidden">
+<div class="card">
+<h3>Aposta em Torneio</h3>
+<div class="row">
+<select id="torneio-select"><option value="">— Selecione um torneio —</option></select>
+<input type="number" id="valor-torneio" placeholder="Valor (Den.)" min="1" value="500">
+<button class="primary" onclick="fazerApostaTorneio()">Apostar</button>
+</div>
+<p class="info">Odds variam conforme o participante escolhido.</p>
+</div>
+</div>
+</main>
+<script>
+const API='/api/gwent/apostas';
+let statusTimer;
+function showStatus(msg,type='success'){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type;clearTimeout(statusTimer);statusTimer=setTimeout(()=>s.className='status',4000)}
+async function api(path,method='GET',body=null){const r=await fetch(API+path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Error(d.error||'Erro');return d}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));document.getElementById('tab-'+t.dataset.tab).classList.remove('hidden')});
+async function carregarCartas(){try{const d=await api('/cartas');const sel1=document.getElementById('minha-carta'),sel2=document.getElementById('carta-oponente');sel1.innerHTML='<option value="">— Minha carta —</option>';sel2.innerHTML='<option value="">— Carta do oponente —</option>';(d.minhas||[]).forEach(c=>sel1.innerHTML+=`<option value="${c.id}">${c.nome} (${c.rarity})</option>`);(d.oponentes||[]).forEach(c=>sel2.innerHTML+=`<option value="${c.id}">${c.nome} (${c.rarity})</option>`)}catch(e){showStatus(e.message,'error')}}
+async function carregarTorneios(){try{const d=await api('/torneios');const sel=document.getElementById('torneio-select');sel.innerHTML='<option value="">— Selecione um torneio —</option>';(d.torneios||[]).forEach(t=>sel.innerHTML+=`<option value="${t.id}">${t.nome}</option>`)}catch(e){showStatus(e.message,'error')}}
+async function fazerApostaDenarios(){const tipo=document.getElementById('tipo-aposta').value,valor=parseInt(document.getElementById('valor-aposta').value);if(!valor||valor<1)return showStatus('Valor inválido.','error');try{const r=await api('/denarios','POST',{tipo,valor});showStatus(r.mensagem||'Aposta realizada!','success')}catch(e){showStatus(e.message,'error')}}
+async function fazerApostaCarta(){const a=document.getElementById('minha-carta').value,b=document.getElementById('carta-oponente').value,modo=document.getElementById('modo-aposta').value;if(!a||!b)return showStatus('Selecione ambas as cartas.','error');try{const r=await api('/cartas','POST',{carta_a:a,carta_b:b,modo});showStatus(r.mensagem||'Aposta de cartas realizada!','success');carregarCartas()}catch(e){showStatus(e.message,'error')}}
+async function fazerApostaTorneio(){const t=document.getElementById('torneio-select').value,v=parseInt(document.getElementById('valor-torneio').value);if(!t||!v)return showStatus('Selecione torneio e valor.','error');try{const r=await api('/torneio','POST',{torneio_id:t,valor:v});showStatus(r.mensagem||'Aposta em torneio realizada!','success')}catch(e){showStatus(e.message,'error')}}
+carregarCartas();carregarTorneios();
+</script>
+</body></html>
