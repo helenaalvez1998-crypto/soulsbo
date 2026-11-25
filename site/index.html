@@ -51,6 +51,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
     <button class="nav" data-tab="atelier"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.7 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16.5" cy="9.5" r="1"/></svg></i><span>Ateliê</span></button>
     <button class="nav" data-tab="portal"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></i><span>Meu Portal</span></button>
     <button class="nav" data-tab="guide"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6M9 12h6"/></svg></i><span>Guia</span></button>
+    <button class="nav" data-tab="conquistas"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22c5.52-4.95 5.52-12.95 0-17.9l-1.03-2.12.98-2.14C17.37 2.09 9.06.18 5.93 2.94 2.86 5.08.06 8.67.06 12s0 6.83.07 9.85.99 11.91 6.64 15.27 6.6 9.66 6.7 12.29zM12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm-2 15.57L9.55 9.36 12 10.6 14.45 9.36 12 13.68 9.55 9.36 12 10.6z"/></svg><i><span>Conquistas</span></button>
     <button class="nav" data-tab="admin" id="nav-admin" hidden><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></i><span>Moderação</span></button>
   </nav>
   <div class="wallet"><span title="Almas">✦ <b id="souls">—</b></span><span title="Fragmentos">✧ <b id="fragments">—</b></span><span title="Denários">◈ <b id="denarios">—</b></span><span title="XP">⚑ <b id="gwent-xp">—</b></span></div>
@@ -314,4 +315,37 @@ let seen=0;try{seen=localStorage.getItem('tour')}catch(e){}
 if(!seen){const w=setInterval(()=>{if(!document.getElementById('splash')){clearInterval(w);setTimeout(start,1600)}},400)}
 })();
 </script>
+
+  <div class="tab" id="tab-conquistas" data-title="Conquistas">
+    <section class="hub-hero">
+      <div class="hub-hero-txt">
+        <small class="eyebrow">CONQUISTAS</small>
+        <h2>Suas Conquistas e Platinas</h2>
+        <p class="muted">Registre, consulte e acompanhe todas as suas conquistas no Coliseu.</p>
+        <div class="hub-chips">
+          <span id="conq-total">-</span> conquistas registradas
+          <span id="conq-unlocked">-</span> desbloqueadas
+        </div>
+        <div class="hub-cta">
+          <button class="big gold" data-goto="conquista-list" type="button">Ver Minhas Conquistas</button>
+          <button class="big" data-goto="conquista-registrar" type="button">Registrar Conquista</button>
+        </div>
+      </div>
+    </section>
+    
+    <section class="section-head"><div><small class="eyebrow">LISTA DE CONQUISTAS</small><h3>Minhas Conquistas</h3></div>
+    <div id="conquista-list-container" class="conquista-list">
+      <p class="muted">Carregando conquistas...</p>
+    </div>
+    
+    <div class="section-head"><div><small class="eyebrow">REGISTRAR NOVA CONQUISTA</small><h3>Nova Conquista</h3></div>
+    <div class="conquista-form" id="conquista-registrar-form" hidden>
+      <label>Nome da Conquista <input id="conquista-nome" type="text" placeholder="Ex: Platina - Elden Ring"></label>
+      <label>Progresso <input id="conquista-progresso" type="number" min="0" value="0"></label>
+      <label>Total <input id="conquista-total" type="number" min="1" value="100"></label>
+      <button class="primary" id="conquista-salvar" type="button">Salvar Conquista</button>
+    </div>
+    <div id="conquista-msg" class="muted"></div>
+    </section>
+  </div>
 </body></html>
