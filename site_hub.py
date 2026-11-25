@@ -755,11 +755,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/transmutacao", transmutacao_page)
     app.router.add_get("/evolucao", evolucao_page)
     app.router.add_get("/apostas", apostas_page)
-    app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
-    app.router.add_get("/api/gwent/apostas/torneios", apostas_list_torneios)
-    app.router.add_post("/api/gwent/apostas/denarios", apostas_denarios)
-    app.router.add_post("/api/gwent/apostas/cartas", apostas_cartas)
-    app.router.add_post("/api/gwent/apostas/torneio", apostas_torneio)
     app.router.add_get("/api/gwent/transmutacao", transmutacao_list)
     app.router.add_post("/api/gwent/transmutacao/preview", transmutacao_preview)
     app.router.add_post("/api/gwent/transmutacao/execute", transmutacao_execute)
@@ -1004,6 +999,13 @@ def registrar_rotas(bot, app: web.Application) -> None:
             })
         except (ValueError, TypeError) as e:
             return web.json_response({"error": str(e)}, status=400)
+
+    # Registrar endpoints de apostas somente após declarar todos os handlers.
+    app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
+    app.router.add_get("/api/gwent/apostas/torneios", apostas_list_torneios)
+    app.router.add_post("/api/gwent/apostas/denarios", apostas_denarios)
+    app.router.add_post("/api/gwent/apostas/cartas", apostas_cartas)
+    app.router.add_post("/api/gwent/apostas/torneio", apostas_torneio)
 
     app.router.add_get("/rituais-ancestrais", rituais_page)
     app.router.add_get("/api/gwent/rituais-ancestrais", rituais_list)
