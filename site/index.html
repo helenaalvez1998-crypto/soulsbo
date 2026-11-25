@@ -9,6 +9,7 @@
 <script>try{const v=JSON.parse(localStorage.getItem('vis')||'{}'),r=document.documentElement;r.dataset.theme=v.tema||'cinzas';if(/^#[0-9a-f]{6}$/i.test(v.cor||'')){r.style.setProperty('--gold',v.cor);r.style.setProperty('--gold-bright','color-mix(in srgb,'+v.cor+' 70%,#fff)')}}catch(e){}</script>
 
   <link rel="stylesheet" href="/narabot-visual-v59.css?v=68">
+<link rel="stylesheet" href="/narabot-polish.css?v=polish1">
 </head>
 <body>
 <div id="splash"><div><div class="s-fan"><i>⚔</i><i>✦</i><i>⚜</i><i>♜</i><i>☗</i></div><h1>GWENT</h1><p>DO COLISEU</p><div class="s-press">— CLIQUE PARA ENTRAR NA ARENA —</div></div></div>
@@ -51,7 +52,6 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
     <button class="nav" data-tab="atelier"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.7 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16.5" cy="9.5" r="1"/></svg></i><span>Ateliê</span></button>
     <button class="nav" data-tab="portal"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></i><span>Meu Portal</span></button>
     <button class="nav" data-tab="guide"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6M9 12h6"/></svg></i><span>Guia</span></button>
-    <button class="nav" data-tab="conquistas"><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22c5.52-4.95 5.52-12.95 0-17.9l-1.03-2.12.98-2.14C17.37 2.09 9.06.18 5.93 2.94 2.86 5.08.06 8.67.06 12s0 6.83.07 9.85.99 11.91 6.64 15.27 6.6 9.66 6.7 12.29zM12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm-2 15.57L9.55 9.36 12 10.6 14.45 9.36 12 13.68 9.55 9.36 12 10.6z"/></svg><i><span>Conquistas</span></button>
     <button class="nav" data-tab="admin" id="nav-admin" hidden><i><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></i><span>Moderação</span></button>
   </nav>
   <div class="wallet"><span title="Almas">✦ <b id="souls">—</b></span><span title="Fragmentos">✧ <b id="fragments">—</b></span><span title="Denários">◈ <b id="denarios">—</b></span><span title="XP">⚑ <b id="gwent-xp">—</b></span></div>
@@ -66,20 +66,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   <div class="tab show" id="tab-home" data-title="Início"><section class="hub-hero"><img id="hub-icon" class="hub-icon" alt="" hidden><div class="hub-hero-txt"><small class="eyebrow">BEM-VINDO AO</small><h2 id="hub-server">Servidor</h2><p class="muted">Perfil, ranking, Gwent e a Nara — tudo do seu servidor num só lugar.</p><div class="hub-chips"><span>👥 <b id="hub-members">—</b> membros</span><span><i class="dot on"></i><b id="hub-online">—</b> online no Discord</span><span>🌐 <b id="hub-onsite">—</b> no site</span></div><div class="hub-cta"><a id="hub-invite" class="primary linkbtn" target="_blank" rel="noopener" hidden>Entrar no Discord</a><button class="big gold" data-goto="arena" type="button">⚔ Jogar Gwent</button><button class="big" data-goto="community" type="button">Ver ranking</button><button class="big" data-goto="catalog" type="button">📚 Catálogo</button></div></div></section>
 <div class="hub-grid"><section class="hub-card" id="hub-me"><div class="section-head"><div><small class="eyebrow">SEU PERFIL</small><h3 id="hub-me-name">Visitante</h3></div><b id="hub-me-rank" class="muted"></b></div><div id="hub-me-body"><p class="muted">Entre com Discord para ver seu nível, XP, platinas e posição no ranking.</p></div></section>
 <section class="hub-card"><div class="section-head"><div><small class="eyebrow">PERGUNTE À NARA</small><h3>Dúvidas do servidor</h3></div></div><div id="nara-log" class="nara-log" aria-live="polite"><p class="nara-msg bot">Fale comigo, guerreiro. Pergunte sobre XP, platinas, zerados, cartas ou como o bot funciona.</p></div><form id="nara-form" class="nara-form"><input id="nara-input" maxlength="300" placeholder="Ex.: como ganho cartas?" autocomplete="off"><button class="primary" type="submit">Enviar</button></form></section></div>
-<section class="hub-card" id="coliseu-systems" style="margin:20px 0">
-<div class="section-head"><div><small class="eyebrow">SISTEMAS DO COLISEU</small><h3>Forja, cartas e criação</h3></div><a class="text-btn" href="/biblioteca-cartas">Ver todas as cartas →</a></div>
-<div class="hub-system-links" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
-<a class="big" href="/forja">⚒ Forja</a>
-<a class="big" href="/transmutacao">🧪 Transmutação</a>
-<a class="big" href="/linhagens">🜂 Linhagens</a>
-<a class="big" href="/rituais-ancestrais">🔥 Rituais Ancestrais</a>
-<a class="big" href="/biblioteca-cartas">🃏 Biblioteca de Cartas</a>
-<a class="big" href="/cartas-geradas">✦ Cartas Geradas</a>
-<a class="big" href="/atelie-arte">🎨 Ateliê de Arte</a>
-<a class="big" href="/tutorial">📖 Tutorial</a>
-</div>
-<p class="muted" style="font-size:11px;margin:12px 0 0">Evolução com Risco, Apostas e Conquistas ainda não estão liberadas: as integrações de banco e API precisam ser concluídas antes de habilitar essas operações.</p>
-</section>
+<section class="hub-card" id="coliseu-systems" style="margin:var(--sp) 0"><div class="section-head"><div><small class="eyebrow">SISTEMAS DO COLISEU</small><h3>Forja, cartas e criação</h3></div><a class="text-btn" href="/biblioteca-cartas">Ver todas as cartas →</a></div><div class="sys-wrap"><div class="sys-group"><h4>Forja e evolução</h4><a class="sys-link" href="/forja"><span class="sys-ico">⚒</span><span><b>Forja</b><small>Evolua e lapide suas cartas</small></span></a><a class="sys-link" href="/transmutacao"><span class="sys-ico">🧪</span><span><b>Transmutação</b><small>Transforme cartas em novas</small></span></a><a class="sys-link" href="/linhagens"><span class="sys-ico">🜂</span><span><b>Linhagens</b><small>Explore as linhagens de cartas</small></span></a><a class="sys-link" href="/rituais-ancestrais"><span class="sys-ico">🔥</span><span><b>Rituais Ancestrais</b><small>Rituais e receitas ocultas</small></span></a></div><div class="sys-group"><h4>Coleção</h4><a class="sys-link" href="/biblioteca-cartas"><span class="sys-ico">🃏</span><span><b>Biblioteca de Cartas</b><small>Todas as cartas do jogo</small></span></a><a class="sys-link" href="/cartas-geradas"><span class="sys-ico">✦</span><span><b>Cartas Geradas</b><small>Cartas criadas pelo gerador</small></span></a></div><div class="sys-group"><h4>Criação e guia</h4><a class="sys-link" href="/atelie-arte"><span class="sys-ico">🎨</span><span><b>Ateliê de Arte</b><small>Ilustre cartas e ganhe crédito</small></span></a><a class="sys-link" href="/tutorial"><span class="sys-ico">📖</span><span><b>Tutorial</b><small>Aprenda a jogar</small></span></a></div></div><div class="sys-soon"><small>Em breve:</small><span>Evolução com Risco</span><span>Apostas</span><span>Conquistas</span></div></section>
 <div class="section-head"><div><small class="eyebrow">DESTAQUES</small><h3>Top 5 do servidor</h3></div><button class="text-btn" data-goto="community" type="button">Ranking completo →</button></div><div class="hub-tops" id="hub-tops"><p class="muted">Entre com Discord para ver o ranking.</p></div>
 <div class="section-head"><div><small class="eyebrow">AO VIVO</small><h3>Atividade recente</h3></div></div><div id="hub-recent" class="hub-recent"><p class="muted">Entre com Discord para ver as conquistas da comunidade.</p></div></div>
   <div class="tab" id="tab-community" data-title="Comunidade"><div class="section-head"><div><small class="eyebrow">COMUNIDADE</small><h3>Ranking</h3></div><div class="seg" id="rank-seg"><button class="on" data-rank="xp" type="button">XP</button><button data-rank="platinas" type="button">Platinas</button><button data-rank="zerados" type="button">Zerados</button></div></div><div id="rank-podium"></div><div id="rank-list" class="rank-list"><p class="muted">Entre com Discord para ver o ranking.</p></div><div class="section-head"><div><small class="eyebrow">MEMBROS</small><h3>Quem está online</h3></div><input id="players-search" class="deck-search" type="search" placeholder="Buscar membro..." style="max-width:260px;margin:0"></div><div id="players-list" class="players-list"></div></div>
@@ -329,37 +316,4 @@ let seen=0;try{seen=localStorage.getItem('tour')}catch(e){}
 if(!seen){const w=setInterval(()=>{if(!document.getElementById('splash')){clearInterval(w);setTimeout(start,1600)}},400)}
 })();
 </script>
-
-  <div class="tab" id="tab-conquistas" data-title="Conquistas">
-    <section class="hub-hero">
-      <div class="hub-hero-txt">
-        <small class="eyebrow">CONQUISTAS</small>
-        <h2>Suas Conquistas e Platinas</h2>
-        <p class="muted">Registre, consulte e acompanhe todas as suas conquistas no Coliseu.</p>
-        <div class="hub-chips">
-          <span id="conq-total">-</span> conquistas registradas
-          <span id="conq-unlocked">-</span> desbloqueadas
-        </div>
-        <div class="hub-cta">
-          <button class="big gold" data-goto="conquista-list" type="button">Ver Minhas Conquistas</button>
-          <button class="big" data-goto="conquista-registrar" type="button">Registrar Conquista</button>
-        </div>
-      </div>
-    </section>
-    
-    <section class="section-head"><div><small class="eyebrow">LISTA DE CONQUISTAS</small><h3>Minhas Conquistas</h3></div>
-    <div id="conquista-list-container" class="conquista-list">
-      <p class="muted">Carregando conquistas...</p>
-    </div>
-    
-    <div class="section-head"><div><small class="eyebrow">REGISTRAR NOVA CONQUISTA</small><h3>Nova Conquista</h3></div>
-    <div class="conquista-form" id="conquista-registrar-form" hidden>
-      <label>Nome da Conquista <input id="conquista-nome" type="text" placeholder="Ex: Platina - Elden Ring"></label>
-      <label>Progresso <input id="conquista-progresso" type="number" min="0" value="0"></label>
-      <label>Total <input id="conquista-total" type="number" min="1" value="100"></label>
-      <button class="primary" id="conquista-salvar" type="button">Salvar Conquista</button>
-    </div>
-    <div id="conquista-msg" class="muted"></div>
-    </section>
-  </div>
 </body></html>
