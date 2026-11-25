@@ -681,6 +681,12 @@ def registrar_rotas(bot, app: web.Application) -> None:
             return web.Response(text="Página da Forja indisponível.", status=503)
         return web.FileResponse(page)
 
+    async def evolucao_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "evolucao.html"
+        if not page.is_file():
+            return web.Response(text="Página de Evolução indisponível.", status=503)
+        return web.FileResponse(page)
+
     async def forja_list(request: web.Request) -> web.Response:
         uid = auth(request)
         if uid is None:
