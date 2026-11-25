@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0a10"><title>Forja das Almas — Evolução com Risco — Cartas do Coliseu</title>
+<style>
+:root{--bg:#0b0a10;--panel:#15131d;--line:rgba(197,170,112,.2);--gold:#d8bb7a;--text:#f0e9df;--muted:#a7a7b2;--radius:14px;--shadow:0 18px 48px rgba(0,0,0,.34)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+.header{padding:1.5rem 2rem;background:radial-gradient(ellipse at top,#1a1720 0%,#0b0a10 100%);border-bottom:1px solid var(--line)}
+.header h1{margin:0;font-size:1.7rem;letter-spacing:1px;color:var(--gold)}
+.main{padding:2rem}
+section{background:var(--panel);border-radius:var(--radius);padding:1.5rem 2rem;margin:1.5rem 0;box-shadow:var(--shadow);border:1px solid var(--line)}
+h2{color:var(--gold);margin-top:0;border-bottom:1px solid var(--line);padding-bottom:0.5rem}
+.btn{display:inline-block;background:var(--gold);color:var(--bg);padding:0.75rem 1.5rem;border-radius:var(--radius);text-decoration:none;font-weight:bold;margin:0.5rem;cursor:pointer;border:none;transition:opacity .2s}
+.btn:hover{opacity:0.9}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-danger{background:#a64c46}
+.amulet-badge{background:#2a7a2a;color:#fff;padding:0.2rem 0.6rem;border-radius:10px;font-size:0.7rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-top:1rem}
+.card{background:var(--panel);border-radius:var(--radius);padding:1rem;border:1px solid var(--line);position:relative;min-height:340px}
+.card .rarity{position:absolute;top:8px;right:8px;padding:0.3rem 0.6rem;border-radius:10px;font-size:0.7rem;text-transform:uppercase;font-weight:bold;color:#000}
+.card .rarity-comum{background:#4a4} .card .raridade-rara{background:#55f}.card .raridade-epica{background:#a55}
+.card .raridade-lendaria{background:#d55} .card .raridade-mitica{background:#555} .card .raridade-singular{background:#f55;color:#fff}
+.card .power{position:absolute;bottom:8px;right:8px;font-size:1.4rem;font-weight:bold;color:var(--gold)}
+.card .name{padding-top:60px;font-weight:bold;margin-bottom:.5rem}
+.card .level{color:var(--muted);font-size:.85rem}
+.card .level span{color:var(--gold);font-weight:bold}
+.card .actions{position:absolute;bottom:8px;left:8px;right:8px;padding:.5rem;background:rgba(0,0,0,.5);border-radius:0 0 var(--radius) var(--radius)}
+.evo-info{background:rgba(216,187,122,.1);padding:1rem;border-radius:var(--radius);margin:1rem 0}
+.evo-stats{display:flex;gap:1rem;flex-wrap:wrap}
+.stat{background:var(--panel);padding:.5rem 1rem;border-radius:10px;text-align:center}
+.stat .label{color:var(--muted);font-size:.75rem}
+.stat .value{color:var(--gold);font-size:1.1rem;font-weight:bold}
+.notice{padding:.75rem;border-radius:10px;margin-top:1rem}
+.notice.ok{background:#2a4a2a;border:1px solid #4a4;color:#4a4}
+.notice.err{background:#4a2a2a;border:1px solid #a64c46;color:#a64c46}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="header"><h1>🔥 Forja das Almas — Evolução com Risco</h1></div>
+<div class="main">
+<section>
+<h2>Suas Cartas</h2>
+<div id="card-grid" class="card-grid"></div>
+</section>
+
+<section>
+<h2>Evoluir Carta Selecionada</h2>
+<div id="evo-info" class="evo-info">Nenhuma carta selecionada</div>
+<div id="evo-stats" class="evo-stats" style="display:none">
+<div class="stat"><div class="label">Sucesso</div><div class="value" id="stat-sucesso">–</div></div>
+<div class="stat"><div class="label">Risco de Regressão</div><div class="value" id="stat-risco">–</div></div>
+<div class="stat"><div class="label">Custo Denários</div><div class="value" id="stat-custo">–</div></div>
+<div class="stat"><div class="label">Fragmentos</div><div class="value" id="stat-frag">–</div></div>
+</div>
+<div id="amuleto-box" style="margin-top:1rem;display:none">
+<button class="btn" id="btn-amuleto" onclick="toggleAmulet()">✨ Usar Amuleto de Proteção (1)</button>
+</div>
+<button class="btn" id="btn-evoluir" onclick="executarEvolucao()">⚡ Iniciar Evolução</button>
+<button class="btn btn-danger" id="btn-cancelar" onclick="limparSelecao()">✕ Cancelar</button>
+<div id="resultado" style="margin-top:1rem"></div>
+</section>
+</div>
+
+<script>
+let cards=[];
+let selected=null;
+let amuleto=false;
+
+async function loadCards(){
+  const resp=await fetch('/api/gwent/evolucao');
+  cards=await resp.json();
+  const grid=document.getElementById('card-grid');
+  grid.innerHTML='';
+  cards.forEach((c,i)=>{
+    const div=document.createElement('div');
+    div.className='card';
+    const rarityCls='raridade-'+c.rarity.toLowerCase();
+    div.innerHTML=`
+      <div class="rarity ${rarityCls}">${c.rarity}</div>
+      <div class="name">${c.nome}</div>
+      <div class="level">Nível: <span>${c.evolution_level}</span></div>
+      <div class="power">${c.poder}</div>
+      <div class="actions"><button class="btn" onclick="selectCard(${i})">Selecionar</button></div>
+    `;
+    if(c.amulet>0) div.innerHTML+='<div class="amulet-badge">Amuleto</div>';
+    grid.appendChild(div);
+  });
+}
+
+function selectCard(i){
+  selected=i;
+  const c=cards[i];
+  document.querySelectorAll('.card').forEach((el,idx)=>el.style.borderColor=idx===i?'var(--gold)':'var(--line)');
+  document.getElementById('evo-info').innerHTML=`<strong>${c.nome}</strong> — Nível ${c.evolution_level}`;
+  document.getElementById('evo-stats').style.display='flex';
+  document.getElementById('stat-sucesso').textContent=c.success_rate+'%';
+  document.getElementById('stat-risco').textContent=c.risk_pct+'%';
+  document.getElementById('stat-custo').textContent=c.cost_denarios+' Den.';
+  document.getElementById('stat-frag').textContent=c.cost_fragmentos+' Frag.';
+  document.getElementById('btn-evoluir').disabled=false;
+  document.getElementById('amuleto-box').style.display=c.amulet>0?'block':'none';
+  document.getElementById('btn-amuleto').textContent='✨ Usar Amuleto de Proteção ('+c.amulet+')';
+  document.getElementById('resultado').innerHTML='';
+  amuleto=false;
+}
+
+function toggleAmulet(){amuleto=!amuleto;document.getElementById('btn-amuleto').style.background=amuleto?'var(--gold)':'var(--bg)'}
+
+function limparSelecao(){
+  selected=null;document.getElementById('evo-info').innerHTML='Nenhuma carta selecionada';
+  document.getElementById('evo-stats').style.display='none';
+  document.getElementById('btn-evoluir').disabled=true;
+  document.getElementById('amuleto-box').style.display='none';
+  document.getElementById('btn-amuleto').style.background='var(--bg)';
+  amuleto=false;
+  document.getElementById('resultado').innerHTML='';
+}
+
+async function executarEvolucao(){
+  if(selected===null)return;
+  const c=cards[selected];
+  const resp=await fetch('/api/gwent/evolucao',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({exemplar_id:c.id,use_amulet:amuleto})
+  });
+  const result=await resp.json();
+  const box=document.getElementById('resultado');
+  box.className='notice '+ (result.success?'ok':'err');
+  box.innerHTML=result.message||result.error;
+  if(result.success){
+    c.poder=result.new_power;
+    c.evolution_level=result.new_level;
+    loadCards();
+  }else if(result.regressed){
+    loadCards();
+  }
+  if(result.success||result.regressed){selected=null;document.getElementById('btn-evoluir').disabled=true;}
+}
+
+loadCards();
+</script>
+</body></html>

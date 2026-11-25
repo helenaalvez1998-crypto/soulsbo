@@ -1,5 +1,4 @@
-# Dependências de produção — versões travadas para builds reproduzíveis.
-# Python 3.11+ (Python 3.13 recomendado na FadeHost).
+# Python 3.11+ (3.13 recomendado na FadeHost)
 discord.py==2.7.1
 aiosqlite==0.22.1
 python-dotenv==1.2.4

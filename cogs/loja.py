@@ -4,10 +4,9 @@ from discord.ext import commands
 
 import config
 import loja
-import ui
 from levels import nivel_por_xp
 from cogs.platinas import eh_moderador
-from utils import upsert_panel
+from utils import rodape, upsert_panel
 
 
 class Loja(commands.Cog):
@@ -78,7 +77,7 @@ class Loja(commands.Cog):
 def catalogo_publico() -> str:
     linhas = [
         "# 🪙 Loja da Nara — Catálogo",
-        "Compre cores de perfil e títulos usando Denários. Os itens são cosméticos e não alteram XP ou rankings.",
+        "Escolha cores de perfil e títulos usando Denários. São itens cosméticos: estilo, não vantagem em XP ou rankings. Gaste com alguma estratégia — arrependimento não devolve moeda.",
         "",
     ]
     for tipo, rotulo in loja.ROTULO_TIPO.items():
@@ -90,7 +89,7 @@ def catalogo_publico() -> str:
             linhas.append(f"{item.emoji} **{item.nome}** — 🪙 {item.preco}{requisito}")
         linhas.append("")
     linhas.extend([
-        "Selecione um item no menu abaixo para abrir sua loja pessoal, ver seu saldo e comprar/equipar.",
+        "Selecione um item para abrir sua loja pessoal, consultar o saldo e comprar ou equipar. A transação só acontece depois da confirmação.",
         "_Seu saldo e inventário são privados; a seleção não publica informações pessoais._",
     ])
     return "\n".join(linhas)[:2000]
@@ -113,6 +112,11 @@ class LojaCatalogoView(discord.ui.View):
         )
         self.seletor.callback = self._selecionar
         self.add_item(self.seletor)
+        from cogs.comunidade import adicionar_botao_contribuicao_contextual
+        adicionar_botao_contribuicao_contextual(
+            self, "item_suggestion", "loja", "Sugerir item para a loja", "💡", row=1,
+            style=discord.ButtonStyle.success,
+        )
 
     async def _selecionar(self, interaction: discord.Interaction):
         view = LojaView(self.cog, interaction.user)
@@ -161,7 +165,7 @@ class LojaView(discord.ui.View):
         e.description = "\n".join(partes)
         if self.aviso:
             e.add_field(name="Resultado", value=self.aviso, inline=False)
-        e.set_footer(text=ui.rodape("Loja"))
+        e.set_footer(text=rodape("Loja"))
         return e
 
     def _montar(self):
@@ -195,6 +199,8 @@ class LojaView(discord.ui.View):
             botao.disabled = self.nivel < item.nivel_min or self.saldo < item.preco
         botao.callback = self._acao
         self.add_item(botao)
+        from utils import restaurar_botao_voltar
+        restaurar_botao_voltar(self)
 
     async def _escolher(self, interaction: discord.Interaction):
         self.sel = interaction.data["values"][0]

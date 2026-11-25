@@ -1,15 +1,43 @@
-import asyncio
-import logging
+"""Configuração central do NARA: variáveis de ambiente, constantes e caminhos persistentes."""
+from __future__ import annotations
+
 import os
+from pathlib import Path
+import logging
+import shutil
 import re as _re
 from datetime import timedelta, timezone
-from pathlib import Path
 from urllib.parse import quote
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-
 from dotenv import load_dotenv
 
-from runtime_paths import get_data_dir
+
+# ======================================================================
+# Resolução única dos caminhos persistentes do NARA
+# ======================================================================
+
+def get_data_dir() -> Path:
+    """Retorna o diretório de dados configurado sem depender do diretório atual."""
+    configured = os.getenv("DATA_DIR", "").strip()
+    if configured:
+        return Path(configured).expanduser()
+    persistent_volume = Path("/data")
+    if persistent_volume.is_dir():
+        return persistent_volume
+    return Path(__file__).resolve().parent / "data"
+
+
+def get_state_path(env_name: str, default_filename: str) -> Path:
+    """Retorna caminho override por variável de ambiente ou arquivo dentro de DATA_DIR."""
+    configured = os.getenv(env_name, "").strip()
+    if configured:
+        return Path(configured).expanduser()
+    return get_data_dir() / default_filename
+
+
+# ======================================================================
+# Variáveis de ambiente e constantes
+# ======================================================================
 
 load_dotenv()
 
@@ -43,25 +71,77 @@ GUILD_ID = _env_int("GUILD_ID", 0) or None
 MOD_CHANNEL_ID = _env_int("MOD_CHANNEL_ID", 0)
 SOULSLIKE_CHANNEL_ID = _env_int("SOULSLIKE_CHANNEL_ID", 0)
 COLIZEU_CHANNEL_ID = _env_int("COLIZEU_CHANNEL_ID", 0)
+# Canal privado único para a biblioteca de artes e a fila de aprovação do Ateliê.
+COLISEU_ART_CHANNEL_ID = _env_int("COLISEU_ART_CHANNEL_ID", 0)
 NARA_CHANNEL_ID = _env_int("NARA_CHANNEL_ID", 0)
 PLATINAS_CHANNEL_ID = _env_int("PLATINAS_CHANNEL_ID", 0)
 MOD_ROLE_ID = _env_int("MOD_ROLE_ID", 0)
 PERFIS_CHANNEL_ID = _env_int("PERFIS_CHANNEL_ID", 0)
 ZERADOS_CHANNEL_ID = _env_int("ZERADOS_CHANNEL_ID", 0)
+LORE_CHANNEL_ID = _env_int("LORE_CHANNEL_ID", 0)
+GUIDES_CHANNEL_ID = _env_int("GUIDES_CHANNEL_ID", 0)
+COMMUNITY_CHANNEL_ID = _env_int("COMMUNITY_CHANNEL_ID", 0)
 DATA_DIR = get_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = os.getenv("DB_PATH", str(DATA_DIR / "colizeu.db")).strip() or str(DATA_DIR / "colizeu.db")
 
-# Caçador de Troféus: tetos para proteger a franquia gratuita de Gemini/Tavily.
-CACADOR_LIMITE_USUARIO = _env_int("CACADOR_LIMITE_USUARIO", 3, minimo=1, maximo=20)      # identificações por janela
-CACADOR_JANELA_MINUTOS = _env_int("CACADOR_JANELA_MINUTOS", 10, minimo=1, maximo=1440)
-CACADOR_PESQUISAS_DIA = _env_int("CACADOR_PESQUISAS_DIA", 15, minimo=1, maximo=500)     # pesquisas completas/dia (servidor)
+
+def _migrar_dados_legados_para_volume_persistente() -> None:
+    """Migra cache/templates do diretório do deploy para o volume /data.
+
+    Na FadeHost, /data/app é recriado a cada deploy, enquanto /data persiste.
+    Versões anteriores podiam deixar arquivos em /data/app/data; copiar apenas
+    arquivos ausentes preserva o conteúdo já existente no volume persistente.
+    """
+    origem = Path(__file__).resolve().parent / "data"
+    try:
+        if not origem.is_dir() or origem.resolve() == DATA_DIR.resolve():
+            return
+    except OSError:
+        return
+
+    copiados = 0
+    falhas = 0
+    # Somente dados de cartas: não copiar bancos ou outros estados por acidente.
+    for nome in ("cartas_cache", "cartas_templates"):
+        pasta_origem = origem / nome
+        if not pasta_origem.is_dir():
+            continue
+        for arquivo in pasta_origem.rglob("*"):
+            if not arquivo.is_file():
+                continue
+            try:
+                relativo = arquivo.relative_to(origem)
+                destino = DATA_DIR / relativo
+                if destino.exists():
+                    continue
+                destino.parent.mkdir(parents=True, exist_ok=True)
+                # Escrita temporária + replace evita deixar cópia parcial.
+                temporario = destino.with_name(destino.name + ".migrating")
+                shutil.copy2(arquivo, temporario)
+                temporario.replace(destino)
+                copiados += 1
+            except OSError:
+                falhas += 1
+
+    if copiados or falhas:
+        _log.info(
+            "Migração de dados de cartas concluída: %s arquivo(s) copiado(s), %s falha(s); destino=%s",
+            copiados, falhas, DATA_DIR,
+        )
+    else:
+        _log.info("Volume persistente de cartas verificado: destino=%s; nenhum arquivo legado pendente", DATA_DIR)
+
+
+_migrar_dados_legados_para_volume_persistente()
+DB_PATH = os.getenv("DB_PATH", str(DATA_DIR / "colizeu.db")).strip() or str(DATA_DIR / "colizeu.db")
 
 XP_PLATINA = _env_int("XP_PLATINA", 200, minimo=0)
 DENARIOS_PLATINA = _env_int("DENARIOS_PLATINA", 50, minimo=0)
 XP_ZERADO = _env_int("XP_ZERADO", 50, minimo=0)
 DENARIOS_ZERADO = _env_int("DENARIOS_ZERADO", 10, minimo=0)
 ZERADOS_XP_LIMITE_DIARIO = _env_int("ZERADOS_XP_LIMITE_DIARIO", 3, minimo=0)
+COMMUNITY_XP_DEFAULT = _env_int("COMMUNITY_XP_DEFAULT", 10, minimo=0)
+COMMUNITY_XP_WEEKLY_CAP = _env_int("COMMUNITY_XP_WEEKLY_CAP", 50, minimo=0)
 
 
 # =====================================================================
@@ -81,6 +161,8 @@ if LOG_LEVEL not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
 
 TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
 BOT_OWNER_ID = _env_int("BOT_OWNER_ID", 0)
+# Conta do criador no Discord; o apelido público pode mudar, a identidade não.
+SOULS_USER_ID = 1300117955236991046
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "").strip()
 YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID", "").strip()
 
@@ -102,11 +184,11 @@ YOUTUBE_LIVE_CHECK_MINUTES = max(5, _env_int("YOUTUBE_LIVE_CHECK_MINUTES", 10))
 LIVE_START_HOUR = _env_int("LIVE_START_HOUR", 19, minimo=0, maximo=23)
 LIVE_END_HOUR = _env_int("LIVE_END_HOUR", 24, minimo=1, maximo=24)  # exclusivo: 19:00 até 23:59
 
-OFFERS_CHECK_MINUTES = max(10, _env_int("OFFERS_CHECK_MINUTES", 30))
-MAX_OFFERS_PER_CHECK = max(1, _env_int("MAX_OFFERS_PER_CHECK", 8))
+OFFERS_CHECK_MINUTES = max(10, _env_int("OFFERS_CHECK_MINUTES", 15))
+MAX_OFFERS_PER_CHECK = max(1, _env_int("MAX_OFFERS_PER_CHECK", 15))
 # Só avisa promoções da Steam com pelo menos esse desconto (0 = todas)
 MIN_PROMO_DISCOUNT = max(0, _env_int("MIN_PROMO_DISCOUNT", 50))
-# Chave opcional da API do GG.deals (comparação de preços em região brasileira).
+# Chave da API GG.deals (fonte prioritária de comparação de preços em região brasileira).
 GG_DEALS_API_KEY = os.getenv("GG_DEALS_API_KEY", "").strip()
 
 # IsThereAnyDeal (https://isthereanydeal.com/apps/my/ — chave gratuita). Opcional:
@@ -135,4 +217,3 @@ YOUTUBE_FEED_URL = (
     "https://www.youtube.com/feeds/videos.xml?channel_id="
     + quote(YOUTUBE_CHANNEL_ID)
 )
-

@@ -8,6 +8,7 @@ from discord.ext import commands
 import config
 from admin_config import GuildConfig
 from cogs.platinas import eh_moderador, sincronizar_patente, hoje
+from cogs.comum import NotaJogoView, formatar_dificuldade
 from levels import nivel_por_xp, patente_por_nivel
 from utils import get_text_channel, upsert_panel, erro_comando
 
@@ -45,8 +46,8 @@ class Zerados(commands.Cog):
         self.bot.add_view(ZeradosPublicoView(self))
         self.bot.add_view(ZeradoRevisaoView(self))
 
-    def painel_view(self, user) -> "ZeradosPainelView":
-        return ZeradosPainelView(self, user)
+    def painel_view(self, user, callback_voltar=None) -> "ZeradosPainelView":
+        return ZeradosPainelView(self, user, callback_voltar=callback_voltar)
 
     # ------------------------------------------------------------ comandos
     @app_commands.command(name="zerados", description="Abre seu painel de jogos zerados.")
@@ -66,9 +67,9 @@ class Zerados(commands.Cog):
             return await interaction.response.send_message("Apenas moderadores.", ephemeral=True)
         texto = (
             "# ✅ Jogos Zerados\n\n"
-            "Não curte platinar, mas zerou o jogo? Use o botão abaixo para **enviar seu registro**, "
+            "Não curte platinar, mas terminou o jogo? A jornada também conta. Use o botão abaixo para **enviar seu registro**, "
             "ver sua lista aprovada e acompanhar o ranking de quem mais finalizou jogos.\n\n"
-            "_Os registros passam pela Central de Aprovação. XP/Denários e publicação são liberados após a aprovação. Print é opcional._"
+            "_Os registros passam pela Central de Aprovação. XP/Denários e publicação só são liberados após a aprovação. Print é opcional; não precisa transformar cada final em um dossiê._"
         )
         key = f"panel:zerados:{interaction.guild_id}:{interaction.channel_id}"
         await upsert_panel(
@@ -94,6 +95,8 @@ class Zerados(commands.Cog):
         removido = await db.remover_zerado_com_recompensa(registro)
         if removido is None:
             return await interaction.response.send_message("Este registro já foi removido por outra ação.", ephemeral=True)
+        if isinstance(removido, dict) and removido.get("erro"):
+            return await interaction.response.send_message(removido["erro"], ephemeral=True)
         if removido["status"] == "pending" and removido["proof_msg_id"]:
             try:
                 mod_ch_id = await GuildConfig.get(db, interaction.guild_id, "mod_channel")
@@ -120,6 +123,8 @@ class Zerados(commands.Cog):
             if membro:
                 await sincronizar_patente(interaction.guild, membro, novo)
             extra = f" A recompensa (−{z['xp_awarded']} XP, −{z['denarios_awarded']} Denários) foi devolvida."
+        if removido.get("recompensa_drop_revertida"):
+            extra += " O drop de carta/recursos desse registro também foi revertido."
         await interaction.response.send_message(f"🗑️ Registro #{registro} (**{z['game']}**) removido.{extra}", ephemeral=True)
 
     async def cog_app_command_error(self, interaction, error):
@@ -127,7 +132,8 @@ class Zerados(commands.Cog):
 
     # ------------------------------------------------------------ registro
     async def registrar_zerado(self, interaction: discord.Interaction, jogo: str, plataforma: str,
-                               data: str, comentario: str, capturas):
+                               data: str, comentario: str, capturas, nota: int | None = None,
+                               dificuldade: int | None = None):
         try:
             d = dt.datetime.strptime(data.strip(), "%d/%m/%Y").date()
         except ValueError:
@@ -136,7 +142,11 @@ class Zerados(commands.Cog):
             return await interaction.response.send_message("A data não pode estar no futuro.", ephemeral=True)
 
         jogo, plataforma = jogo.strip()[:100], plataforma.strip()[:30]
-        comentario = (comentario or "").strip()[:300]
+        comentario = (comentario or "").strip()[:500]
+        if nota is not None and (type(nota) is not int or not 1 <= nota <= 10):
+            return await interaction.response.send_message("Escolha uma nota entre 1 e 10.", ephemeral=True)
+        if dificuldade is not None and (type(dificuldade) is not int or not 1 <= dificuldade <= 5):
+            return await interaction.response.send_message("Escolha uma dificuldade entre 1 e 5.", ephemeral=True)
         if not jogo:
             return await interaction.response.send_message("Informe o nome do jogo.", ephemeral=True)
 
@@ -169,12 +179,16 @@ class Zerados(commands.Cog):
 
         await interaction.response.defer(ephemeral=True, thinking=True)
         try:
-            linhas = await self.gravar_zerado(interaction.guild, interaction.user, d, jogo, plataforma, comentario, capturas)
+            linhas = await self.gravar_zerado(
+                interaction.guild, interaction.user, d, jogo, plataforma, comentario, capturas, nota, dificuldade
+            )
+            await db.set_ultima_plataforma(interaction.user.id, plataforma)
         except ValueError as exc:
             return await interaction.edit_original_response(content=str(exc))
         await interaction.edit_original_response(content="\n".join(linhas))
 
-    async def gravar_zerado(self, guild, user, d, jogo, plataforma, comentario, capturas) -> list[str]:
+    async def gravar_zerado(self, guild, user, d, jogo, plataforma, comentario, capturas,
+                            nota: int | None = None, dificuldade: int | None = None) -> list[str]:
         """Cria uma solicitação pendente e envia o cartão com comprovantes ao canal central."""
         db = self.bot.db
         mod_ch_id = await GuildConfig.get(db, guild.id, "mod_channel")
@@ -191,7 +205,7 @@ class Zerados(commands.Cog):
             )
 
         zerado_id = await db.criar_zerado_pendente(
-            user.id, jogo, plataforma, d.isoformat(), comentario
+            user.id, jogo, plataforma, d.isoformat(), comentario, nota, dificuldade
         )
         if zerado_id is None:
             raise ValueError(
@@ -211,6 +225,10 @@ class Zerados(commands.Cog):
             embed.set_thumbnail(url=user.display_avatar.url)
             embed.add_field(name="Plataforma", value=plataforma, inline=True)
             embed.add_field(name="Data em que zerou", value=d.strftime("%d/%m/%Y"), inline=True)
+            if nota is not None:
+                embed.add_field(name="Nota do jogo", value=f"⭐ {nota}/10", inline=True)
+            if dificuldade is not None:
+                embed.add_field(name="Dificuldade percebida", value=formatar_dificuldade(dificuldade), inline=True)
             if comentario:
                 embed.add_field(name="Comentário", value=comentario, inline=False)
             if capturas:
@@ -276,6 +294,10 @@ class Zerados(commands.Cog):
                 embed.set_thumbnail(url=membro.display_avatar.url)
             embed.add_field(name="Plataforma", value=registro["platform"], inline=True)
             embed.add_field(name="Data", value=data_legivel(registro["finished_at"]), inline=True)
+            if registro.get("rating") is not None:
+                embed.add_field(name="Nota do jogo", value=f"⭐ {int(registro['rating'])}/10", inline=True)
+            if registro.get("difficulty") is not None:
+                embed.add_field(name="Dificuldade percebida", value=formatar_dificuldade(registro["difficulty"]), inline=True)
             if registro.get("comment"):
                 embed.add_field(name="Comentário", value=registro["comment"], inline=False)
             anexos = list(getattr(interaction.message, "attachments", []) or [])
@@ -292,7 +314,15 @@ class Zerados(commands.Cog):
             if novo_nivel:
                 embed.add_field(name="⬆️ Novo nível", value=f"{novo_nivel} — {patente_por_nivel(novo_nivel)}", inline=False)
             embed.set_footer(text=f"Registro #{registro['id']} · aprovado pela moderação")
-            await canal.send(embed=embed)
+            mensagem_publica = await canal.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
+            comunidade = self.bot.get_cog("Comunidade")
+            if comunidade:
+                try:
+                    await comunidade.registrar_publicacao_social(
+                        interaction.guild, canal, mensagem_publica, "zerado", int(registro["id"]), int(registro["user_id"])
+                    )
+                except Exception:
+                    log.exception("Zerado #%s publicado, mas as interações sociais não foram anexadas", registro.get("id"))
             return True
         except Exception:
             log.exception("Falha ao anunciar zerado aprovado #%s", registro.get("id"))
@@ -303,7 +333,7 @@ class Zerados(commands.Cog):
         rows = await self.bot.db.zerados_do_usuario(membro.id)
         cabecalho = f"## ✅ Zerados de {membro.display_name}\n\n"
         if not rows:
-            return cabecalho + "Ainda não há jogos zerados registrados."
+            return cabecalho + "Ainda não há jogos zerados registrados. Sua lista está limpa — por enquanto."
         linhas = []
         for r in rows[:30]:
             linha = f"✅ **{r['game']}** · `{r['platform']}` · {data_legivel(r['finished_at'])} · `#{r['id']}`"
@@ -323,7 +353,7 @@ class Zerados(commands.Cog):
         else:
             rows, titulo = await db.ranking_zerados(), "Ranking de Zerados"
         if not rows:
-            return f"## ✅ {titulo}\n\nAinda não há dados nesse ranking."
+            return f"## ✅ {titulo}\n\nAinda não há dados suficientes nesse ranking. A disputa continua aberta."
         linhas = []
         for i, r in enumerate(rows):
             pos = MEDALHAS[i] if i < 3 else f"`{i + 1:>2}.`"
@@ -338,23 +368,30 @@ class ZeradoRevisaoView(discord.ui.View):
         super().__init__(timeout=None)
         self.cog = cog
 
-    async def _processar(self, interaction: discord.Interaction, aprovar: bool):
-        if not await eh_moderador(interaction.user, self.cog.bot.db):
-            return await interaction.response.send_message("Apenas moderadores podem revisar este registro.", ephemeral=True)
-        if not interaction.message or not interaction.message.embeds:
+    async def _processar(
+        self, interaction: discord.Interaction, aprovar: bool, motivo: str = "",
+        source_message: discord.Message | None = None,
+    ):
+        mensagem_revisao = source_message or interaction.message
+        if not mensagem_revisao or not mensagem_revisao.embeds:
             return await interaction.response.send_message("Cartão de revisão inválido.", ephemeral=True)
-        footer = interaction.message.embeds[0].footer.text or ""
+        footer = mensagem_revisao.embeds[0].footer.text or ""
         import re
         match = re.search(r"\bZeradoID:(\d+)\b", footer)
         if not match:
             return await interaction.response.send_message("Não consegui localizar o ID deste zerado.", ephemeral=True)
+
         zerado_id = int(match.group(1))
         db = self.cog.bot.db
+        # Reconhece o clique antes de qualquer consulta/transação potencialmente lenta.
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        if not await eh_moderador(interaction.user, db):
+            return await interaction.followup.send("Apenas moderadores podem revisar este registro.", ephemeral=True)
         pendente = await db.get_zerado(zerado_id)
         if pendente is None or pendente["status"] != "pending":
-            return await interaction.response.send_message("Este registro já foi processado ou removido.", ephemeral=True)
+            return await interaction.followup.send("Este registro já foi processado ou removido.", ephemeral=True)
         if int(pendente["user_id"]) == interaction.user.id:
-            return await interaction.response.send_message("Você não pode aprovar ou rejeitar o próprio registro.", ephemeral=True)
+            return await interaction.followup.send("Você não pode aprovar ou rejeitar o próprio registro.", ephemeral=True)
 
         if aprovar:
             xp = await GuildConfig.get(db, interaction.guild_id, "xp_zerado")
@@ -370,33 +407,71 @@ class ZeradoRevisaoView(discord.ui.View):
                 zerado_id, interaction.user.id, int(xp), int(denarios), int(limite)
             )
             if resultado is None:
-                return await interaction.response.send_message("Outro moderador já processou este registro.", ephemeral=True)
-            from cogs.moderacao_utils import sincronizar_cartao
-            await sincronizar_cartao(self.cog.bot, interaction.guild_id, "zerados", zerado_id, "approved", interaction.user.id)
-            status_texto = "✅ Aprovado"
-            cor = discord.Color.green()
+                return await interaction.followup.send("Outro moderador já processou este registro.", ephemeral=True)
+
+            # Confirma a presença da carta após o commit e repara conquistas antigas.
+            carta_confirmada = False
+            try:
+                await db.coliseu_sincronizar_conquistas(int(resultado["user_id"]))
+                carta_presente = await db._one(
+                    "SELECT 1 FROM cartas_colecao WHERE user_id=? AND card_id=?",
+                    (int(resultado["user_id"]), str(resultado["card_id"])),
+                )
+                carta_confirmada = carta_presente is not None
+                if not carta_confirmada:
+                    raise RuntimeError(
+                        f"Carta não encontrada após sincronização: zerado={zerado_id} card={resultado['card_id']}"
+                    )
+            except Exception:
+                log.exception(
+                    "Zerado #%s aprovado, mas houve falha ao confirmar a carta %s para user=%s",
+                    zerado_id, resultado.get("card_id"), resultado.get("user_id"),
+                )
+                await interaction.followup.send(
+                    "O zerado foi aprovado, mas não consegui confirmar a carta na coleção. "
+                    "A equipe foi avisada pelo log; não envie o registro novamente.", ephemeral=True,
+                )
+
+            from cogs.comum import sincronizar_cartao
+            await sincronizar_cartao(
+                self.cog.bot, interaction.guild_id, "zerados", zerado_id, "approved", interaction.user.id
+            )
             recompensa = f"+{resultado['xp']} XP · +{resultado['denarios']} Denários"
             if resultado["daily_limit_reached"]:
                 recompensa = "Sem recompensa: limite diário atingido"
-            embed = interaction.message.embeds[0]
-            embed.color = cor
+            embed = discord.Embed.from_dict(mensagem_revisao.embeds[0].to_dict())
+            embed.color = discord.Color.green()
             embed.set_footer(text=f"ZeradoID:{zerado_id} · APROVADO")
+            outcome = resultado.get("card_outcome")
+            if outcome == "carta":
+                status_carta = f"🃏 **Drop recebido:** {resultado['card_name']} · {resultado['card_rarity']}"
+            elif outcome == "almas":
+                status_carta = f"✨ **Duplicata convertida:** +{resultado.get('card_almas', 0)} Almas"
+            elif outcome == "fragmentos":
+                status_carta = f"🧩 **Duplicata convertida:** +{resultado.get('card_fragmentos', 0)} fragmentos de evolução"
+            else:
+                status_carta = f"🃏 **Recompensa:** {resultado.get('card_name', 'Carta')} · {resultado.get('card_rarity', '')}"
             embed.add_field(
                 name="Resultado",
-                value=f"{status_texto} por {interaction.user.mention}\n**Recompensa:** {recompensa}",
+                value=(
+                    f"✅ Aprovado por {interaction.user.mention}\n"
+                    f"**Recompensa:** {recompensa}\n{status_carta}"
+                ),
                 inline=False,
             )
+            cartao_atualizado = True
             try:
-                await interaction.response.edit_message(
+                await mensagem_revisao.edit(
                     content=f"✅ Solicitação `#{zerado_id}` aprovada por {interaction.user.mention}.",
                     embed=embed, view=None,
                 )
             except discord.HTTPException:
-                log.exception("Zerado #%s aprovado, mas o cartão não foi atualizado", zerado_id)
-                if not interaction.response.is_done():
-                    await interaction.response.send_message("A aprovação foi salva, mas não consegui atualizar o cartão.", ephemeral=True)
-                else:
-                    await interaction.followup.send("A aprovação foi salva, mas não consegui atualizar o cartão.", ephemeral=True)
+                cartao_atualizado = False
+                log.exception("Zerado #%s aprovado, mas o cartão de revisão não foi atualizado", zerado_id)
+                await interaction.followup.send(
+                    "A aprovação foi salva e as recompensas foram aplicadas, mas não consegui atualizar o cartão. Não clique novamente.",
+                    ephemeral=True,
+                )
 
             membro = interaction.guild.get_member(int(resultado["user_id"])) if interaction.guild else None
             subiu = resultado["new_level"] > resultado["old_level"]
@@ -406,7 +481,11 @@ class ZeradoRevisaoView(discord.ui.View):
                 interaction, resultado, int(resultado["new_level"]) if subiu else None
             )
             try:
-                await db.log(interaction.user.id, "zerado_aprovado", f"id={zerado_id} user={resultado['user_id']}")
+                await db.log(
+                    interaction.user.id, "zerado_aprovado",
+                    f"id={zerado_id} user={resultado['user_id']} card={resultado.get('card_id')} "
+                    f"card_added={bool(resultado.get('card_added'))} card_confirmed={carta_confirmada}",
+                )
             except Exception:
                 log.exception("Zerado #%s aprovado, mas falhou o log de auditoria", zerado_id)
             painel = self.cog.bot.get_cog("Colizeu")
@@ -421,39 +500,72 @@ class ZeradoRevisaoView(discord.ui.View):
                     await santuario.atualizar(int(resultado["user_id"]))
                 except Exception:
                     log.exception("Falha ao atualizar santuário após aprovação do zerado #%s", zerado_id)
+            from utils import notificar_usuario
+            aviso_carta = (
+                f"🃏 Você recebeu **{resultado['card_name']}** ({resultado['card_rarity']})!"
+                if outcome == "carta" else
+                f"✨ Sua duplicata virou **{resultado.get('card_almas', 0)} Almas**."
+                if outcome == "almas" else
+                f"🧩 Sua duplicata virou **{resultado.get('card_fragmentos', 0)} fragmentos de evolução**."
+                if outcome == "fragmentos" else
+                "⚠️ A recompensa foi registrada; consulte sua coleção."
+            )
+            await notificar_usuario(
+                self.cog.bot, interaction.guild_id, int(resultado["user_id"]), "approvals",
+                f"✅ Seu zerado de **{pendente['game']}** foi aprovado e registrado no Coliseu.\n"
+                f"{aviso_carta}\nAbra `/nara` → Coliseu → Minha coleção para conferir."
+            )
+            if cartao_atualizado:
+                detalhe_entrega = (
+                    ("carta entregue" if resultado.get("card_added") else "carta já estava na coleção")
+                    if carta_confirmada else "entrega da carta requer verificação"
+                )
+                await interaction.followup.send(
+                    f"Zerado #{zerado_id} aprovado; {detalhe_entrega}: **{resultado['card_name']}**.",
+                    ephemeral=True,
+                )
             return
 
-        alterado = await db.rejeitar_zerado(zerado_id, interaction.user.id)
+        alterado = await db.rejeitar_zerado(zerado_id, interaction.user.id, motivo)
         if not alterado:
-            return await interaction.response.send_message("Outro moderador já processou este registro.", ephemeral=True)
-        embed = interaction.message.embeds[0]
+            return await interaction.followup.send("Outro moderador já processou este registro.", ephemeral=True)
+        embed = discord.Embed.from_dict(mensagem_revisao.embeds[0].to_dict())
         embed.color = discord.Color.red()
         embed.set_footer(text=f"ZeradoID:{zerado_id} · REJEITADO")
-        embed.add_field(name="Resultado", value=f"❌ Rejeitado por {interaction.user.mention}", inline=False)
+        resultado_texto = f"❌ Rejeitado por {interaction.user.mention}"
+        if motivo:
+            resultado_texto += f"\n**Motivo:** {discord.utils.escape_markdown(motivo[:300])}"
+        embed.add_field(name="Resultado", value=resultado_texto, inline=False)
+        cartao_atualizado = True
         try:
-            await interaction.response.edit_message(
+            await mensagem_revisao.edit(
                 content=f"❌ Solicitação `#{zerado_id}` rejeitada por {interaction.user.mention}.",
                 embed=embed, view=None,
             )
         except discord.HTTPException:
-            log.exception("Zerado #%s rejeitado, mas o cartão não foi atualizado", zerado_id)
-            if not interaction.response.is_done():
-                await interaction.response.send_message("A rejeição foi salva, mas não consegui atualizar o cartão.", ephemeral=True)
-            else:
-                await interaction.followup.send("A rejeição foi salva, mas não consegui atualizar o cartão.", ephemeral=True)
+            cartao_atualizado = False
+            log.exception("Zerado #%s rejeitado, mas o cartão de revisão não foi atualizado", zerado_id)
+            await interaction.followup.send(
+                "A rejeição foi salva, mas não consegui atualizar o cartão. Não clique novamente.",
+                ephemeral=True,
+            )
         try:
             await db.log(interaction.user.id, "zerado_rejeitado", f"id={zerado_id} user={pendente['user_id']}")
         except Exception:
             log.exception("Zerado #%s rejeitado, mas falhou o log de auditoria", zerado_id)
-        membro = interaction.guild.get_member(int(pendente["user_id"])) if interaction.guild else None
-        if membro:
-            try:
-                await membro.send(
-                    f"Seu registro de jogo zerado **{pendente['game']}** foi rejeitado pela moderação. "
-                    "Você pode conferir os dados e falar com a equipe se precisar de esclarecimentos."
-                )
-            except discord.Forbidden:
-                pass
+        from cogs.comum import sincronizar_cartao
+        await sincronizar_cartao(
+            self.cog.bot, interaction.guild_id, "zerados", zerado_id, "rejected", interaction.user.id, motivo
+        )
+        from utils import notificar_usuario
+        texto_motivo = f"\nMotivo: {motivo}" if motivo else ""
+        await notificar_usuario(
+            self.cog.bot, interaction.guild_id, int(pendente["user_id"]), "rejections",
+            f"❌ Seu registro de zerado **{pendente['game']}** foi rejeitado.{texto_motivo}\n"
+            "Você pode corrigir os dados e enviar novamente pelo painel de Zerados."
+        )
+        if cartao_atualizado:
+            await interaction.followup.send(f"Zerado #{zerado_id} rejeitado.", ephemeral=True)
 
     @discord.ui.button(label="Aprovar", style=discord.ButtonStyle.success, emoji="✅", custom_id="zer:approve")
     async def aprovar(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -461,30 +573,36 @@ class ZeradoRevisaoView(discord.ui.View):
 
     @discord.ui.button(label="Rejeitar", style=discord.ButtonStyle.danger, emoji="❌", custom_id="zer:reject")
     async def rejeitar(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not await eh_moderador(interaction.user, self.cog.bot.db):
-            return await interaction.response.send_message("Apenas moderadores.", ephemeral=True)
+        # A autorização é validada novamente no envio do modal; abrir o modal não altera dados.
         import re
         footer = interaction.message.embeds[0].footer.text or "" if interaction.message and interaction.message.embeds else ""
         match = re.search(r"\bZeradoID:(\d+)\b", footer)
         if not match:
             return await interaction.response.send_message("Não foi possível identificar o registro.", ephemeral=True)
-        from cogs.moderacao_utils import MotivoDecisaoModal
+        from cogs.comum import MotivoDecisaoModal
+        mensagem_revisao = interaction.message
         async def decidir(inter, motivo):
-            await self._processar(inter, False)
-            from cogs.moderacao_utils import sincronizar_cartao
-            await sincronizar_cartao(self.cog.bot, inter.guild_id, "zerados", int(match.group(1)), "rejected", inter.user.id, motivo)
+            await self._processar(inter, False, motivo, source_message=mensagem_revisao)
         await interaction.response.send_modal(MotivoDecisaoModal(self.cog.bot, "zerado", int(match.group(1)), decidir))
 
 
 # ------------------------------------------------------------------ painel do usuário
 class ZeradosPainelView(discord.ui.View):
-    def __init__(self, cog: Zerados, user):
+    def __init__(self, cog: Zerados, user, callback_voltar=None):
         super().__init__(timeout=900)
         self.cog, self.user = cog, user
+        self.callback_voltar = callback_voltar
+        # Este painel já tem botão Voltar próprio; a central da Nara não deve
+        # acrescentar um segundo botão de retorno.
+        self._nara_has_return = callback_voltar is not None
         self.alvo = None  # membro consultado (padrão: você)
         self.sel_membro = discord.ui.UserSelect(placeholder="🔎 Consultar outro membro (opcional)", row=0)
         self.sel_membro.callback = self.trocar_membro
         self.add_item(self.sel_membro)
+        from cogs.comunidade import adicionar_botao_contribuicao_contextual
+        adicionar_botao_contribuicao_contextual(
+            self, "correction", "zerados", "Sugerir melhoria em Zerados", "💡", row=3,
+        )
 
     def _membro(self):
         return self.alvo or self.user
@@ -516,21 +634,31 @@ class ZeradosPainelView(discord.ui.View):
 
     @discord.ui.button(label="Registrar zerado", style=discord.ButtonStyle.success, emoji="📤", row=1)
     async def registrar(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(ZeradoModal(self.cog))
+        plataforma_padrao = await self.cog.bot.db.get_ultima_plataforma(interaction.user.id)
+        await interaction.response.send_modal(ZeradoModal(self.cog, plataforma_padrao))
 
     @discord.ui.button(label="Lista", style=discord.ButtonStyle.primary, emoji="📜", row=1)
     async def lista(self, interaction: discord.Interaction, button: discord.ui.Button):
         membro = self._membro()
         texto = await self.cog.texto_lista(membro)
-        await interaction.response.edit_message(content=texto, embeds=[], view=VoltarZeradosView(self.cog, self.user, self.alvo))
+        await interaction.response.edit_message(content=texto, embeds=[], view=VoltarZeradosView(self.cog, self.user, self.alvo, self.callback_voltar))
+
+    @discord.ui.button(label="Galeria", style=discord.ButtonStyle.primary, emoji="🖼️", row=2)
+    async def galeria_zerados(self, interaction: discord.Interaction, button: discord.ui.Button):
+        membro = self._membro()
+        rows = await self.cog.bot.db.zerados_do_usuario(membro.id)
+        view = GaleriaZeradosView(self.cog, self.user, membro, rows, callback_voltar=self.callback_voltar)
+        await interaction.response.edit_message(content=None, embeds=await view.embeds(), view=view)
 
     @discord.ui.button(label="Ranking", style=discord.ButtonStyle.secondary, emoji="🏆", row=1)
     async def ranking(self, interaction: discord.Interaction, button: discord.ui.Button):
         texto = await self.cog.texto_ranking("total")
-        await interaction.response.edit_message(content=texto, embeds=[], view=RankingZeradosView(self.cog, self.user, self.alvo))
+        await interaction.response.edit_message(content=texto, embeds=[], view=RankingZeradosView(self.cog, self.user, self.alvo, self.callback_voltar))
 
-    @discord.ui.button(label="Voltar ao Coliseu", style=discord.ButtonStyle.secondary, emoji="↩️", row=2)
+    @discord.ui.button(label="Voltar", style=discord.ButtonStyle.secondary, emoji="↩️", row=2)
     async def voltar_coliseu(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.callback_voltar is not None:
+            return await self.callback_voltar(interaction)
         from cogs.platinas import ColiseuView
         platinas = self.cog.bot.get_cog("Platinas")
         if platinas is None:
@@ -539,12 +667,118 @@ class ZeradosPainelView(discord.ui.View):
         await interaction.response.edit_message(content=view.texto(), embeds=[], view=view)
 
 
+class GaleriaZeradosView(discord.ui.View):
+    """Galeria paginada de jogos concluídos, usando comprovante real quando disponível."""
+    PAGE_SIZE = 5
+
+    def __init__(self, cog, owner, alvo, rows, page=0, callback_voltar=None):
+        super().__init__(timeout=900)
+        self.cog, self.owner, self.alvo = cog, owner, alvo
+        self.callback_voltar = callback_voltar
+        self.rows = list(rows)
+        self.page = max(0, min(page, max(0, (len(self.rows) - 1) // self.PAGE_SIZE)))
+        self._sync()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.owner.id:
+            await interaction.response.send_message("Esta galeria pertence a outra pessoa.", ephemeral=True)
+            return False
+        return True
+
+    async def embeds(self):
+        inicio = self.page * self.PAGE_SIZE
+        fatia = self.rows[inicio:inicio + self.PAGE_SIZE]
+        total_paginas = max(1, (len(self.rows) + self.PAGE_SIZE - 1) // self.PAGE_SIZE)
+        cards = []
+        mod_ch_id = await GuildConfig.get(self.cog.bot.db, self.alvo.guild.id, "mod_channel") if getattr(self.alvo, "guild", None) else None
+        canal = await get_text_channel(self.cog.bot, mod_ch_id) if mod_ch_id else None
+        for row in fatia:
+            e = discord.Embed(
+                title=f"✅ {row['game']}",
+                description=f"**Plataforma:** {row['platform']}\\n**Concluído em:** {data_legivel(row['finished_at'])}\\n**Registro:** `#{row['id']}`",
+                color=discord.Color.green(),
+            )
+            comentario = str(row["comment"] or "").strip()
+            if row["rating"] is not None:
+                e.add_field(name="Nota do jogo", value=f"⭐ {int(row['rating'])}/10", inline=True)
+            if row["difficulty"] is not None:
+                e.add_field(name="Dificuldade percebida", value=formatar_dificuldade(row["difficulty"]), inline=True)
+            if comentario:
+                e.add_field(name="Comentário", value=comentario[:900], inline=False)
+            # O cartão original da moderação pode conter um comprovante anexado.
+            if canal and row["proof_msg_id"]:
+                try:
+                    mensagem = await canal.fetch_message(int(row["proof_msg_id"]))
+                    anexo = next((a for a in mensagem.attachments if (a.content_type or "").startswith("image/")), None)
+                    if anexo:
+                        e.set_image(url=anexo.url)
+                        e.set_footer(text="Comprovante enviado pelo jogador")
+                except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                    pass
+            if not e.footer.text:
+                e.set_footer(text="Imagem de capa não cadastrada")
+            cards.append(e)
+        if not cards:
+            cards.append(discord.Embed(
+                title=f"✅ Jogos zerados de {self.alvo.display_name}",
+                description="Ainda não há jogos concluídos aprovados para exibir.",
+                color=discord.Color.green(),
+            ))
+        cards[0].description = (
+            f"**Coleção de {self.alvo.display_name}**\\n"
+            f"Página {self.page + 1}/{total_paginas} · {len(self.rows)} jogo(s)\\n\\n"
+            + (cards[0].description or "")
+        )
+        return cards
+
+    def _sync(self):
+        self.clear_items()
+        total_paginas = max(1, (len(self.rows) + self.PAGE_SIZE - 1) // self.PAGE_SIZE)
+        botoes = [
+            discord.ui.Button(label="Anterior", emoji="⬅️", style=discord.ButtonStyle.secondary,
+                              disabled=self.page <= 0, row=0, custom_id=f"zer:galeria:prev:{self.page}"),
+            discord.ui.Button(label="Próxima", emoji="➡️", style=discord.ButtonStyle.secondary,
+                              disabled=self.page >= total_paginas - 1, row=0,
+                              custom_id=f"zer:galeria:next:{self.page}"),
+            discord.ui.Button(label="Lista por nome", emoji="📜", style=discord.ButtonStyle.primary,
+                              row=1, custom_id=f"zer:galeria:lista:{self.page}"),
+            discord.ui.Button(label="Voltar ao painel", emoji="↩️", style=discord.ButtonStyle.secondary,
+                              row=1, custom_id=f"zer:galeria:voltar:{self.page}"),
+        ]
+        for b, cb in zip(botoes, (self.anterior, self.proxima, self.lista, self.voltar)):
+            b.callback = cb
+            self.add_item(b)
+
+    async def anterior(self, interaction):
+        self.page = max(0, self.page - 1)
+        self._sync()
+        await interaction.response.edit_message(embeds=await self.embeds(), view=self)
+
+    async def proxima(self, interaction):
+        self.page = min(max(0, (len(self.rows) - 1) // self.PAGE_SIZE), self.page + 1)
+        self._sync()
+        await interaction.response.edit_message(embeds=await self.embeds(), view=self)
+
+    async def lista(self, interaction):
+        texto = await self.cog.texto_lista(self.alvo)
+        await interaction.response.edit_message(content=texto, embeds=[], view=VoltarZeradosView(self.cog, self.owner, self.alvo, self.callback_voltar))
+
+    async def voltar(self, interaction):
+        view = ZeradosPainelView(self.cog, self.owner, callback_voltar=self.callback_voltar)
+        view.alvo = self.alvo if self.alvo.id != self.owner.id else None
+        await interaction.response.edit_message(content=None, embed=await view.embed(), view=view)
+
+
 class VoltarZeradosView(discord.ui.View):
     """Volta ao painel sem criar uma nova mensagem."""
 
-    def __init__(self, cog: Zerados, owner, alvo=None):
+    def __init__(self, cog: Zerados, owner, alvo=None, callback_voltar=None):
         super().__init__(timeout=900)
         self.cog, self.owner, self.alvo = cog, owner, alvo
+        self.callback_voltar = callback_voltar
+        if callback_voltar is not None:
+            from utils import adicionar_botao_voltar
+            adicionar_botao_voltar(self, callback_voltar, label="Voltar ao Coliseu", emoji="🏠")
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.owner.id:
@@ -554,14 +788,14 @@ class VoltarZeradosView(discord.ui.View):
 
     @discord.ui.button(label="Voltar ao painel", style=discord.ButtonStyle.secondary, emoji="↩️", row=1)
     async def voltar(self, interaction: discord.Interaction, button: discord.ui.Button):
-        view = ZeradosPainelView(self.cog, self.owner)
+        view = ZeradosPainelView(self.cog, self.owner, callback_voltar=self.callback_voltar)
         view.alvo = self.alvo
         await interaction.response.edit_message(content=None, embed=await view.embed(), view=view)
 
 
 class RankingZeradosView(VoltarZeradosView):
-    def __init__(self, cog: Zerados, owner, alvo=None):
-        super().__init__(cog, owner, alvo)
+    def __init__(self, cog: Zerados, owner, alvo=None, callback_voltar=None):
+        super().__init__(cog, owner, alvo, callback_voltar)
         self.sel = discord.ui.Select(
             placeholder="Filtrar ranking",
             options=[
@@ -582,34 +816,63 @@ class RankingZeradosView(VoltarZeradosView):
 
 
 class ZeradoModal(discord.ui.Modal):
-    """Formulário de registro (anexo é opcional). Precisa de discord.py >= 2.6."""
+    """Dados do registro; a nota e o comentário são solicitados em duas etapas seguintes."""
 
-    def __init__(self, cog: Zerados):
-        super().__init__(title="Registrar jogo zerado")
+    def __init__(
+        self, cog: Zerados, plataforma_padrao: str | None = None,
+        jogo_padrao: str | None = None, data_padrao: str | None = None,
+        motivo_rejeicao: str | None = None,
+    ):
+        super().__init__(title="Corrigir zerado rejeitado" if jogo_padrao else "Registrar jogo zerado")
         self.cog = cog
-        self.jogo = discord.ui.TextInput(placeholder="Ex.: Hollow Knight", max_length=100)
+        self.jogo = discord.ui.TextInput(
+            placeholder="Ex.: Hollow Knight", max_length=100,
+            default=(str(jogo_padrao)[:100] if jogo_padrao else None),
+        )
         self.plataforma = discord.ui.Select(
             placeholder="Escolha a plataforma",
-            options=[discord.SelectOption(label=p, value=p) for p in PLATAFORMAS],
+            options=[discord.SelectOption(label=p, value=p, default=(p == plataforma_padrao)) for p in PLATAFORMAS],
         )
-        self.data = discord.ui.TextInput(default=hoje().strftime("%d/%m/%Y"), placeholder="DD/MM/AAAA", max_length=10)
-        self.comentario = discord.ui.TextInput(
-            style=discord.TextStyle.paragraph, required=False, max_length=300,
-            placeholder="O que achou? Nota, final, dificuldade... (opcional)",
+        self.data = discord.ui.TextInput(
+            default=(str(data_padrao)[:10] if data_padrao else hoje().strftime("%d/%m/%Y")),
+            placeholder="DD/MM/AAAA", max_length=10,
         )
+        self.motivo_rejeicao = str(motivo_rejeicao or "").strip()[:180]
         self.prova = discord.ui.FileUpload(required=False, min_values=0, max_values=5)
         self.add_item(discord.ui.Label(text="Jogo", component=self.jogo))
         self.add_item(discord.ui.Label(text="Plataforma", component=self.plataforma))
         self.add_item(discord.ui.Label(text="Data em que zerou", component=self.data))
-        self.add_item(discord.ui.Label(text="Comentário (opcional)", component=self.comentario))
         self.add_item(discord.ui.Label(text="Print dos créditos (opcional)", component=self.prova))
 
     async def on_submit(self, interaction: discord.Interaction):
         if not self.plataforma.values:
             return await interaction.response.send_message("Escolha a plataforma.", ephemeral=True)
-        await self.cog.registrar_zerado(
-            interaction, self.jogo.value, self.plataforma.values[0], self.data.value,
-            self.comentario.value, list(self.prova.values),
+        jogo = str(self.jogo.value).strip()
+        plataforma = self.plataforma.values[0]
+        data = str(self.data.value).strip()
+        capturas = list(self.prova.values)
+        semelhantes = await self.cog.bot.db.titulos_semelhantes(jogo)
+        aviso_titulo = (
+            "\n\n**Confira o nome:** encontrei títulos parecidos no catálogo: "
+            + ", ".join(f"**{discord.utils.escape_markdown(t)}**" for t in semelhantes)
+            + ". Confirme se está registrando a edição correta."
+            if semelhantes else ""
+        )
+
+        async def concluir(avaliacao_interaction, nota, dificuldade, comentario):
+            await self.cog.registrar_zerado(
+                avaliacao_interaction, jogo, plataforma, data, comentario, capturas, nota, dificuldade,
+            )
+
+        await interaction.response.send_message(
+            "**Avaliação — 1/3: Nota do jogo**\nQuanto você gostou deste jogo? Escolha uma nota de 1 a 10." + aviso_titulo,
+            view=NotaJogoView(
+                concluir, "Na sua experiência, qual foi a dificuldade para zerar este jogo?",
+                contexto=(f"Jogo: **{discord.utils.escape_markdown(jogo)}**\n"
+                          f"Plataforma: **{plataforma}** · Data: **{data}**\n"
+                          f"Comprovantes: **{len(capturas)} arquivo(s)**"
+                          + (f"\n**Motivo da rejeição anterior:** {discord.utils.escape_markdown(self.motivo_rejeicao)}" if self.motivo_rejeicao else "")),
+            ), ephemeral=True,
         )
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):

@@ -1,3 +1,4 @@
+import asyncio
 import io
 import logging
 import re
@@ -9,7 +10,8 @@ from discord.ext import commands
 
 import config
 from admin_config import GuildConfig
-from utils import get_text_channel
+from utils import get_text_channel, upsert_panel
+from cogs.comum import NotaJogoView, formatar_dificuldade
 
 log = logging.getLogger("soulslike")
 
@@ -142,23 +144,10 @@ class Soulslike(commands.Cog):
         self.pending_uploads = {}
 
     # -------------------------------------------------------- auxiliares
-    async def _jogo(self, nome: str):
-        return await self.bot.db._one("SELECT * FROM sl_games WHERE name=?", (nome.strip(),))
-
-    async def _desafio(self, nome: str):
-        return await self.bot.db._one("SELECT * FROM sl_challenges WHERE name=?", (nome.strip(),))
 
     async def _posicao(self, game_id, chal_id, seg, user_id) -> int:
         row = await self.bot.db._one(SQL_POSICAO, (game_id, chal_id, seg, user_id))
         return row["c"] + 1
-
-    async def ac_jogo(self, interaction: discord.Interaction, atual: str):
-        rows = await self.bot.db._all("SELECT name FROM sl_games ORDER BY name")
-        return [app_commands.Choice(name=r["name"], value=r["name"]) for r in rows if atual.lower() in r["name"].lower()][:25]
-
-    async def ac_desafio(self, interaction: discord.Interaction, atual: str):
-        rows = await self.bot.db._all("SELECT name FROM sl_challenges ORDER BY name")
-        return [app_commands.Choice(name=r["name"], value=r["name"]) for r in rows if atual.lower() in r["name"].lower()][:25]
 
     async def texto_ranking(self, game_id: int, chal_id: int) -> str:
         db = self.bot.db
@@ -166,6 +155,8 @@ class Soulslike(commands.Cog):
         c = await db._one("SELECT * FROM sl_challenges WHERE id=?", (chal_id,))
         if not g or not c:
             return "## ⚔️ Hall da Fama\n\nJogo ou desafio não encontrado. Atualize a central."
+        if c["game_id"] is not None and int(c["game_id"]) != int(game_id):
+            return "## ⚔️ Hall da Fama\n\nEste desafio pertence a outro jogo. Escolha um desafio compatível."
         rows = await db._all(SQL_RANKING, (game_id, chal_id, 10))
         partes = [f"## ⚔️ {g['name']} — {c['name']}"]
         if c["rules"]:
@@ -204,15 +195,21 @@ class Soulslike(commands.Cog):
         return e
 
     # -------------------------------------------------------- submissão de runs (usada pela Central)
-    async def enviar_para_moderacao(self, user, g, c, seg, build, dados, filename):
+    async def enviar_para_moderacao(self, user, g, c, seg, build, dados, filename,
+                                    nota: int | None = None, comentario: str = "",
+                                    dificuldade: int | None = None):
         db = self.bot.db
         mod_ch_id = await GuildConfig.get(db, user.guild.id if hasattr(user, 'guild') and user.guild else 0, "mod_channel")
         canal = await get_text_channel(self.bot, mod_ch_id)
         if canal is None:
             return None
+        if nota is not None and (type(nota) is not int or not 1 <= nota <= 10):
+            return None
+        if dificuldade is not None and (type(dificuldade) is not int or not 1 <= dificuldade <= 5):
+            return None
         cur = await db.conn.execute(
-            "INSERT INTO sl_runs(user_id, game_id, challenge_id, build, seconds) VALUES (?,?,?,?,?)",
-            (user.id, g["id"], c["id"], build, seg),
+            "INSERT INTO sl_runs(user_id, game_id, challenge_id, build, seconds, rating, difficulty, comment) VALUES (?,?,?,?,?,?,?,?)",
+            (user.id, g["id"], c["id"], build, seg, nota, dificuldade, str(comentario or "")[:500]),
         )
         await db.conn.commit()
         run_id = cur.lastrowid
@@ -241,6 +238,12 @@ class Soulslike(commands.Cog):
             embed.add_field(name="Desafio", value=c["name"])
             embed.add_field(name="Tempo", value=fmt_tempo(seg))
             embed.add_field(name="Build", value=build or "Não informada")
+            if nota is not None:
+                embed.add_field(name="Nota do jogo", value=f"⭐ {int(nota)}/10")
+            if dificuldade is not None:
+                embed.add_field(name="Dificuldade percebida", value=formatar_dificuldade(dificuldade))
+            if str(comentario or "").strip():
+                embed.add_field(name="Comentário", value=str(comentario).strip()[:500], inline=False)
             embed.add_field(name="Posição", value=ref)
             if filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")):
                 embed.set_image(url=f"attachment://{filename}")
@@ -294,11 +297,60 @@ class Soulslike(commands.Cog):
             log.exception("Run #%s registrada, mas falhou o log de auditoria", run_id)
         return run_id
 
+    async def iniciar_upload_run(self, interaction: discord.Interaction, game_id: int,
+                                 challenge_id: int, segundos: int, build: str,
+                                 nota: int, comentario: str, dificuldade: int):
+        """Salva a avaliação temporária e solicita o comprovante por DM."""
+        if type(nota) is not int or not 1 <= nota <= 10:
+            return await interaction.response.send_message("Escolha uma nota entre 1 e 10.", ephemeral=True)
+        if type(dificuldade) is not int or not 1 <= dificuldade <= 5:
+            return await interaction.response.send_message("Escolha uma dificuldade entre 1 e 5.", ephemeral=True)
+        state = self.pending_uploads.get(interaction.user.id)
+        if state and time.monotonic() - float(state.get("created_at", 0)) <= PENDING_UPLOAD_TTL:
+            return await interaction.response.send_message(
+                "Você já tem um registro aguardando comprovante. Conclua esse envio ou aguarde o prazo de 10 minutos antes de iniciar outro.",
+                ephemeral=True,
+            )
+        g = await self.bot.db._one("SELECT * FROM sl_games WHERE id=?", (int(game_id),))
+        c = await self.bot.db._one("SELECT * FROM sl_challenges WHERE id=?", (int(challenge_id),))
+        if not g or not c:
+            return await interaction.response.send_message(
+                "O jogo ou desafio não está mais disponível. Reabra a Central Soulslike.", ephemeral=True
+            )
+        self.pending_uploads[interaction.user.id] = {
+            'game_id': int(game_id), 'challenge_id': int(challenge_id), 'seconds': int(segundos),
+            'build': str(build or 'Não informada')[:100], 'rating': int(nota),
+            'difficulty': int(dificuldade), 'comment': str(comentario or '').strip()[:500],
+            'created_at': time.monotonic(),
+        }
+        try:
+            dm = await interaction.user.create_dm()
+            await dm.send(
+                f"**Ritual de entrada — etapa final**\nJogo: **{g['name']}**\nDesafio: **{c['name']}**\n"
+                f"Tempo: **{fmt_tempo(segundos)}**\nNota do jogo: **{int(nota)}/10**\n"
+                f"Dificuldade percebida: **{formatar_dificuldade(dificuldade)}**\n\n"
+                f"Envie nesta conversa uma imagem ou vídeo como comprovante. "
+                "O bot apresentará uma prévia para você confirmar antes de enviar à moderação. Limite: 20 MB."
+            )
+        except discord.Forbidden:
+            self.pending_uploads.pop(interaction.user.id, None)
+            return await interaction.response.send_message(
+                "Não consigo enviar DM para você. Ative mensagens diretas deste servidor e tente novamente.",
+                ephemeral=True,
+            )
+        await interaction.response.send_message(
+            "## ✅ Etapa final do registro\n\n"
+            "Enviei uma mensagem direta para você. Anexe nela a imagem ou o vídeo de comprovante da run.\n\n"
+            "_Esta tela foi atualizada; você não precisa abrir outro painel._",
+            ephemeral=True,
+            view=VoltarCentralView(self),
+        )
+
     # -------------------------------------------------------- central Soulslike
     def texto_central(self) -> str:
         return (
             "# ⛧ SOULSLIKE · THE HALL OF THE FALLEN\n\n"
-            "**A chama está acesa.** Registre suas runs, consulte recordes e acompanhe sua jornada.\n\n"
+            "**A chama está acesa.** Registre suas runs, consulte recordes e acompanhe sua jornada. A arena não perdoa descuido, então confira as regras antes de enviar.\n\n"
             "⚔️ **Registrar run** — jogo, desafio, tempo, build e comprovante.\n"
             "🏆 **Hall da Fama** — melhores tempos por jogo e desafio.\n"
             "📜 **Livro dos Desafios** — categorias e regras.\n"
@@ -311,7 +363,7 @@ class Soulslike(commands.Cog):
             title="⛧ SOULSLIKE | THE HALL OF THE FALLEN",
             description=(
                 "**A chama está acesa.**\n"
-                "Registre suas runs, consulte os recordes e acompanhe sua jornada.\n\n"
+                "Registre suas runs, consulte os recordes e acompanhe sua jornada. Confira as regras antes de entrar na arena.\n\n"
                 "Escolha uma opção nos botões abaixo. Suas submissões são encaminhadas à moderação."
             ),
             color=config.COR_OURO,
@@ -320,7 +372,7 @@ class Soulslike(commands.Cog):
         e.add_field(name="🏆 Hall da Fama", value="Melhores tempos por jogo e desafio.", inline=True)
         e.add_field(name="📜 Livro dos Desafios", value="Consulte regras e categorias disponíveis.", inline=True)
         e.add_field(name="🗡️ Meu perfil", value="Histórico, status e runs pendentes.", inline=True)
-        e.set_footer(text="Cada run deixa uma marca. Apenas runs aprovadas entram no ranking.")
+        e.set_footer(text="Cada run deixa uma marca. Só as aprovadas entram no ranking.")
         return e
 
     async def mostrar_perfil(self, interaction: discord.Interaction):
@@ -351,16 +403,21 @@ class Soulslike(commands.Cog):
 
     async def mostrar_desafios(self, interaction: discord.Interaction):
         jogos = await self.bot.db._all("SELECT * FROM sl_games ORDER BY name")
-        desafios = await self.bot.db._all("SELECT * FROM sl_challenges ORDER BY name")
+        desafios = await self.bot.db._all(
+            "SELECT c.*,g.name AS game_name FROM sl_challenges c LEFT JOIN sl_games g ON g.id=c.game_id ORDER BY g.name,c.name"
+        )
         if not jogos or not desafios:
+            motivo = "Ainda não existem jogos cadastrados." if not jogos else "Ainda não existem desafios cadastrados."
             return await substituir_ou_responder(
-                interaction, content="## 📜 Livro dos Desafios\n\nAinda não existem jogos ou desafios cadastrados.",
+                interaction,
+                content=f"## 📜 Livro dos Desafios\n\n{motivo} Use os botões abaixo para sugerir o que está faltando, sem sair desta tela.",
                 view=VoltarCentralView(self),
             )
         lines = ["## 📜 Livro dos Desafios", ""]
         for c in desafios[:15]:
             regras = c['rules'] or 'Sem regras adicionais cadastradas.'
-            lines.append(f"**{c['name']}**\n{regras[:250]}")
+            escopo = c["game_name"] or "Global"
+            lines.append(f"**{c['name']}** · _{escopo}_\n{regras[:220]}")
         lines.extend(["", "### 🎮 Jogos disponíveis"])
         lines.extend(f"• {g['name']}" for g in jogos[:25])
         if len(desafios) > 15 or len(jogos) > 25:
@@ -408,10 +465,20 @@ class Soulslike(commands.Cog):
                 f"**Tempo:** `{fmt_tempo(seg)}`",
                 f"**Build:** {state['build'] or 'Não informada'}",
             ]
+            if state.get("rating") is not None:
+                prev.append(f"**Nota do jogo:** ⭐ {int(state['rating'])}/10")
+            if state.get("difficulty") is not None:
+                prev.append(f"**Dificuldade percebida:** {formatar_dificuldade(state['difficulty'])}")
+            if str(state.get("comment") or "").strip():
+                prev.append(f"**Comentário:** {str(state['comment']).strip()[:500]}")
             if c['rules']:
                 prev.extend(["", f"**Regras do desafio:** {c['rules'][:700]}"])
             prev.extend(["", "_Confirme para enviar o comprovante à moderação._"])
-            view = ConfirmarView(self, message.author, g, c, seg, state['build'], data, attachment.filename[:100])
+            view = ConfirmarView(
+                self, message.author, g, c, seg, state['build'], data,
+                attachment.filename[:100], state.get("rating"), state.get("comment", ""),
+                state.get("difficulty"),
+            )
             await message.channel.send(content="\n".join(prev), view=view)
             self.pending_uploads.pop(message.author.id, None)
         except (discord.HTTPException, OSError) as exc:
@@ -458,6 +525,66 @@ class Soulslike(commands.Cog):
         msg = f"Desafio **{nome}** adicionado." if cur.rowcount else f"**{nome}** já existe."
         await self.bot.db.log(interaction.user.id, "sl_desafio_adicionar", nome)
         await interaction.response.send_message(msg, ephemeral=True)
+
+    @sl_admin.command(name="recompensa_desafio", description="[MOD] Configura chance de Primordial e Singular de um desafio Soulslike.")
+    @app_commands.describe(
+        desafio_id="ID do desafio exibido no cadastro/registro",
+        permitir_primordial="Habilita chance de 0,1% de drop Primordial nas runs aprovadas",
+        singular="Carta Singular concedida ao aprovar uma run deste desafio",
+    )
+    @app_commands.choices(singular=[
+        app_commands.Choice(name="Nenhuma Singular", value="none"),
+        app_commands.Choice(name="O Primeiro Juramento", value="gwent_singular_primeiro"),
+        app_commands.Choice(name="A Lâmina Intocada (No-hit)", value="gwent_singular_intocavel"),
+        app_commands.Choice(name="A Vontade Inquebrável (Nível 1)", value="gwent_singular_nivel1"),
+        app_commands.Choice(name="A Coroa dos Vencidos (Todos os chefes)", value="gwent_singular_cacador_chefes"),
+    ])
+    async def recompensa_desafio(
+        self,
+        interaction: discord.Interaction,
+        desafio_id: int,
+        permitir_primordial: bool,
+        singular: app_commands.Choice[str],
+    ):
+        if not interaction.user.guild_permissions.manage_guild:
+            return await interaction.response.send_message("Apenas moderadores com Gerenciar servidor.", ephemeral=True)
+        desafio = await self.bot.db._one("SELECT id,name FROM sl_challenges WHERE id=?", (int(desafio_id),))
+        if not desafio:
+            return await interaction.response.send_message("Desafio não encontrado.", ephemeral=True)
+        singular_id = singular.value
+        await self.bot.db.conn.execute(
+            "UPDATE sl_challenges SET coliseu_primordial_drop=?,coliseu_singular_card_id=? WHERE id=?",
+            (int(bool(permitir_primordial)), singular_id, int(desafio_id)),
+        )
+        await self.bot.db.conn.commit()
+        await self.bot.db.log(
+            interaction.user.id,
+            "sl_recompensa_desafio_configurada",
+            f"challenge={desafio_id};primordial={int(bool(permitir_primordial))};singular={singular_id or 'nenhuma'}",
+        )
+        resumo = "Primordial: chance de 0,1% habilitada" if permitir_primordial else "Primordial: desabilitada"
+        resumo += f"\nSingular: {singular.name}"
+        await interaction.response.send_message(
+            f"Recompensas do desafio **{desafio['name']}** atualizadas.\n{resumo}", ephemeral=True
+        )
+
+    @sl_admin.command(name="recompensas_listar", description="[MOD] Lista IDs e recompensas configuradas dos desafios Soulslike.")
+    async def recompensas_listar(self, interaction: discord.Interaction):
+        if not interaction.user.guild_permissions.manage_guild:
+            return await interaction.response.send_message("Apenas moderadores com Gerenciar servidor.", ephemeral=True)
+        rows = await self.bot.db._all(
+            "SELECT id,name,coliseu_primordial_drop,coliseu_singular_card_id FROM sl_challenges ORDER BY name LIMIT 80"
+        )
+        if not rows:
+            return await interaction.response.send_message("Nenhum desafio cadastrado.", ephemeral=True)
+        linhas = ["**ID · Desafio · Recompensas**"]
+        for row in rows:
+            cfg = int(row["coliseu_primordial_drop"] if row["coliseu_primordial_drop"] is not None else -1)
+            primordial = "Primordial 0,1%" if cfg == 1 else "Primordial desativada" if cfg == 0 else "Primordial automática"
+            singular = str(row["coliseu_singular_card_id"] or "")
+            singular_label = singular.replace("gwent_singular_", "") if singular and singular != "none" else "nenhuma" if singular == "none" else "automática"
+            linhas.append(f"`{row['id']}` · **{row['name']}** — {primordial}; Singular: {singular_label}")
+        await interaction.response.send_message("\n".join(linhas)[:1900], ephemeral=True)
 
     @sl_admin.command(name="invalidar", description="[MOD] Retira do ranking uma run aprovada e registra o motivo no log.")
     @app_commands.describe(numero="Número da run", motivo="Motivo (fica no log)")
@@ -516,7 +643,7 @@ class Soulslike(commands.Cog):
         # e mescla o estado transacional confirmado pelo banco.
         run = {**dict(run), **resultado["run"]}
         try:
-            from cogs.moderacao_utils import sincronizar_cartao
+            from cogs.comum import sincronizar_cartao
             await sincronizar_cartao(self.bot, interaction.guild_id, "runs", int(run["id"]), "approved", interaction.user.id)
         except Exception:
             log.exception("Falha ao sincronizar cartão original da run #%s", run["id"])
@@ -577,13 +704,49 @@ class Soulslike(commands.Cog):
                     f"**Posição no ranking:** {pos}º" + ("" if melhorou else " _(melhor tempo pessoal)_"),
                     f"**Recompensa:** +{resultado['xp_awarded']} XP",
                 ]
+                if resultado.get("card_outcome") == "carta":
+                    linhas.append(f"🃏 **Drop:** {resultado.get('card_name')} · {resultado.get('card_rarity')}")
+                elif resultado.get("card_outcome") == "almas":
+                    linhas.append(f"✨ **Duplicata:** +{resultado.get('card_almas', 0)} Almas")
+                elif resultado.get("card_outcome") == "fragmentos":
+                    linhas.append(f"🧩 **Duplicata:** +{resultado.get('card_fragmentos', 0)} fragmentos")
+                if (resultado.get("singular_drop") or {}).get("outcome") == "singular":
+                    nome_singular = (resultado.get("singular_drop") or {}).get("card_name", "uma carta Singular")
+                    linhas.append(f"🌟 **Feito extraordinário: {nome_singular} (Singular) conquistada!**")
+                if run["rating"] is not None:
+                    linhas.insert(4, f"**Nota do jogo:** ⭐ {int(run['rating'])}/10")
+                if run["difficulty"] is not None:
+                    pos_dificuldade = 5 if run["rating"] is not None else 4
+                    linhas.insert(pos_dificuldade, f"**Dificuldade percebida:** {formatar_dificuldade(run['difficulty'])}")
+                if str(run["comment"] or "").strip():
+                    pos_comentario = 4 + int(run["rating"] is not None) + int(run["difficulty"] is not None)
+                    linhas.insert(pos_comentario,
+                                  f"**Comentário:** {str(run['comment']).strip()[:500]}")
                 if run["proof_url"]:
                     linhas.append(f"[📸 Ver comprovante]({run['proof_url']})")
                 if vezes > 1:
                     linhas.append(f"**Runs concluídas:** 🔁 {vezes}x")
-                await canal.send("\n".join(linhas))
+                mensagem_publica = await canal.send("\n".join(linhas), allowed_mentions=discord.AllowedMentions.none())
+                comunidade = self.bot.get_cog("Comunidade")
+                if comunidade:
+                    try:
+                        await comunidade.registrar_publicacao_social(
+                            interaction.guild, canal, mensagem_publica, "run", int(run["id"]), int(run["user_id"])
+                        )
+                    except Exception:
+                        log.exception("Run #%s publicada, mas as interações sociais não foram anexadas", run["id"])
         except Exception:
             log.exception("Run #%s aprovada, mas falhou a publicação no canal Soulslike", run["id"])
+        from utils import notificar_usuario
+        await notificar_usuario(
+            self.bot, interaction.guild_id, int(run["user_id"]), "approvals",
+            f"✅ Sua run de **{run['jogo']} — {run['desafio']}** foi aprovada. "
+            f"Tempo registrado: {fmt_tempo(run['seconds'])}. Recompensa: +{resultado['xp_awarded']} XP. "
+            + (f"Drop: **{resultado.get('card_name')}** ({resultado.get('card_rarity')})."
+               if resultado.get("card_outcome") == "carta" else
+               "A duplicata virou recursos." if resultado.get("card_outcome") in ("almas", "fragmentos") else "")
+            + (" Você também conquistou uma carta Singular!" if (resultado.get("singular_drop") or {}).get("outcome") == "singular" else "")
+        )
 
     async def rejeitar(self, interaction: discord.Interaction):
         if not await eh_moderador(interaction.user, self.bot.db):
@@ -595,44 +758,90 @@ class Soulslike(commands.Cog):
 
 
 # ------------------------------------------------------------------ views
+def _callback_nara_soulslike(cog, user_id: int | None):
+    if user_id is None:
+        return None
+    return getattr(cog, "_retornos_nara", {}).get(int(user_id))
+
+
 class VoltarCentralView(discord.ui.View):
-    def __init__(self, cog):
+    """Estado vazio do Soulslike: mantém o caminho de volta e oferece ações contextuais."""
+    def __init__(self, cog, callback_voltar=None):
         super().__init__(timeout=600)
         self.cog = cog
+        self.callback_voltar = callback_voltar
+        if callback_voltar is not None:
+            from utils import adicionar_botao_voltar
+            adicionar_botao_voltar(self, callback_voltar, label="Voltar", emoji="↩️")
+        from cogs.comunidade import adicionar_botao_contribuicao_contextual
+        adicionar_botao_contribuicao_contextual(
+            self, "game_suggestion", "runs", "Sugerir jogo ausente", "🎮", row=1,
+            style=discord.ButtonStyle.success,
+        )
+        adicionar_botao_contribuicao_contextual(
+            self, "challenge", "runs", "Propor desafio", "⚔️", row=1,
+            style=discord.ButtonStyle.primary,
+        )
 
-    @discord.ui.button(label="Voltar à central", emoji="↩️", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Voltar à central", emoji="↩️", style=discord.ButtonStyle.secondary, row=0)
     async def voltar(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.edit_message(content=self.cog.texto_central(), embeds=[], view=CentralView(self.cog))
+        callback = self.callback_voltar or _callback_nara_soulslike(self.cog, interaction.user.id)
+        await interaction.response.edit_message(content=self.cog.texto_central(), embeds=[], view=CentralView(self.cog, callback_voltar=callback, user_id=interaction.user.id))
 
 
 class VoltarCentralButton(discord.ui.Button):
-    def __init__(self, cog, row=1):
+    def __init__(self, cog, row=1, callback_voltar=None):
         self.cog = cog
+        self.callback_voltar = callback_voltar
         super().__init__(label="Voltar à central", emoji="↩️", style=discord.ButtonStyle.secondary, row=row)
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(content=self.cog.texto_central(), embeds=[], view=CentralView(self.cog))
+        callback = self.callback_voltar or _callback_nara_soulslike(self.cog, interaction.user.id)
+        await interaction.response.edit_message(content=self.cog.texto_central(), embeds=[], view=CentralView(self.cog, callback_voltar=callback, user_id=interaction.user.id))
 
 
 class CentralView(discord.ui.View):
-    """View persistente: custom_id estável e timeout=None permitem reutilizar a mensagem após reinício."""
-    def __init__(self, cog):
-        super().__init__(timeout=None)
+    """Central de runs; no fluxo privado mantém retorno à Nara sem alterar a versão pública persistente."""
+    def __init__(self, cog, callback_voltar=None, user_id: int | None = None):
+        super().__init__(timeout=None if callback_voltar is None else 600)
         self.cog = cog
+        self.callback_voltar = callback_voltar
+        if callback_voltar is not None and user_id is not None:
+            if not hasattr(cog, "_retornos_nara"):
+                cog._retornos_nara = {}
+            cog._retornos_nara[int(user_id)] = callback_voltar
+            from utils import adicionar_botao_voltar
+            adicionar_botao_voltar(self, callback_voltar, label="Voltar", emoji="↩️")
+        from cogs.comunidade import adicionar_botao_contribuicao_contextual
+        adicionar_botao_contribuicao_contextual(
+            self, "game_suggestion", "runs", "Sugerir jogo ausente", "🎮", row=2,
+            style=discord.ButtonStyle.success,
+        )
+        adicionar_botao_contribuicao_contextual(
+            self, "challenge", "runs", "Propor desafio", "⚔️", row=2,
+            style=discord.ButtonStyle.primary,
+        )
 
     @discord.ui.button(label="Registrar run", style=discord.ButtonStyle.danger, emoji="⚔️", custom_id="central:register", row=0)
     async def registrar(self, interaction: discord.Interaction, button: discord.ui.Button):
         jogos = await self.cog.bot.db._all("SELECT * FROM sl_games ORDER BY name")
         desafios = await self.cog.bot.db._all("SELECT * FROM sl_challenges ORDER BY name")
-        if not jogos or not desafios:
+        if not jogos:
             return await substituir_ou_responder(
-                interaction, content="## ⚔️ Ritual de entrada\n\nAinda não há jogos e desafios cadastrados.",
-                view=VoltarCentralView(self.cog),
+                interaction,
+                content="## ⚔️ Ritual de entrada\n\nAinda não há jogos cadastrados. Você pode sugerir um jogo diretamente nesta tela; a equipe revisará a inclusão.",
+                view=VoltarCentralView(self.cog, self.callback_voltar),
             )
         view = RegistrarView(self.cog, jogos, desafios, parent_interaction=interaction)
+        orientacao = (
+            "Ainda não há desafios cadastrados. Use **Sugerir desafio** nesta mesma tela para propor o primeiro."
+            if not desafios else
+            "Escolha o jogo e o desafio. Se não encontrar um desafio compatível, use **Sugerir desafio** aqui mesmo."
+        )
         await substituir_ou_responder(
             interaction,
-            content="## ⚔️ Ritual de entrada\n\nEscolha o jogo e o desafio. Depois, informe o tempo e a build; o comprovante será enviado por mensagem direta.",
+            content=("## ⚔️ Ritual de entrada\n\n" + orientacao +
+                     " Depois, informe o tempo e a build; o comprovante será enviado por mensagem direta."),
             view=view,
         )
 
@@ -642,11 +851,16 @@ class CentralView(discord.ui.View):
         jogos = await db._all("SELECT * FROM sl_games ORDER BY name")
         desafios = await db._all("SELECT * FROM sl_challenges ORDER BY name")
         if not jogos or not desafios:
+            motivo = "Ainda não há jogos cadastrados." if not jogos else "Ainda não há desafios cadastrados."
             return await substituir_ou_responder(
-                interaction, content="## 🏆 Hall da Fama\n\nAinda não há jogos ou desafios cadastrados.",
-                view=VoltarCentralView(self.cog),
+                interaction, content=f"## 🏆 Hall da Fama\n\n{motivo} Você pode sugerir o conteúdo que está faltando nesta mesma tela.",
+                view=VoltarCentralView(self.cog, self.callback_voltar),
             )
-        g, c = jogos[0], desafios[0]
+        g = jogos[0]
+        desafios_compativeis = [c for c in desafios if c["game_id"] is None or int(c["game_id"]) == int(g["id"])]
+        if not desafios_compativeis:
+            return await substituir_ou_responder(interaction, content="## 🏆 Hall da Fama\n\nEste jogo ainda não possui desafios compatíveis.", view=VoltarCentralView(self.cog, self.callback_voltar))
+        c = desafios_compativeis[0]
         await substituir_ou_responder(
             interaction, content=await self.cog.texto_ranking(g['id'], c['id']),
             view=RankingView(self.cog, jogos, desafios, g['id'], c['id']),
@@ -667,33 +881,50 @@ class RegistrarView(discord.ui.View):
         self.cog = cog
         self.parent_interaction = parent_interaction
         self.jogos = jogos
-        self.desafios = desafios
-        self.game_id = jogos[0]['id']
-        self.challenge_id = desafios[0]['id']
+        self.todos_desafios = desafios
+        self.game_id = int(jogos[0]['id'])
+        self.challenge_id = None
         self.game_page = 0
         self.challenge_page = 0
+        self.desafios = []
         self.game_select = discord.ui.Select(placeholder="1. Escolha o jogo", min_values=1, max_values=1, row=0)
-        self.challenge_select = discord.ui.Select(placeholder="2. Escolha o desafio", min_values=1, max_values=1, row=1)
+        self.challenge_select = discord.ui.Select(placeholder="2. Escolha o desafio compatível", min_values=1, max_values=1, row=1)
         self.game_select.callback = self._choose_game
         self.challenge_select.callback = self._choose_challenge
         self.add_item(self.game_select)
         self.add_item(self.challenge_select)
+        self._filtrar_desafios()
         self._refresh_options()
+
+    def _filtrar_desafios(self):
+        self.desafios = [
+            row for row in self.todos_desafios
+            if row["game_id"] is None or int(row["game_id"]) == self.game_id
+        ]
+        ids = {int(row["id"]) for row in self.desafios}
+        if self.challenge_id not in ids:
+            self.challenge_id = int(self.desafios[0]["id"]) if self.desafios else None
+        self.challenge_page = min(self.challenge_page, max(0, (len(self.desafios) - 1) // 25))
 
     def _refresh_options(self):
         self.game_select.options.clear()
         self.game_select.options.extend(
-            discord.SelectOption(label=str(r['name'])[:100], value=str(r['id']), default=r['id'] == self.game_id)
+            discord.SelectOption(label=str(r['name'])[:100], value=str(r['id']), default=int(r['id']) == self.game_id)
             for r in self.jogos[self.game_page * 25:(self.game_page + 1) * 25]
         )
         self.challenge_select.options.clear()
-        self.challenge_select.options.extend(
-            discord.SelectOption(label=str(r['name'])[:100], value=str(r['id']), default=r['id'] == self.challenge_id)
-            for r in self.desafios[self.challenge_page * 25:(self.challenge_page + 1) * 25]
-        )
-        # Paginação dos menus, respeitando o limite de 25 opções por select.
+        if self.desafios:
+            self.challenge_select.options.extend(
+                discord.SelectOption(label=str(r['name'])[:100], value=str(r['id']), default=int(r['id']) == self.challenge_id)
+                for r in self.desafios[self.challenge_page * 25:(self.challenge_page + 1) * 25]
+            )
+            self.challenge_select.disabled = False
+        else:
+            self.challenge_select.options.append(discord.SelectOption(label="Nenhum desafio disponível para este jogo", value="0"))
+            self.challenge_select.disabled = True
+        from cogs.comunidade import CommunityContextContributionButton, adicionar_botao_contribuicao_contextual
         for item in list(self.children):
-            if isinstance(item, PageButton) or isinstance(item, VoltarCentralButton):
+            if isinstance(item, (PageButton, VoltarCentralButton, CommunityContextContributionButton)):
                 self.remove_item(item)
         linhas_usadas = set()
         if len(self.jogos) > 25:
@@ -704,22 +935,43 @@ class RegistrarView(discord.ui.View):
             self.add_item(PageButton(self, 'challenge', -1, row=3))
             self.add_item(PageButton(self, 'challenge', 1, row=3))
             linhas_usadas.add(3)
+        game_row = next((r for r in self.jogos if int(r["id"]) == self.game_id), None)
+        game_name = str(game_row["name"]) if game_row else ""
+        adicionar_botao_contribuicao_contextual(
+            self, "challenge", "runs", "Sugerir desafio", "⚔️", row=4,
+            default_game=game_name, style=discord.ButtonStyle.primary,
+        )
         linha_voltar = next(linha for linha in (2, 3, 4) if linha not in linhas_usadas)
-        self.add_item(VoltarCentralButton(self.cog, row=linha_voltar))
+        self.add_item(VoltarCentralButton(self.cog, row=linha_voltar, callback_voltar=getattr(self.cog, "_retornos_nara", {}).get(getattr(self.parent_interaction, "user", None).id) if getattr(self.parent_interaction, "user", None) else None))
 
     async def _choose_game(self, interaction: discord.Interaction):
         self.game_id = int(self.game_select.values[0])
+        self.challenge_page = 0
+        self._filtrar_desafios()
         self._refresh_options()
-        await interaction.response.edit_message(view=self)
+        game_row = next((r for r in self.jogos if int(r["id"]) == self.game_id), None)
+        game_name = str(game_row["name"]) if game_row else "este jogo"
+        content = None if self.desafios else (
+            f"Este jogo ainda não possui desafios compatíveis. Use **Sugerir desafio** nesta mesma tela para propor um novo para {game_name}."
+        )
+        await interaction.response.edit_message(content=content, view=self)
 
     async def _choose_challenge(self, interaction: discord.Interaction):
+        if self.challenge_select.values[0] == "0":
+            game_row = next((r for r in self.jogos if int(r["id"]) == self.game_id), None)
+            game_name = str(game_row["name"]) if game_row else "este jogo"
+            return await interaction.response.edit_message(
+                content=(f"Este jogo ainda não possui desafios compatíveis. Use **Sugerir desafio** "
+                         f"nesta mesma tela para propor um para {game_name}."),
+                view=self,
+            )
         self.challenge_id = int(self.challenge_select.values[0])
         g = await self.cog.bot.db._one("SELECT * FROM sl_games WHERE id=?", (self.game_id,))
         c = await self.cog.bot.db._one("SELECT * FROM sl_challenges WHERE id=?", (self.challenge_id,))
-        if not g or not c:
+        if not g or not c or (c["game_id"] is not None and int(c["game_id"]) != self.game_id):
             return await interaction.response.edit_message(
-                content="⚠️ Jogo ou desafio não encontrado. Volte à central e tente novamente.",
-                embeds=[], view=VoltarCentralView(self.cog),
+                content="⚠️ Jogo ou desafio incompatível. Volte à central e tente novamente.",
+                embeds=[], view=VoltarCentralView(self.cog, self.callback_voltar),
             )
         await interaction.response.send_modal(RunDadosModal(self.cog, g['id'], c['id'], parent_interaction=self.parent_interaction or interaction))
 
@@ -747,12 +999,25 @@ class RunDadosModal(discord.ui.Modal, title="Registrar run Soulslike"):
     tempo = discord.ui.TextInput(label="Tempo da run", placeholder="Ex.: 1:30:45 ou 1h30m", max_length=30)
     build = discord.ui.TextInput(label="Build / classe / arma (opcional)", required=False, default="Não informada", max_length=100)
 
-    def __init__(self, cog, game_id: int, challenge_id: int, parent_interaction=None):
+    def __init__(
+        self, cog, game_id: int, challenge_id: int, parent_interaction=None,
+        tempo_padrao: int | None = None, build_padrao: str | None = None,
+        motivo_rejeicao: str | None = None, callback_voltar=None,
+    ):
         super().__init__(timeout=300)
         self.cog = cog
         self.game_id = game_id
         self.challenge_id = challenge_id
         self.parent_interaction = parent_interaction
+        user_obj = getattr(parent_interaction, "user", None)
+        self.callback_voltar = callback_voltar or _callback_nara_soulslike(
+            cog, getattr(user_obj, "id", None)
+        )
+        if tempo_padrao:
+            self.tempo.default = fmt_tempo(int(tempo_padrao))
+        if build_padrao is not None:
+            self.build.default = str(build_padrao)[:100]
+        self.motivo_rejeicao = str(motivo_rejeicao or "").strip()[:180]
 
     async def on_submit(self, interaction: discord.Interaction):
         seg = parse_tempo(str(self.tempo))
@@ -770,44 +1035,31 @@ class RunDadosModal(discord.ui.Modal, title="Registrar run Soulslike"):
             )
         if state:
             self.cog.pending_uploads.pop(interaction.user.id, None)
-        self.cog.pending_uploads[interaction.user.id] = {
-            'game_id': self.game_id, 'challenge_id': self.challenge_id, 'seconds': seg,
-            'build': (str(self.build).strip() or 'Não informada')[:100],
-            'created_at': time.monotonic(),
-        }
-        try:
-            dm = await interaction.user.create_dm()
-            await dm.send(
-                f"**Ritual de entrada — etapa final**\nJogo: **{g['name']}**\nDesafio: **{c['name']}**\n"
-                f"Tempo: **{fmt_tempo(seg)}**\n\nEnvie nesta conversa uma imagem ou vídeo como comprovante. "
-                "O bot apresentará uma prévia para você confirmar antes de enviar à moderação. Limite: 20 MB."
+        build = (str(self.build).strip() or 'Não informada')[:100]
+
+        async def concluir(avaliacao_interaction, nota, dificuldade, comentario):
+            await self.cog.iniciar_upload_run(
+                avaliacao_interaction, self.game_id, self.challenge_id, seg, build, nota, comentario, dificuldade
             )
-        except discord.Forbidden:
-            self.cog.pending_uploads.pop(interaction.user.id, None)
-            return await interaction.response.send_message(
-                "Não consigo enviar DM para você. Ative mensagens diretas deste servidor e tente novamente.", ephemeral=True
-            )
-        aviso = (
-            "## ✅ Etapa final do registro\n\n"
-            "Enviei uma mensagem direta para você. Anexe nela a imagem ou o vídeo de comprovante da run.\n\n"
-            "_Esta tela foi atualizada; você não precisa abrir outro painel._"
+
+        await interaction.response.send_message(
+            "**Avaliação — 1/3: Nota da experiência**\nQuanto você gostou desta run? Escolha uma nota de 1 a 10.",
+            view=NotaJogoView(
+                concluir, "Na sua experiência, qual foi a dificuldade para concluir esta run/desafio?",
+                contexto=(f"Jogo: **{discord.utils.escape_markdown(g['name'])}**\n"
+                          f"Desafio: **{discord.utils.escape_markdown(c['name'])}** · Tempo: **{fmt_tempo(seg)}**\n"
+                          f"Build: **{discord.utils.escape_markdown(build or 'Não informada')}**"
+                          + (f"\n**Motivo da rejeição anterior:** {discord.utils.escape_markdown(self.motivo_rejeicao)}" if self.motivo_rejeicao else "")),
+            ), ephemeral=True,
         )
         if self.parent_interaction is not None:
-            await interaction.response.defer(ephemeral=True, thinking=True)
             try:
                 await self.parent_interaction.edit_original_response(
-                    content=aviso, embeds=[], view=VoltarCentralView(self.cog),
+                    content="Conclua a avaliação na tela privada aberta. Depois, enviarei as instruções do comprovante.",
+                    embeds=[], view=VoltarCentralView(self.cog, self.callback_voltar),
                 )
             except discord.HTTPException:
-                # Se o token anterior expirou, preserva a confirmação no fluxo atual.
-                await interaction.edit_original_response(content=aviso, embeds=[], view=VoltarCentralView(self.cog))
-            else:
-                try:
-                    await interaction.delete_original_response()
-                except discord.HTTPException:
-                    pass  # A tela principal já foi atualizada; não duplica a confirmação.
-        else:
-            await interaction.response.send_message(aviso, ephemeral=True)
+                log.debug("Não foi possível atualizar a tela anterior ao iniciar avaliação da run")
 
 
 class PerfilView(discord.ui.View):
@@ -868,10 +1120,12 @@ class CancelarRunButton(discord.ui.Button):
 
 
 class ConfirmarView(discord.ui.View):
-    def __init__(self, cog, user, g, c, seg, build, dados, filename):
+    def __init__(self, cog, user, g, c, seg, build, dados, filename, nota=None, comentario="", dificuldade=None):
         super().__init__(timeout=180)
         self.cog, self.user, self.g, self.c = cog, user, g, c
         self.seg, self.build, self.dados, self.filename = seg, build, dados, filename
+        self.nota, self.comentario = nota, str(comentario or "")[:500]
+        self.dificuldade = dificuldade
         self._claimed = False
         self._claim_lock = asyncio.Lock()
 
@@ -886,7 +1140,8 @@ class ConfirmarView(discord.ui.View):
         await interaction.response.edit_message(content="⏳ Enviando para a moderação...", embed=None, view=None)
         try:
             run_id = await self.cog.enviar_para_moderacao(
-                self.user, self.g, self.c, self.seg, self.build, self.dados, self.filename
+                self.user, self.g, self.c, self.seg, self.build, self.dados, self.filename,
+                self.nota, self.comentario, self.dificuldade,
             )
         except Exception:
             log.exception("Falha inesperada ao enviar run para user=%s", self.user.id)
@@ -952,7 +1207,7 @@ class MotivoModal(discord.ui.Modal, title="Rejeitar run"):
         await db.conn.commit()
         if cur.rowcount != 1:
             return await interaction.response.send_message("Esta run já foi processada por outro moderador.", ephemeral=True)
-        from cogs.moderacao_utils import sincronizar_cartao
+        from cogs.comum import sincronizar_cartao
         await sincronizar_cartao(self.cog.bot, interaction.guild_id, "runs", self.run_id, "rejected", interaction.user.id, str(self.motivo))
         try:
             await db.log(interaction.user.id, "run_rejeitada", f"id={self.run_id} motivo={self.motivo}")
@@ -962,40 +1217,63 @@ class MotivoModal(discord.ui.Modal, title="Rejeitar run"):
         embed.color = discord.Color.red()
         embed.add_field(name="Resultado", value=f"❌ Rejeitada por {interaction.user.mention}\nMotivo: {self.motivo}", inline=False)
         await interaction.response.edit_message(embed=embed, view=None)
-        try:
-            user = self.cog.bot.get_user(run["user_id"]) or await self.cog.bot.fetch_user(run["user_id"])
-            await user.send(f"Sua run `#{self.run_id}` foi rejeitada.\nMotivo: {self.motivo}\nVocê pode enviar novamente pela Central Soulslike no servidor.")
-        except discord.HTTPException:
-            pass
+        from utils import notificar_usuario
+        await notificar_usuario(
+            self.cog.bot, interaction.guild_id, int(run["user_id"]), "rejections",
+            f"❌ Sua run `#{self.run_id}` foi rejeitada.\nMotivo: {self.motivo}\n"
+            "Você pode corrigir os dados e enviar novamente pela Central Soulslike."
+        )
 
 
 class RankingView(discord.ui.View):
     def __init__(self, cog, jogos, desafios, game_id, chal_id):
         super().__init__(timeout=600)
-        self.cog, self.game_id, self.chal_id = cog, game_id, chal_id
+        self.cog, self.game_id, self.chal_id = cog, int(game_id), int(chal_id)
+        self.jogos, self.todos_desafios = jogos, desafios
+        self.desafios = []
+        self._filtrar_desafios()
         self.sel_jogo = discord.ui.Select(
             placeholder="Jogo",
-            options=[discord.SelectOption(label=j["name"], value=str(j["id"]), default=j["id"] == game_id) for j in jogos[:25]],
+            options=[discord.SelectOption(label=j["name"][:100], value=str(j["id"]), default=int(j["id"]) == self.game_id) for j in jogos[:25]],
         )
-        self.sel_desafio = discord.ui.Select(
-            placeholder="Desafio",
-            options=[discord.SelectOption(label=c["name"], value=str(c["id"]), default=c["id"] == chal_id) for c in desafios[:25]],
-        )
+        self.sel_desafio = discord.ui.Select(placeholder="Desafio", min_values=1, max_values=1)
         self.sel_jogo.callback = self.trocar_jogo
         self.sel_desafio.callback = self.trocar_desafio
         self.add_item(self.sel_jogo)
         self.add_item(self.sel_desafio)
         self.add_item(VoltarCentralButton(cog, row=2))
+        self._atualizar_opcoes_desafio()
+
+    def _filtrar_desafios(self):
+        self.desafios = [row for row in self.todos_desafios if row["game_id"] is None or int(row["game_id"]) == self.game_id]
+        ids = {int(row["id"]) for row in self.desafios}
+        if self.chal_id not in ids:
+            self.chal_id = int(self.desafios[0]["id"]) if self.desafios else 0
+
+    def _atualizar_opcoes_desafio(self):
+        if self.desafios:
+            self.sel_desafio.options = [
+                discord.SelectOption(label=row["name"][:100], value=str(row["id"]), default=int(row["id"]) == self.chal_id)
+                for row in self.desafios[:25]
+            ]
+            self.sel_desafio.disabled = False
+        else:
+            self.sel_desafio.options = [discord.SelectOption(label="Nenhum desafio disponível", value="0")]
+            self.sel_desafio.disabled = True
 
     async def _atualizar(self, interaction: discord.Interaction):
-        for o in self.sel_jogo.options:
-            o.default = o.value == str(self.game_id)
-        for o in self.sel_desafio.options:
-            o.default = o.value == str(self.chal_id)
-        await interaction.response.edit_message(content=await self.cog.texto_ranking(self.game_id, self.chal_id), embeds=[], view=self)
+        for option in self.sel_jogo.options:
+            option.default = option.value == str(self.game_id)
+        self._atualizar_opcoes_desafio()
+        texto = (
+            await self.cog.texto_ranking(self.game_id, self.chal_id) if self.chal_id
+            else "## ⚔️ Hall da Fama\n\nEste jogo ainda não possui desafios compatíveis."
+        )
+        await interaction.response.edit_message(content=texto, embeds=[], view=self)
 
     async def trocar_jogo(self, interaction: discord.Interaction):
         self.game_id = int(self.sel_jogo.values[0])
+        self._filtrar_desafios()
         await self._atualizar(interaction)
 
     async def trocar_desafio(self, interaction: discord.Interaction):

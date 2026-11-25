@@ -12,15 +12,17 @@ O módulo não altera a lógica do catálogo de jogos/mods; usa tabelas própria
 """
 import asyncio
 import hashlib
+import logging
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from email.utils import parsedate_to_datetime
 
 import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
+
+log = logging.getLogger("nara")
 
 DEFAULT_FEEDS = [
     ("Gematsu", "https://www.gematsu.com/feed"),
@@ -36,11 +38,6 @@ ANNOUNCEMENT_TERMS = (
     "chega em", "já disponível", "ja disponivel", "estreia",
 )
 USER_AGENT = "GameNewsDiscordBot/1.0 (+RSS reader)"
-
-
-def _db(bot):
-    # Usa o mesmo arquivo SQLite do bot, mas tabelas independentes.
-    return bot.db_connection() if hasattr(bot, "db_connection") else None
 
 
 class GameNewsCog(commands.Cog):
@@ -194,7 +191,7 @@ class GameNewsCog(commands.Cog):
         embed = discord.Embed(
             title=item["title"][:256],
             url=item["link"],
-            description=(item["description"][:MAX_DESCRIPTION] if item["description"] else "Abra a fonte original para ler a notícia completa."),
+            description=(item["description"][:MAX_DESCRIPTION] if item["description"] else "A fonte publicou uma notícia nova. Abra o link original para conferir os detalhes."),
             color=discord.Color.blurple(),
             timestamp=datetime.now(timezone.utc),
         )
@@ -221,7 +218,7 @@ class GameNewsCog(commands.Cog):
             try:
                 items = await self._fetch_feed(self._session, feed["url"])
             except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as exc:
-                print(f"[news] Feed {feed['nome']} indisponível: {exc}")
+                log.warning(f"[news] Feed {feed['nome']} indisponível: {exc}")
                 continue
             # Na primeira leitura, registra o conteúdo já existente para não despejar notícias antigas.
             if not self._feed_initialised(feed["id"]):
@@ -238,7 +235,7 @@ class GameNewsCog(commands.Cog):
                 try:
                     await self._publish(channel, feed["nome"], item)
                 except (discord.Forbidden, discord.HTTPException) as exc:
-                    print(f"[news] Falha ao publicar no Discord: {exc}")
+                    log.error(f"[news] Falha ao publicar no Discord: {exc}")
                     break
 
     @poll_news.before_loop

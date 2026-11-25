@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0a10"><title>Tutorial — Cartas do Coliseu</title>
+<style>
+:root{--bg:#0b0a10;--panel:#15131d;--line:rgba(197,170,112,.2);--gold:#d8bb7a;--text:#f0e9df;--muted:#a7a7b2;--radius:14px;--shadow:0 18px 48px rgba(0,0,0,.34)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,sans-serif}
+.wrap{max-width:800px;margin:0 auto;padding:28px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:20px;box-shadow:var(--shadow)}
+h1{color:var(--gold);font-size:28px;margin:0 0 8px}h2{color:var(--gold);font-size:20px;margin:24px 0 12px}
+h3{color:var(--text);font-size:16px;margin:16px 0 8px}
+.step{display:flex;gap:16px;margin:16px 0}.step-num{flex-shrink:0;width:36px;height:36px;background:var(--gold);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+.step-content{flex:1}.step-content h3{margin:0 0 4px}.step-content p{margin:0;color:var(--muted)}
+.tip{background:rgba(197,170,112,.1);border-left:3px solid var(--gold);padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;color:var(--muted)}
+.tip strong{color:var(--gold)}
+.btn{display:inline-block;padding:10px 20px;background:var(--gold);color:var(--bg);text-decoration:none;border-radius:8px;font-weight:600;margin:8px 4px 0 0;transition:transform .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-secondary{background:var(--panel2,#171f2c);color:var(--text);border:1px solid var(--line)}
+@media(max-width:600px){.wrap{padding:16px}.card{padding:16px}}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>⚔️ Tutorial — Cartas do Coliseu</h1>
+    <p style="color:var(--muted);margin:0">Bem-vindo ao NARABOT! Aqui você aprende o básico para começar a jogar.</p>
+  </div>
+
+  <div class="card">
+    <h2>📖 Passo 1: Crie seu Deck</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Acesse a Forja</h3>
+        <p>Vá até <a href="/forja" style="color:var(--gold)">/forja</a> e selecione cartas para montar seu deck inicial. Você começa com cartas Comuns e Raras.</p>
+      </div>
+    </div>
+    <div class="tip"><strong>Dica:</strong> Tente equilibrar entre Corpo-a-corpo, Longa Distância e Cerco. Não coloque só um tipo!</div>
+  </div>
+
+  <div class="card">
+    <h2>🎮 Passo 2: Jogue uma Partida</h2>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Use o comando /gwent no Discord</h3>
+        <p>Digite <code>/gwent</code> no Discord para iniciar uma partida contra a IA ou outro jogador. O objetivo é ter mais poder total nas 3 fileiras.</p>
+      </div>
+    </div>
+    <div class="tip"><strong>Dica:</strong> Cada fileira (Corpo-a-corpo, Longa Distância, Cerco) tem pontos. Quem vencer 2 de 3 fileiras ganha!</div>
+  </div>
+
+  <div class="card">
+    <h2>⚗️ Passo 3: Evolua suas Cartas (Forja das Almas)</h2>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Acesse /evolucao</h3>
+        <p>Use Fragmentos e Denários para evoluir cartas. Cada nível aumenta o poder, mas tem risco de regressão! Use amuletos de proteção para evitar perder o nível.</p>
+      </div>
+    </div>
+    <div class="tip"><strong>Atenção:</strong> A chance de sucesso diminui a cada nível. Nível 5 tem apenas 25% de chance! Use amuletos!</div>
+    <a href="/evolucao" class="btn">Ir para Evolução</a>
+  </div>
+
+  <div class="card">
+    <h2>🎲 Passo 4: Aposte (Aposta das Almas)</h2>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Acesse /apostas</h3>
+        <p>Aposte Denários ou cartas em partidas. Se ganhar, leva tudo! Se perder... perdeu. Use com sabedoria!</p>
+      </div>
+    </div>
+    <div class="tip"><strong>Dica:</strong> Comece com apostas de Denários. Cartas só aposte quando tiver muitas!</div>
+    <a href="/apostas" class="btn">Ir para Apostas</a>
+  </div>
+
+  <div class="card">
+    <h2>🏆 Passo 5: Conquistas</h2>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>Complete desafios</h3>
+        <p>Acesse <a href="/conquistas" style="color:var(--gold)">/conquistas</a> para ver seus objetivos. Ganhe recompensas ao completá-los!</p>
+      </div>
+    </div>
+    <a href="/conquistas" class="btn">Ver Conquistas</a>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <h2>🔥 Pronto para Jogar?</h2>
+    <p style="color:var(--muted);margin:12px 0">Agora você já sabe o básico. Vá para a Forja e comece sua jornada!</p>
+    <a href="/forja" class="btn">⚔️ Ir para Forja</a>
+    <a href="/transmutacao" class="btn btn-secondary">🧪 Transmutação</a>
+  </div>
+</div>
+</body></html>

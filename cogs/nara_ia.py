@@ -1,33 +1,42 @@
-"""Nara integrada ao NARA com roteamento local-first.
+"""Nara integrada ao NARA com roteamento por tipo de interação.
 
-Respostas locais/SQLite precedem ferramentas e Gemini. Conversa livre usa o prompt de
-identidade existente; pedidos de ação só usam ferramentas registradas e as guardas do
-núcleo Python. Pesquisa factual usa ferramentas de leitura compatíveis. A conversa pode enviar imagens comuns ao Gemini quando o membro marca a Nara ou usa o canal configurado; anexos não são persistidos.
+Menção real à Nara direciona a conversa à IA; perguntas com dados locais usam o código
+como contexto factual. O nome escrito sem menção ativa somente respostas locais. Pedidos
+de ação mantêm as ferramentas registradas e as guardas do núcleo Python.
 """
 import asyncio
 import logging
 import mimetypes
 import os
-import random
+import re
 import time
 from pathlib import Path
 
 import discord
+import config
 from discord import app_commands
 from discord.ext import commands
 
 from cogs.platinas import eh_moderador
-from ia_confirmacao import AtalhoView, ConfirmarAcaoView
-from ia_ferramentas import criar_registro
-from ia_multi import RoteadorIA, TodosProvedoresIndisponiveis
-from ia_nucleo import Ctx, Registro, Risco, rodar_agente
+from ia.confirmacao import AtalhoView, ConfirmarAcaoView
+from ia.ferramentas import criar_registro
+from ia.multi import RoteadorIA, TodosProvedoresIndisponiveis
+from ia.nucleo import Ctx, Registro, Risco, rodar_agente
 from levels import nivel_por_xp, patente_por_nivel
-from gemini_resilience import GeminiUnavailableError, all_gemini_status
-from ia_provedores import pesquisa_status
-from nara_local import aplicar_politica_de_quota, decidir_rota, resposta_local_fallback, tem_anexo_visual
-import nara_conhecimento
-import nara_conversa as conv
-import nara_social
+from ia.gemini_circuit import GeminiUnavailableError, all_gemini_status
+from ia.provedores import diagnostico_configuracao
+from nara.local import (
+    aplicar_politica_de_quota, decidir_interacao_nara,
+    resposta_local_fallback, tem_anexo_visual, chamada_textual_nara,
+)
+from nara import faq as faq_base
+from nara import conhecimento as nara_conhecimento
+from nara import conversa as conv
+from nara import social as nara_social
+from nara import relacionamento as nara_relacionamento
+from nara import estilo as nara_estilo_textual
+from nara import respostas as nara_respostas
+from nara.local import normalizar
 
 log = logging.getLogger("nara.ia")
 
@@ -65,6 +74,143 @@ NARA_DUVIDAS_LIMPEZA_INTERVALO_MINUTOS = _env_nonnegative_int("NARA_DUVIDAS_LIMP
 COOLDOWN_SEG = 8  # intervalo mínimo entre pesquisas externas feitas no chat por usuário
 PROMPT_PESQUISA_PATH = Path(__file__).resolve().parent.parent / "prompts" / "nara_pesquisa.md"
 
+def preservar_links_contexto_local(resposta: str, contexto_local: str, limite: int = 1900) -> str:
+    """Reinsere links mascarados do contexto factual que a IA tenha omitido.
+
+    A IA pode reescrever a explicação, mas não deve apagar os destinos de download
+    fornecidos pelo código. O formato [rótulo](URL) é clicável nas mensagens do Discord.
+    """
+    links = re.findall(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", contexto_local or "")
+    ausentes = [(rotulo, url) for rotulo, url in links if url not in (resposta or "")]
+    if not ausentes:
+        return resposta
+
+    bloco = "\n\n**Links de acesso:**\n" + "\n".join(
+        f"• [{rotulo}]({url})" for rotulo, url in ausentes
+    )
+    corpo = (resposta or "").rstrip()
+    espaco = limite - len(bloco)
+    if len(corpo) > espaco:
+        corpo = corpo[:max(0, espaco - 2)].rstrip() + "…"
+    return corpo + bloco
+
+
+class PainelRelacionamentoAdminView(discord.ui.View):
+    """Painel efêmero de ajustes; apenas o proprietário global do bot pode interagir."""
+
+    PASSO = 0.5
+
+    def __init__(self, cog, guild_id: int, user_id: int, owner_id: int):
+        super().__init__(timeout=300)
+        self.cog = cog
+        self.guild_id = int(guild_id)
+        self.user_id = int(user_id)
+        self.owner_id = int(owner_id)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        autorizado = (
+            int(interaction.user.id) == self.owner_id
+            and await self.cog._interacao_e_dono_bot(interaction)
+        )
+        if not autorizado:
+            await interaction.response.send_message(
+                "Este painel é privado e só pode ser usado pelo proprietário do bot.", ephemeral=True
+            )
+            return False
+        if int(interaction.guild_id or 0) != self.guild_id or not self.cog._relacionamento_configurado(
+            self.guild_id, self.user_id
+        ):
+            await interaction.response.send_message(
+                "Este painel expirou ou o usuário configurado foi alterado. Abra `/adm` e entre em Relacionamento da NARA novamente.",
+                ephemeral=True,
+            )
+            return False
+        return True
+
+    async def _ajustar(self, interaction: discord.Interaction, campo: str, delta: float):
+        if campo not in {"afinidade", "paciencia"}:
+            return await interaction.response.send_message("Indicador inválido.", ephemeral=True)
+
+        agora = int(time.time())
+        perfil = await self.cog.bot.db._one(
+            "SELECT afinidade, paciencia FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?",
+            (self.guild_id, self.user_id),
+        )
+        if perfil:
+            afinidade = float(perfil["afinidade"] or 5.0)
+            paciencia = float(perfil["paciencia"] or 5.0)
+        else:
+            afinidade = paciencia = 5.0
+            await self.cog.bot.db.conn.execute(
+                "INSERT INTO nara_relacionamento_perfil(guild_id,user_id,afinidade,paciencia,updated_at,recovered_at) VALUES (?,?,5.0,5.0,?,?)",
+                (self.guild_id, self.user_id, agora, agora),
+            )
+
+        valor_atual = afinidade if campo == "afinidade" else paciencia
+        novo_valor = nara_relacionamento.ajustar_indicador(valor_atual, delta)
+        await self.cog.bot.db.conn.execute(
+            f"UPDATE nara_relacionamento_perfil SET {campo}=?, updated_at=?, recovered_at=? WHERE guild_id=? AND user_id=?",
+            (novo_valor, agora, agora, self.guild_id, self.user_id),
+        )
+        await self.cog.bot.db.conn.commit()
+        await self._renderizar(interaction)
+
+    async def _renderizar(self, interaction: discord.Interaction | None = None):
+        embed, afinidade, paciencia = await self.cog._montar_embed_relacionamento_admin(
+            self.guild_id, self.user_id
+        )
+        self.afinidade_aumentar.disabled = afinidade >= 10.0
+        self.afinidade_diminuir.disabled = afinidade <= 1.0
+        self.paciencia_aumentar.disabled = paciencia >= 10.0
+        self.paciencia_diminuir.disabled = paciencia <= 1.0
+        if interaction is not None:
+            await interaction.response.edit_message(embed=embed, view=self)
+        return embed
+
+    @discord.ui.button(label="Afinidade +0,5", style=discord.ButtonStyle.success, row=0)
+    async def afinidade_aumentar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._ajustar(interaction, "afinidade", self.PASSO)
+
+    @discord.ui.button(label="Afinidade −0,5", style=discord.ButtonStyle.danger, row=0)
+    async def afinidade_diminuir(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._ajustar(interaction, "afinidade", -self.PASSO)
+
+    @discord.ui.button(label="Paciência +0,5", style=discord.ButtonStyle.success, row=1)
+    async def paciencia_aumentar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._ajustar(interaction, "paciencia", self.PASSO)
+
+    @discord.ui.button(label="Paciência −0,5", style=discord.ButtonStyle.danger, row=1)
+    async def paciencia_diminuir(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._ajustar(interaction, "paciencia", -self.PASSO)
+
+    @discord.ui.button(label="Atualizar", style=discord.ButtonStyle.secondary, row=1)
+    async def atualizar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._renderizar(interaction)
+
+    @discord.ui.button(label="Desativar relacionamento", style=discord.ButtonStyle.danger, row=2)
+    async def desativar_relacionamento(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.cog.bot.db.conn.execute(
+            "DELETE FROM nara_relacionamento_config WHERE guild_id=?", (self.guild_id,)
+        )
+        await self.cog.bot.db.conn.execute(
+            "DELETE FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?",
+            (self.guild_id, self.user_id),
+        )
+        await self.cog.bot.db.conn.execute(
+            "DELETE FROM nara_relacionamento_eventos WHERE guild_id=? AND user_id=?",
+            (self.guild_id, self.user_id),
+        )
+        await self.cog.bot.db.conn.commit()
+        self.cog._relacionamento_alvos.pop(self.guild_id, None)
+        for item in self.children:
+            item.disabled = True
+        await interaction.response.edit_message(
+            content=f"Relacionamento adaptativo desativado para <@{self.user_id}>. Indicadores e eventos relacionais foram apagados.",
+            embed=None,
+            view=self,
+        )
+
+
 # ------------------------------------------------------------------------- cog
 class NaraIA(commands.Cog):
     def __init__(self, bot):
@@ -84,6 +230,8 @@ class NaraIA(commands.Cog):
                 self.ia_config_error = f"{type(exc).__name__}: {exc}"[:300]
                 log.exception("Provedores conversacionais não puderam ser inicializados; respostas locais continuam ativas.")
         self.ultimo_uso: dict[int, float] = {}
+        # Um alvo por servidor; carregado do SQLite para consulta síncrona no fluxo de chat.
+        self._relacionamento_alvos: dict[int, int] = {}
         self._limpeza_duvidas_task = None
         if NARA_DUVIDAS_LIMPEZA_ENABLED and not IA_CANAIS_LIVRES:
             log.info("Limpeza automática da Nara não iniciada: IA_CANAIS_LIVRES não contém canais configurados.")
@@ -91,20 +239,35 @@ class NaraIA(commands.Cog):
         # A personalidade principal existente é carregada antes do escopo específico da rota.
         self.prompt_conversa = conv.carregar_prompt()
         self.prompt_identidade = ""
+        self.prompt_personalidade = conv.carregar_personalidade_base() or conv.PROMPT_MINIMO
+        self.prompt_filtro_runtime = conv.carregar_filtro_runtime()
         try:
             self.prompt_identidade = (Path(__file__).resolve().parent.parent / "prompts" / "nara.md").read_text(encoding="utf-8").strip()
         except (OSError, UnicodeError):
             log.exception("Não foi possível carregar o prompt principal prompts/nara.md.")
+        # Manual oficial do bot: o que a Nara usa para ENSINAR a navegação real (/nara, botões, fluxos).
+        self.prompt_manual = ""
+        try:
+            self.prompt_manual = (Path(__file__).resolve().parent.parent / "prompts" / "nara_manual.md").read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            log.exception("Não foi possível carregar prompts/nara_manual.md; a Nara ensinará sem o manual oficial.")
         self.conv_cache = conv.CacheConversa()
         self.conv_cooldown = conv.Cooldown()
+        # Últimas respostas por canal: contexto efêmero para variar a escrita sem persistir dados.
+        self._respostas_recentes_nara: dict[int, list[str]] = {}
+        # Últimas opiniões por alvo, usadas somente para detectar repetição; nunca entram no prompt.
+        self._ultimas_opinioes_nara: dict[tuple[int, int], list[str]] = {}
         try:
             prompt_especializado = PROMPT_PESQUISA_PATH.read_text(encoding="utf-8").strip()
             identidade_curta = conv.extrair_identidade(self.prompt_identidade)
-            self.prompt_pesquisa = ((identidade_curta or self.prompt_identidade) + "\n\n" + prompt_especializado).strip()
+            blocos = [self.prompt_personalidade, identidade_curta or self.prompt_identidade, prompt_especializado]
+            self.prompt_pesquisa = "\n\n---\n\n".join(bloco for bloco in blocos if bloco).strip()
             if not self.prompt_identidade:
                 log.warning("Prompt principal indisponível; a rota de pesquisa usa somente o prompt específico existente.")
         except (OSError, UnicodeError):
-            self.prompt_pesquisa = self.prompt_identidade or conv.PROMPT_MINIMO
+            self.prompt_pesquisa = "\n\n---\n\n".join(
+                bloco for bloco in (self.prompt_personalidade, self.prompt_identidade, conv.PROMPT_MINIMO) if bloco
+            )
             log.warning("prompts/nara_pesquisa.md ausente; pesquisa não recebeu um novo prompt substituto.")
         if conv.CONVERSA_ATIVA and self.ia is not None:
             log.info("Conversa econômica da Nara ativa: %s/usuário/dia, %s/servidor/dia, cooldown %ss, %s tokens por resposta.",
@@ -139,7 +302,7 @@ class NaraIA(commands.Cog):
             except Exception:
                 log.exception("Falha ao fechar adaptadores de IA da Nara")
 
-    async def cog_load(self):
+    async def _inicializar_banco(self):
         await self.bot.db.conn.execute(
             """CREATE TABLE IF NOT EXISTS ia_uso (
                  user_id INTEGER NOT NULL, dia TEXT NOT NULL, qtd INTEGER NOT NULL DEFAULT 0,
@@ -169,10 +332,54 @@ class NaraIA(commands.Cog):
                  updated_at INTEGER NOT NULL,
                  PRIMARY KEY (guild_id, user_id))"""
         )
+        # Relacionamento adaptativo individual para todos os membros que mantêm a memória ativa.
+        # O painel administrativo seleciona um usuário apenas para consulta e ajuste manual.
+        await self.bot.db.conn.execute(
+            """CREATE TABLE IF NOT EXISTS nara_relacionamento_config (
+                 guild_id INTEGER PRIMARY KEY,
+                 user_id INTEGER NOT NULL,
+                 configured_by INTEGER NOT NULL,
+                 updated_at INTEGER NOT NULL)"""
+        )
+        await self.bot.db.conn.execute(
+            """CREATE TABLE IF NOT EXISTS nara_relacionamento_perfil (
+                 guild_id INTEGER NOT NULL, user_id INTEGER NOT NULL,
+                 afinidade REAL NOT NULL DEFAULT 5.0,
+                 paciencia REAL NOT NULL DEFAULT 5.0,
+                 updated_at INTEGER NOT NULL,
+                 recovered_at INTEGER NOT NULL,
+                 PRIMARY KEY (guild_id, user_id))"""
+        )
+        await self.bot.db.conn.execute(
+            """CREATE TABLE IF NOT EXISTS nara_relacionamento_eventos (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 guild_id INTEGER NOT NULL, user_id INTEGER NOT NULL,
+                 event_type TEXT NOT NULL, summary TEXT NOT NULL,
+                 afinidade_delta REAL NOT NULL DEFAULT 0,
+                 paciencia_delta REAL NOT NULL DEFAULT 0,
+                 created_at INTEGER NOT NULL)"""
+        )
+        await self.bot.db.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_nara_rel_eventos_scope ON nara_relacionamento_eventos(guild_id,user_id,created_at)"
+        )
         await self.bot.db.conn.execute(
             "DELETE FROM nara_memoria WHERE created_at<?", (int(time.time()) - 30 * 86400,)
         )
+        await self.bot.db.conn.execute(
+            "DELETE FROM nara_relacionamento_eventos WHERE created_at<?", (int(time.time()) - 90 * 86400,)
+        )
         await self.bot.db.conn.commit()
+        alvos_configurados = await self.bot.db._all(
+            "SELECT guild_id, user_id FROM nara_relacionamento_config"
+        )
+        self._relacionamento_alvos = {
+            int(row["guild_id"]): int(row["user_id"])
+            for row in (alvos_configurados or [])
+        }
+        log.info(
+            "Relacionamento: configuração carregada para %s servidor(es).",
+            len(self._relacionamento_alvos),
+        )
         if NARA_DUVIDAS_LIMPEZA_ENABLED and IA_CANAIS_LIVRES and NARA_DUVIDAS_LIMPEZA_INTERVALO_MINUTOS > 0:
             self._limpeza_duvidas_task = asyncio.create_task(self._loop_limpeza_automatica_duvidas())
 
@@ -183,8 +390,29 @@ class NaraIA(commands.Cog):
         )
         return bool(row and int(row["enabled"]))
 
+    async def _ativar_memoria_no_primeiro_contato(self, guild_id: int, user_id: int) -> bool:
+        """Ativa memória no primeiro contato; retorna True quando acabou de ativar.
+
+        O membro pode desativar ou apagar tudo em /nara_memoria.
+        """
+        if not guild_id or not user_id:
+            return False
+        row = await self.bot.db._one(
+            "SELECT enabled FROM nara_memoria_privacidade WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        )
+        if row is not None:
+            return False  # respeita tanto opt-in anterior quanto opt-out explícito
+        agora = int(time.time())
+        await self.bot.db.conn.execute(
+            "INSERT OR IGNORE INTO nara_memoria_privacidade(guild_id,user_id,enabled,updated_at) VALUES (?,?,1,?)",
+            (guild_id, user_id, agora),
+        )
+        await self.bot.db.conn.commit()
+        return True
+
     async def _carregar_relacao_social(self, guild_id: int, user_id: int) -> str:
-        """Perfil social privado; só existe/é lido quando o membro autorizou memória."""
+        """Perfil social privado; só existe/é lido enquanto a memória estiver ativa."""
         if not await self._memoria_ativa(guild_id, user_id):
             return ""
         row = await self.bot.db._one(
@@ -198,7 +426,7 @@ class NaraIA(commands.Cog):
         )
 
     async def _atualizar_relacao_social(self, guild_id: int, user_id: int, texto: str):
-        """Atualiza vínculo apenas após opt-in explícito e interação bem-sucedida."""
+        """Atualiza vínculo social durante interações bem-sucedidas com memória ativa."""
         if not await self._memoria_ativa(guild_id, user_id):
             return
         proximidade, intimidade = nara_social.calcular_sinal(texto)
@@ -215,8 +443,375 @@ class NaraIA(commands.Cog):
         )
         await self.bot.db.conn.commit()
 
+    def _relacionamento_configurado(self, guild_id: int, user_id: int) -> bool:
+        """Confere se a pessoa é o único alvo configurado para este servidor."""
+        alvo = self._relacionamento_alvos.get(int(guild_id or 0), 0)
+        return bool(alvo and int(user_id) == int(alvo))
+
+    async def _relacionamento_ativo(self, guild_id: int, user_id: int) -> bool:
+        """Relacionamento individual ativo para todo membro com memória habilitada."""
+        return bool(guild_id and user_id and await self._memoria_ativa(guild_id, user_id))
+
+    async def _atualizar_relacionamento(self, guild_id: int, user_id: int, texto: str):
+        """Aplica recuperação e eventos locais; não guarda o texto original nem chama IA."""
+        if not await self._relacionamento_ativo(guild_id, user_id):
+            return
+
+        agora = int(time.time())
+        perfil = await self.bot.db._one(
+            "SELECT afinidade, paciencia, recovered_at FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        )
+        if perfil:
+            afinidade = float(perfil["afinidade"] or 5.0)
+            paciencia = float(perfil["paciencia"] or 5.0)
+            recuperado_em = int(perfil["recovered_at"] or agora)
+        else:
+            afinidade = paciencia = 5.0
+            recuperado_em = agora
+            await self.bot.db.conn.execute(
+                "INSERT INTO nara_relacionamento_perfil(guild_id,user_id,afinidade,paciencia,updated_at,recovered_at) VALUES (?,?,5.0,5.0,?,?)",
+                (guild_id, user_id, agora, agora),
+            )
+
+        afinidade, paciencia = nara_relacionamento.recuperar_com_tempo(
+            afinidade, paciencia, max(0, agora - recuperado_em)
+        )
+
+        ofensa_recente = await self.bot.db._one(
+            """SELECT id FROM nara_relacionamento_eventos
+               WHERE guild_id=? AND user_id=?
+                 AND event_type IN ('provocacao','desrespeito','desrespeito_grave')
+                 AND created_at>=? LIMIT 1""",
+            (guild_id, user_id, agora - 30 * 86400),
+        )
+        evento = nara_relacionamento.avaliar_mensagem(
+            texto, houve_desrespeito_recente=bool(ofensa_recente)
+        )
+        if evento:
+            repetido = await self.bot.db._one(
+                """SELECT id FROM nara_relacionamento_eventos
+                   WHERE guild_id=? AND user_id=? AND event_type=? AND created_at>=?
+                   ORDER BY id DESC LIMIT 1""",
+                (guild_id, user_id, evento.tipo, agora - 900),
+            )
+            if repetido:
+                evento = None
+
+        if evento and (evento.afinidade_delta > 0 or evento.paciencia_delta > 0):
+            ganhos = await self.bot.db._one(
+                """SELECT
+                     COALESCE(SUM(CASE WHEN afinidade_delta>0 THEN afinidade_delta ELSE 0 END),0) AS afinidade,
+                     COALESCE(SUM(CASE WHEN paciencia_delta>0 THEN paciencia_delta ELSE 0 END),0) AS paciencia
+                   FROM nara_relacionamento_eventos
+                   WHERE guild_id=? AND user_id=? AND created_at>=?""",
+                (guild_id, user_id, agora - 86400),
+            )
+            evento = nara_relacionamento.limitar_delta_positivo(
+                evento,
+                afinidade_positiva_24h=float(ganhos["afinidade"] or 0) if ganhos else 0.0,
+                paciencia_positiva_24h=float(ganhos["paciencia"] or 0) if ganhos else 0.0,
+            )
+
+        if evento:
+            afinidade += evento.afinidade_delta
+            paciencia += evento.paciencia_delta
+            await self.bot.db.conn.execute(
+                """INSERT INTO nara_relacionamento_eventos
+                   (guild_id,user_id,event_type,summary,afinidade_delta,paciencia_delta,created_at)
+                   VALUES (?,?,?,?,?,?,?)""",
+                (guild_id, user_id, evento.tipo, evento.resumo,
+                 evento.afinidade_delta, evento.paciencia_delta, agora),
+            )
+            await self.bot.db.conn.execute(
+                """DELETE FROM nara_relacionamento_eventos
+                   WHERE guild_id=? AND user_id=? AND id NOT IN
+                   (SELECT id FROM nara_relacionamento_eventos
+                    WHERE guild_id=? AND user_id=? ORDER BY id DESC LIMIT 25)""",
+                (guild_id, user_id, guild_id, user_id),
+            )
+
+        afinidade = min(10.0, max(1.0, afinidade))
+        paciencia = min(10.0, max(1.0, paciencia))
+        await self.bot.db.conn.execute(
+            """INSERT INTO nara_relacionamento_perfil
+               (guild_id,user_id,afinidade,paciencia,updated_at,recovered_at)
+               VALUES (?,?,?,?,?,?)
+               ON CONFLICT(guild_id,user_id) DO UPDATE SET
+                 afinidade=excluded.afinidade, paciencia=excluded.paciencia,
+                 updated_at=excluded.updated_at, recovered_at=excluded.recovered_at""",
+            (guild_id, user_id, afinidade, paciencia, agora, agora),
+        )
+        await self.bot.db.conn.execute(
+            "DELETE FROM nara_relacionamento_eventos WHERE guild_id=? AND user_id=? AND created_at<?",
+            (guild_id, user_id, agora - 90 * 86400),
+        )
+        await self.bot.db.conn.commit()
+
+    async def _carregar_contexto_alvo_opiniao(self, message: discord.Message, texto: str) -> dict | None:
+        """Resolve a pessoa efetivamente mencionada e busca somente o relacionamento dela."""
+        if not nara_relacionamento.eh_consulta_opiniao(texto):
+            return None
+
+        guild = getattr(message, "guild", None)
+        guild_id = int(getattr(guild, "id", 0) or 0)
+        if not guild_id:
+            return {"status": "sem_servidor", "nome": "essa pessoa"}
+
+        autor = getattr(message, "author", None)
+        autor_id = int(getattr(autor, "id", 0) or 0)
+        bot_id = int(getattr(getattr(self.bot, "user", None), "id", 0) or 0)
+        configurado_id = int(self._relacionamento_alvos.get(guild_id, 0) or 0)
+        texto_norm = normalizar(texto)
+
+        # "o que você acha de mim?" deve consultar o próprio autor.
+        fala_sobre_autor = bool(re.search(r"\b(?:sobre mim|de mim|a meu respeito)\b", texto_norm))
+        alvo = autor if fala_sobre_autor else None
+
+        # A menção do bot (@Nara) não é o alvo da opinião; outras menções são identidades exatas.
+        mencoes = []
+        vistos = set()
+        for pessoa in (getattr(message, "mentions", None) or []):
+            uid = int(getattr(pessoa, "id", 0) or 0)
+            if not uid or uid == bot_id or uid in vistos:
+                continue
+            vistos.add(uid)
+            mencoes.append(pessoa)
+
+        if alvo is None and len(mencoes) == 1:
+            alvo = mencoes[0]
+        elif alvo is None and len(mencoes) > 1:
+            configurados_mencionados = [p for p in mencoes if int(getattr(p, "id", 0) or 0) == configurado_id]
+            if len(configurados_mencionados) == 1:
+                alvo = configurados_mencionados[0]
+            else:
+                log.warning(
+                    "Opinião sobre membro ambígua: múltiplas menções sem alvo único; guild=%s autor_id=%s quantidade=%s.",
+                    guild_id, autor_id, len(mencoes),
+                )
+                return {"status": "alvo_ambiguo", "nome": "essas pessoas"}
+
+        # Sem menção, tenta identificar um nome literal na lista de membros em cache.
+        if alvo is None:
+            candidatos = {}
+            for membro in (getattr(guild, "members", None) or []):
+                uid = int(getattr(membro, "id", 0) or 0)
+                if not uid or uid == bot_id:
+                    continue
+                for atributo in ("display_name", "name", "global_name"):
+                    nome_membro = getattr(membro, atributo, None)
+                    nome_norm = normalizar(str(nome_membro or ""))
+                    if nome_norm and re.search(rf"(?<![a-z0-9]){re.escape(nome_norm)}(?![a-z0-9])", texto_norm):
+                        candidatos[uid] = membro
+                        break
+            if len(candidatos) == 1:
+                alvo = next(iter(candidatos.values()))
+            elif len(candidatos) > 1:
+                configurado = candidatos.get(configurado_id)
+                if configurado is not None:
+                    alvo = configurado
+                else:
+                    log.warning(
+                        "Opinião sobre membro ambígua por nome: guild=%s autor_id=%s candidatos=%s.",
+                        guild_id, autor_id, len(candidatos),
+                    )
+                    return {"status": "alvo_ambiguo", "nome": "essas pessoas"}
+
+        # O membro escolhido no painel continua sendo o fallback para perguntas sem nome/menção.
+        if alvo is None and configurado_id:
+            alvo = guild.get_member(configurado_id) if guild else None
+            if alvo is None:
+                try:
+                    alvo = await self.bot.fetch_user(configurado_id)
+                except Exception:
+                    alvo = None
+
+        if alvo is None:
+            log.warning("Opinião sobre membro sem alvo identificável; guild=%s autor_id=%s.", guild_id, autor_id)
+            return {"status": "alvo_nao_identificado", "nome": "essa pessoa"}
+
+        alvo_id = int(getattr(alvo, "id", 0) or 0)
+        nome_alvo = (getattr(alvo, "display_name", None)
+                     or getattr(alvo, "global_name", None)
+                     or getattr(alvo, "name", None) or str(alvo_id))
+
+        if not await self._relacionamento_ativo(guild_id, alvo_id):
+            log.warning(
+                "Opinião sobre membro sem histórico relacional autorizado; guild=%s autor_id=%s alvo_id=%s.",
+                guild_id, autor_id, alvo_id,
+            )
+            return {"status": "sem_historico", "alvo_id": alvo_id, "nome": str(nome_alvo)[:80]}
+
+        perfil = await self.bot.db._one(
+            "SELECT afinidade, paciencia FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?",
+            (guild_id, alvo_id),
+        )
+        afinidade = float(perfil["afinidade"] or 5.0) if perfil else 5.0
+        paciencia = float(perfil["paciencia"] or 5.0) if perfil else 5.0
+        contexto = await self._carregar_contexto_relacionamento(guild_id, alvo_id)
+        if not contexto:
+            log.error("Opinião sobre membro: perfil ativo sem contexto; guild=%s alvo_id=%s.", guild_id, alvo_id)
+            return {"status": "sem_historico", "alvo_id": alvo_id, "nome": str(nome_alvo)[:80]}
+
+        log.info(
+            "Opinião sobre membro: contexto carregado; guild=%s autor_id=%s alvo_id=%s nome=%r afinidade=%.1f faixa=%s.",
+            guild_id, autor_id, alvo_id, str(nome_alvo)[:80], afinidade,
+            nara_relacionamento.faixa_afinidade(afinidade),
+        )
+        return {
+            "status": "ok", "alvo_id": alvo_id, "nome": str(nome_alvo)[:80],
+            "afinidade": afinidade, "paciencia": paciencia,
+            "contexto": (
+                f"[ALVO DA OPINIÃO: {str(nome_alvo)[:80]} | ID: {alvo_id}]\n"
+                + contexto
+                + "\nEste perfil pertence exclusivamente ao alvo acima. Não use o relacionamento do autor da pergunta."
+            ),
+        }
+
+    async def _carregar_contexto_relacionamento(self, guild_id: int, user_id: int) -> str:
+        """Fornece afinidade, paciência e eventos importantes ao prompt da NARA."""
+        if not await self._relacionamento_ativo(guild_id, user_id):
+            return ""
+        perfil = await self.bot.db._one(
+            "SELECT afinidade, paciencia FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        )
+        if not perfil:
+            return nara_relacionamento.formatar_contexto(5.0, 5.0, [])
+        eventos = await self.bot.db._all(
+            """SELECT summary FROM nara_relacionamento_eventos
+               WHERE guild_id=? AND user_id=? ORDER BY id DESC LIMIT 4""",
+            (guild_id, user_id),
+        )
+        return nara_relacionamento.formatar_contexto(
+            float(perfil["afinidade"] or 5.0),
+            float(perfil["paciencia"] or 5.0),
+            [{"summary": str(evento["summary"] or "")} for evento in (eventos or [])],
+        )
+
+    async def _montar_embed_relacionamento_admin(self, guild_id: int, user_id: int):
+        """Monta dados administrativos do relacionamento; nunca é usado em painéis públicos."""
+        if await self._memoria_ativa(guild_id, user_id):
+            await self._atualizar_relacionamento(guild_id, user_id, "")
+        perfil = await self.bot.db._one(
+            "SELECT afinidade, paciencia FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        )
+        afinidade = float(perfil["afinidade"] or 5.0) if perfil else 5.0
+        paciencia = float(perfil["paciencia"] or 5.0) if perfil else 5.0
+        memoria_ativa = await self._memoria_ativa(guild_id, user_id)
+        eventos = await self.bot.db._all(
+            "SELECT summary FROM nara_relacionamento_eventos WHERE guild_id=? AND user_id=? ORDER BY id DESC LIMIT 5",
+            (guild_id, user_id),
+        )
+
+        def barra(valor: float) -> str:
+            preenchidos = max(0, min(10, round(valor)))
+            return "█" * preenchidos + "░" * (10 - preenchidos)
+
+        embed = discord.Embed(
+            title="NARA — Painel privado de relacionamento",
+            description=(
+                f"**Usuário monitorado:** <@{user_id}> (`{user_id}`)\n"
+                f"**Memória autorizada:** {'Sim' if memoria_ativa else 'Não'}"
+            ),
+            color=0x5865F2,
+        )
+        embed.add_field(
+            name="Afinidade",
+            value=f"`{afinidade:.1f}/10`\n`{barra(afinidade)}`",
+            inline=True,
+        )
+        embed.add_field(
+            name="Paciência",
+            value=f"`{paciencia:.1f}/10`\n`{barra(paciencia)}`",
+            inline=True,
+        )
+        resumos = [str(evento["summary"] or "").strip()[:120] for evento in (eventos or []) if evento["summary"]]
+        embed.add_field(
+            name="Eventos importantes recentes",
+            value="\n".join(f"• {resumo}" for resumo in resumos) if resumos else "Nenhum evento registrado.",
+            inline=False,
+        )
+        observacao = (
+            "Os botões alteram 0,5 ponto por clique. Os indicadores permanecem entre 1 e 10."
+        )
+        if not memoria_ativa:
+            observacao += " A memória está desativada para esta pessoa; os dados não serão atualizados até que ela reative em `/nara_memoria`."
+        embed.set_footer(text=observacao[:2048])
+        return embed, afinidade, paciencia
+
+    async def _interacao_e_dono_bot(self, interaction: discord.Interaction) -> bool:
+        """Aceita somente o proprietário global do bot, não apenas moderadores do servidor."""
+        owner_id = int(getattr(config, "BOT_OWNER_ID", 0) or 0)
+        if owner_id and int(interaction.user.id) == owner_id:
+            return True
+        try:
+            return bool(await self.bot.is_owner(interaction.user))
+        except Exception:
+            log.exception("Não foi possível validar o proprietário do bot no painel privado de relacionamento.")
+            return False
+
+    async def abrir_painel_relacionamento(
+        self, interaction: discord.Interaction, usuario: discord.User | discord.Member, *, editar: bool = False
+    ):
+        """Configura o alvo e abre o painel privado; chamado somente pelo botão restrito do /adm."""
+        if not await self._interacao_e_dono_bot(interaction):
+            return await interaction.response.send_message(
+                "Somente o proprietário global do bot pode acessar o relacionamento da NARA.", ephemeral=True
+            )
+        if interaction.guild_id is None:
+            return await interaction.response.send_message(
+                "Este painel só pode ser usado dentro de um servidor.", ephemeral=True
+            )
+        if getattr(usuario, "bot", False):
+            return await interaction.response.send_message("Escolha uma pessoa, não outro bot.", ephemeral=True)
+
+        # Auto-reparo: garante o esquema mesmo em bancos antigos ou após atualização parcial.
+        await self.bot.db.conn.execute(
+            """CREATE TABLE IF NOT EXISTS nara_relacionamento_config (
+                 guild_id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL,
+                 configured_by INTEGER NOT NULL, updated_at INTEGER NOT NULL)"""
+        )
+        await self.bot.db.conn.execute(
+            """CREATE TABLE IF NOT EXISTS nara_relacionamento_perfil (
+                 guild_id INTEGER NOT NULL, user_id INTEGER NOT NULL,
+                 afinidade REAL NOT NULL DEFAULT 5.0, paciencia REAL NOT NULL DEFAULT 5.0,
+                 updated_at INTEGER NOT NULL, recovered_at INTEGER NOT NULL,
+                 PRIMARY KEY (guild_id, user_id))"""
+        )
+        await self.bot.db.conn.execute(
+            """CREATE TABLE IF NOT EXISTS nara_relacionamento_eventos (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id INTEGER NOT NULL,
+                 user_id INTEGER NOT NULL, event_type TEXT NOT NULL, summary TEXT NOT NULL,
+                 afinidade_delta REAL NOT NULL DEFAULT 0, paciencia_delta REAL NOT NULL DEFAULT 0,
+                 created_at INTEGER NOT NULL)"""
+        )
+        await self.bot.db.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_nara_rel_eventos_scope ON nara_relacionamento_eventos(guild_id,user_id,created_at)"
+        )
+
+        guild_id = int(interaction.guild_id)
+        user_id = int(usuario.id)
+        agora = int(time.time())
+        await self.bot.db.conn.execute(
+            """INSERT INTO nara_relacionamento_config(guild_id,user_id,configured_by,updated_at)
+               VALUES (?,?,?,?) ON CONFLICT(guild_id) DO UPDATE SET
+                 user_id=excluded.user_id, configured_by=excluded.configured_by, updated_at=excluded.updated_at""",
+            (guild_id, user_id, int(interaction.user.id), agora),
+        )
+        await self.bot.db.conn.commit()
+        self._relacionamento_alvos[guild_id] = user_id
+
+        painel = PainelRelacionamentoAdminView(self, guild_id, user_id, int(interaction.user.id))
+        embed = await painel._renderizar()
+        if editar:
+            await interaction.response.edit_message(content=None, embed=embed, view=painel)
+        else:
+            await interaction.response.send_message(embed=embed, view=painel, ephemeral=True)
+
     async def _carregar_memoria(self, guild_id: int, user_id: int) -> str:
-        """Carrega somente as últimas 12 mensagens de quem autorizou memória."""
+        """Carrega somente as últimas 12 mensagens de quem mantém a memória ativa."""
         if not await self._memoria_ativa(guild_id, user_id):
             return ""
         agora = int(time.time())
@@ -243,7 +838,7 @@ class NaraIA(commands.Cog):
         )[:5000]
 
     async def _salvar_memoria(self, guild_id: int, user_id: int, pergunta: str, resposta: str):
-        """Persiste texto apenas após opt-in; imagens e anexos nunca são armazenados."""
+        """Persiste texto enquanto a memória estiver ativa; imagens e anexos nunca são armazenados."""
         if not await self._memoria_ativa(guild_id, user_id):
             return
         agora = int(time.time())
@@ -264,6 +859,11 @@ class NaraIA(commands.Cog):
 
     @app_commands.command(name="nara_memoria", description="Abre os controles privados da sua memória com a Nara.")
     async def nara_memoria(self, interaction: discord.Interaction):
+        """Comando legado. As pontuações e controles administrativos não aparecem neste painel."""
+        await self.abrir_painel_memoria(interaction)
+
+    async def abrir_painel_memoria(self, interaction: discord.Interaction, callback_voltar=None):
+        """Abre os mesmos controles de privacidade dentro da central /nara ou pelo comando legado."""
         if interaction.guild_id is None:
             return await interaction.response.send_message(
                 "Este controle está disponível dentro de um servidor.", ephemeral=True
@@ -287,7 +887,13 @@ class NaraIA(commands.Cog):
                     (guild_id, user_id, agora),
                 )
                 await self.bot.db.conn.commit()
-                texto = "Memória ativada. Vou usar até 12 mensagens recentes para manter continuidade. O histórico expira em 30 dias; imagens não são armazenadas."
+                if self._relacionamento_configurado(guild_id, user_id):
+                    texto = ("Memória ativada. Vou usar até 12 mensagens recentes para manter continuidade. "
+                             "Esta autorização também permite um perfil interno de personalização baseado nas interações, "
+                             "administrado separadamente pelo proprietário do bot. Os controles desse perfil não são exibidos aqui. "
+                             "As conversas expiram em 30 dias e os registros relacionais em 90 dias; imagens não são armazenadas.")
+                else:
+                    texto = "Memória ativada. Vou usar até 12 mensagens recentes para manter continuidade. O histórico expira em 30 dias; imagens não são armazenadas."
             elif acao == "desativar":
                 await self.bot.db.conn.execute(
                     """INSERT INTO nara_memoria_privacidade(guild_id,user_id,enabled,updated_at)
@@ -296,13 +902,23 @@ class NaraIA(commands.Cog):
                     (guild_id, user_id, agora),
                 )
                 await self.bot.db.conn.commit()
-                texto = "Memória desativada. Não vou guardar novas conversas. O histórico existente permanece até ser apagado ou expirar."
+                if self._relacionamento_configurado(guild_id, user_id):
+                    texto = ("Memória desativada. Não vou guardar novas conversas nem atualizar o perfil interno de personalização. "
+                             "Os dados já existentes permanecem até serem apagados ou expirarem.")
+                else:
+                    texto = "Memória desativada. Não vou guardar novas conversas. O histórico existente permanece até ser apagado ou expirar."
             elif acao == "apagar":
                 await self.bot.db.conn.execute(
                     "DELETE FROM nara_memoria WHERE guild_id=? AND user_id=?", (guild_id, user_id)
                 )
                 await self.bot.db.conn.execute(
                     "DELETE FROM nara_social_perfil WHERE guild_id=? AND user_id=?", (guild_id, user_id)
+                )
+                await self.bot.db.conn.execute(
+                    "DELETE FROM nara_relacionamento_perfil WHERE guild_id=? AND user_id=?", (guild_id, user_id)
+                )
+                await self.bot.db.conn.execute(
+                    "DELETE FROM nara_relacionamento_eventos WHERE guild_id=? AND user_id=?", (guild_id, user_id)
                 )
                 await self.bot.db.conn.execute(
                     """INSERT INTO nara_memoria_privacidade(guild_id,user_id,enabled,updated_at)
@@ -314,20 +930,20 @@ class NaraIA(commands.Cog):
                 texto = "Seu histórico foi apagado e a memória ficou desativada."
             else:
                 ativa = await self._memoria_ativa(guild_id, user_id)
+                if ativa:
+                    # Atualiza a recuperação pelo tempo mesmo quando o membro só consulta o status.
+                    await self._atualizar_relacionamento(guild_id, user_id, "")
                 row = await self.bot.db._one(
                     "SELECT COUNT(*) AS total FROM nara_memoria WHERE guild_id=? AND user_id=?",
                     (guild_id, user_id),
                 )
                 total = int(row["total"] if row else 0)
-                perfil = await self.bot.db._one(
-                    "SELECT interacoes, afinidade, intimidade FROM nara_social_perfil WHERE guild_id=? AND user_id=?",
-                    (guild_id, user_id),
-                )
                 relacao = (
-                    nara_social.formatar_relacao(int(perfil["interacoes"]), float(perfil["afinidade"]), float(perfil["intimidade"]))
-                    if perfil else "Ainda não há vínculo social registrado."
-                )
-                texto = f"Memória: **{'ativada' if ativa else 'desativada'}**. Registros armazenados: **{total}**. Limite: 12 mensagens, retenção de 30 dias.\n{relacao}\nO perfil social personalizado também depende desta autorização."
+                    "\nO perfil de relacionamento da NARA é individual. Afinidade, paciência e eventos "
+                    "são usados para adaptar as respostas enquanto a memória estiver ativada; os indicadores "
+                    "e controles administrativos não aparecem neste painel."
+                ) if ativa else ""
+                texto = f"Memória: **{'ativada' if ativa else 'desativada'}**. Registros armazenados: **{total}**. Limite: 12 mensagens, retenção de 30 dias.{relacao}"
             await interacao.response.edit_message(content=texto, view=view)
 
         botoes = (
@@ -343,11 +959,33 @@ class NaraIA(commands.Cog):
             botao.callback = callback
             view.add_item(botao)
 
-        await interaction.response.send_message(
-            "## Memória privada da Nara\nEscolha o que deseja fazer. A memória começa desativada, é separada por servidor e só guarda texto e indicadores sociais após sua autorização. São mantidas até 12 mensagens por 30 dias; imagens nunca são armazenadas. Apagar o histórico também apaga seu perfil de afinidade.",
-            view=view,
-            ephemeral=True,
+        descricao_memoria = (
+            "## Memória privada da Nara\nA memória é ativada automaticamente no primeiro contato com a NARA. "
+            "Você pode consultar, desativar ou apagar seus dados a qualquer momento neste painel. "
+            "São mantidas até 12 mensagens recentes por até 30 dias; imagens e anexos não são armazenados. "
+            "O relacionamento individual mantém afinidade, paciência e eventos resumidos por até 90 dias. "
+            "Apagar o histórico também apaga os dados de personalização associados."
         )
+        if callback_voltar is not None:
+            from utils import adicionar_botao_voltar
+            adicionar_botao_voltar(view, callback_voltar, label="Voltar à Nara", emoji="🏠")
+            await interaction.response.edit_message(content=descricao_memoria, embed=None, view=view)
+        else:
+            await interaction.response.send_message(descricao_memoria, view=view, ephemeral=True)
+
+    async def abrir_central_ajuda(self, interaction: discord.Interaction, callback_voltar=None):
+        """Abre a FAQ reutilizando as mesmas categorias do comando /central_ajuda."""
+        from nara.ajuda import CentralAjudaView
+        embed = discord.Embed(
+            title="Central de Ajuda da Nara",
+            description="Escolha o assunto e depois a pergunta. As respostas abrem nesta mesma tela, com caminho de volta.",
+            color=discord.Color.dark_teal(),
+        )
+        view = CentralAjudaView(self.bot, callback_voltar=callback_voltar)
+        if callback_voltar is not None:
+            await interaction.response.edit_message(content=None, embed=embed, view=view)
+        else:
+            await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="nara_relatorio", description="Mostra indicadores de uso e disponibilidade da Nara para a equipe.")
     async def nara_relatorio(self, interaction: discord.Interaction):
@@ -458,88 +1096,233 @@ class NaraIA(commands.Cog):
             total += len(dados)
         return imagens
 
-    async def _conversar(self, message: discord.Message, texto: str) -> str:
+    async def _conversar(self, message: discord.Message, texto: str, *, contexto_local: str = "") -> str:
         """Papo livre com a personalidade da Nara. Sempre devolve texto; nunca derruba o bot."""
         autor = message.author
-        nome = autor.display_name
+        # No Discord, o ID é a identidade estável: mesmo com display_name "Quase Pro",
+        # esta conta deve ser tratada e chamada de "Souls".
+        nome = "Souls" if int(getattr(autor, "id", 0) or 0) == config.SOULS_USER_ID else autor.display_name
         guild_id = getattr(getattr(message, "guild", None), "id", 0) or 0
         anexos = getattr(message, "attachments", None) or []
+        pergunta_opiniao = nara_relacionamento.eh_consulta_opiniao(texto)
+        fallback_conversa = conv.resposta_sem_ia() if pergunta_opiniao else (contexto_local or conv.resposta_sem_ia())
         if not texto.strip() and not anexos:
-            return random.choice(["Chamou? Fala logo, estou ouvindo.", "Tô aqui. Qual é a missão?"])
+            return contexto_local or nara_respostas.resposta_social("mensagem_vazia", nome=nome)
 
         contexto = self._contexto_nara(message)
-        decisao_escopo = nara_social.avaliar_escopo(texto, contexto, tem_imagem=bool(anexos))
-        if not decisao_escopo.permitido:
-            log.info("Nara bloqueou conversa fora do escopo: guild=%s user=%s motivo=%s",
-                     guild_id, autor.id, decisao_escopo.motivo)
-            return nara_social.RESPOSTA_FORA_ESCOPO
+        # A conversa marcada é tematicamente aberta. Segurança sexual é tratada
+        # separadamente por um detector contextual, sem bloquear educação ou pedidos de ajuda.
+        if nara_social.detectar_abordagem_sexual(texto):
+            return nara_social.resposta_limite_sexual(texto)
         if self.ia is None:
-            return conv.fala_sem_ia()
+            return fallback_conversa
 
-        memoria_ativa = await self._memoria_ativa(guild_id, autor.id)
+        memoria_ativada_agora = False
+        memoria_ativa = False
+        if not pergunta_opiniao:
+            memoria_ativada_agora = await self._ativar_memoria_no_primeiro_contato(guild_id, int(autor.id))
+            memoria_ativa = await self._memoria_ativa(guild_id, autor.id)
+        relacionamento_ativo = bool(guild_id and memoria_ativa and not pergunta_opiniao)
         chave = conv.chave_cache(texto)
-        if not contexto and not memoria_ativa and not anexos:
+        if not pergunta_opiniao and not contexto and not memoria_ativa and not anexos and not contexto_local:
             em_cache = self.conv_cache.obter(chave)
             if em_cache:
                 return em_cache
 
         if not self.conv_cooldown.liberar(autor.id):
-            return conv.FALA_COOLDOWN.format(nome=nome)
+            return conv.RESPOSTA_COOLDOWN.format(nome=nome) if pergunta_opiniao else (contexto_local or conv.RESPOSTA_COOLDOWN.format(nome=nome))
         if conv.LIMITE_USUARIO_DIA and await self._gasto_conversa(autor.id) >= conv.LIMITE_USUARIO_DIA:
-            return conv.FALA_LIMITE_USUARIO.format(nome=nome)
+            return conv.RESPOSTA_LIMITE_USUARIO.format(nome=nome) if pergunta_opiniao else (contexto_local or conv.RESPOSTA_LIMITE_USUARIO.format(nome=nome))
         if conv.LIMITE_GLOBAL_DIA and await self._gasto_conversa(0) >= conv.LIMITE_GLOBAL_DIA:
             log.warning("Teto diário global da conversa da Nara atingido (%s).", conv.LIMITE_GLOBAL_DIA)
-            return conv.fala_sem_ia()
+            return fallback_conversa
 
-        pedido = conv.montar_pedido(nome, texto or "Analise a imagem anexada e responda ao contexto.", contexto)
-        memoria = await self._carregar_memoria(guild_id, autor.id)
-        if memoria:
-            pedido += memoria
+        pedido = conv.montar_pedido(
+            nome, texto or "Analise a imagem anexada e responda ao contexto.",
+            "" if pergunta_opiniao else contexto,
+        )
+        if not pergunta_opiniao:
+            memoria = await self._carregar_memoria(guild_id, autor.id)
+            if memoria:
+                pedido += memoria
         imagens = await self._imagens_para_modelo(message) if anexos else []
         if anexos and not imagens and tem_anexo_visual(anexos):
             return "Não consegui ler esse formato ou arquivo. Envie PNG, JPG ou WEBP com até 5 MiB por imagem."
-        prompt = self.prompt_conversa + nara_social.contexto_especialista(texto)
-        relacao = await self._carregar_relacao_social(guild_id, autor.id)
-        if relacao:
-            prompt += "\n\n" + relacao
+        if relacionamento_ativo and not pergunta_opiniao:
+            # A avaliação é local e acontece na mesma interação; não cria chamada adicional à IA.
+            await self._atualizar_relacionamento(guild_id, autor.id, texto)
+        prompt = (
+            self.prompt_conversa if pergunta_opiniao else
+            self.prompt_conversa + nara_social.contexto_especialista(texto)
+            + nara_social.instrucoes_tom(texto)
+        )
+        # Histórico efêmero das respostas da Nara neste canal: ajuda a variar sem persistir mensagens.
+        canal_id = int(getattr(message.channel, "id", 0) or 0)
+        respostas_recentes = [] if pergunta_opiniao else self._respostas_recentes_nara.get(canal_id, [])[-4:]
+        if respostas_recentes:
+            bloco_recentes = "\n".join(
+                f"{i}. {resposta[:520]}" for i, resposta in enumerate(respostas_recentes, 1)
+            )
+            prompt += (
+                "\n\nHISTÓRICO DE RESPOSTAS RECENTES DA NARA NESTE CANAL — APENAS REFERÊNCIA:\n"
+                + bloco_recentes
+                + "\nUse esse histórico para perceber o que já foi dito e variar a construção. "
+                  "Não copie frases, aberturas, bordões, comparações, argumentos ou encerramentos. "
+                  "Não responda novamente à mesma ideia quando a conversa já avançou. "
+                  "Alterne naturalmente entre resposta direta, pergunta, opinião, reconhecimento, "
+                  "explicação curta e humor contextual. Não escolha um formato fixo."
+            )
+        if contexto_local and not pergunta_opiniao:
+            prompt += (
+                "\n\nCONTEXTO FACTUAL VERIFICADO PELO CÓDIGO — fonte de verdade para esta resposta:\n"
+                + contexto_local[:1800]
+                + "\nUse esses dados como referência obrigatória. Preserve valores, nomes, estados e limites exatamente. "
+                  "Você pode adaptar a linguagem à sua personalidade, mas não invente, complete ou altere informações."
+            )
+        if not pergunta_opiniao:
+            if not relacionamento_ativo:
+                relacao = await self._carregar_relacao_social(guild_id, autor.id)
+                if relacao:
+                    prompt += "\n\n" + relacao
+            else:
+                contexto_relacionamento = await self._carregar_contexto_relacionamento(guild_id, autor.id)
+                if contexto_relacionamento:
+                    prompt += "\n\n" + contexto_relacionamento
+
+        # Em perguntas de opinião, somente o perfil do alvo é relevante.
+        contexto_alvo_opiniao = None
+        if pergunta_opiniao:
+            contexto_alvo_opiniao = await self._carregar_contexto_alvo_opiniao(message, texto)
+            if not contexto_alvo_opiniao or contexto_alvo_opiniao.get("status") != "ok":
+                status = (contexto_alvo_opiniao or {}).get("status", "alvo_nao_identificado")
+                nome_alvo = (contexto_alvo_opiniao or {}).get("nome", "essa pessoa")
+                if status == "alvo_ambiguo":
+                    return "menciona uma pessoa por vez, pq vieram vários nomes e eu não vou misturar os históricos."
+                if status == "sem_historico":
+                    return f"não tenho histórico suficiente com {nome_alvo} pra formar uma opinião justa."
+                return "de quem vc quer saber? menciona a pessoa pra eu não confundir o alvo."
+
+            prompt += (
+                "\n\n" + contexto_alvo_opiniao["contexto"]
+                + "\nPRIORIDADE DESTA RESPOSTA: você foi perguntada sobre a opinião a respeito de "
+                  + contexto_alvo_opiniao["nome"] + ". A faixa de afinidade acima determina a avaliação, não apenas o tom. "
+                  "Não use histórico, memória, afinidade ou sentimentos do autor da pergunta. "
+                  "Não acrescente elogios de cortesia, ressalvas positivas, saudade ou apego para suavizar uma avaliação baixa. "
+                  "A faixa deve aparecer no comportamento e na escolha de palavras, não em uma explicação repetida sobre a relação. "
+                  "Não diga automaticamente que a relação é distante, fria, neutra ou reservada; só mencione isso se a pergunta "
+                  "for sobre a relação em si ou se a informação for necessária. Não invente condutas negativas: sem eventos, "
+                  "expresse somente uma impressão subjetiva compatível com a afinidade. Varie a construção e não use frases prontas. "
+                  "Não revele pontuação ou dados privados."
+            )
+            log.info(
+                "Opinião sobre membro: contexto do alvo anexado ao prompt; guild=%s autor_id=%s alvo_id=%s faixa=%s.",
+                guild_id, int(getattr(autor, "id", 0) or 0), contexto_alvo_opiniao["alvo_id"],
+                nara_relacionamento.faixa_afinidade(contexto_alvo_opiniao["afinidade"]),
+            )
         norm = texto.casefold()
         termos_bot = (
             "nara", "servidor", "comando", "painel", "santuario", "platina", "zerado",
             "coliseu", "loja", "soulslike", "ranking", "perfil", "cargo", "canal",
             "configuracao", "permissao", "modulo", "evento", "recurso", "administracao",
         )
-        if any(termo in norm for termo in termos_bot):
+        termos_duvida = ("como", "onde", "qual", "quais", "botao", "botão", "comando", "funciona",
+                         "usar", "usa", "fazer", "faco", "faço", "registr", "enviar", "mandar", "ensina")
+        if not pergunta_opiniao and (
+            any(re.search(rf"(?<![a-z0-9]){re.escape(termo)}(?![a-z0-9])", norm) for termo in termos_bot)
+            or any(re.search(rf"(?<![a-z0-9]){re.escape(termo)}(?![a-z0-9])", norm) for termo in termos_duvida)
+        ):
+            if self.prompt_manual:
+                prompt += "\n\n" + self.prompt_manual
+            try:
+                relacionadas = faq_base.buscar_relacionadas(texto, limite=3)
+            except Exception:
+                log.exception("Falha ao buscar FAQ relacionada para a conversa.")
+                relacionadas = []
+            if relacionadas:
+                prompt += "\n\nFAQ RELACIONADA (respostas oficiais; prevalecem sobre qualquer suposição sua):\n" + "\n".join(
+                    f"- {resp[:900]}" for _i, resp, _s in relacionadas
+                )
             prompt += "\n\n" + nara_conhecimento.inventario_runtime(self.bot, autor, limite=35)
+        # O runtime é a última camada, depois da personalidade-base, dos dados do alvo,
+        # das regras da rota e de qualquer contexto factual/inventário anexado.
+        prompt = conv.aplicar_filtro_runtime(prompt, self.prompt_filtro_runtime)
         try:
             bruto = (await self.ia.conversar(prompt, pedido, conv.MAX_TOKENS, imagens=imagens)
                      if imagens else await self.ia.conversar(prompt, pedido, conv.MAX_TOKENS))
         except GeminiUnavailableError as exc:
             log.warning("Conversa da Nara: provedor indisponível: %s", getattr(exc, "admin_message", str(exc)))
-            return conv.fala_sem_ia()
+            return fallback_conversa
         except TodosProvedoresIndisponiveis as exc:
             log.error("Conversa da Nara: todos os provedores indisponíveis: %s", exc.admin_message)
-            return conv.fala_sem_ia()
+            return fallback_conversa
         except Exception:
             log.exception("Falha na conversa da Nara")
-            return conv.fala_sem_ia()
+            return fallback_conversa
 
         resposta = conv.limpar_resposta(bruto)
         if not resposta:
-            return conv.fala_sem_ia()
-        try:
-            await self._salvar_memoria(guild_id, autor.id, texto, resposta)
-        except Exception:
-            log.exception("Não foi possível persistir a memória opt-in da Nara.")
-        try:
-            await self._atualizar_relacao_social(guild_id, autor.id, texto)
-        except Exception:
-            log.exception("Não foi possível atualizar o vínculo social opt-in da Nara.")
+            return fallback_conversa
+
+        if pergunta_opiniao and contexto_alvo_opiniao and contexto_alvo_opiniao.get("status") == "ok":
+            afinidade_alvo = float(contexto_alvo_opiniao["afinidade"])
+            chave_opiniao = (int(guild_id), int(contexto_alvo_opiniao["alvo_id"]))
+            anteriores = self._ultimas_opinioes_nara.get(chave_opiniao, [])
+            motivo = nara_relacionamento.motivo_resposta_incoerente(resposta, afinidade_alvo)
+            repetida = nara_relacionamento.resposta_repetida(resposta, anteriores)
+            if motivo or repetida:
+                log.warning(
+                    "Resposta de opinião corrigida pelo validador; alvo_id=%s afinidade=%.1f motivo=%s repetida=%s.",
+                    contexto_alvo_opiniao["alvo_id"], afinidade_alvo, motivo or "nenhum", repetida,
+                )
+                resposta = nara_relacionamento.resposta_padrao_opiniao(
+                    contexto_alvo_opiniao["nome"], afinidade_alvo, anteriores,
+                )
+            else:
+                log.info(
+                    "Opinião sobre membro: resposta compatível com a faixa; alvo_id=%s afinidade=%.1f faixa=%s.",
+                    contexto_alvo_opiniao["alvo_id"], afinidade_alvo,
+                    nara_relacionamento.faixa_afinidade(afinidade_alvo),
+                )
+            opinioes_salvas = self._ultimas_opinioes_nara.setdefault(chave_opiniao, [])
+            opinioes_salvas.append(resposta[:650])
+            del opinioes_salvas[:-3]
+            if len(self._ultimas_opinioes_nara) > 500:
+                primeira_chave = next(iter(self._ultimas_opinioes_nara))
+                self._ultimas_opinioes_nara.pop(primeira_chave, None)
+        if memoria_ativada_agora and not pergunta_opiniao:
+            resposta = (
+                "*Aviso: a memória da NARA foi ativada no seu primeiro contato para manter continuidade "
+                "entre conversas. Você pode consultar, desativar ou apagar seus dados a qualquer momento "
+                "em `/nara_memoria`. São armazenadas até 12 mensagens recentes por até 30 dias, além de "
+                "eventos resumidos de relacionamento por até 90 dias.*\n\n" + resposta
+            )
+        if contexto_local and not pergunta_opiniao:
+            # A IA pode personalizar a explicação, mas os links factuais não podem sumir.
+            resposta = preservar_links_contexto_local(resposta, contexto_local)
+        if not pergunta_opiniao:
+            try:
+                await self._salvar_memoria(guild_id, autor.id, texto, resposta)
+            except Exception:
+                log.exception("Não foi possível persistir a memória automática da Nara.")
+        if not relacionamento_ativo and not pergunta_opiniao:
+            try:
+                await self._atualizar_relacao_social(guild_id, autor.id, texto)
+            except Exception:
+                log.exception("Não foi possível atualizar o vínculo social da Nara.")
         try:
             await self._registrar_conversa(autor.id)
         except Exception:
             log.exception("Não foi possível registrar o uso da conversa da Nara.")
-        if not contexto and not memoria_ativa and not imagens and nome.lower() not in resposta.lower():
+        if not pergunta_opiniao and not contexto and not memoria_ativa and not imagens and not contexto_local and nome.lower() not in resposta.lower():
             self.conv_cache.guardar(chave, resposta)
+        if resposta and not pergunta_opiniao:
+            recentes = self._respostas_recentes_nara.setdefault(canal_id, [])
+            recentes.append(resposta[:650])
+            del recentes[:-4]
+            # Limita canais mantidos em memória para evitar crescimento indefinido.
+            if len(self._respostas_recentes_nara) > 300:
+                primeiro_canal = next(iter(self._respostas_recentes_nara))
+                self._respostas_recentes_nara.pop(primeiro_canal, None)
         return resposta
 
     async def _responder_local(self, message: discord.Message, intent: str) -> str:
@@ -547,11 +1330,28 @@ class NaraIA(commands.Cog):
         db = self.bot.db
         autor = message.author
         guild = message.guild
+        nome = "Souls" if int(getattr(autor, "id", 0) or 0) == config.SOULS_USER_ID else autor.display_name
+
+        # Respostas comunitárias passam por aprovação humana e ficam separadas da FAQ editorial oficial.
+        if intent == "fallback_local":
+            return resposta_local_fallback(message.clean_content or "")
+
+        if str(intent).startswith("community_faq:"):
+            try:
+                entry_id = int(str(intent).split(":", 1)[1])
+                entry = await db.obter_faq_comunitaria(entry_id)
+            except (ValueError, TypeError):
+                entry = None
+            if entry:
+                question = discord.utils.escape_mentions(str(entry["question"]))
+                answer = discord.utils.escape_mentions(str(entry["answer"]))
+                return (f"**📚 Resposta da comunidade — {question}**\n{answer}\n\n"
+                        "_Conteúdo enviado por um membro e aprovado pela equipe do NARA._")
 
         # FAQ JSON contém mensagens finais prontas para Discord, nunca prompts.
         # Consultas pessoais, rankings e valores configuráveis continuam nos handlers abaixo.
         try:
-            import faq_base
+            from nara import faq as faq_base
             pronta = faq_base.resposta_pronta(intent)
             if pronta:
                 return pronta
@@ -560,7 +1360,7 @@ class NaraIA(commands.Cog):
 
         if intent == "como_transmitir_discord":
             return (
-                "**Como tentar voltar a transmitir no Discord**\n"
+                "**Quer tentar voltar a transmitir no Discord?** Vamos por etapas. Antes de começar, leia o aviso de segurança no final.\n"
                 "1. Crie uma conta gratuita na [Proton](https://account.proton.me/pt-br/start?ref=pme_hp_b2c-1) e abra a área do Proton VPN.\n"
                 "2. No Proton VPN, entre em **WireGuard**, crie uma configuração para **Windows** e baixe o arquivo de configuração. Selecione um servidor gratuito disponível; a disponibilidade e os recursos podem mudar conforme a Proton.\n"
                 "3. Baixe o executável [DiscordGoLiveBypass v2.2.0](https://github.com/thomassolcia/DiscordGoLiveBypass/releases/download/v2.2.0/DiscordGoLiveBypass.exe), publicado por terceiros no GitHub. Ele não é uma ferramenta oficial do Discord nem da Proton.\n"
@@ -570,69 +1370,38 @@ class NaraIA(commands.Cog):
                 "**Atenção:** esse método usa software de terceiros e pode contrariar regras ou restrições do Discord. Não desative o Microsoft Defender nem ignore alertas do Windows para executá-lo. Se o Windows bloquear o arquivo ou apontar risco, interrompa e verifique a origem, a assinatura/hash e o arquivo com ferramentas de segurança antes de decidir. O funcionamento não é garantido."
             )
         if intent == "saudacao":
-            import config
             from datetime import datetime
             hora = datetime.now(config.BRAZIL_TZ).hour
             cumprimento = "Bom dia" if hora < 12 else ("Boa tarde" if hora < 18 else "Boa noite")
-            return random.choice([
-                f"{cumprimento}, {autor.display_name}. Nara na área. O que precisa?",
-                f"Ora, {autor.display_name} apareceu. Diga o que precisa — sem invocar nenhum chefe, por enquanto.",
-                f"Oi, {autor.display_name}. Meus circuitos estão em ordem. E os seus?",
-            ])
+            return nara_respostas.resposta_social("saudacao", nome=nome, cumprimento=cumprimento)
+        if intent in nara_respostas.INTENCOES_SOCIAIS:
+            return nara_respostas.resposta_social(intent, nome=nome)
         if intent == "ajuda":
-            return nara_conhecimento.formatar_ajuda(self.bot, autor)
+            return (
+                "**Mapa rápido: tudo começa no `/nara`** (painel privado, só você vê).\n"
+                "• 🎮 **Ports & Mods** — catálogo de ports e mods.\n"
+                "• 📚 **Minha biblioteca** — Platinas, Zerados, Runs e desafios, Remover zerado.\n"
+                "• 🏆 **Meu progresso** — nível e XP, ranking, Loja.\n"
+                "• 👤 **Meu perfil** · 🏛️ **Meu Santuário** · 🧠 **Preferências** · 📡 **Comunidade** · ❔ **Ajuda e suporte**.\n"
+                "Tem uma dúvida específica? Fala cmg que eu aponto o botão certo. Decorar tudo seria um castigo desnecessário."
+            )
         if intent == "sistemas_ativos":
             return nara_conhecimento.formatar_sistemas(self.bot)
         if intent == "canais_servidor":
             canais = nara_conhecimento.canais_visiveis(guild, autor)
-            return ("**Canais que você pode visualizar:**\n" + "\n".join(f"• {nome}" for nome in canais[:40])) \
-                if canais else "Não encontrei canais visíveis para sua conta neste servidor."
+            return ("**Canais que sua conta consegue ver:**\n" + "\n".join(f"• {nome}" for nome in canais[:40])) \
+                if canais else "Não achei nenhum canal visível pra vc neste servidor. Se isso parece errado, pede pra equipe conferir as permissões."
         if intent == "meus_cargos":
             cargos = [getattr(c, "name", str(c)) for c in getattr(autor, "roles", [])
                       if getattr(c, "name", "") != "@everyone"]
-            return "**Seus cargos:**\n" + "\n".join(f"• {nome}" for nome in cargos) if cargos else "Você não possui outros cargos além do @everyone."
+            return "**Cargos da sua conta:**\n" + "\n".join(f"• {nome}" for nome in cargos) if cargos else "Por enquanto, vc só tem `@everyone`. Começo humilde — ainda dá pra mudar esse quadro."
 
         respostas = {
-            "identidade": "Sou a Nara, assistente do NARA. Cuido das informações do servidor, dos painéis e das consultas que o bot consegue fazer.",
-            "capacidades": "Consigo consultar seu perfil, XP, patente, Denários, platinas, jogos zerados, runs, rankings e loja; também explico os sistemas do NARA. Também converso, tiro dúvidas gerais e uso minha IA quando a pergunta foge do FAQ; pesquisa automática de guias está temporariamente desativada.",
-            "ajuda": "**Atalhos do NARA**\n• `/nara` — platinas, runs, rankings e santuários.\n• **Jogos zerados** no `/nara` — registrar e consultar jogos finalizados.\n• **Remover zerado** no `/nara` — remover um registro seu de zerado.\n• **Meu nível** no `/nara` — seu nível, XP e progresso.\n• **Ranking XP** no `/nara` — ranking de XP.\n• **Caçador de Troféus** no `/nara` — abrir o Caçador de Troféus.\n• **Pesquisar jogo** no `/nara` — identificar jogo e pesquisar catálogo de troféus.\n• **Loja** no `/nara` — loja de itens cosméticos.\nUse os painéis para abrir formulários e consultar detalhes.",
-            "como_registrar_platina": "Para registrar uma platina: abra `/nara`, entre em **Platinas** e escolha registrar. Preencha jogo, plataforma, data e envie o comprovante no formulário. A platina só entra no perfil e gera recompensa depois da aprovação da moderação.",
-            "como_registrar_zerado": "Se você terminou um jogo sem platinar, abra **Jogos zerados** no `/nara` ou `/nara` e escolha **Zerados**. Informe jogo, plataforma e data; o comprovante é opcional. O pedido segue para a Central de Aprovação. Se a platina desse mesmo jogo e plataforma já foi aprovada, não precisa cadastrar de novo: ele já aparece automaticamente nos seus zerados.",
-            "como_remover_zerado": "Use **Remover zerado** no `/nara` para cancelar um pedido seu que ainda está pendente ou remover um registro aprovado. Ao remover um registro aprovado, o XP/Denários concedido por ele é devolvido e suas estatísticas são atualizadas.",
-            "quando_recebo_recompensa": "Platinas, runs e jogos zerados passam pela Central de Aprovação. XP/Denários são creditados somente quando a solicitação é aprovada, respeitando os valores e limites configurados no servidor. Se o registro continuar pendente, aguarde a análise; não envie duplicado.",
-            "como_funciona_aprovacao": "Platinas, runs Soulslike e jogos zerados são enviados para o mesmo canal central de aprovação. A equipe revisa cada cartão e usa os botões para aprovar ou rejeitar. A recompensa e a publicação pública só acontecem após a aprovação; pedidos rejeitados não entram no perfil ou ranking.",
-            "como_ver_platinas": "Abra `/nara` e entre em **Platinas** para consultar as conquistas aprovadas, seu perfil e o ranking. Você também pode perguntar à Nara **minhas platinas** para consultar seus próprios registros pelo banco, sem IA.",
-            "como_ver_zerados": "Use **Jogos zerados** no `/nara` ou abra `/nara` e escolha **Zerados**. Para consultar seus próprios registros, pergunte **meus jogos zerados**; a Nara consulta o banco sem Gemini.",
-            "como_ver_runs": "Abra `/nara` e escolha **Runs** para consultar a Central Soulslike. Você também pode perguntar **minhas runs** para ver a contagem de registros aprovados.",
-            "perfil_outro_membro": "Abra `/nara` e use o menu de membros para escolher outra pessoa e consultar o perfil público, como patente, nível, XP e estatísticas de jogo. Saldo e inventário continuam privados.",
-            "como_registrar_run": "Abra `/nara` e entre em **Runs**. Informe jogo, desafio, tempo, build e comprovante. A run fica pendente até a moderação revisar.",
-            "como_comprovante": "Os prints não são analisados pela conversa da Nara. Para comprovar platina ou run, abra `/nara` e envie o arquivo no formulário específico; a moderação revisa o registro.",
-            "privacidade": "Seu saldo de Denários e seu inventário são privados e só são consultados para você. Rankings são públicos e mostram posição/estatísticas de jogo, não seu saldo ou inventário.",
-            "como_chamar_nara": "Marque meu usuário com @Nara ou responda a uma mensagem minha. Nos canais configurados para dúvidas, também respondo a perguntas frequentes reconhecidas localmente. Papo livre só quando você me marca.",
-            "loja": "A loja usa Denários e vende apenas itens cosméticos, como cores de perfil e títulos. Use **Loja** no `/nara` para consultar itens, preços e requisitos de nível. Comprar/equipar não aumenta atributos nem XP.",
-            "patentes": "As patentes são definidas pelo seu nível e podem conceder cargos automáticos. Seu nível depende do XP acumulado. Consulte **Meu nível** no `/nara` para ver seu progresso atual.",
-            "coliseu": "O `/nara` é o painel central: reúne Platinas, Zerados, Runs Soulslike, rankings, santuários e desafios. Os registros com comprovante passam por revisão da moderação.",
-            "santuario": "O Santuário é seu espaço de perfil pessoal, com bio, banner, redes e galeria de platinas. Abra `/nara` e escolha a área de Santuário para criar ou visitar.",
-            "rankings": "O NARA possui rankings de XP, platinas, zerados e resultados Soulslike. Use **Ranking XP** no `/nara` para o ranking de XP ou abra `/nara` para os demais painéis.",
-            "youtube": "O bot publica avisos de vídeos novos e lives do canal configurado. Para receber alertas, confira os cargos de aviso disponíveis no painel de cargos.",
-            "ofertas": "O módulo de ofertas verifica promoções e jogos gratuitos de lojas configuradas, como Steam, Epic e GOG. Os avisos aparecem no canal de ofertas do servidor.",
-            "regras": "Respeite as regras do servidor, não tente fraudar comprovantes ou rankings e use os formulários oficiais para registros. A moderação decide aprovações e pode rejeitar registros inválidos.",
-            "recompensas": "As recompensas dependem das configurações atuais do servidor. Platinas, runs e jogos zerados só concedem XP/Denários depois da aprovação da moderação. Consulte `/nara` para acompanhar os registros e **Loja** no `/nara` para gastar Denários.",
-            "agradecimento": random.choice(["Disponha. Guarde o agradecimento; Denários seriam mais úteis. 😏", "Por nada. Trabalho bem feito não precisa de cerimônia — mas aceito elogios.", "Tamo junto. Só não transforme isso em uma quest secundária."]),
-            "despedida": "Até mais. Que sua próxima tentativa tenha menos mortes desnecessárias.",
-            "como_esta": "Operacional e com a língua afiada de sempre. E você, sobreviveu ao último chefe?",
-            "provocacao": "Anotado. Quando terminar de testar minha paciência, posso ajudar com seu perfil ou com os sistemas do servidor.",
-            "status": "Estou online se esta mensagem chegou até mim. FAQ e consultas funcionam sempre; o papo livre depende da IA e dos limites diários.",
-            "piada": random.choice(["Um jogador Soulslike entrou numa reunião. Morreu três vezes antes de encontrar o botão de sair.", "Qual é o chefe mais pontual? O que sempre chega na segunda fase.", "Minha build favorita? Defesa alta contra perguntas sem contexto." ]),
-            "motivacao": random.choice(["Você não precisa vencer o chefe inteiro hoje. Só precisa aprender o padrão do próximo golpe.", "Progresso não é ausência de mortes; é voltar sabendo mais do que antes.", "Uma tentativa ruim ainda é informação. Use-a na próxima." ]),
-            "criador": "Fui configurada como assistente do NARA. Minha identidade, regras e personalidade vêm das instruções e dos sistemas definidos para este servidor.",
-            "sem_visao": "Não. A Nara não recebe nem analisa prints nesta conversa. Para comprovantes, use os formulários próprios em `/nara`.",
-            "faq_geral": "Consigo responder dúvidas sobre XP, Denários, patentes, platinas, zerados, runs, loja e painéis sem chamar o Gemini. Diga qual sistema quer consultar.",
+            "ajuda": "**Vamos ao mapa do NARA.**\n• `/nara` — sua central de jogos, biblioteca, conquistas, perfil e suporte.\n• **Jogos zerados** — registre e consulte jogos concluídos.\n• **Remover zerado** — corrija um registro seu.\n• **Meu nível** — consulte XP, patente e progresso.\n• **Ranking de XP** — veja a classificação.\n• **Loja** — confira itens cosméticos e preços.\nUse os painéis para abrir formulários e detalhes. Não precisa decorar tudo; eu também não espero esse tipo de milagre.",
         }
         if intent in respostas:
             return respostas[intent]
         if intent in {"como_ganhar_xp", "como_ganhar_denarios", "recompensas"}:
-            import config
             from admin_config import GuildConfig
             from cogs.progressao import XP_MENSAGEM_MIN, XP_MENSAGEM_MAX, XP_VOZ_POR_INTERVALO
             guild_id = guild.id if guild else 0
@@ -645,17 +1414,20 @@ class NaraIA(commands.Cog):
             xp_zerado = config.XP_ZERADO if xp_zerado is None else int(xp_zerado)
             den_zerado = config.DENARIOS_ZERADO if den_zerado is None else int(den_zerado)
             if intent == "como_ganhar_xp":
-                return (f"Mensagens válidas rendem **{XP_MENSAGEM_MIN}–{XP_MENSAGEM_MAX} XP**, respeitando o intervalo de 60 segundos. "
-                        f"Voz rende **{XP_VOZ_POR_INTERVALO} XP a cada 5 minutos** com pelo menos duas pessoas. "
-                        f"Platina aprovada: **{xp_platina} XP**; jogo zerado registrado: **{xp_zerado} XP**. "
-                        "Runs aprovadas também concedem XP conforme as regras da Central Soulslike.")
+                return ("Beleza, estes são os valores configurados no servidor: "
+                        f"Mensagens válidas rendem **{XP_MENSAGEM_MIN}–{XP_MENSAGEM_MAX} XP**, respeitando o intervalo de 60 segundos. "
+                        f"A participação em canal de voz rende **{XP_VOZ_POR_INTERVALO} XP a cada 5 minutos**, com pelo menos duas pessoas. "
+                        f"Platina aprovada: **{xp_platina} XP**; jogo zerado aprovado: **{xp_zerado} XP**. "
+                        "Runs aprovadas seguem a regra própria da Central Soulslike. Agora vc tem os números — usa com inteligência.")
             if intent == "como_ganhar_denarios":
-                return (f"Denários são a moeda cosmética do NARA. Platina aprovada: **{den_platina} Denários**; "
-                        f"jogo zerado registrado: **{den_zerado} Denários**. Use **Loja** no `/nara` para gastar em cores e títulos.")
-            return (f"Uma platina aprovada concede **{xp_platina} XP** e **{den_platina} Denários**. "
-                    f"Um jogo zerado registrado pode conceder **{xp_zerado} XP** e **{den_zerado} Denários**. "
-                    f"Mensagens válidas concedem {XP_MENSAGEM_MIN}–{XP_MENSAGEM_MAX} XP e voz concede {XP_VOZ_POR_INTERVALO} XP "
-                    "a cada cinco minutos nas condições do sistema. Runs têm regras próprias na Central Soulslike.")
+                return ("Denários são a moeda da Loja para itens cosméticos. "
+                        f"Platina aprovada: **{den_platina} Denários**; jogo zerado aprovado: **{den_zerado} Denários**. "
+                        "Abra `/nara` → **Meu progresso** → **Loja de recompensas** pra conferir cores e títulos disponíveis. Não gaste td antes de olhar o catálogo; eu não vou financiar arrependimento.")
+            return ("Os valores atuais do servidor são estes: "
+                    f"uma platina aprovada concede **{xp_platina} XP** e **{den_platina} Denários**; "
+                    f"um jogo zerado aprovado pode conceder **{xp_zerado} XP** e **{den_zerado} Denários**. "
+                    f"Mensagens válidas rendem **{XP_MENSAGEM_MIN}–{XP_MENSAGEM_MAX} XP** e a participação em voz rende **{XP_VOZ_POR_INTERVALO} XP** "
+                    "a cada cinco minutos, conforme as condições do sistema. Runs seguem as regras próprias da Central Soulslike. A administração pode ajustar esses valores.")
 
         user = await db.get_user(autor.id)
         xp = int(user["xp"] or 0)
@@ -666,36 +1438,40 @@ class NaraIA(commands.Cog):
             runs_row = await db._one("SELECT COUNT(*) AS total FROM sl_runs WHERE user_id=? AND status='approved'", (autor.id,))
             runs = int(runs_row["total"] if runs_row else 0)
             if intent == "meu_saldo":
-                return f"Seu saldo é **{int(user['denarios'] or 0)} Denários**. Consulte **Loja** no `/nara` para ver os itens disponíveis."
+                texto = f"Seu saldo atual é **{int(user['denarios'] or 0)} Denários**. Abra `/nara` → **Meu progresso** → **Loja de recompensas** para ver o que está disponível para compra. Vamos torcer para que seus planos sejam maiores que seu saldo."
+                return nara_estilo_textual.enquadrar(texto, "saldo")
             if intent == "minhas_platinas":
                 rows = await db.platinas_do_usuario(autor.id)
-                lista = "\n".join(f"• {r['game']} ({r['platform']})" for r in rows[:10]) or "Nenhuma platina aprovada ainda."
-                return f"Você tem **{platinas} platina(s) aprovada(s)**.\n{lista}"
+                lista = "\n".join(f"• {r['game']} ({r['platform']})" for r in rows[:10]) or "Nenhuma platina aprovada por enquanto. A coleção ainda está esperando seu primeiro troféu."
+                return nara_estilo_textual.enquadrar(f"Você tem **{platinas} platina(s) aprovada(s)**.\n{lista}", "platinas")
             if intent == "meus_zerados":
                 rows = await db.zerados_do_usuario(autor.id)
-                lista = "\n".join(f"• {r['game']} ({r['platform']})" for r in rows[:10]) or "Nenhum jogo zerado registrado ainda."
-                return f"Você tem **{zerados} jogo(s) zerado(s)** registrado(s).\n{lista}"
+                lista = "\n".join(f"• {r['game']} ({r['platform']})" for r in rows[:10]) or "Nenhum jogo zerado registrado ainda. O backlog continua em vantagem."
+                return nara_estilo_textual.enquadrar(f"Você tem **{zerados} jogo(s) zerado(s)** registrado(s).\n{lista}", "zerados")
             if intent == "minhas_runs":
-                return f"Você tem **{runs} run(s) aprovada(s)** na Central Soulslike. Abra `/nara` para consultar seus registros e desafios."
+                texto = f"Você tem **{runs} run(s) aprovada(s)** na Central Soulslike. Abra `/nara` → **Minha biblioteca** → **Runs e desafios** para consultar registros, tempos e desafios. O cronômetro está esperando sua próxima tentativa."
+                return nara_estilo_textual.enquadrar(texto, "runs")
             if intent == "meu_inventario":
                 import loja
                 rows = await db.inventario_do_usuario(autor.id)
                 if not rows:
-                    return "Seu inventário cosmético está vazio. Consulte **Loja** no `/nara` para ver cores e títulos disponíveis."
+                    return nara_estilo_textual.enquadrar("Seu inventário cosmético está vazio. Abra `/nara` → **Meu progresso** → **Loja de recompensas** para conferir cores e títulos disponíveis. Um começo humilde; até os grandes arsenais começam com uma peça.", "inventario")
                 itens = []
                 for row in rows[:15]:
                     item = loja.POR_ID.get(row["item"])
                     nome = item.nome if item else row["item"]
                     estado = "equipado" if row["equipado"] else "guardado"
                     itens.append(f"• {nome} — {estado}")
-                return "**Seu inventário:**\n" + "\n".join(itens)
+                return nara_estilo_textual.enquadrar("**Seu inventário:**\n" + "\n".join(itens), "inventario")
             from levels import barra_progresso, xp_para_nivel
             prox = xp_para_nivel(nivel + 1) - xp
             posicao = await db.posicao_xp(xp)
-            return (f"**Perfil de {autor.display_name}**\nNível **{nivel}** — {patente_por_nivel(nivel)}\n"
+            nome_perfil = "Souls" if int(getattr(autor, "id", 0) or 0) == config.SOULS_USER_ID else autor.display_name
+            texto_perfil = (f"**Perfil de {nome_perfil}**\nNível **{nivel}** — {patente_por_nivel(nivel)}\n"
                     f"XP: **{xp}** ({barra_progresso(xp)})\nPróximo nível: **{max(0, prox)} XP**\n"
                     f"Denários: **{int(user['denarios'] or 0)}**\nPlatinas: **{platinas}** · Zerados: **{zerados}** · Runs: **{runs}**\n"
                     f"Posição no ranking XP: **#{posicao}**")
+            return nara_estilo_textual.enquadrar(texto_perfil, "perfil")
 
         if intent in {"ranking_xp", "ranking_platinas", "ranking_zerados"}:
             getters = {
@@ -706,13 +1482,14 @@ class NaraIA(commands.Cog):
             getter, label = getters[intent]
             rows = await getter(10)
             if not rows:
-                return f"Ainda não há registros suficientes para montar o ranking de {label}."
+                return f"Ainda não há registros suficientes pra montar o ranking de {label}. A arena tá aberta; falta alguém aparecer com registros válidos. Uma chance bem conveniente pra vc puxar a fila."
             linhas = []
             for i, row in enumerate(rows, 1):
                 membro = guild.get_member(int(row["user_id"])) if guild else None
-                nome = membro.display_name if membro else f"Membro {str(row['user_id'])[-4:]}"
+                uid = int(row["user_id"])
+                nome = ("Souls" if uid == config.SOULS_USER_ID else membro.display_name) if membro else f"Membro {str(row['user_id'])[-4:]}"
                 linhas.append(f"**{i}.** {nome} — {int(row['valor'])} {label}")
-            return f"**Top {label}:**\n" + "\n".join(linhas)
+            return nara_estilo_textual.enquadrar(f"**Top {label}:**\n" + "\n".join(linhas), "ranking")
 
         return resposta_local_fallback(message.clean_content)
 
@@ -755,7 +1532,11 @@ class NaraIA(commands.Cog):
               "Não alegue sucesso sem resultado da ferramenta. Ações com risco CONFIRMAR/MODERACAO "
               "devem aguardar o botão Confirmar do autor."
         )
-        system = (self.prompt_identidade or "") + "\n\n" + inventario
+        system = "\n\n---\n\n".join(
+            bloco for bloco in (self.prompt_personalidade, self.prompt_identidade, self.prompt_manual, inventario) if bloco
+        )
+        system += nara_social.instrucoes_tom(message.clean_content or "")
+        system = conv.aplicar_filtro_runtime(system, self.prompt_filtro_runtime)
         gerar = self.ia.criar_gerador(system, registro)
         texto = await rodar_agente(gerar, self.ia, pedido, registro, ctx)
         return (texto or "Não consegui concluir a ação com as ferramentas disponíveis." ).strip(), ctx
@@ -777,7 +1558,9 @@ class NaraIA(commands.Cog):
         # Pesquisa em chat fica estritamente limitada a ferramentas de leitura.
         registro = Registro([f for f in registro.ferramentas.values() if f.risco is Risco.LEITURA])
 
-        gerar = self.ia.criar_gerador(self.prompt_pesquisa, registro)
+        prompt = self.prompt_pesquisa + nara_social.instrucoes_tom(pergunta)
+        prompt = conv.aplicar_filtro_runtime(prompt, self.prompt_filtro_runtime)
+        gerar = self.ia.criar_gerador(prompt, registro)
         texto = await rodar_agente(gerar, self.ia, conteudo, registro, ctx)
         return (texto or "Não consegui concluir a pesquisa.").strip(), ctx
 
@@ -818,7 +1601,15 @@ class NaraIA(commands.Cog):
         conteudo_usuario = (message.clean_content or "").strip()
         if self.bot.user:
             conteudo_usuario = conteudo_usuario.replace(f"@{self.bot.user.display_name}", "").strip()
+            # clean_content pode variar conforme apelido; remove a menção real pelo ID também.
+            conteudo_usuario = re.sub(rf"<@!?{self.bot.user.id}>", "", conteudo_usuario).strip()
         tem_imagem = tem_anexo_visual(message.attachments)
+        chamada_direta = foi_marcado or chamada_textual_nara(conteudo_usuario)
+        if chamada_direta and nara_social.detectar_abordagem_sexual(conteudo_usuario):
+            return await message.reply(
+                nara_social.resposta_limite_sexual(conteudo_usuario),
+                allowed_mentions=sem_mencao,
+            )
         texto_prova = conteudo_usuario.casefold()
         termos_prova = ("comprovante", "prova da platina", "prova da run", "print da platina",
                         "print da run", "aprova minha", "aprovar minha", "validar minha conquista")
@@ -828,15 +1619,28 @@ class NaraIA(commands.Cog):
                 allowed_mentions=sem_mencao,
             )
 
-        rota, intent = decidir_rota(
-            conteudo_usuario,
-            direcionada=foi_marcado,
-            canal_livre=canal_livre,
-            tem_imagem=tem_imagem,
+        # Menção Discord real => IA; nome escrito sem @ => somente respostas locais.
+        # Canais livres não iniciam conversa com IA sem uma interação direta.
+        rota, intent, chamada_por_nome = decidir_interacao_nara(
+            conteudo_usuario, foi_marcado=foi_marcado,
+            canal_livre=canal_livre, tem_imagem=tem_imagem,
         )
+        # FAQ da comunidade só responde quando a conversa já foi dirigida à NARA
+        # ou está em um canal livre configurado; a busca exige correspondência forte.
+        if rota == "fallback" and not tem_imagem:
+            try:
+                faq_comunitaria = await self.bot.db.buscar_faq_comunitaria(message.guild.id, conteudo_usuario)
+                if faq_comunitaria:
+                    rota, intent = "local", f"community_faq:{int(faq_comunitaria['id'])}"
+            except Exception:
+                log.exception("Falha ao consultar FAQ comunitária aprovada.")
+        if chamada_por_nome and rota == "fallback":
+            # A chamada pelo nome é sempre local; sem FAQ correspondente, usa o fallback determinístico.
+            rota, intent = "local", "fallback_local"
         rota = aplicar_politica_de_quota(rota, chat_ia_ativa=NARA_CHAT_IA_ENABLED)
-        log.info("Roteamento Nara: intent=%s route=%s local=%s guild=%s user=%s",
-                 intent or "não_classificada", rota, rota == "local", message.guild.id, message.author.id)
+        log.info("Roteamento Nara: intent=%s route=%s ai=%s local=%s chamada_nome=%s guild=%s user=%s",
+                 intent or "não_classificada", rota, foi_marcado and conv.CONVERSA_ATIVA,
+                 rota == "local" and not foi_marcado, chamada_por_nome, message.guild.id, message.author.id)
 
         if rota == "ignorar":
             return
@@ -845,7 +1649,29 @@ class NaraIA(commands.Cog):
                 texto = await self._responder_local(message, intent)
             except Exception:
                 log.exception("Falha em uma resposta local da Nara (intenção=%s)", intent)
-                texto = "Consigo responder sem IA, mas falhei ao consultar esse dado agora. Tente novamente."
+                texto = "A consulta local falhou desta vez. Tente novamente; prefiro reconhecer o erro a inventar seus dados."
+            if foi_marcado:
+                # A resposta determinística fornece os fatos; a IA produz a resposta conversacional.
+                texto_local = texto
+                if conv.CONVERSA_ATIVA:
+                    async with message.channel.typing():
+                        texto = await self._conversar(
+                            message, conteudo_usuario, contexto_local=texto_local
+                        )
+                if tem_imagem:
+                    texto += "\n\n_Não abri nem analisei o anexo; respondi apenas ao texto._"
+                if intent == "como_transmitir_discord":
+                    try:
+                        from cogs.transmissoes import VideoTransmissaoView
+                        modulo = self.bot.get_cog("Transmissoes")
+                        video_url = await modulo.obter_video(message.guild.id) if modulo else None
+                        view = VideoTransmissaoView(video_url) if video_url else None
+                        if not video_url:
+                            texto += "\n\n_O vídeo demonstrativo ainda não foi cadastrado pela administração._"
+                        return await message.reply(texto[:1900], allowed_mentions=sem_mencao, view=view)
+                    except Exception:
+                        log.exception("Falha ao anexar o vídeo tutorial de transmissões.")
+                return await message.reply(texto[:1900], allowed_mentions=sem_mencao)
             if tem_imagem:
                 texto += "\n\n_Não abri nem analisei o anexo; respondi apenas ao texto._"
             if intent == "como_transmitir_discord":
@@ -876,18 +1702,18 @@ class NaraIA(commands.Cog):
                     texto = getattr(exc, "user_message", "A interpretação está indisponível; nenhuma ação foi executada.")
                 except TodosProvedoresIndisponiveis as exc:
                     log.error("Todos os provedores falharam ao interpretar ação: %s", exc.admin_message)
-                    texto = "Não consegui interpretar a solicitação agora. Nenhuma ação foi executada."
+                    texto = "Não consegui interpretar a solicitação com segurança. Nenhuma ação foi executada."
                 except Exception:
                     log.exception("Falha ao preparar ação da Nara.")
-                    texto = "A preparação da ação falhou. Nenhuma alteração foi confirmada."
+                    texto = "A preparação da ação falhou. Nenhuma alteração foi confirmada; o sistema não vai improvisar uma execução."
             if ctx is None:
                 return await message.reply(texto[:1900], allowed_mentions=sem_mencao)
             return await self._enviar(message, texto, ctx)
 
         if rota == "pedir_mencao":
             texto = (
-                "Essa pergunta precisa de pesquisa com fontes, recurso que está temporariamente indisponível. "
-                "para identificar o jogo e preparar o catálogo. Não consumo quota automaticamente no canal."
+                "Essa solicitação depende de pesquisa com fontes para identificar o jogo e preparar o catálogo. "
+                "Esse recurso está temporariamente indisponível; não vou chutar o título nem consumir quota automaticamente no canal."
             )
             if tem_imagem:
                 texto += "\n\n_Não abri nem analisei o print; considerei somente o texto._"
@@ -903,17 +1729,17 @@ class NaraIA(commands.Cog):
                 texto += "\n\n_Não abri nem analisei o print; considerei somente o texto._"
             return await message.reply(texto, allowed_mentions=sem_mencao)
         if rota == "fallback" and not foi_marcado and not tem_imagem:
-            from nara_help_panel import AjudaAtalhoView
+            from nara.ajuda import AjudaAtalhoView
             texto = (
                 "Não encontrei uma resposta local confiável para isso. "
-                "Se quiser que eu tente entender melhor, repita a pergunta me marcando (@Nara). "
-                "Enquanto isso, deixei a Central de Ajuda logo abaixo — escolha um assunto e encontre a resposta sem precisar adivinhar comandos."
+                "Marque (@Nara) na mensagem para abrir a conversa livre, quando disponível. "
+                "Enquanto isso, a Central de Ajuda está logo abaixo: escolha um assunto. Não precisa adivinhar comando como quem procura uma passagem secreta."
             )
             return await message.reply(
                 texto, view=AjudaAtalhoView(self.bot), allowed_mentions=sem_mencao
             )
 
-        if rota in {"fallback", "pesquisa_chat_desativada", "pesquisa_nao_suportada"} and conv.CONVERSA_ATIVA:
+        if foi_marcado and rota in {"fallback", "pesquisa_chat_desativada", "pesquisa_nao_suportada"} and conv.CONVERSA_ATIVA:
             async with message.channel.typing():
                 texto = await self._conversar(message, conteudo_usuario)
             if tem_imagem:
@@ -921,9 +1747,9 @@ class NaraIA(commands.Cog):
             return await message.reply(texto[:1900], allowed_mentions=sem_mencao)
         if rota == "pesquisa_chat_desativada":
             texto = (
-                "Desativei a pesquisa conversacional para preservar a quota. Não vou chamar o Gemini para guias ou perguntas abertas no chat. "
-                "Para consultar os recursos disponíveis, abra a Central de Ajuda pelo `/nara`. "
-                "e só chama a pesquisa externa quando não encontra dados existentes."
+                "Guia e pergunta aberta de jogo eu não faço pelo chat, pra não gastar meu fôlego à toa. "
+                "Pra ver o que eu resolvo, abre `/nara` → **Ajuda e suporte** → **Abrir central de ajuda**. "
+                "Pesquisa externa só entra quando os dados daqui não resolvem."
             )
             if tem_imagem:
                 texto += "\n\n_Não abri nem analisei o print; considerei somente o texto._"
@@ -937,11 +1763,11 @@ class NaraIA(commands.Cog):
                 texto += "\n\n_Não abri nem analisei o print; considerei somente o texto._"
             return await message.reply(texto, allowed_mentions=sem_mencao)
         if rota == "fallback":
-            from nara_help_panel import AjudaAtalhoView
+            from nara.ajuda import AjudaAtalhoView
             texto = (
                 "Ainda não tenho uma resposta local segura para essa pergunta. "
-                "Se quiser uma resposta conversacional, marque a Nara na mensagem; "
-                "ou abra a Central de Ajuda e escolha uma pergunta pronta."
+                "Marque a Nara para tentar uma resposta conversacional, quando o serviço estiver disponível, "
+                "ou abra a Central de Ajuda e escolha uma pergunta pronta. Prefiro pedir contexto a fabricar certeza."
             )
             if tem_imagem:
                 texto += "\n\n_Não abri nem analisei o anexo; considerei somente o texto._"
@@ -952,8 +1778,8 @@ class NaraIA(commands.Cog):
         # Pesquisa factual explicitamente solicitada, separada do papo livre e das ações.
         if self.ia is None:
             return await message.reply(
-                "A pesquisa avançada está indisponível porque nenhum provedor de IA foi configurado. "
-                "As respostas básicas e consultas do servidor continuam funcionando localmente.",
+                "Pesquisa mais pesada tá fora do ar por aqui agora. "
+                "Dúvida do servidor e consulta de dados continuam comigo normalmente.",
                 allowed_mentions=sem_mencao,
             )
 
@@ -987,8 +1813,11 @@ class NaraIA(commands.Cog):
         return await self._enviar(message, texto, ctx)
 
     async def cog_load(self):
+        # Inicializa tabelas/migrações. Antes havia outro cog_load acima com o mesmo nome;
+        # ele era sobrescrito pelo Python e as tabelas relacionais nunca eram criadas.
+        await self._inicializar_banco()
         # Registra o botão persistente para continuar funcionando após reinícios.
-        from nara_help_panel import PainelAjudaPublicoView
+        from nara.ajuda import PainelAjudaPublicoView
         self.bot.add_view(PainelAjudaPublicoView(self.bot))
 
     @discord.app_commands.command(
@@ -1009,7 +1838,7 @@ class NaraIA(commands.Cog):
             return await interaction.response.send_message(
                 "Não consegui publicar o painel neste tipo de canal.", ephemeral=True
             )
-        from nara_help_panel import PainelAjudaPublicoView
+        from nara.ajuda import PainelAjudaPublicoView
         embed = discord.Embed(
             title="📚 Central de Ajuda da Nara",
             description=(
@@ -1039,7 +1868,7 @@ class NaraIA(commands.Cog):
 
     @discord.app_commands.command(name="comandos", description="Abre o índice organizado de comandos do NARA por área.")
     async def comandos_command(self, interaction: discord.Interaction):
-        from nara_help_panel import ComandosEntradaView, embed_inicio_comandos
+        from nara.ajuda import ComandosEntradaView, embed_inicio_comandos
         await interaction.response.send_message(
             embed=embed_inicio_comandos(), view=ComandosEntradaView(self.bot), ephemeral=True
         )
@@ -1050,10 +1879,10 @@ class NaraIA(commands.Cog):
             return await interaction.response.send_message(
                 "A Central de Ajuda está disponível dentro do servidor NARA.", ephemeral=True
             )
-        from nara_help_panel import CentralAjudaView
+        from nara.ajuda import CentralAjudaView
         embed = discord.Embed(
             title="Central de Ajuda da Nara",
-            description="1 · Escolha o assunto. 2 · Escolha a pergunta. As respostas são locais e não consomem Gemini.",
+            description="1 · Escolha o assunto. 2 · Escolha a pergunta. As respostas são instantâneas e privadas.",
             color=discord.Color.dark_teal(),
         )
         await interaction.response.send_message(embed=embed, view=CentralAjudaView(self.bot), ephemeral=True)
@@ -1082,22 +1911,13 @@ class NaraIA(commands.Cog):
             configured.append(f"Reserva (`{GEMINI_BACKUP_MODEL}`)")
         if GEMINI_THIRD_API_KEY:
             configured.append(f"Terceira (`{GEMINI_THIRD_MODEL}`)")
-        search = pesquisa_status()
-        if search["blocked"]:
-            minutes = max(1, (search["remaining_seconds"] + 59) // 60)
-            search_line = f"**Pesquisa web (Tavily Free): PAUSADA** — {search['kind']}, cerca de {minutes} min."
-        elif search["configured"]:
-            search_line = "**Pesquisa web (Tavily Free): circuito liberado** (não confirma saldo mensal restante)."
-        else:
-            search_line = "**Pesquisa web (Tavily Free): não configurada** — falta TAVILY_API_KEY."
-        problemas = search.get("config_problems") or []
+        problemas = diagnostico_configuracao()
         avisos = ("\n\n⚠️ **Atenção na configuração:**\n" + "\n".join(f"• {x}" for x in problemas)) if problemas else ""
         body = (
             f"**Configuração Gemini:** `{', '.join(configured) if configured else 'nenhuma chave configurada'}`\n\n"
             + "\n".join(labels)
-            + "\n" + search_line
             + avisos
-            + "\n\nA pesquisa usa Tavily Free; Gemini principal, reserva e terceira configuração analisam as fontes em sequência. "
+            + "\n\nGemini principal, reserva e terceira configuração respondem em sequência. "
               "Duas chaves do mesmo projeto Google compartilham quota. Não vincule billing se não quiser pagar."
         )
         await interaction.response.send_message(body[:1900], ephemeral=True)

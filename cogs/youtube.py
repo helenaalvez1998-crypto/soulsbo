@@ -9,10 +9,16 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from config import (
-    YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID, YOUTUBE_FEED_URL, ATOM, YT,
-    VIDEO_CHANNEL_ID, LIVE_CHANNEL_ID, ROLE_VIDEO, ROLE_LIVE,
-    YOUTUBE_VIDEO_CHECK_SECONDS, YOUTUBE_LIVE_CHECK_MINUTES,
-    LIVE_START_HOUR, LIVE_END_HOUR, BRAZIL_TZ,
+    YOUTUBE_API_KEY,
+    YOUTUBE_CHANNEL_ID,
+    YOUTUBE_FEED_URL,
+    ATOM,
+    YT,
+    YOUTUBE_VIDEO_CHECK_SECONDS,
+    YOUTUBE_LIVE_CHECK_MINUTES,
+    LIVE_START_HOUR,
+    LIVE_END_HOUR,
+    BRAZIL_TZ,
 )
 from admin_config import GuildConfig
 from utils import get_text_channel, erro_comando
@@ -258,7 +264,7 @@ class YouTube(commands.Cog):
         embed = discord.Embed(
             title=latest["title"][:250],
             url=latest["url"],
-            description=f"Um vídeo novo foi publicado no canal **oQuasepro**.\n\n[Assistir agora]({latest['url']})",
+            description=f"O canal **oQuasepro** publicou um vídeo novo. Se você estava esperando um motivo para pausar a run, está aqui.\n\n[Assistir agora]({latest['url']})",
             color=discord.Color.red(),
             timestamp=datetime.now(timezone.utc),
         )
@@ -330,7 +336,7 @@ class YouTube(commands.Cog):
         embed = discord.Embed(
             title="oQuasepro está AO VIVO no YouTube!",
             url=live["url"],
-            description=f"**{live['title']}**\n\n[Assistir à live agora]({live['url']})",
+            description=f"**{live['title']}**\n\nA transmissão começou. A arena pode esperar alguns minutos.\n\n[Assistir à live agora]({live['url']})",
             color=discord.Color.red(),
             timestamp=datetime.now(timezone.utc),
         )

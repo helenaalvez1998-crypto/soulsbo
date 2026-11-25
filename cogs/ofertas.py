@@ -6,6 +6,7 @@ Fontes (todas consultadas em região BR / preços em reais quando a loja informa
   • GOG                 – promoções e jogos grátis em BRL                (sem chave)
   • GamerPower          – giveaways de várias lojas                      (sem chave)
   • IsThereAnyDeal      – Nuuvem e outras lojas em BRL + giveaways       (ITAD_API_KEY, opcional)
+  • CheapShark          – promoções de várias lojas em USD → BRL        (sem chave)
   • GG.deals            – comparação de preço da Steam em BRL            (GG_DEALS_API_KEY, opcional)
 
 Cada oferta vira um cartão limpo: imagem grande, nome grande, preço original riscado
@@ -13,6 +14,7 @@ e preço de agora. Nenhuma fonte é obrigatória: se uma falhar, as outras conti
 """
 import asyncio
 import json
+from email.utils import parsedate_to_datetime
 import logging
 import os
 import re
@@ -27,15 +29,25 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from config import (
-    GAMES_CHANNEL_ID, PROMOS_CHANNEL_ID, OFFERS_CHECK_MINUTES, MAX_OFFERS_PER_CHECK,
-    MIN_PROMO_DISCOUNT, SEED_OFFERS_ON_FIRST_RUN, SENT_DB_PATH, GG_DEALS_API_KEY,
-    ITAD_API_KEY, ITAD_SHOPS, OFFERS_GOG_ENABLED, OFFERS_SHOW_DESCRIPTION, BRAZIL_TZ,
+    OFFERS_CHECK_MINUTES,
+    MAX_OFFERS_PER_CHECK,
+    MIN_PROMO_DISCOUNT,
+    SEED_OFFERS_ON_FIRST_RUN,
+    SENT_DB_PATH,
+    GG_DEALS_API_KEY,
+    ITAD_API_KEY,
+    ITAD_SHOPS,
+    OFFERS_GOG_ENABLED,
+    OFFERS_SHOW_DESCRIPTION,
+    BRAZIL_TZ,
 )
 from admin_config import GuildConfig
 from utils import get_text_channel, erro_comando
-from ia_provedores import gerar_texto_com_failover
+from ia.provedores import gerar_texto_com_failover
 
 log = logging.getLogger("ofertas")
+
+# CheapShark: exige redução real, desconto >=50% e qualidade mínima.
 
 HAS_LAYOUT_VIEW = hasattr(discord.ui, "LayoutView") and hasattr(discord.ui, "MediaGallery")
 
@@ -276,15 +288,50 @@ def _brl_only(currency: Any) -> bool:
 
 # =============================================================== requisição segura
 
+# Respeita o Retry-After para não insistir enquanto a API mantém o bloqueio.
+_REQUEST_COOLDOWNS: dict[str, datetime] = {}
+
+
 async def _request_json(session: aiohttp.ClientSession, method: str, url: str,
                         nome: str, **kwargs) -> Any | None:
     """Faz a requisição e devolve JSON ou None. Nunca registra URL/headers (podem ter chave)."""
+    cooldown_until = _REQUEST_COOLDOWNS.get(nome)
+    now = datetime.now(timezone.utc)
+    if cooldown_until and now < cooldown_until:
+        remaining = int((cooldown_until - now).total_seconds())
+        log.info("%s em pausa por limite da API; nova tentativa em aproximadamente %s s.", nome, remaining)
+        return None
+
     try:
         async with session.request(
             method, url, timeout=aiohttp.ClientTimeout(total=20), **kwargs
         ) as resp:
             if resp.status == 429:
-                log.warning("%s limitou requisições; tentaremos no próximo ciclo.", nome)
+                retry_after = (resp.headers.get("Retry-After") or "").strip()
+                retry_seconds = 0
+                if retry_after:
+                    try:
+                        retry_seconds = max(0, int(float(retry_after)))
+                    except ValueError:
+                        try:
+                            retry_dt = parsedate_to_datetime(retry_after)
+                            if retry_dt.tzinfo is None:
+                                retry_dt = retry_dt.replace(tzinfo=timezone.utc)
+                            retry_seconds = max(0, int((retry_dt - now).total_seconds()))
+                        except (TypeError, ValueError, OverflowError):
+                            retry_seconds = 0
+                if retry_seconds > 0:
+                    _REQUEST_COOLDOWNS[nome] = now + timedelta(seconds=retry_seconds)
+                    log.warning(
+                        "%s respondeu HTTP 429; respeitando Retry-After de %s s.",
+                        nome, retry_seconds,
+                    )
+                else:
+                    _REQUEST_COOLDOWNS[nome] = now + timedelta(minutes=30)
+                    log.warning(
+                        "%s respondeu HTTP 429 sem Retry-After válido; pausa preventiva de 30 minutos.",
+                        nome,
+                    )
                 return None
             if resp.status in (401, 403):
                 log.warning("%s recusou o acesso (HTTP %s). Confira a chave/plano.", nome, resp.status)
@@ -619,6 +666,216 @@ async def fetch_itad_giveaways(session: aiohttp.ClientSession) -> list[dict[str,
     return items
 
 
+
+# ---- CheapShark (promoções de várias lojas) -------------------------------------
+CHEAPSHARK_DEALS_URL = "https://www.cheapshark.com/api/1.0/deals"
+CHEAPSHARK_STORES_URL = "https://www.cheapshark.com/api/1.0/stores"
+USD_BRL_URL = "https://economia.awesomeapi.com.br/json/last/USD-BRL"
+USD_BRL_CACHE_SECONDS = 6 * 60 * 60
+
+
+async def fetch_usd_brl_rate(session: aiohttp.ClientSession) -> float | None:
+    """Obtém USD/BRL com cache e duas fontes; evita consultar câmbio a cada ciclo."""
+    now = datetime.now(timezone.utc).timestamp()
+    cached_rate = getattr(fetch_usd_brl_rate, "_rate", None)
+    cached_at = getattr(fetch_usd_brl_rate, "_at", 0.0)
+    if cached_rate and now - cached_at < USD_BRL_CACHE_SECONDS:
+        return float(cached_rate)
+
+    # Frankfurter é a fonte principal: não exige chave e não publica quotas diárias/mensais.
+    # A AwesomeAPI fica como fallback caso a primeira esteja indisponível.
+    providers = (
+        (
+            "Frankfurter",
+            "https://api.frankfurter.dev/v2/rate/usd/brl",
+            lambda data: float(data["rate"]) if isinstance(data, dict) else 0.0,
+        ),
+        (
+            "AwesomeAPI",
+            USD_BRL_URL,
+            lambda data: float(data["USDBRL"]["bid"]) if isinstance(data, dict) else 0.0,
+        ),
+    )
+
+    for provider_name, url, extract_rate in providers:
+        try:
+            data = await _request_json(session, "GET", url, f"cotação USD/BRL ({provider_name})")
+            rate = extract_rate(data)
+            if rate > 0:
+                fetch_usd_brl_rate._rate = rate
+                fetch_usd_brl_rate._at = now
+                fetch_usd_brl_rate._provider = provider_name
+                log.info("Cotação USD/BRL obtida via %s: %.4f", provider_name, rate)
+                return rate
+        except Exception as exc:
+            log.warning("Falha na cotação USD/BRL via %s: %s", provider_name, exc)
+
+    # Se todas as fontes falharem, usa a última taxa válida em memória.
+    if cached_rate:
+        log.warning("Fontes de câmbio indisponíveis; usando última cotação válida em cache.")
+        return float(cached_rate)
+
+    return None
+
+
+async def fetch_cheapshark_stores(session: aiohttp.ClientSession) -> dict[str, str]:
+    """Obtém os nomes das lojas monitoradas pelo CheapShark."""
+    data = await _request_json(session, "GET", CHEAPSHARK_STORES_URL, "CheapShark (lojas)")
+    if not isinstance(data, list):
+        return {}
+    return {
+        str(store.get("storeID")): str(store.get("storeName") or "Loja")
+        for store in data
+        if isinstance(store, dict) and store.get("storeID") is not None
+        and str(store.get("isActive", "1")) == "1"
+    }
+
+
+async def fetch_cheapshark_offers(
+    session: aiohttp.ClientSession,
+    store_names: dict[str, str],
+    usd_brl: float | None,
+) -> list[dict[str, Any]]:
+    """Busca até 300 promoções CheapShark, filtra qualidade e desconto mínimo."""
+    if not usd_brl or usd_brl <= 0:
+        log.warning("CheapShark pausado: cotação USD/BRL indisponível; não serão exibidos preços incorretos.")
+        return []
+
+    # Cinco páginas sequenciais de até 60 resultados (limite documentado por página).
+    all_deals: list[dict[str, Any]] = []
+    for page_number in range(5):
+        page_data = await _request_json(
+            session, "GET", CHEAPSHARK_DEALS_URL, "CheapShark",
+            params={
+                "pageNumber": page_number,
+                "pageSize": 60,
+                "sortBy": "DealRating",
+                "onSale": 1,
+            },
+            headers={"User-Agent": "NARABOT/1.0 (Discord game deals monitor)"},
+        )
+        if not isinstance(page_data, list):
+            log.warning(
+                "CheapShark página %s não retornou uma lista (tipo=%s); interrompendo paginação.",
+                page_number + 1, type(page_data).__name__,
+            )
+            break
+        all_deals.extend(page_data)
+        log.info(
+            "CheapShark página %s/5: %s registros recebidos.",
+            page_number + 1, len(page_data),
+        )
+        if len(page_data) < 60:
+            break
+
+    if not all_deals:
+        log.warning("CheapShark não retornou registros nas páginas consultadas.")
+        return []
+
+    log.info("CheapShark API respondeu com %s registros brutos em até 5 páginas.", len(all_deals))
+    candidates: dict[str, dict[str, Any]] = {}
+    rejected_not_flagged = 0
+    rejected_not_on_sale = 0
+    rejected_discount = 0
+    rejected_low_quality = 0
+    duplicate_game_deals = 0
+
+    for deal in all_deals:
+        try:
+            title = str(deal.get("title") or "").strip()
+            deal_id = str(deal.get("dealID") or "").strip()
+            sale_usd = float(deal.get("salePrice"))
+            normal_usd = float(deal.get("normalPrice"))
+            if not title or not deal_id or sale_usd < 0 or normal_usd <= 0:
+                continue
+
+            if str(deal.get("isOnSale", "0")).strip() != "1":
+                rejected_not_flagged += 1
+                continue
+            if sale_usd >= normal_usd:
+                rejected_not_on_sale += 1
+                continue
+
+            discount = round(((normal_usd - sale_usd) / normal_usd) * 100)
+            if discount < 50:
+                rejected_discount += 1
+                continue
+
+            steam_rating = int(float(deal.get("steamRatingPercent") or 0))
+            steam_review_count = int(float(deal.get("steamRatingCount") or 0))
+            metacritic = int(float(deal.get("metacriticScore") or 0))
+
+            # Qualidade: Steam >=75% com >=300 avaliações OU Metacritic >=70.
+            steam_quality = steam_rating >= 75 and steam_review_count >= 300
+            metacritic_quality = metacritic >= 70
+            if not (steam_quality or metacritic_quality):
+                rejected_low_quality += 1
+                continue
+
+            deal_rating = float(deal.get("dealRating") or 0)
+        except (TypeError, ValueError):
+            continue
+
+        store_id = str(deal.get("storeID") or "")
+        store = store_names.get(store_id, f"Loja {store_id}" if store_id else "Loja")
+        url = f"https://www.cheapshark.com/redirect?dealID={deal_id}"
+        sale_brl = sale_usd * usd_brl
+        normal_brl = normal_usd * usd_brl
+        thumb = deal.get("thumb")
+        steam_app_id = str(deal.get("steamAppID") or "").strip()
+        # Preferir header art Steam em resolução maior; o MediaGallery usa toda a largura do painel.
+        image = (
+            f"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{steam_app_id}/header.jpg"
+            if steam_app_id
+            else thumb if isinstance(thumb, str) and thumb.startswith("https://") else None
+        )
+        game_id = str(deal.get("gameID") or "").strip()
+        dedupe_id = f"cheapshark-game:{game_id}" if game_id else f"cheapshark-deal:{deal_id}"
+        candidate = {
+            "key": dedupe_id,
+            "source_id": "cheapshark",
+            "title": title,
+            "url": url,
+            "image": image,
+            "store": store,
+            "platform": "PC",
+            "price": fmt_brl(sale_brl),
+            "original_price": fmt_brl(normal_brl),
+            "discount": discount,
+            "end": None,
+            "kind": "promo",
+            "via": f"CheapShark · conversão estimada (US$ 1 = {fmt_brl(usd_brl)})",
+            "relevance_rank": (
+                steam_rating + min(steam_review_count, 10000) / 100 + metacritic
+            ),
+            "_deal_rating": deal_rating,
+        }
+
+        # Um cartão por jogo; mantém a oferta com melhor DealRating e depois maior desconto.
+        existing = candidates.get(dedupe_id)
+        if existing:
+            duplicate_game_deals += 1
+            if (candidate["_deal_rating"], candidate["discount"]) <= (
+                existing["_deal_rating"], existing["discount"]
+            ):
+                continue
+        candidates[dedupe_id] = candidate
+
+    items = []
+    for candidate in candidates.values():
+        candidate.pop("_deal_rating", None)
+        items.append(candidate)
+
+    log.info(
+        "CheapShark qualidade: brutos=%s | sem isOnSale=%s | sem redução=%s | "
+        "desconto abaixo de 50%%=%s | reprovados por avaliações/Metacritic=%s | "
+        "duplicados do mesmo jogo=%s | aprovados únicos=%s",
+        len(all_deals), rejected_not_flagged, rejected_not_on_sale,
+        rejected_discount, rejected_low_quality, duplicate_game_deals, len(items),
+    )
+    return items
+
+
 # ---- GG.deals (comparação opcional, só Steam) -----------------------------------
 async def enrich_with_gg_deals_prices(session: aiohttp.ClientSession, items: list[dict[str, Any]]) -> None:
     """Acrescenta comparação GG.deals em BRL sem substituir o preço regional da Steam."""
@@ -702,9 +959,9 @@ def cartao_texto(item: dict[str, Any]) -> str:
     rotulo = "🎁 JOGO GRÁTIS" if gratis else "🔥 PROMOÇÃO"
     store = str(item.get("store") or "").strip()
     linhas = [
-        f"-# {rotulo}" + (f"  ·  {_esc(store)}" if store else ""),
+        f"**{rotulo}**" + (f"  ·  **{_esc(store)}**" if store else ""),
         f"# {_esc(str(item.get('title') or 'Jogo'))[:240]}",
-        f"### {preco_linha(item)}",
+        f"## {preco_linha(item)}",
     ]
     meta = []
     plat = str(item.get("platform") or "").strip()
@@ -716,7 +973,7 @@ def cartao_texto(item: dict[str, Any]) -> str:
     if item.get("via"):
         meta.append(f"via {item['via']}")
     if meta:
-        linhas.append("-# " + "  ·  ".join(meta))
+        linhas.append("  ·  ".join(meta))
 
     gg_url, gg_retail, gg_keys = item.get("gg_deals_url"), item.get("gg_deals_retail"), item.get("gg_deals_keyshops")
     if gg_url and (gg_retail or gg_keys):
@@ -725,7 +982,7 @@ def cartao_texto(item: dict[str, Any]) -> str:
             partes.append(f"lojas oficiais {gg_retail}")
         if gg_keys:
             partes.append(f"keyshops {gg_keys}")
-        linhas.append(f"-# GG.deals: {' · '.join(partes)} · [comparar]({gg_url})")
+        linhas.append(f"**GG.deals:** {' · '.join(partes)} · [comparar]({gg_url})")
 
     if OFFERS_SHOW_DESCRIPTION and item.get("description"):
         linhas.append(str(item["description"])[:300].rstrip() + ("…" if len(str(item["description"])) > 300 else ""))
@@ -806,14 +1063,18 @@ AMOSTRA = {
 # ===================================================================== cog
 
 class Ofertas(commands.Cog):
-    """Jogos grátis e promoções (Steam BR, Epic, GOG, GamerPower, ITAD/Nuuvem) com cartões limpos."""
+    """Jogos grátis e promoções (Steam, Epic, GOG, CheapShark, GamerPower e ITAD/Nuuvem)."""
 
     def __init__(self, bot):
         self.bot = bot
         self.http_session: aiohttp.ClientSession | None = None
+        self.cheapshark_stores: dict[str, str] = {}
 
     async def cog_load(self):
-        self.http_session = aiohttp.ClientSession(headers={"User-Agent": "NaraBot/2.0"})
+        self.http_session = aiohttp.ClientSession(headers={
+            "User-Agent": "NARABOT/1.0 (Discord game deals monitor)"
+        })
+        self.cheapshark_stores = await fetch_cheapshark_stores(self.http_session)
         await asyncio.to_thread(init_offers_db)
         await asyncio.to_thread(migrate_legacy_seeds)
         self.offers_loop.start()
@@ -838,6 +1099,23 @@ class Ofertas(commands.Cog):
                 items.extend(result)
             elif isinstance(result, Exception):
                 log.error("Erro na fonte %s: %r", fonte.__name__, result)
+
+        try:
+            usd_brl = await fetch_usd_brl_rate(self.http_session)
+            cheapshark = await fetch_cheapshark_offers(
+                self.http_session, self.cheapshark_stores, usd_brl
+            )
+            cheapshark_eligible = len(cheapshark)
+            log.info(
+                "CheapShark: lojas=%s | ofertas recebidas=%s | "
+                "promoções válidas=%s (desconto mínimo interno: 50%%)",
+                len(self.cheapshark_stores),
+                len(cheapshark),
+                cheapshark_eligible,
+            )
+            items.extend(cheapshark)
+        except Exception:
+            log.exception("Erro na fonte CheapShark.")
         return items
 
     @tasks.loop(minutes=OFFERS_CHECK_MINUTES)
@@ -866,6 +1144,10 @@ class Ofertas(commands.Cog):
             fontes_presentes = {i["source_id"] for i in unique.values()}
             if SEED_OFFERS_ON_FIRST_RUN:
                 for src in fontes_presentes:
+                    # CheapShark deve publicar ofertas já encontradas na primeira coleta.
+                    # As fontes antigas continuam protegidas contra inundação inicial.
+                    if src == "cheapshark":
+                        continue
                     if await asyncio.to_thread(offer_already_sent, f"seed:{src}"):
                         continue
                     seeded = 0
@@ -885,13 +1167,30 @@ class Ofertas(commands.Cog):
                     continue
                 if item["kind"] == "game" and await asyncio.to_thread(free_title_recently_sent, item.get("norm", "")):
                     continue
-                if item["kind"] == "promo" and (item.get("discount") or 0) < MIN_PROMO_DISCOUNT:
+                if (
+                    item["kind"] == "promo"
+                    and item.get("source_id") != "cheapshark"
+                    and (item.get("discount") or 0) < MIN_PROMO_DISCOUNT
+                ):
                     continue
                 novos.append(item)
-            # Jogos grátis primeiro; depois as promoções de maior desconto.
-            novos.sort(key=lambda i: (i["kind"] != "game", -(i.get("discount") or 0)))
+            # Jogos grátis primeiro; depois CheapShark por relevância e, em seguida, desconto.
+            novos.sort(key=lambda i: (
+                i["kind"] != "game",
+                -float(i.get("relevance_rank") or 0),
+                -(i.get("discount") or 0),
+            ))
+
+            cheapshark_total = sum(1 for i in unique.values() if i.get("source_id") == "cheapshark")
+            cheapshark_new = sum(1 for i in novos if i.get("source_id") == "cheapshark")
+            log.info(
+                "CheapShark pipeline: coletadas=%s | novas após deduplicação/filtros=%s",
+                cheapshark_total,
+                cheapshark_new,
+            )
 
             sent_this_cycle = 0
+            cheapshark_sent_this_cycle = 0
             guild_id = self.bot.guilds[0].id if self.bot.guilds else 0
             for item in novos:
                 if item["kind"] == "game":
@@ -912,12 +1211,18 @@ class Ofertas(commands.Cog):
                     if item["kind"] == "game":
                         await asyncio.to_thread(mark_free_title, item.get("norm", ""))
                     sent_this_cycle += 1
+                    if item.get("source_id") == "cheapshark":
+                        cheapshark_sent_this_cycle += 1
                     await asyncio.sleep(1.2)
                     if sent_this_cycle >= MAX_OFFERS_PER_CHECK:
                         break
                 except discord.HTTPException:
                     log.exception("Falha publicando oferta: %s", item.get("title"))
-            log.info("Ofertas verificadas: %s; novas publicadas: %s", len(unique), sent_this_cycle)
+            log.info(
+                "Ofertas verificadas: %s; novas publicadas: %s | "
+                "CheapShark publicadas nesta coleta: %s",
+                len(unique), sent_this_cycle, cheapshark_sent_this_cycle,
+            )
         except Exception:
             log.exception("Erro na rotina de ofertas.")
 
@@ -946,6 +1251,7 @@ class Ofertas(commands.Cog):
             f"**Verificação:** a cada {OFFERS_CHECK_MINUTES} minutos · desconto mínimo {MIN_PROMO_DISCOUNT}%\n"
             f"**Layout:** {layout}\n\n"
             "**Fontes**\n✅ Steam Brasil\n✅ Epic Games Store (BR)\n✅ GamerPower\n"
+            f"✅ CheapShark ({len(self.cheapshark_stores)} lojas cadastradas; USD → BRL)\n"
             f"{gog}\n{itad}\n{gg}",
             ephemeral=True,
         )

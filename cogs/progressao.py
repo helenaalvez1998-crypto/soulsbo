@@ -1,13 +1,16 @@
 import logging
 import random
 import time
+import hashlib
+import re
+import unicodedata
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
 import config
 from admin_config import GuildConfig
-from levels import nivel_por_xp, xp_para_nivel, patente_por_nivel, barra_progresso
+from levels import nivel_por_xp, patente_por_nivel, barra_progresso
 from cogs.platinas import sincronizar_patente
 
 # XP de participação; valores ajustáveis aqui.
@@ -18,6 +21,8 @@ XP_VOZ_POR_INTERVALO = 5
 INTERVALO_VOZ_SEGUNDOS = 300
 XP_RUN_APROVADA = 100
 XP_NOVO_RECORDE = 100
+XP_MENSAGENS_LIMITE_DIARIO = 20
+XP_MENSAGEM_TAMANHO_MINIMO = 15
 
 class ProgressaoXP(commands.Cog):
     """Progressão única por mensagens, voz, platinas e runs aprovadas."""
@@ -69,16 +74,16 @@ class ProgressaoXP(commands.Cog):
     async def notificar_recompensa(self, guild, user_id: int, antigo_nivel: int,
                                    novo_nivel: int, quantidade: int, motivo: str):
         """Atualiza efeitos do Discord para XP já creditado em outra transação."""
-        membro = guild.get_member(user_id) if guild else None
-        if membro and novo_nivel > antigo_nivel:
-            await sincronizar_patente(guild, membro, novo_nivel)
-            try:
-                await membro.send(
-                    f"⚔️ Você alcançou o nível **{novo_nivel} — {patente_por_nivel(novo_nivel)}** "
-                    f"no sistema da Nara! (+{quantidade} XP por {motivo})"
-                )
-            except (discord.Forbidden, discord.HTTPException):
-                pass
+        if novo_nivel > antigo_nivel:
+            membro = guild.get_member(user_id) if guild else None
+            if membro:
+                await sincronizar_patente(guild, membro, novo_nivel)
+            from utils import notificar_usuario
+            await notificar_usuario(
+                self.bot, guild.id if guild else None, user_id, "levels",
+                f"⚔️ Novo nível desbloqueado: **{novo_nivel} — {patente_por_nivel(novo_nivel)}**. "
+                f"Você recebeu +{quantidade} XP por {motivo}."
+            )
 
     async def conceder_xp(self, guild, user_id: int, quantidade: int, motivo: str):
         if quantidade <= 0:
@@ -92,20 +97,47 @@ class ProgressaoXP(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot or message.guild is None:
+        if message.author.bot or message.guild is None or message.webhook_id:
             return
-        # Ignora mensagens vazias, comandos e canais de moderação.
-        if not message.content.strip() and not message.attachments:
-            return
-        mod_ch_id = await GuildConfig.get(self.bot.db, message.guild.id, "mod_channel")
-        if mod_ch_id and message.channel.id == mod_ch_id:
-            return
+        # Cooldown em memória primeiro: evita consultar o banco para quem ainda está no intervalo.
         agora = time.monotonic()
         chave = (message.guild.id, message.author.id)
         if agora - self.ultimo_xp_msg.get(chave, 0) < INTERVALO_MENSAGEM:
             return
+        # Mensagens vazias, comandos e conteúdo mínimo não geram XP.
+        conteudo = (message.content or "").strip()
+        if len(conteudo) < XP_MENSAGEM_TAMANHO_MINIMO:
+            return
+        if conteudo.startswith(("!", ".", "/", "?")):
+            return
+        if self.bot.user and conteudo.startswith((f"<@{self.bot.user.id}>", f"<@!{self.bot.user.id}>")):
+            return
+        palavras = re.findall(r"\w+", conteudo, flags=re.UNICODE)
+        if len(palavras) < 3:
+            return
+        mod_ch_id = await GuildConfig.get(self.bot.db, message.guild.id, "mod_channel")
+        if mod_ch_id and message.channel.id == mod_ch_id:
+            return
+
+        # Hash normalizado evita farm com cópia/repetição de mensagens nos últimos 7 dias.
+        normalizado = unicodedata.normalize("NFKC", conteudo).casefold()
+        normalizado = " ".join(normalizado.split())
+        digest = hashlib.sha256(normalizado.encode("utf-8")).hexdigest()
+        try:
+            elegivel = await self.bot.db.registrar_xp_mensagem(
+                message.guild.id, message.author.id, digest, XP_MENSAGENS_LIMITE_DIARIO
+            )
+        except Exception:
+            logging.exception("Falha ao validar elegibilidade de XP por mensagem para user=%s", message.author.id)
+            return
+        if not elegivel:
+            return
         self.ultimo_xp_msg[chave] = agora
-        await self.conceder_xp(message.guild, message.author.id, random.randint(XP_MENSAGEM_MIN, XP_MENSAGEM_MAX), "interação no Discord")
+        await self.conceder_xp(
+            message.guild, message.author.id,
+            random.randint(XP_MENSAGEM_MIN, XP_MENSAGEM_MAX),
+            "interação no Discord",
+        )
 
     @tasks.loop(seconds=INTERVALO_VOZ_SEGUNDOS)
     async def voz(self):
@@ -140,12 +172,12 @@ class ProgressaoXP(commands.Cog):
     async def ranking_xp(self, interaction: discord.Interaction):
         rows = await self.bot.db.ranking_xp(10)
         if not rows:
-            return await interaction.response.send_message("Ainda não há XP registrado.", ephemeral=True)
+            return await interaction.response.send_message("A arena de XP ainda está vazia. Quando houver progresso registrado, o ranking aparece aqui.", ephemeral=True)
         linhas = []
         for i, row in enumerate(rows, 1):
             nivel = nivel_por_xp(int(row['valor']))
             linhas.append(f"`{i:>2}.` <@{row['user_id']}> — **Nível {nivel}** · {patente_por_nivel(nivel)} · {row['valor']} XP")
-        texto = "## 🏆 Ranking de XP da Nara\n\n" + "\n".join(linhas)
+        texto = "## 🏆 Ranking de XP da Nara\n\nA classificação é dos números; eu só organizo o espetáculo.\n\n" + "\n".join(linhas)
         await interaction.response.send_message(content=texto)
 
 

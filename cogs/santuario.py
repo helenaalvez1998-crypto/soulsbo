@@ -6,13 +6,13 @@ import time
 
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 import config
 from admin_config import GuildConfig
 from cogs.platinas import eh_moderador
 from levels import nivel_por_xp, patente_por_nivel, barra_progresso
-from links_sociais import REDES, normalizar_link
+from utils import REDES, normalizar_link
 from utils import upsert_panel
 
 log = logging.getLogger("colizeu")
@@ -50,10 +50,125 @@ class Santuario(commands.Cog):
         self.bot = bot
         self._lock_criar = asyncio.Lock()
         self._ultimo_refresh: dict[int, float] = {}
+        self._ultima_atividade: dict[int, float] = {}
+        # Saída automática de visitantes 2 minutos após a liberação da visita.
+        self._saidas_visitantes: dict[tuple[int, int], asyncio.Task] = {}
 
     async def cog_load(self):
         self.bot.add_view(SantuarioPublicoView(self))
         self.bot.add_view(CartaoView(self))
+        if not self._monitorar_santuarios.is_running():
+            self._monitorar_santuarios.start()
+
+    def cog_unload(self):
+        self._monitorar_santuarios.cancel()
+        for tarefa in self._saidas_visitantes.values():
+            tarefa.cancel()
+        self._saidas_visitantes.clear()
+
+    def _marcar_atividade_local(self, thread_id: int) -> None:
+        self._ultima_atividade[thread_id] = time.monotonic()
+
+    def _agendar_saida_visitante(self, thread_id: int, user_id: int) -> None:
+        """Remove o visitante da thread 30 segundos após a liberação da visita."""
+        chave = (int(thread_id), int(user_id))
+        anterior = self._saidas_visitantes.pop(chave, None)
+        if anterior and not anterior.done():
+            anterior.cancel()
+
+        async def executar_saida():
+            try:
+                await asyncio.sleep(30)
+                perfil = await self.bot.db.get_perfil_por_thread(thread_id)
+                if perfil is None or int(perfil["user_id"]) == user_id:
+                    return
+                thread = await self._thread(thread_id)
+                if thread is None or thread.archived:
+                    return
+                await thread.remove_user(discord.Object(id=user_id))
+                log.info(
+                    "Visitante removido automaticamente do Santuário após 30 segundos: thread=%s user=%s",
+                    thread_id, user_id,
+                )
+            except asyncio.CancelledError:
+                raise
+            except discord.NotFound:
+                pass  # O visitante já saiu ou o tópico não existe mais.
+            except discord.Forbidden:
+                log.warning(
+                    "Sem permissão para remover visitante automaticamente do Santuário %s; verifique Gerenciar Tópicos",
+                    thread_id,
+                )
+            except discord.HTTPException:
+                log.warning(
+                    "Falha ao executar saída automática do visitante %s no Santuário %s",
+                    user_id, thread_id, exc_info=True,
+                )
+            except Exception:
+                log.exception(
+                    "Erro inesperado na saída automática do visitante %s no Santuário %s",
+                    user_id, thread_id,
+                )
+            finally:
+                atual = self._saidas_visitantes.get(chave)
+                if atual is asyncio.current_task():
+                    self._saidas_visitantes.pop(chave, None)
+
+        self._saidas_visitantes[chave] = asyncio.create_task(executar_saida())
+
+    @tasks.loop(seconds=60)
+    async def _monitorar_santuarios(self):
+        """Arquiva santuários após 10 min sem mensagens ou interações humanas."""
+        try:
+            perfis = await self.bot.db._all("SELECT user_id, thread_id FROM perfis")
+        except Exception:
+            log.exception("Não foi possível consultar os santuários para arquivamento por inatividade")
+            return
+
+        agora = time.monotonic()
+        for perfil in perfis:
+            thread_id = int(perfil["thread_id"])
+            # Após reinício, concede uma janela completa de 10 minutos.
+            ultima = self._ultima_atividade.setdefault(thread_id, agora)
+            if agora - ultima < 600:
+                continue
+
+            thread = await self._thread(thread_id)
+            if thread is None or thread.archived:
+                self._ultima_atividade.pop(thread_id, None)
+                continue
+            try:
+                await thread.edit(archived=True, reason="Santuário sem atividade por 10 minutos")
+                self._ultima_atividade.pop(thread_id, None)
+                log.info("Santuário arquivado por inatividade: thread=%s owner=%s", thread_id, perfil["user_id"])
+            except discord.NotFound:
+                self._ultima_atividade.pop(thread_id, None)
+            except discord.Forbidden:
+                log.warning("Sem permissão para arquivar santuário %s; verifique Gerenciar tópicos", thread_id)
+            except discord.HTTPException:
+                log.warning("Falha ao arquivar santuário %s por inatividade", thread_id, exc_info=True)
+
+    @_monitorar_santuarios.before_loop
+    async def _antes_monitorar_santuarios(self):
+        await self.bot.wait_until_ready()
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot or not isinstance(message.channel, discord.Thread):
+            return
+        perfil = await self.bot.db.get_perfil_por_thread(message.channel.id)
+        if perfil:
+            self._marcar_atividade_local(message.channel.id)
+
+    @commands.Cog.listener()
+    async def on_interaction(self, interaction: discord.Interaction):
+        if interaction.user.bot or not interaction.channel_id:
+            return
+        canal = interaction.channel or self.bot.get_channel(interaction.channel_id)
+        if isinstance(canal, discord.Thread):
+            perfil = await self.bot.db.get_perfil_por_thread(canal.id)
+            if perfil:
+                self._marcar_atividade_local(canal.id)
 
     # ------------------------------------------------------------ infraestrutura
     async def _thread(self, thread_id: int) -> discord.Thread | None:
@@ -79,6 +194,7 @@ class Santuario(commands.Cog):
             valor for valor in (
                 getattr(discord.MessageType, "thread_member_join", None),
                 getattr(discord.MessageType, "thread_member_remove", None),
+                getattr(discord.MessageType, "pins_add", None),
             ) if valor is not None
         }
         if not tipos:
@@ -205,6 +321,20 @@ class Santuario(commands.Cog):
         hero.add_field(name="🪙 Denários", value=str(user["denarios"]))
         hero.add_field(name="📈 Rank XP", value=f"#{await db.posicao_xp(user['xp'])}")
         hero.add_field(name="🥇 Rank Platinas", value=f"#{await db.posicao_platinas(qtd)}")
+        try:
+            honras = await db.contar_honras(guild.id, user_id)
+            seguidores = await db.contar_seguidores(guild.id, user_id)
+            total_honras = sum(honras.values())
+            hero.add_field(name="🏅 Honras", value=str(total_honras), inline=True)
+            hero.add_field(name="⭐ Seguidores", value=str(seguidores), inline=True)
+            if honras:
+                hero.add_field(
+                    name="Reconhecimento da comunidade",
+                    value=f"🛡️ {honras.get('respect', 0)} · 🔥 {honras.get('determination', 0)} · 👑 {honras.get('greatness', 0)}",
+                    inline=False,
+                )
+        except Exception:
+            log.exception("Falha ao carregar honras/seguidores do Santuário de %s", user_id)
         if perfil["fav_game"]:
             hero.add_field(name="💖 Jogo do coração", value=perfil["fav_game"], inline=False)
         hero.add_field(name="✨ Experiência", value=barra_progresso(user["xp"]), inline=False)
@@ -312,12 +442,18 @@ class Santuario(commands.Cog):
             await msg.pin()
         except discord.HTTPException:
             pass
+        # O Discord gera uma mensagem de sistema "Nara fixou uma mensagem"
+        # depois do pin; limpar novamente para manter apenas o cartão e conteúdo real.
+        await self._limpar_notificacoes_sistema(thread)
         return True
 
     def _fonte_ephemeral(self, interaction: discord.Interaction) -> bool:
         return bool(interaction.message and getattr(interaction.message.flags, "ephemeral", False))
 
-    def _view_voltar_painel(self, interaction: discord.Interaction, alvo=None):
+    def _view_voltar_painel(self, interaction: discord.Interaction, alvo=None, callback_voltar=None):
+        if callback_voltar is not None:
+            from utils import view_so_com_voltar
+            return view_so_com_voltar(callback_voltar)
         mensagem = interaction.message
         if not mensagem or not self._fonte_ephemeral(interaction):
             return None
@@ -344,9 +480,9 @@ class Santuario(commands.Cog):
         await interaction.edit_original_response(content=texto, embeds=[], view=view)
 
     # ------------------------------------------------------------ criar / abrir o próprio santuário
-    async def abrir_meu(self, interaction: discord.Interaction):
+    async def abrir_meu(self, interaction: discord.Interaction, callback_voltar=None):
         privado_origem = self._fonte_ephemeral(interaction)
-        view_voltar = self._view_voltar_painel(interaction, interaction.user)
+        view_voltar = self._view_voltar_painel(interaction, interaction.user, callback_voltar=callback_voltar)
         perfis_ch_id = await GuildConfig.get(self.bot.db, interaction.guild_id, "perfis_channel")
         if not perfis_ch_id:
             return await self._responder_fluxo(
@@ -394,6 +530,7 @@ class Santuario(commands.Cog):
             if thread.archived:
                 await thread.edit(archived=False)
             await thread.add_user(interaction.user)
+            self._marcar_atividade_local(thread.id)
             # A entrada do proprietário não deve deixar o aviso automático do Discord no Santuário.
             await self._limpar_notificacoes_sistema(thread)
             await self.atualizar(interaction.user.id, force_new=True)
@@ -412,10 +549,10 @@ class Santuario(commands.Cog):
         )
 
     # ------------------------------------------------------------ visitar
-    async def visitar(self, interaction: discord.Interaction, alvo_id: int):
+    async def visitar(self, interaction: discord.Interaction, alvo_id: int, callback_voltar=None):
         privado_origem = self._fonte_ephemeral(interaction)
         alvo_membro = interaction.guild.get_member(alvo_id) if interaction.guild else None
-        view_voltar = self._view_voltar_painel(interaction, alvo_membro or interaction.user)
+        view_voltar = self._view_voltar_painel(interaction, alvo_membro or interaction.user, callback_voltar=callback_voltar)
         if privado_origem:
             await interaction.response.defer()
         else:
@@ -433,6 +570,8 @@ class Santuario(commands.Cog):
             if thread.archived:
                 await thread.edit(archived=False)
             await thread.add_user(interaction.user)
+            self._marcar_atividade_local(thread.id)
+            self._agendar_saida_visitante(thread.id, interaction.user.id)
             # Mantém o espaço limpo também após uma visita. Só remove mensagens de sistema.
             await self._limpar_notificacoes_sistema(thread)
         except discord.HTTPException:
@@ -459,7 +598,10 @@ class Santuario(commands.Cog):
                 privado_origem=privado_origem, view=view_voltar,
             )
         try:
+            if thread.archived:
+                await thread.edit(archived=False)
             await thread.add_user(interaction.user)
+            self._marcar_atividade_local(thread.id)
         except discord.HTTPException:
             pass
         await self._responder_fluxo(
@@ -499,11 +641,11 @@ class Santuario(commands.Cog):
             return await interaction.response.send_message("Apenas moderadores.", ephemeral=True)
         texto = (
             "# 🏛️ Santuários do Coliseu\n\n"
-            "Cada gladiador tem um espaço próprio para sua história, suas conquistas e suas jornadas. "
-            "Entre com respeito: aqui, o protagonista é quem ergueu este Santuário.\n\n"
+            "Cada membro tem um espaço próprio para sua história, suas conquistas e suas jornadas. "
+            "Entre com respeito: aqui, o protagonista é quem ergueu este Santuário — visitante não vira dono.\n\n"
             "✨ **Meu Santuário** — crie ou abra seu espaço pessoal.\n"
             "🚪 **Visitar um Santuário** — escolha um membro para conhecer suas conquistas. "
-            "Visitantes podem contemplar o espaço, mas somente o proprietário pode personalizá-lo."
+            "Visitantes podem conhecer o espaço, mas somente o proprietário pode personalizá-lo. Admire a decoração; não tente reformar a casa alheia."
         )
         await upsert_panel(
             self.bot, interaction.channel,
@@ -520,6 +662,10 @@ class SantuarioPublicoView(discord.ui.View):
     def __init__(self, cog):
         super().__init__(timeout=None)
         self.cog = cog
+        from cogs.comunidade import adicionar_botao_contribuicao_contextual
+        adicionar_botao_contribuicao_contextual(
+            self, "idea", "santuario", "Sugerir melhoria", "💡", row=1,
+        )
 
     @discord.ui.button(label="Meu santuário", style=discord.ButtonStyle.success, emoji="✨", custom_id="sant:meu")
     async def meu(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -528,7 +674,7 @@ class SantuarioPublicoView(discord.ui.View):
     @discord.ui.button(label="Visitar um santuário", style=discord.ButtonStyle.primary, emoji="🚪", custom_id="sant:visitar")
     async def visitar(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message(
-            "De quem você quer visitar o santuário?", view=EscolherVisitaView(self.cog), ephemeral=True
+            "Qual Santuário você quer visitar? Escolha o membro; as portas continuam sob controle do proprietário.", view=EscolherVisitaView(self.cog), ephemeral=True
         )
 
 
@@ -553,6 +699,66 @@ class CartaoView(discord.ui.View):
     def __init__(self, cog):
         super().__init__(timeout=None)
         self.cog = cog
+        from cogs.comunidade import adicionar_botao_contribuicao_contextual
+        adicionar_botao_contribuicao_contextual(
+            self, "idea", "santuario", "Sugerir melhoria no Santuário", "💡", row=3,
+        )
+
+    @discord.ui.button(
+        label="SAIR DO SANTUÁRIO",
+        style=discord.ButtonStyle.danger,
+        emoji="🚪",
+        custom_id="sant:leave",
+        row=4,
+    )
+    async def sair_santuario(self, interaction: discord.Interaction, button: discord.ui.Button):
+        thread = interaction.channel
+        if not isinstance(thread, discord.Thread):
+            return await interaction.response.send_message(
+                "Este botão só funciona dentro de um tópico de Santuário.", ephemeral=True
+            )
+        perfil = await self.cog.bot.db.get_perfil_por_thread(thread.id)
+        if perfil is None:
+            return await interaction.response.send_message(
+                "Não encontrei o Santuário associado a este tópico.", ephemeral=True
+            )
+
+        proprietario = int(perfil["user_id"]) == interaction.user.id
+        try:
+            await interaction.response.defer(ephemeral=True, thinking=True)
+            if proprietario:
+                # O dono fecha o espaço para todos. O tópico e o histórico são preservados.
+                await thread.edit(
+                    archived=True,
+                    reason=f"Santuário fechado pelo proprietário {interaction.user.id}",
+                )
+                self.cog._ultima_atividade.pop(thread.id, None)
+                mensagem = (
+                    "🔒 **Seu Santuário foi fechado.** O tópico foi arquivado e seu histórico continua salvo. "
+                    "Quando quiser voltar, abra **Meu Santuário** pelo `/nara`."
+                )
+            else:
+                # Um visitante sai apenas da lista de membros; não fecha o espaço do proprietário.
+                await thread.remove_user(interaction.user)
+                tarefa = self.cog._saidas_visitantes.pop((thread.id, interaction.user.id), None)
+                if tarefa and not tarefa.done():
+                    tarefa.cancel()
+                mensagem = "🚪 Você saiu deste Santuário. O espaço continua disponível para o proprietário."
+            await interaction.followup.send(mensagem, ephemeral=True)
+        except discord.Forbidden:
+            log.warning("Sem permissão para fechar/remover membro do Santuário %s", thread.id, exc_info=True)
+            mensagem = "Não consegui concluir a saída. A NARA precisa da permissão **Gerenciar Tópicos**."
+            if interaction.response.is_done():
+                await interaction.followup.send(mensagem, ephemeral=True)
+            else:
+                await interaction.response.send_message(mensagem, ephemeral=True)
+        except discord.HTTPException:
+            log.exception("Falha ao sair/fechar Santuário %s", thread.id)
+            mensagem = "O Discord não permitiu concluir a ação. Tente novamente."
+            if interaction.response.is_done():
+                await interaction.followup.send(mensagem, ephemeral=True)
+            else:
+                await interaction.response.send_message(mensagem, ephemeral=True)
 
     @discord.ui.button(label="Personalizar", style=discord.ButtonStyle.primary, emoji="✏️", custom_id="sant:perfil")
     async def personalizar(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -565,6 +771,78 @@ class CartaoView(discord.ui.View):
         perfil = await self.cog.exigir_dono(interaction)
         if perfil:
             await interaction.response.send_modal(RedeModal(self.cog))
+
+    @discord.ui.button(label="Acompanhar jogador", style=discord.ButtonStyle.secondary, emoji="⭐", custom_id="sant:follow", row=1)
+    async def acompanhar_jogador(self, interaction: discord.Interaction, button: discord.ui.Button):
+        perfil = await self.cog.bot.db.get_perfil_por_thread(interaction.channel_id)
+        if perfil is None:
+            return await interaction.response.send_message("Não achei este santuário.", ephemeral=True)
+        if int(perfil["user_id"]) == interaction.user.id:
+            return await interaction.response.send_message("Você já acompanha a própria jornada.", ephemeral=True)
+        seguido = await self.cog.bot.db.alternar_seguir(interaction.guild_id, interaction.user.id, int(perfil["user_id"]))
+        await interaction.response.send_message(
+            "⭐ Você começou a acompanhar este gladiador. Novas publicações poderão chegar por mensagem direta." if seguido
+            else "Você deixou de acompanhar este gladiador.", ephemeral=True
+        )
+
+    @discord.ui.button(label="Conceder honra", style=discord.ButtonStyle.secondary, emoji="🏅", custom_id="sant:honor", row=1)
+    async def conceder_honra(self, interaction: discord.Interaction, button: discord.ui.Button):
+        perfil = await self.cog.bot.db.get_perfil_por_thread(interaction.channel_id)
+        if perfil is None:
+            return await interaction.response.send_message("Não achei este santuário.", ephemeral=True)
+        if int(perfil["user_id"]) == interaction.user.id:
+            return await interaction.response.send_message("Você não pode honrar a si mesmo.", ephemeral=True)
+        comunidade = self.cog.bot.get_cog("Comunidade")
+        if comunidade is None:
+            return await interaction.response.send_message("O sistema de reconhecimento está indisponível.", ephemeral=True)
+        from cogs.comunidade import CommunityHonorSelect
+        view = discord.ui.View(timeout=180)
+        view.add_item(CommunityHonorSelect(comunidade, int(perfil["user_id"])))
+        await interaction.response.send_message(
+            "🏅 Escolha uma honra para reconhecer este gladiador. Uma honra por semana; você pode alterá-la enquanto a semana estiver aberta.",
+            view=view, ephemeral=True,
+        )
+
+    @discord.ui.button(label="Deixar mensagem", style=discord.ButtonStyle.primary, emoji="✉️", custom_id="sant:guestbook:add", row=2)
+    async def deixar_mensagem(self, interaction: discord.Interaction, button: discord.ui.Button):
+        perfil = await self.cog.bot.db.get_perfil_por_thread(interaction.channel_id)
+        if perfil is None:
+            return await interaction.response.send_message("Não achei este santuário.", ephemeral=True)
+        owner_id = int(perfil["user_id"])
+        if owner_id == interaction.user.id:
+            return await interaction.response.send_message("O Livro de Visitas é para mensagens de outros membros. Você pode consultar e moderar as entradas do seu Santuário.", ephemeral=True)
+        await interaction.response.send_modal(LivroVisitasModal(self.cog, owner_id))
+
+    @discord.ui.button(label="Livro de visitas", style=discord.ButtonStyle.secondary, emoji="📖", custom_id="sant:guestbook:view", row=2)
+    async def ver_livro_visitas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        perfil = await self.cog.bot.db.get_perfil_por_thread(interaction.channel_id)
+        if perfil is None:
+            return await interaction.response.send_message("Não achei este santuário.", ephemeral=True)
+        rows = await self.cog.bot.db.listar_mensagens_santuario(interaction.guild_id, int(perfil["user_id"]), 10)
+        if not rows:
+            return await interaction.response.send_message("📖 Este Livro de Visitas ainda está vazio. Seja o primeiro a deixar uma mensagem!", ephemeral=True)
+        embed = discord.Embed(title="📖 Livro de Visitas", description="Mensagens deixadas por visitantes deste Santuário.", color=TEMAS.get(perfil["theme"], config.COR_OURO))
+        for row in rows[:10]:
+            data = str(row["created_at"] or "")[:16].replace("T", " ")
+            texto = discord.utils.escape_mentions(discord.utils.escape_markdown(str(row["message"] or "")))
+            embed.add_field(name=f"✉️ Visitante <@{int(row['visitor_id'])}> · {data or 'data indisponível'}", value=texto[:1024], inline=False)
+        await interaction.response.send_message(embed=embed, ephemeral=True, allowed_mentions=discord.AllowedMentions.none())
+
+    @discord.ui.button(label="Gerenciar visitas", style=discord.ButtonStyle.secondary, emoji="🧹", custom_id="sant:guestbook:manage", row=2)
+    async def gerenciar_livro_visitas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        perfil = await self.cog.bot.db.get_perfil_por_thread(interaction.channel_id)
+        if perfil is None:
+            return await interaction.response.send_message("Não achei este santuário.", ephemeral=True)
+        owner_id = int(perfil["user_id"])
+        if interaction.user.id != owner_id:
+            return await interaction.response.send_message("Somente o proprietário pode gerenciar o Livro de Visitas.", ephemeral=True)
+        rows = await self.cog.bot.db.listar_mensagens_santuario(interaction.guild_id, owner_id, 25)
+        if not rows:
+            return await interaction.response.send_message("Seu Livro de Visitas está vazio.", ephemeral=True)
+        await interaction.response.send_message(
+            "Selecione uma mensagem para removê-la do seu Livro de Visitas. A ação não pode ser desfeita.",
+            view=LivroVisitasManageView(self.cog, owner_id, interaction.user.id, rows), ephemeral=True,
+        )
 
     @discord.ui.button(label="Ver galeria", style=discord.ButtonStyle.success, emoji="🏆", custom_id="sant:galeria")
     async def ver_galeria(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -587,6 +865,65 @@ class CartaoView(discord.ui.View):
             itens.append((registro, foto))
         view = GaleriaView(itens, TEMAS.get(perfil["theme"], config.COR_OURO))
         await interaction.edit_original_response(embeds=view.embeds_pagina(0), view=view)
+
+
+class LivroVisitasModal(discord.ui.Modal):
+    def __init__(self, cog: Santuario, owner_id: int):
+        super().__init__(title="Deixar mensagem no Santuário", timeout=300)
+        self.cog, self.owner_id = cog, int(owner_id)
+        self.mensagem = discord.ui.TextInput(
+            label="Sua mensagem", placeholder="Deixe um reconhecimento ou uma mensagem respeitosa...",
+            style=discord.TextStyle.paragraph, min_length=8, max_length=300, required=True,
+        )
+        self.add_item(self.mensagem)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        texto = str(self.mensagem.value).strip()
+        if len(texto) < 8:
+            return await interaction.response.send_message("A mensagem precisa ter pelo menos 8 caracteres.", ephemeral=True)
+        try:
+            message_id = await self.cog.bot.db.criar_mensagem_santuario(
+                interaction.guild_id, self.owner_id, interaction.user.id, texto
+            )
+        except ValueError as exc:
+            return await interaction.response.send_message(str(exc), ephemeral=True)
+        if message_id is None:
+            return await interaction.response.send_message(
+                "Você já deixou uma mensagem neste Santuário nas últimas 24 horas. Isso mantém o Livro de Visitas organizado.",
+                ephemeral=True,
+            )
+        await interaction.response.send_message("✉️ Sua mensagem foi registrada no Livro de Visitas.", ephemeral=True)
+
+
+class LivroVisitasSelect(discord.ui.Select):
+    def __init__(self, cog: Santuario, owner_id: int, requester_id: int, rows):
+        options = []
+        for row in rows[:25]:
+            texto = str(row["message"] or "").replace("\n", " ")
+            options.append(discord.SelectOption(
+                label=f"Visitante {int(row['visitor_id'])}"[:100],
+                description=texto[:100] or "Mensagem sem texto",
+                value=str(int(row["id"])),
+            ))
+        super().__init__(placeholder="Escolha uma mensagem para apagar", min_values=1, max_values=1, options=options)
+        self.cog, self.owner_id, self.requester_id = cog, int(owner_id), int(requester_id)
+
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.requester_id or interaction.user.id != self.owner_id:
+            return await interaction.response.send_message("Somente o proprietário pode gerenciar este Livro de Visitas.", ephemeral=True)
+        apagada = await self.cog.bot.db.apagar_mensagem_santuario(
+            interaction.guild_id, self.owner_id, int(self.values[0])
+        )
+        await interaction.response.edit_message(
+            content="🧹 Mensagem removida." if apagada else "A mensagem não foi encontrada; talvez já tenha sido removida.",
+            view=None,
+        )
+
+
+class LivroVisitasManageView(discord.ui.View):
+    def __init__(self, cog: Santuario, owner_id: int, requester_id: int, rows):
+        super().__init__(timeout=180)
+        self.add_item(LivroVisitasSelect(cog, owner_id, requester_id, rows))
 
 
 class GaleriaView(discord.ui.View):
