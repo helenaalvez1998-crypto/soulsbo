@@ -1120,9 +1120,12 @@ class NaraBot(commands.Bot):
                        for key, value in LEADERS.items() if value["faction"] == name]
                 for name in DEFAULT_LEADERS},
             "factions": [{"name": name, "preferred_type": kind,
-                          "description": {"Ordem Áurea": "Formação e resistência na linha de frente.",
-                                          "Véu Carmesim": "Sangue, sacrifício e rituais de heresia.",
-                                          "Lua Negra": "Magia lunar, cosmos e segredos arcanos."}[name]}
+                          "description": {
+                              "Ordem Áurea": "Formação e resistência na linha de frente.",
+                              "Véu Carmesim": "Sangue, sacrifício e rituais de heresia.",
+                              "Lua Negra": "Magia lunar, cosmos e segredos arcanos.",
+                              "Os Esquecidos": "Fé, devoção e glória divina.",
+                          }.get(name, "Uma facção com identidade e estratégias próprias.")}
                          for kind, name in FACTIONS.items()],
             "relic_id": str(row["relic_id"] or "") if row else "",
             "rules": {"cards": 12, "opening_hand": 10, "reserve": 2, "unique": True, "relics_per_match": 1}})
