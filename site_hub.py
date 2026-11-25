@@ -687,6 +687,12 @@ def registrar_rotas(bot, app: web.Application) -> None:
             return web.Response(text="Página de Evolução indisponível.", status=503)
         return web.FileResponse(page)
 
+    async def apostas_page(request: web.Request) -> web.Response:
+        page = Path(__file__).resolve().parent / "site" / "apostas.html"
+        if not page.is_file():
+            return web.Response(text="Página de Apostas indisponível.", status=503)
+        return web.FileResponse(page)
+
     async def forja_list(request: web.Request) -> web.Response:
         uid = auth(request)
         if uid is None:
@@ -998,16 +1004,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
             })
         except (ValueError, TypeError) as e:
             return web.json_response({"error": str(e)}, status=400)
-
-    # Rotas de API de apostas
-    app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
-
-    # Rota para página de apostas
-    app.router.add_get("/apostas", apostas_page)
-    app.router.add_get("/api/gwent/apostas/torneios", apostas_list_torneios)
-    app.router.add_post("/api/gwent/apostas/denarios", apostas_denarios)
-    app.router.add_post("/api/gwent/apostas/cartas", apostas_cartas)
-    app.router.add_post("/api/gwent/apostas/torneio", apostas_torneio)
 
     app.router.add_get("/rituais-ancestrais", rituais_page)
     app.router.add_get("/api/gwent/rituais-ancestrais", rituais_list)
