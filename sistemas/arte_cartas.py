@@ -1,7 +1,7 @@
 """Arte local e determinística para as cartas do Coliseu.
 
 As ilustrações são compostas com formas originais do Pillow. A categoria define a
-composição, o tipo define a paleta secundária e a raridade altera moldura e ornamentos.
+composição, a fileira tática define o emblema e a raridade altera moldura e ornamentos.
 Nenhuma imagem, personagem ou marca de jogo de terceiros é incorporada.
 """
 from __future__ import annotations
@@ -67,8 +67,7 @@ def _fingerprint_renderizador() -> str:
 # automaticamente o cache quando o código/overlay/fonte muda sem bump manual.
 VERSAO_RENDERIZADOR = f"{VERSAO_ARTES}-V12-ACABAMENTO-SOULS-ELDEN-{_fingerprint_renderizador()}"
 
-# Cor principal da moldura por raridade: as categorias e os tipos continuam
-# visualmente distintos dentro de cada faixa de raridade.
+# Cor principal da moldura por raridade; facção e fileira tática têm sinais próprios.
 CORES_RARIDADE = {
     "Comum": ((23, 29, 37), (166, 181, 194)),
     "Rara": ((9, 29, 48), (77, 180, 226)),
@@ -78,20 +77,6 @@ CORES_RARIDADE = {
     "Primordial": ((34, 32, 25), (239, 224, 174)),
     "Singular": ((9, 12, 24), (151, 143, 206)),
 }
-CORES_TIPO = {
-    "Destreza": (75, 211, 177),
-    "Força": (237, 117, 75),
-    "Magia": (157, 132, 255),
-}
-CORES_CATEGORIA = {
-    "Chefe": ((18, 27, 39), (100, 47, 49)),
-    "Arma": ((19, 31, 40), (79, 75, 55)),
-    "Magia": ((22, 22, 48), (70, 48, 105)),
-    "Covenant": ((16, 39, 37), (43, 83, 76)),
-    "Jogo": ((17, 31, 48), (37, 72, 91)),
-    "Patente": ((45, 31, 17), (104, 76, 31)),
-}
-SIMBOLOS = {"Destreza": "✥", "Força": "⚔", "Magia": "✧"}
 CORES_FACCAO = {
     "Ordem Áurea": ((38, 31, 17), (230, 190, 91)),
     "Lua Negra": ((24, 18, 51), (139, 112, 214)),
@@ -844,27 +829,23 @@ def _draw_patente(draw: ImageDraw.ImageDraw, box, accent, rng: random.Random):
                   stroke_fill=(255, 239, 188, 210))
 
 
-def _draw_type_icon(draw: ImageDraw.ImageDraw, center: tuple[int, int], card_type: str, accent):
-    """Ícone vetorial próprio; não depende de glifos emoji instalados no servidor."""
+def _draw_type_icon(draw: ImageDraw.ImageDraw, center: tuple[int, int], combat_row: str, accent):
+    """Ícone vetorial da posição tática: corpo a corpo, longa distância ou cerco."""
     cx, cy = center
     pale = (245, 239, 219, 245)
-    if card_type == "Destreza":
-        draw.arc((cx - 9, cy - 9, cx + 9, cy + 9), 35, 325, fill=(*accent, 255), width=3)
-        draw.arc((cx - 5, cy - 5, cx + 13, cy + 13), 205, 495, fill=pale, width=2)
-        draw.polygon([(cx + 10, cy - 9), (cx + 15, cy - 10), (cx + 12, cy - 4)], fill=(*accent, 255))
-    elif card_type == "Força":
-        draw.line((cx - 9, cy + 10, cx + 9, cy - 10), fill=pale, width=3)
-        draw.line((cx - 9, cy - 10, cx + 9, cy + 10), fill=(*accent, 255), width=3)
-        draw.line((cx - 12, cy + 5, cx - 5, cy + 12), fill=(*accent, 255), width=3)
-        draw.line((cx + 5, cy + 12, cx + 12, cy + 5), fill=pale, width=3)
+    if combat_row == "melee":
+        draw.line((cx - 10, cy + 10, cx + 10, cy - 10), fill=(*accent, 255), width=3)
+        draw.line((cx - 10, cy - 10, cx + 10, cy + 10), fill=pale, width=3)
+        draw.line((cx - 13, cy + 6, cx - 6, cy + 13), fill=(*accent, 255), width=3)
+        draw.line((cx + 6, cy + 13, cx + 13, cy + 6), fill=pale, width=3)
+    elif combat_row == "ranged":
+        draw.arc((cx - 12, cy - 13, cx + 10, cy + 13), 270, 90, fill=(*accent, 255), width=3)
+        draw.line((cx - 2, cy, cx + 15, cy), fill=pale, width=2)
+        draw.polygon([(cx + 15, cy), (cx + 8, cy - 5), (cx + 8, cy + 5)], fill=(*accent, 255))
     else:
-        points = []
-        for i in range(8):
-            angle = math.radians(-90 + i * 45)
-            radius = 12 if i % 2 == 0 else 5
-            points.append((cx + math.cos(angle) * radius, cy + math.sin(angle) * radius))
-        draw.polygon(points, fill=(*accent, 200), outline=pale)
-        draw.ellipse((cx - 2, cy - 2, cx + 2, cy + 2), fill=(255, 255, 255, 255))
+        draw.rectangle((cx - 12, cy - 8, cx + 12, cy + 11), outline=(*accent, 255), width=3)
+        draw.rectangle((cx - 6, cy - 14, cx + 6, cy - 8), fill=(*accent, 230), outline=pale, width=1)
+        draw.line((cx, cy - 3, cx, cy + 8), fill=pale, width=2)
 
 
 def _draw_rarity_frame(draw: ImageDraw.ImageDraw, width: int, height: int, rarity: str,
@@ -1054,9 +1035,10 @@ def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = 
 
     rarity = str(card.get("raridade", "Comum"))
     category = "Especial" if str(card.get("categoria", "Unidade")).casefold() == "especial" else "Unidade"
-    ctype = str(card.get("tipo", "Magia"))
-    faction = molduras_cartas.normalizar_faccao(card.get("faccao") or {"Força":"Ordem Áurea","Destreza":"Véu Carmesim","Magia":"Lua Negra","Fé":"Os Esquecidos"}.get(ctype,"Ordem Áurea"))
-    row = str(card.get("fileira") or {"Força":"melee","Destreza":"ranged","Magia":"siege","Fé":"melee"}.get(ctype,"melee"))
+    faction = molduras_cartas.normalizar_faccao(card.get("faccao"))
+    row = str(card.get("fileira") or card.get("row") or "melee")
+    if row not in {"melee", "ranged", "siege"}:
+        raise ValueError("Fileira tática inválida ao renderizar carta.")
     seed = _seed(card); rng = random.Random(seed)
     palettes = {
         "Ordem Áurea": ((39,31,17),(91,69,31),(224,183,82),(245,230,180)),
@@ -1328,7 +1310,7 @@ def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = 
     f_rar=_font(max(8,X(10)),True)
     rar_txt=rarity.upper()
     larg_rar=_largura_rastreada(d,rar_txt,f_rar,X(1.6))/max(sx,.01)+12
-    ov=molduras_cartas.overlay_pronto(rarity,faction,ctype,row,especial,int(math.ceil(larg_rar/4)*4),width,height)
+    ov=molduras_cartas.overlay_pronto(rarity,faction,row,especial,int(math.ceil(larg_rar/4)*4),width,height)
     im=Image.alpha_composite(im,ov)
     d=ImageDraw.Draw(im,"RGBA")
 
@@ -1473,9 +1455,10 @@ def _draw_card_com_template(card: dict[str, Any], illustration_bytes: bytes) -> 
     draw = ImageDraw.Draw(imagem, "RGBA")
 
     category = str(card.get("categoria", "Unidade"))
-    card_type = str(card.get("tipo", "Magia"))
-    faction = molduras_cartas.normalizar_faccao(card.get("faccao") or {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra", "Fé": "Os Esquecidos"}.get(card_type, "Ordem Áurea"))
-    row = str(card.get("fileira") or {"Força": "melee", "Destreza": "ranged", "Magia": "siege"}.get(card_type, "melee"))
+    faction = molduras_cartas.normalizar_faccao(card.get("faccao"))
+    row = str(card.get("fileira") or card.get("row") or "melee")
+    if row not in {"melee", "ranged", "siege"}:
+        raise ValueError("Fileira tática inválida ao renderizar carta.")
     rarity_base, rarity_accent = CORES_RARIDADE.get(rarity, CORES_RARIDADE["Comum"])
     type_accent = CORES_FACCAO.get(faction, ((21, 29, 39), (44, 47, 61)))[1]
     accent = _mix(rarity_accent, type_accent, 0.34)
@@ -1503,7 +1486,7 @@ def _draw_card_com_template(card: dict[str, Any], illustration_bytes: bytes) -> 
     tx1, ty1, tx2, ty2 = layout["tipo"]
     altura_tipo = ty2 - ty1
     icone = Image.new("RGBA", (40, 40), (0, 0, 0, 0))
-    _draw_type_icon(ImageDraw.Draw(icone, "RGBA"), (20, 20), card_type, type_accent)
+    _draw_type_icon(ImageDraw.Draw(icone, "RGBA"), (20, 20), row, type_accent)
     lado = max(32, int(altura_tipo * 0.62))
     icone = icone.resize((lado, lado), Image.Resampling.LANCZOS)
     imagem.alpha_composite(icone, (tx1 + 22, ty1 + (altura_tipo - lado) // 2))
@@ -1590,9 +1573,10 @@ def render_previa_template(raridade: str, *, calibracao: bool = False) -> io.Byt
     exemplo = {
         "id": f"preview_template_{templates_cartas.RARIDADES_TEMPLATE.get(raridade, 'x')}",
         "nome": f"Prévia — {raridade}",
-        "categoria": "Chefe",
+        "categoria": "Unidade",
         "raridade": raridade,
-        "tipo": "Magia",
+        "faccao": "Lua Negra",
+        "fileira": "siege",
         "poder": 88,
         "custo": 3,
         "habilidade": next(iter(HABILIDADES), ""),

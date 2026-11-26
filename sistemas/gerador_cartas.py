@@ -18,11 +18,6 @@ from sistemas.afinidades import (
 )
 from sistemas.cartas import FAIXA_PODER, HABILIDADES, HABILIDADES_COMUNS
 
-TIPO_POR_FACCAO = {
-    "Ordem Áurea": "Força",
-    "Véu Carmesim": "Destreza",
-    "Lua Negra": "Magia",
-}
 FILEIRA_POR_FUNCAO = {
     "ataque": "melee", "defesa": "melee",
     "controle": "siege", "suporte": "ranged",
@@ -210,7 +205,6 @@ def gerar_carta_procedural(
         "card_id": str(generated_id),
         "nome": nome,
         "categoria": "Unidade",
-        "tipo": TIPO_POR_FACCAO[faccao],
         "faccao": faccao,
         "raridade": raridade,
         "poder": poder,
@@ -311,8 +305,8 @@ def validar_definicao_gerada(definition: dict[str, Any]) -> tuple[bool, list[str
         erros.append("Poder fora da faixa permitida.")
     if definition.get("faccao") not in FACCOES:
         erros.append("Facção inválida.")
-    if definition.get("tipo") != TIPO_POR_FACCAO.get(definition.get("faccao")):
-        erros.append("Tipo legado não corresponde à facção.")
+    if definition.get("fileira") not in {"melee", "ranged", "siege"}:
+        erros.append("A classificação tática deve ser Corpo a corpo, Longa distância ou Cerco.")
     if definition.get("origem_tipo") != "transmutacao" or definition.get("is_sacrificable") is not False:
         erros.append("Proteção de carta pessoal ausente.")
     if definition.get("owner_scoped") is not True:

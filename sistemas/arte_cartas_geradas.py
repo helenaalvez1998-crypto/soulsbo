@@ -28,7 +28,6 @@ def _card_payload(definition: dict[str, Any]) -> dict[str, Any]:
         "id": str(definition["card_id"]),
         "nome": str(definition["nome"]),
         "categoria": "Unidade",
-        "tipo": str(definition["tipo"]),
         "faccao": str(definition["faccao"]),
         "raridade": str(definition["raridade"]),
         "poder": int(definition["poder"]),
@@ -49,7 +48,7 @@ def gerar_arte_original(definition: dict[str, Any], *, width: int = LARGURA_PADR
     card_id = str(definition.get("card_id", ""))
     if not CARD_ID_RE.fullmatch(card_id):
         raise ValueError("ID de carta gerada inválido.")
-    required = ("nome", "tipo", "faccao", "raridade", "poder", "fileira")
+    required = ("nome", "faccao", "raridade", "poder", "fileira")
     if any(k not in definition for k in required):
         raise ValueError("Definição incompleta para geração de arte.")
     if definition.get("origem_tipo") != "transmutacao" or definition.get("is_sacrificable") is not False:
@@ -147,8 +146,8 @@ def verificar_arte(path: str | Path, expected_hash: str) -> bool:
 
 # V44 — manifesto de arte individual e validação de identidade visual.
 ARTE_MANIFEST_VERSION = "v44"
-FACCOES_VALIDAS = {"Ordem Áurea", "Véu Carmesim", "Lua Negra"}
-RARIDADES_VALIDAS = {"Comum", "Rara", "Épica", "Lendária", "Mítica"}
+FACCOES_VALIDAS = {"Ordem Áurea", "Véu Carmesim", "Lua Negra", "Os Esquecidos"}
+RARIDADES_VALIDAS = {"Comum", "Rara", "Épica", "Lendária", "Mítica", "Primordial", "Singular"}
 
 
 def validar_manifesto_arte(definition: dict[str, Any], image_bytes: bytes,
@@ -161,7 +160,7 @@ def validar_manifesto_arte(definition: dict[str, Any], image_bytes: bytes,
     uma composição gráfica procedural, não uma pintura original.
     """
     required = ("card_id", "owner_id", "nome", "faccao", "raridade",
-                "afinidade_dominante", "funcao_tatica")
+                "afinidade_dominante", "funcao_tatica", "fileira")
     missing = [key for key in required if definition.get(key) in (None, "")]
     if missing:
         raise ValueError("Manifesto incompleto: " + ", ".join(missing))
@@ -169,6 +168,10 @@ def validar_manifesto_arte(definition: dict[str, Any], image_bytes: bytes,
         raise ValueError("Facção inválida para manifesto de arte.")
     if definition.get("raridade") not in RARIDADES_VALIDAS:
         raise ValueError("Raridade inválida para manifesto de arte.")
+    row_labels = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}
+    fileira = str(definition.get("fileira") or "")
+    if fileira not in row_labels:
+        raise ValueError("Posição tática inválida para manifesto de arte.")
     if not validar_imagem_bytes(image_bytes, limite_bytes=15 * 1024 * 1024):
         raise ValueError("Imagem inválida para manifesto.")
     digest = hashlib.sha256(image_bytes).hexdigest()
@@ -180,7 +183,8 @@ def validar_manifesto_arte(definition: dict[str, Any], image_bytes: bytes,
         "faction": str(definition["faccao"]),
         "rarity": str(definition["raridade"]),
         "affinity": str(definition["afinidade_dominante"]),
-        "tactical_role": str(definition["funcao_tatica"]),
+        "tactical_function": str(definition["funcao_tatica"]),
+        "tactical_row": row_labels[fileira],
         "provider": str(provider),
         "concept": str(concept or ""),
         "image_sha256": digest,

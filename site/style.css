@@ -63,7 +63,7 @@
 @media(max-width:760px){.atelier-grid{grid-template-columns:1fr}.atelier-review-item{grid-template-columns:1fr}.atelier-review-item img{max-width:100%}}
 .atelier-official-art{display:grid;gap:7px;margin:8px 0;padding:12px;border:1px solid rgba(103,130,177,.18);border-radius:10px}
 .atelier-official-art small{color:var(--muted,#aaa)}
-.atelier-official-preview{width:min(100%,420px);max-height:280px;object-fit:contain;border-radius:8px}
+.atelier-official-preview{width:min(100%,260px);max-height:390px;aspect-ratio:2/3;object-fit:contain;border-radius:8px;background:#08070a}
 .gwent-store{margin:24px 0;padding:20px;border:1px solid var(--line);border-radius:16px;background:rgba(24,21,29,.88)}
 .gwent-store-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .gwent-store-card{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
@@ -490,7 +490,7 @@ body{background:radial-gradient(1000px 520px at 80% -10%,rgba(80,110,220,.22),tr
 #atelier-review-panel{margin-top:22px}
 #atelier-review-queue{display:grid;gap:14px}
 .atelier-review-item{display:grid!important;grid-template-columns:minmax(140px,220px) minmax(0,1fr)!important;gap:16px!important;align-items:start;padding:14px;border:1px solid #2d4a7a;border-radius:8px;background:rgba(10,18,36,.7);max-width:100%;overflow:hidden}
-.atelier-review-item img{width:100%!important;max-height:240px;aspect-ratio:1/1;object-fit:cover;border-radius:6px}
+.atelier-review-item img{width:100%!important;max-height:360px;aspect-ratio:2/3;object-fit:contain;border-radius:6px;background:#08070a}
 .atelier-review-item>div{min-width:0;display:flex;flex-direction:column;gap:6px}
 .atelier-review-item b{overflow-wrap:anywhere;font:800 14px var(--serif);letter-spacing:1px;color:#ffe3a0;text-transform:uppercase}
 .atelier-review-item small{display:block;overflow-wrap:anywhere}

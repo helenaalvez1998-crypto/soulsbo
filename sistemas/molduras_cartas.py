@@ -93,14 +93,14 @@ _ALIASES_FACCAO = {
 }
 
 def normalizar_faccao(valor: str | None) -> str:
-    """Converte nomes atuais/legados para uma das três facções oficiais."""
+    """Converte nomes atuais/legados para uma das quatro facções oficiais."""
     bruto = str(valor or "").strip()
     chave = unicodedata.normalize("NFKD", bruto).encode("ascii", "ignore").decode("ascii").casefold()
     return _ALIASES_FACCAO.get(chave, bruto if bruto in FACCOES else "Ordem Áurea")
-ELEMENTOS: dict[str, dict] = {
-    "Força": dict(cor=(238, 112, 70), claro=(255, 186, 140), escuro=(110, 30, 18)),
-    "Destreza": dict(cor=(70, 214, 170), claro=(170, 255, 226), escuro=(14, 80, 62)),
-    "Magia": dict(cor=(160, 130, 255), claro=(214, 200, 255), escuro=(54, 34, 130)),
+FILEIRAS_VISUAIS: dict[str, dict] = {
+    "melee": dict(cor=(238, 112, 70), claro=(255, 186, 140), escuro=(110, 30, 18)),
+    "ranged": dict(cor=(70, 174, 190), claro=(170, 235, 240), escuro=(14, 68, 80)),
+    "siege": dict(cor=(142, 118, 205), claro=(210, 198, 250), escuro=(48, 35, 105)),
 }
 
 
@@ -316,33 +316,6 @@ def _espada_rot(md, R, ang, v, dx=0.0, dy=0.0):
     md.polygon([T(-.08, .42), T(.08, .42), T(.08, .78), T(-.08, .78)], fill=v)
     c = T(0, .88)
     md.ellipse([c[0] - .13 * R, c[1] - .13 * R, c[0] + .13 * R, c[1] + .13 * R], fill=v)
-
-
-def _g_forca(md, R, v=255):
-    _espada_rot(md, R, 38, v, 0, -.02)
-    _espada_rot(md, R, -38, v, 0, -.02)
-
-
-def _g_destreza(md, R, v=255):
-    """Pena: leve, rápida, de ponta afiada."""
-    T = _T(R)
-    topo, base = [], []
-    n = 24
-    for k in range(n + 1):
-        t = k / n
-        ax, ay = -.78 + t * 1.58, .78 - t * 1.58           # eixo do canto inferior-esquerdo ao superior-direito
-        larg = .44 * (math.sin(math.pi * min(1, t * 1.04)) ** .75) * (1 - .25 * t)
-        topo.append(T(ax - larg * .707, ay - larg * .707))
-        base.append(T(ax + larg * .707, ay + larg * .707))
-    md.polygon(topo + base[::-1], fill=v)
-    md.line([T(-.92, .92), T(.60, -.60)], fill=0, width=max(1, int(R * .07)))
-    md.line([T(-.98, .98), T(-.62, .62)], fill=v, width=max(2, int(R * .11)))
-
-
-def _g_magia(md, R, v=255):
-    _estrela4(md, R, -.10, .06, .90, v, fino=.22)
-    _estrela4(md, R, .62, -.62, .42, v, fino=.24)
-    _estrela4(md, R, .56, .66, .22, v, fino=.26)
 
 
 def _g_espada(md, R, v=255):
@@ -645,8 +618,8 @@ def _emblema_faccao(ov, est, faccao):
     _carimbar(ov, glifo, cx, cy + (1.2 if faccao == "Ordem Áurea" else 0), 15.5, [_tom(f["metal"], 1.25), f["cor"]])
 
 
-def _gema_elemento(ov, est, tipo):
-    e = ELEMENTOS.get(tipo, ELEMENTOS["Magia"])
+def _gema_fileira(ov, est, fileira):
+    e = FILEIRAS_VISUAIS.get(fileira, FILEIRAS_VISUAIS["melee"])
     cx, cy = CENTRO_ELEMENTO
     r = 18
     octo = lambda rr: [(cx + math.cos(math.radians(-67.5 + i * 45)) * rr, cy + math.sin(math.radians(-67.5 + i * 45)) * rr)
@@ -658,7 +631,7 @@ def _gema_elemento(ov, est, tipo):
     # reflexo de gema
     d = ImageDraw.Draw(ov)
     d.polygon(_p([(cx - 9, cy - 8), (cx + 2, cy - 12), (cx - 2, cy - 6), (cx - 8, cy - 2)]), fill=(255, 255, 255, 70))
-    glifo = {"Força": _g_forca, "Destreza": _g_destreza}.get(tipo, _g_magia)
+    glifo = {"melee": _g_espada, "ranged": _g_arco, "siege": _g_torre}.get(fileira, _g_espada)
     _carimbar(ov, glifo, cx, cy + .3, 10.6, [(255, 255, 255), _tom(e["claro"], 1.2)])
 
 
@@ -852,7 +825,7 @@ def _decoracoes_faccao(ov, faccao, est):
 # ---------------------------------------------------------------------------
 # API pública
 # ---------------------------------------------------------------------------
-def construir_overlay(*, raridade: str, faccao: str, tipo: str, fileira: str, especial: bool,
+def construir_overlay(*, raridade: str, faccao: str, fileira: str, especial: bool,
                       largura_raridade: float = 100) -> Image.Image:
     """Camada RGBA (BASE × S) com moldura, placas, medalhão e emblemas."""
     est = ESTILOS.get(raridade, ESTILOS["Comum"])
@@ -874,19 +847,19 @@ def construir_overlay(*, raridade: str, faccao: str, tipo: str, fileira: str, es
     # 3) HUD
     _medalhao_poder(ov, est, especial)
     _emblema_faccao(ov, est, faccao)
-    _gema_elemento(ov, est, tipo)
     if not especial:
+        _gema_fileira(ov, est, fileira)
         _chip_fileira(ov, est, fileira)
     _placa_raridade(ov, est, largura_raridade)
     return ov
 
 
 @functools.lru_cache(maxsize=64)
-def overlay_pronto(raridade: str, faccao: str, tipo: str, fileira: str, especial: bool,
+def overlay_pronto(raridade: str, faccao: str, fileira: str, especial: bool,
                    largura_raridade: int, largura: int, altura: int) -> Image.Image:
     """Overlay já redimensionado e em cache: ele não depende do conteúdo da carta, só da
-    combinação raridade/facção/elemento/fileira. Tratar o retorno como somente-leitura."""
-    ov = construir_overlay(raridade=raridade, faccao=faccao, tipo=tipo, fileira=fileira,
+    combinação raridade/facção/fileira. Tratar o retorno como somente-leitura."""
+    ov = construir_overlay(raridade=raridade, faccao=faccao, fileira=fileira,
                            especial=especial, largura_raridade=largura_raridade)
     if ov.size != (largura, altura):
         ov = ov.resize((largura, altura), Image.Resampling.LANCZOS)

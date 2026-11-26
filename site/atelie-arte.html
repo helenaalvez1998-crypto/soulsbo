@@ -8,7 +8,7 @@ textarea{width:100%;min-height:330px;background:#101218;color:#f2f3f5;border:1px
 button,input{background:#101218;color:#f2f3f5;border:1px solid var(--line);border-radius:8px;padding:11px}
 button{cursor:pointer;background:#51452b;border-color:#8d7540}button:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row button{flex:1}
-.preview{width:100%;max-width:620px;aspect-ratio:5/4;object-fit:contain;background:#0b0c10;border:1px solid var(--line);border-radius:10px}
+.preview{width:100%;max-width:620px;max-height:780px;object-fit:contain;background:#0b0c10;border:1px solid var(--line);border-radius:10px}#preview{aspect-ratio:2/3}#reference{max-height:280px;width:auto;max-width:100%}
 #status{white-space:pre-wrap;color:var(--muted)}.danger{color:#e5a0a0}
 </style><link rel="stylesheet" href="/elden-ui.css?v=v49">  <link rel="stylesheet" href="/narabot-visual-v59.css?v=59">
 <style id="nb-inline">/* NARABOT — camada final de acabamento visual (carregada por último) */
@@ -147,16 +147,17 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#d5ad69!important
 .sys-go{margin-top:auto;padding-top:8px;font-weight:700;font-size:13px;color:#f3d69b}
 </style>
 </head><body><main>
-<h1>Ateliê de Arte</h1><p class="muted">Gere o prompt exclusivo da sua carta, crie a ilustração na ferramenta de sua preferência e envie o arquivo para vinculá-lo à sua carta.</p>
+<h1>Ateliê de Arte</h1><p class="muted">Gere o prompt exclusivo da sua carta, crie a carta completa na ferramenta de sua preferência e envie o arquivo para vinculá-lo à sua carta.</p>
 <section class="panel"><h2 id="cardName">Carregando carta…</h2><div id="cardMeta" class="muted"></div>
 <p>O pacote contém análise artística, prompt fixo e referência visual automática conforme a facção.</p>
 <label>Análise artística (PT)<textarea id="analysis" readonly placeholder="A análise aparecerá aqui."></textarea></label>
 <label>Prompt fixo<textarea id="prompt" readonly placeholder="O prompt definitivo aparecerá aqui."></textarea></label>
+<label>Negative prompt<textarea id="negative" readonly placeholder="As restrições visuais aparecerão aqui."></textarea></label>
 <label>Referência visual da facção<img id="reference" class="preview" hidden alt="Referência visual da facção selecionada"></label>
-<div class="row"><button id="copy" disabled>Copiar prompt fixo</button><button id="copyAll" disabled>Copiar pacote com análise</button><button id="reload">Atualizar prompt</button></div>
-<p class="muted" id="format">Formato: carta completa; sem imposição de proporção pela análise artística.</p></section>
-<section class="panel"><h2>Enviar ilustração</h2>
-<p class="muted">PNG, JPG ou WEBP · até 8 MB · carta completa. A imagem mantém sua proporção e enquadramento; não será cortada para 5:4.</p>
+<div class="row"><button id="copy" disabled>Copiar prompt fixo</button><button id="copyNegative" disabled>Copiar negative prompt</button><button id="copyAll" disabled>Copiar pacote completo</button><button id="reload">Atualizar prompt</button></div>
+<p class="muted" id="format">Formato: carta completa; orientação vertical 2:3; a imagem deve conter a carta completa.</p></section>
+<section class="panel"><h2>Enviar carta completa</h2>
+<p class="muted">PNG, JPG ou WEBP · até 12 MB · carta completa. A imagem deve ser vertical 2:3 e mantém a moldura e o enquadramento; não será cortada.</p>
 <input type="file" id="file" accept="image/png,image/jpeg,image/webp">
 <div class="row" style="margin-top:12px"><button id="upload">Enviar e validar imagem</button><button id="replace" hidden>Substituir arte atual</button></div>
 <p id="status" role="status"></p><img id="preview" class="preview" hidden alt="Prévia da arte enviada">
@@ -175,8 +176,14 @@ async function load(){
  if(!cardRes.ok||!promptRes.ok){$('status').textContent='Carta não encontrada ou sem permissão de acesso.';return}
  const card=await cardRes.json(),p=await promptRes.json();
  $('cardName').textContent=card.name||card.definition?.nome||cardId;
- $('cardMeta').textContent=[card.faction,card.rarity,'Poder '+card.power,'ID '+cardId].join(' · ');
- $('analysis').value=p.analysis||'';$('prompt').value=p.prompt||'';$('negative').value=p.negative_prompt||'';$('copy').disabled=!p.prompt;$('copyNegative').disabled=!p.negative_prompt;$('copyAll').disabled=!(p.analysis&&p.prompt&&p.negative_prompt);$('format').textContent=`Formato obrigatório: horizontal ${p.recommended_aspect_ratio||'5:4'} · ${p.recommended_width||1200} × ${p.recommended_height||960}px.`;
+ const rowLabels={melee:'Corpo a corpo',ranged:'Longa distância',siege:'Cerco'};
+ const def=card.definition||{};
+ const tacticalRow=String(def.categoria||'').toLowerCase()==='especial'?'Carta especial':(rowLabels[def.fileira]||'Posição tática não cadastrada');
+ const basePower=def.poder_base??def.poder??card.power;
+ const maxPower=card.max_power??def.poder_maximo??basePower;
+ const rarityPower=def.potencia_raridade??card.potencia_raridade??0;
+ $('cardMeta').textContent=[card.faction,card.rarity,tacticalRow,'Poder-base '+basePower,'Poder máximo '+maxPower,'Potência da raridade '+rarityPower,'ID '+cardId].filter(Boolean).join(' · ');
+ $('analysis').value=p.analysis||'';$('prompt').value=p.prompt||'';$('negative').value=p.negative_prompt||'';$('copy').disabled=!p.prompt;$('copyNegative').disabled=!p.negative_prompt;$('copyAll').disabled=!(p.analysis&&p.prompt&&p.negative_prompt);$('format').textContent=`Formato obrigatório: vertical ${p.recommended_aspect_ratio||'2:3'} · ${p.recommended_width||1024} × ${p.recommended_height||1536}px.`;
  currentArt=['validated','stored'].includes(card.art_status)&&!!card.art_path;
  $('replace').hidden=!currentArt;$('upload').hidden=currentArt;
  if(currentArt){$('preview').src='/api/gwent/cartas-geradas/'+encodeURIComponent(cardId)+'/arte';$('preview').hidden=false}

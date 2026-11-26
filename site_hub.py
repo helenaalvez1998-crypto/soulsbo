@@ -550,6 +550,34 @@ def registrar_rotas(bot, app: web.Application) -> None:
             data["definition"] = json.loads(data.pop("definition_json") or "{}")
         except (TypeError, ValueError, json.JSONDecodeError):
             data["definition"] = {}
+        # A ficha e o prompt usam a mesma cópia pessoal exibida na coleção.
+        exemplar_rows = await bot.db.coliseu_listar_exemplares(uid, str(data["card_id"]))
+        stored_exemplar_id = int(data.get("exemplar_id") or 0)
+        exemplar = next(
+            (dict(item) for item in exemplar_rows
+             if stored_exemplar_id and int(item["id"]) == stored_exemplar_id),
+            None,
+        )
+        if exemplar is None and len(exemplar_rows) == 1:
+            exemplar = dict(exemplar_rows[0])
+        if exemplar:
+            from sistemas.gwent import RARITY_EFFECT_BUDGET
+            current_power = int(exemplar.get("power") if exemplar.get("power") is not None else data["power"])
+            current_rarity = str(exemplar.get("rarity") or data["rarity"] or "Comum")
+            data.update({
+                "exemplar_id": int(exemplar["id"]),
+                "power": current_power,
+                "max_power": current_power,
+                "rarity": current_rarity,
+            })
+            data["definition"].update({
+                "raridade": current_rarity,
+                "poder": current_power,
+                "poder_base": current_power,
+                "poder_maximo": current_power,
+                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(current_rarity, 0)),
+                "exemplar_id": int(exemplar["id"]),
+            })
         return web.json_response(data, headers={"Cache-Control": "no-store"})
 
     async def atelier_page(request: web.Request) -> web.Response:
@@ -568,6 +596,38 @@ def registrar_rotas(bot, app: web.Application) -> None:
             return web.json_response({"error": "Carta não encontrada para esta conta."}, status=404)
         try:
             definition = json.loads(row["definition_json"] or "{}")
+            # A carta transmutada tem um exemplar pessoal. O prompt precisa usar
+            # exatamente os valores que a coleção e o modal exibem para essa cópia.
+            exemplar_rows = await bot.db.coliseu_listar_exemplares(uid, card_id)
+            stored_exemplar_id = int(row["exemplar_id"] or 0)
+            exemplar = next(
+                (dict(item) for item in exemplar_rows
+                 if stored_exemplar_id and int(item["id"]) == stored_exemplar_id),
+                None,
+            )
+            if exemplar is None and len(exemplar_rows) == 1:
+                exemplar = dict(exemplar_rows[0])
+            if exemplar is None:
+                return web.json_response(
+                    {"error": "Não foi possível identificar o exemplar dono desta carta para bloquear seus atributos."},
+                    status=409,
+                )
+            from sistemas.gwent import RARITY_EFFECT_BUDGET
+            current_power = int(exemplar.get("power") if exemplar.get("power") is not None else row["power"])
+            current_rarity = str(exemplar.get("rarity") or row["rarity"] or definition.get("raridade", "Comum"))
+            definition.update({
+                "nome": str(row["name"] or definition.get("nome", "Carta")),
+                "faccao": str(row["faction"] or definition.get("faccao", "")),
+                "raridade": current_rarity,
+                "categoria": "Unidade",
+                "poder": current_power,
+                "poder_base": current_power,
+                # No Gwent, o exemplar transmutado não tem evolução de poder separada:
+                # a própria coleção publica max_power igual ao poder atual.
+                "poder_maximo": current_power,
+                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(current_rarity, 0)),
+                "exemplar_id": int(exemplar["id"]),
+            })
             from sistemas.prompt_arte_criador import gerar_prompt_arte
             result = gerar_prompt_arte(definition, card_id=card_id)
         except (ValueError, TypeError, json.JSONDecodeError) as exc:
@@ -1034,7 +1094,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
                     "card_id": str(carta.id),
                     "nome": str(carta.nome),
                     "categoria": str(data.get("categoria") or carta.categoria),
-                    "faccao": str(data.get("faccao") or carta.tipo),
+                    "faccao": str(data.get("faccao") or carta.faccao),
                     "fileira": fileira_labels.get(fileira_raw.casefold(), fileira_raw),
                     "raridade": str(carta.raridade),
                     "poder": int(carta.poder),

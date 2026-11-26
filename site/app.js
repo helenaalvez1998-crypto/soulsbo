@@ -5,7 +5,7 @@ let currentUser = null;
 const text = (value, fallback = '—') => value === null || value === undefined || value === '' ? fallback : String(value);
 const number = (value) => new Intl.NumberFormat('pt-BR').format(Number(value || 0));
 // Manter sincronizado com VERSAO_ARTES em sistemas/cartas.py.
-const CARD_IMAGE_VERSION = 29;
+const CARD_IMAGE_VERSION = 32;
 const imageUrl = (card) => {
   const raw = card.image_url || `/api/gwent/cards/${encodeURIComponent(card.card_id || String(card.id || '').split('::')[0])}/image`;
   if (!raw.includes('/api/gwent/cards/')) return raw;
@@ -17,7 +17,7 @@ const imageUrl = (card) => {
 };
 const cardImageMarkup = (card, alt = '') =>
   `<img data-card-src="${escapeHTML(imageUrl(card))}" loading="lazy" decoding="async" alt="${escapeHTML(alt)}">`;
-// V51 — linguagem visual semântica das cartas (ícones vetoriais locais, sem dependência externa).
+// V52 — linguagem visual semântica das cartas (ícones vetoriais locais, sem dependência externa).
 const CARD_SIGILS = {
   'ordem áurea': '✦', 'véu carmesim': '血', 'lua negra': '☾', 'os esquecidos': '✝',
   'corpo a corpo': '⚔', 'longa distância': '➶', 'cerco': '⌖',
@@ -43,7 +43,7 @@ const rarityPower = card => Number.isFinite(Number(card?.potencia_raridade)) ? N
 const rarityPowerMarkup = card => `<span class=\"v54-rarity-power\" title=\"Potência da raridade: amplia habilidades; não é poder de ataque\"><i>✦</i> Potência ${rarityPower(card)}</span>`;
 const cardInsigniaMarkup = card => {
   const category = card.categoria === 'Especial' ? 'Especial' : 'Unidade';
-  const faction = card.faccao || card.tipo || 'Sem facção';
+  const faction = card.faccao || 'Sem facção';
   const row = card.row_label || card.fileira || (category === 'Especial' ? 'Efeito' : 'Fileira não informada');
   const rarity = card.raridade || 'Comum';
   const ability = card.habilidade_nome || card.efeito_nome || card.habilidade || card.efeito || '';
@@ -51,7 +51,7 @@ const cardInsigniaMarkup = card => {
     const effect = card.habilidade_texto || card.texto_efeito || 'Efeito especial';
     return `<div class="v51-special-banner"><span><i>◇</i> CARTA ESPECIAL</span><span>${escapeHTML(rarity)}</span></div><div class="v54-card-rarity-line">${rarityPowerMarkup(card)}<small>Escala do efeito · não soma ao poder-base</small></div><div class="v51-card-bottomline v51-special-effect"><span title="${escapeHTML(effect)}"><i>${cardSigil(effect)}</i>${escapeHTML(effect)}</span></div>`;
   }
-  return `<div class="v51-card-topline"><span class="v51-card-faction" title="${escapeHTML(faction)}"><i>${cardSigil(faction)}</i>${escapeHTML(faction)}</span><span class="v51-card-rarity">${escapeHTML(rarity)}</span></div><div class="v54-card-rarity-line">${rarityPowerMarkup(card)}<small>Escala do efeito · não soma ao poder-base</small></div><div class="v51-card-bottomline"><span title="${escapeHTML(row)}"><i>${cardSigil(row)}</i>${escapeHTML(row)}</span>${ability ? `<span class="v51-card-ability" title="${escapeHTML(ability)}"><i>${cardSigil(ability)}</i>${escapeHTML(ability)}</span>` : `<span class="v51-card-ability v51-no-ability"><i>—</i>Força pura</span>`}</div>`;
+  return `<div class="v51-card-topline"><span class="v51-card-faction" title="${escapeHTML(faction)}"><i>${cardSigil(faction)}</i>${escapeHTML(faction)}</span><span class="v51-card-rarity">${escapeHTML(rarity)}</span></div><div class="v54-card-rarity-line">${rarityPowerMarkup(card)}<small>Escala do efeito · não soma ao poder-base</small></div><div class="v51-card-bottomline"><span title="${escapeHTML(row)}"><i>${cardSigil(row)}</i>${escapeHTML(row)}</span>${ability ? `<span class="v51-card-ability" title="${escapeHTML(ability)}"><i>${cardSigil(ability)}</i>${escapeHTML(ability)}</span>` : `<span class="v51-card-ability v51-no-ability"><i>—</i>Sem habilidade especial</span>`}</div>`;
 };
 const CARD_IMAGE_FALLBACK = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 620"><rect width="420" height="620" rx="20" fill="#17131c"/><rect x="18" y="18" width="384" height="584" rx="16" fill="none" stroke="#9b805a" stroke-width="4"/><path d="M210 190l55 55-55 55-55-55z" fill="none" stroke="#9b805a" stroke-width="8"/><text x="210" y="390" fill="#d8c6a6" font-family="sans-serif" font-size="22" text-anchor="middle">ARTE INDISPONÍVEL</text><text x="210" y="425" fill="#978a9b" font-family="sans-serif" font-size="16" text-anchor="middle">Tente recarregar a página</text></svg>')}`;
 const CARD_IMAGE_RETRY_DELAYS = [700, 1600];
@@ -319,12 +319,11 @@ function renderGwentBuilder() {
   $('#gwent-card-pool').innerHTML = pool.map(card => cardTile(card)).join('') || '<div class="empty-state">Nenhuma carta disponível na sua coleção com esses filtros.</div>';
   renderGwentCatalog();
   const selectedFaction = $('#gwent-faction')?.value || 'Ordem Áurea';
-  const factionByType = {'Força':'Ordem Áurea','Destreza':'Véu Carmesim','Magia':'Lua Negra','Fé':'Os Esquecidos'};
   const factionAliases = {'Lua Sombria':'Lua Negra','Casa Cariana':'Lua Negra','Dinastia Mohgwyn':'Véu Carmesim','Fé':'Os Esquecidos'};
   const factionCounts = {'Ordem Áurea':0,'Véu Carmesim':0,'Lua Negra':0,'Os Esquecidos':0};
   selected.filter(card => card.categoria !== 'Especial').forEach(card => {
     const rawFaction = card.faccao || '';
-    const faction = factionAliases[rawFaction] || (Object.prototype.hasOwnProperty.call(factionCounts, rawFaction) ? rawFaction : factionByType[card.tipo] || '');
+    const faction = factionAliases[rawFaction] || (Object.prototype.hasOwnProperty.call(factionCounts, rawFaction) ? rawFaction : '');
     if (Object.prototype.hasOwnProperty.call(factionCounts, faction)) factionCounts[faction] += 1;
   });
   const maxFactionCount = Math.max(...Object.values(factionCounts));
@@ -400,7 +399,7 @@ function openGwentCollectionCardModal(cardId) {
   modal.setAttribute('aria-label',`Detalhes da carta ${card.nome || ''}`);
   const tags = [
     card.raridade || 'Comum',
-    card.faccao || card.tipo || 'Sem facção',
+    card.faccao || 'Sem facção',
     special ? 'Especial' : (card.row_label || card.fileira || 'Unidade')
   ];
   const combos = Array.isArray(card.combos_compativeis) ? card.combos_compativeis : [];
@@ -577,14 +576,26 @@ function atelierLegacyRichCopy(html) {
   return copied;
 }
 
+function selectedAtelierTarget() {
+  const raw = String($('#atelier-card')?.value || '');
+  const splitAt = raw.lastIndexOf('|');
+  if (splitAt <= 0) return null;
+  const cardId = raw.slice(0, splitAt);
+  const exemplarId = Number(raw.slice(splitAt + 1));
+  return cardId && Number.isInteger(exemplarId) && exemplarId > 0 ? {cardId, exemplarId} : null;
+}
+
 function renderAtelierCardOptions() {
   const select = $('#atelier-card');
   if (!select) return;
-  const models = new Map();
-  collection.forEach(card => { const key = card.card_id || card.id; if (!models.has(key)) models.set(key, card); });
-  select.innerHTML = '<option value="">Selecione uma carta</option>' + [...models.entries()].map(([key, card]) =>
-    `<option value="${escapeHTML(key)}">${escapeHTML(card.nome)} · ${escapeHTML(card.faccao || card.raridade || 'Carta')}</option>`
-  ).join('');
+  const exemplars = collection.filter(card => Number.isInteger(Number(card.exemplar_id)) && Number(card.exemplar_id) > 0);
+  select.innerHTML = '<option value="">Selecione um exemplar</option>' + exemplars.map(card => {
+    const cardId = String(card.card_id || card.id || '');
+    const exemplarId = Number(card.exemplar_id);
+    const maxPower = Number(card.max_power ?? card.maxPower ?? card.poder_maximo ?? card.poder ?? 0);
+    const power = Number(card.poder ?? card.power ?? 0);
+    return `<option value="${escapeHTML(`${cardId}|${exemplarId}`)}">${escapeHTML(card.nome || cardId)} · Exemplar #${exemplarId} · ${escapeHTML(card.raridade || card.rarity || 'Comum')} · Poder ${power}/${maxPower}</option>`;
+  }).join('');
 }
 
 async function loadAtelierHistory() {
@@ -596,7 +607,7 @@ async function loadAtelierHistory() {
     if (!response.ok) throw new Error(data.error || 'Não foi possível carregar o histórico do Ateliê.');
     target.innerHTML = (data.history || []).map(item => {
       const labels = {pending:'Em análise', approved:'Aprovada · arte oficial', rejected:'Rejeitada', archived:'Arquivada · não está mais aplicada à carta'};
-      return `<article class="atelier-history-item"><b>${escapeHTML(item.card_id)}</b><span>${escapeHTML(labels[item.status] || item.status)}</span><small>${escapeHTML(item.created_at || '')}</small>${item.rejection_reason ? `<p>${escapeHTML(item.rejection_reason)}</p>` : ''}</article>`;
+      return `<article class="atelier-history-item"><b>${escapeHTML(item.card_id)}${item.exemplar_id ? ` · Exemplar #${Number(item.exemplar_id)}` : ' · arte legada por modelo'}</b><span>${escapeHTML(labels[item.status] || item.status)}</span><small>${escapeHTML(item.created_at || '')}</small>${item.rejection_reason ? `<p>${escapeHTML(item.rejection_reason)}</p>` : ''}</article>`;
     }).join('') || '<p class="muted">Você ainda não enviou ilustrações.</p>';
   } catch (error) { target.innerHTML = `<p class="muted">${escapeHTML(error.message)}</p>`; }
 }
@@ -612,7 +623,7 @@ async function loadAtelierReviewQueue() {
     panel.hidden = false;
     await loadAtelierLeaderArtAdmin();
     $('#atelier-review-queue').innerHTML = (data.pending || []).map(item =>
-      `<article class="atelier-review-item"><img src="/api/gwent/atelier/submission/${Number(item.id)}/image" loading="lazy" decoding="async" alt="Arte submetida"><div><b>${escapeHTML(item.card_id)}</b><small>Artista: ${escapeHTML(item.artist_name || `Discord ${item.user_id}`)}</small><small>${escapeHTML(item.created_at || '')}</small><div class="atelier-review-actions"><button class="primary" type="button" data-atelier-approve="${Number(item.id)}">Aprovar</button><button class="secondary" type="button" data-atelier-reject="${Number(item.id)}">Rejeitar</button></div></div></article>`
+      `<article class="atelier-review-item"><img src="/api/gwent/atelier/submission/${Number(item.id)}/image" loading="lazy" decoding="async" alt="Carta completa submetida"><div><b>${escapeHTML(item.card_id)} · ${item.exemplar_id ? `Exemplar #${Number(item.exemplar_id)}` : 'Arte por modelo (legada)'}</b><small>Artista: ${escapeHTML(item.artist_name || `Discord ${item.user_id}`)}</small><small>${escapeHTML(item.created_at || '')}</small><div class="atelier-review-actions"><button class="primary" type="button" data-atelier-approve="${Number(item.id)}">Aprovar</button><button class="secondary" type="button" data-atelier-reject="${Number(item.id)}">Rejeitar</button></div></div></article>`
     ).join('') || '<p class="muted">Nenhuma arte aguardando aprovação.</p>';
   } catch (error) { panel.hidden = true; showNotice(error.message, 'error'); }
 }
@@ -761,34 +772,35 @@ async function loadAtelier() {
 }
 
 async function loadAtelierOfficialArt() {
-  const cardId = $('#atelier-card')?.value;
+  const selected = selectedAtelierTarget();
   const target = $('#atelier-official-art');
   if (!target) return;
-  if (!cardId) { target.innerHTML = '<p class="muted">Selecione uma carta para verificar a arte oficial.</p>'; return; }
+  if (!selected) { target.innerHTML = '<p class="muted">Selecione um exemplar para verificar sua carta completa.</p>'; return; }
   try {
-    const response = await fetch(`/api/gwent/atelier/official/${encodeURIComponent(cardId)}`, {credentials:'same-origin', cache:'no-store'});
+    const response = await fetch(`/api/gwent/atelier/official/${encodeURIComponent(selected.cardId)}?exemplar_id=${selected.exemplarId}`, {credentials:'same-origin', cache:'no-store'});
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Falha ao consultar arte oficial.');
     target.innerHTML = data.official
-      ? `<img class="atelier-official-preview" loading="lazy" decoding="async" src="${escapeHTML(data.image_url)}" alt="Arte oficial comunitária"><small>Arte oficial por <b>${escapeHTML(data.artist_name)}</b> · ${escapeHTML(data.created_at)}</small>`
-      : '<p class="muted">Esta carta ainda utiliza a arte-base. Sua submissão pode se tornar a primeira arte oficial.</p>';
+      ? `<img class="atelier-official-preview" loading="lazy" decoding="async" src="${escapeHTML(data.image_url)}" alt="Carta completa oficial"><small>Carta completa do exemplar #${selected.exemplarId} · artista <b>${escapeHTML(data.artist_name)}</b> · ${escapeHTML(data.created_at)}</small>`
+      : `<p class="muted">O exemplar #${selected.exemplarId} ainda utiliza a arte-base. Envie uma carta completa para este exemplar.</p>`;
   } catch (error) { target.innerHTML = `<p class="muted">${escapeHTML(error.message)}</p>`; }
 }
 
 async function generateAtelierPrompt() {
-  const cardId = $('#atelier-card').value;
-  if (!cardId) return showNotice('Selecione uma carta da sua coleção.', 'error');
+  const selected = selectedAtelierTarget();
+  if (!selected) return showNotice('Selecione um exemplar específico da sua coleção.', 'error');
+  const {cardId, exemplarId} = selected;
   const button = $('#atelier-generate-prompt');
   button.disabled = true;
   try {
-    const response = await fetch(`/api/gwent/atelier/prompt?card_id=${encodeURIComponent(cardId)}`, {
+    const response = await fetch(`/api/gwent/atelier/prompt?card_id=${encodeURIComponent(cardId)}&exemplar_id=${exemplarId}`, {
       credentials: 'same-origin',
       cache: 'no-store'
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Não foi possível gerar o prompt.');
 
-    const selectedCard = collection.find(card => String(card.card_id || card.id) === String(cardId));
+    const selectedCard = collection.find(card => String(card.card_id || card.id) === String(cardId) && Number(card.exemplar_id) === exemplarId);
     const faction = data.faction || data.facção || selectedCard?.faccao || selectedCard?.faction || '';
     atelierPromptText = String(data.prompt || '').trim();
     atelierAnalysisText = String(data.analysis || '').trim();
@@ -817,7 +829,7 @@ async function generateAtelierPrompt() {
     const copyReady = promptsReady && referenceReady;
     showNotice(
       copyReady
-        ? `Os dois prompts e a referência de ${faction || 'facção'} estão carregados. Use os botões separados.`
+        ? `Prompts da carta completa do exemplar #${exemplarId} e referência de ${faction || 'facção'} carregados.`
         : 'Confira se a análise, o prompt fixo e a referência foram carregados.',
       copyReady ? 'success' : 'warning'
     );
@@ -833,18 +845,19 @@ async function generateAtelierPrompt() {
 }
 
 async function submitAtelierArt() {
-  const cardId = $('#atelier-card').value;
+  const selected = selectedAtelierTarget();
   const file = $('#atelier-image').files?.[0];
-  if (!cardId || !file) return showNotice('Selecione a carta e a imagem.', 'error');
+  if (!selected || !file) return showNotice('Selecione o exemplar e a imagem da carta completa.', 'error');
+  const {cardId, exemplarId} = selected;
   if (!atelierPromptText) return showNotice('Gere o prompt individual da carta antes de enviar.', 'error');
   if (file.size > 8 * 1024 * 1024) return showNotice('A imagem ultrapassa o limite de 8 MB.', 'error');
-  const form = new FormData(); form.append('card_id', cardId); form.append('prompt_text', `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL\n${$('#atelier-negative').value}`); form.append('artist_name', ($('#atelier-artist-name').value || '').trim()); form.append('image', file);
+  const form = new FormData(); form.append('card_id', cardId); form.append('exemplar_id', String(exemplarId)); form.append('prompt_text', `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL\n${$('#atelier-negative').value}`); form.append('artist_name', ($('#atelier-artist-name').value || '').trim()); form.append('image', file);
   const button = $('#atelier-submit'); button.disabled = true;
   try {
     const response = await fetch('/api/gwent/atelier/submit', {method:'POST', credentials:'same-origin', body:form});
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Não foi possível enviar a ilustração.');
-    showNotice(`Carta completa enviada para aprovação · submissão #${data.submission_id}.`, 'success');
+    if (!response.ok) throw new Error(data.error || 'Não foi possível enviar a carta completa.');
+    showNotice(`Carta completa do exemplar #${exemplarId} enviada para aprovação · submissão #${data.submission_id}.`, 'success');
     $('#atelier-image').value = ''; $('#atelier-preview').hidden = true;
     await loadAtelierHistory(); await loadAtelierReviewQueue();
   } catch (error) { showNotice(error.message, 'error'); }
@@ -859,7 +872,7 @@ async function decideAtelierSubmission(id, approve) {
     const response = await fetch(`/api/gwent/atelier/review/${id}`, {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({approve, reason})});
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Não foi possível registrar a decisão.');
-    showNotice(approve ? 'Arte aprovada e publicada como ilustração oficial.' : 'Arte rejeitada; o motivo foi registrado.', 'success');
+    showNotice(approve ? 'Carta completa aprovada e publicada para o exemplar selecionado.' : 'Carta completa rejeitada; o motivo foi registrado.', 'success');
     await loadAtelierReviewQueue();
     await loadAtelierOfficialArt();
   } catch (error) { showNotice(error.message, 'error'); await loadAtelierReviewQueue(); }
@@ -1619,8 +1632,8 @@ $('#atelier-card').addEventListener('change', () => {
 $('#atelier-generate-prompt').addEventListener('click', generateAtelierPrompt);
 $('#atelier-copy-prompt').addEventListener('click', async () => {
   const button = $('#atelier-copy-prompt');
-  const cardId = $('#atelier-card')?.value;
-  if (!cardId || !atelierPromptText || !atelierAnalysisText || !atelierReferenceUrl) {
+  const selected = selectedAtelierTarget();
+  if (!selected || !atelierPromptText || !atelierAnalysisText || !atelierReferenceUrl) {
     showNotice('Gere primeiro a análise artística, o prompt fixo e a referência da facção.', 'error');
     return;
   }
@@ -1632,7 +1645,7 @@ $('#atelier-copy-prompt').addEventListener('click', async () => {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ card_id: cardId })
+      body: JSON.stringify({ card_id: selected.cardId, exemplar_id: selected.exemplarId })
     });
     if (!response.ok) {
       let message = 'Não foi possível gerar o PDF.';
@@ -1857,7 +1870,7 @@ function openGwentBoardCardModal(cardId) {
         <small class="gwent-board-card-eyebrow">GWENT DO COLISEU · INSPEÇÃO DE COMBATE</small>
         <h2>${escapeHTML(card.nome || 'Carta')}</h2>
         <div class="gwent-board-card-tags v51-inspection-tags">
-          <span><i>${cardSigil(card.faccao || card.tipo || 'Especial')}</i>${escapeHTML(card.faccao || card.tipo || 'Coliseu')}</span>
+          <span><i>${cardSigil(card.faccao || 'Especial')}</i>${escapeHTML(card.faccao || 'Coliseu')}</span>
           <span><i>${cardSigil(card.raridade || 'Carta')}</i>${escapeHTML(card.raridade || 'Carta')}</span>
           <span><i>${cardSigil(isSpecial ? 'Especial' : rowLabel)}</i>${escapeHTML(isSpecial ? 'Carta especial' : rowLabel)}</span>
           <span>EM CAMPO</span>

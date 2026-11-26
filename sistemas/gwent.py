@@ -5,9 +5,8 @@ from copy import deepcopy
 ROWS = ("melee", "ranged", "siege")
 AI_PLAYER_ID = -1  # Identidade técnica reservada à NARA; nunca recebe ranking/recompensas.
 ROW_LABELS = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}
-TYPE_ROW = {"Força": "melee", "Destreza": "ranged", "Magia": "siege"}
-FACTIONS = {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra", "Fé": "Os Esquecidos"}
-FACTION_TYPES = {value: key for key, value in FACTIONS.items()}
+FACTIONS = ("Ordem Áurea", "Véu Carmesim", "Lua Negra", "Os Esquecidos")
+FACTION_TYPES = frozenset(FACTIONS)
 LEGACY_FACTION_ALIASES = {"Casa Cariana": "Lua Negra", "Lua Sombria": "Lua Negra", "Dinastia Mohgwyn": "Véu Carmesim", "Fé": "Os Esquecidos", "Luteranos": "Os Esquecidos"}
 
 def canonical_faction(value: str | None) -> str | None:
@@ -17,6 +16,48 @@ def canonical_faction(value: str | None) -> str | None:
     value = str(value)
     return LEGACY_FACTION_ALIASES.get(value, value)
 
+
+def faction_for_card(card: dict | None) -> str | None:
+    """Resolve a facção canônica; snapshots antigos são atualizados pelo ID do catálogo, nunca pelo tipo legado."""
+    if not isinstance(card, dict):
+        return None
+    faction = canonical_faction(card.get("faccao"))
+    if faction in FACTION_TYPES:
+        return faction
+    card_id = str(card.get("id") or card.get("card_id") or "")
+    if card_id:
+        try:
+            from sistemas.cartas import get_carta
+            model = get_carta(card_id)
+            if model is not None and model.faccao in FACTION_TYPES:
+                return model.faccao
+        except Exception:
+            pass
+    return None
+
+
+
+def row_for_card(card: dict | None) -> str:
+    """Resolve a posição tática por campo canônico ou ID do catálogo, nunca por classe antiga."""
+    if not isinstance(card, dict):
+        return "melee"
+    row = str(card.get("fileira") or card.get("row") or "")
+    if row in ROWS:
+        return row
+    card_id = str(card.get("id") or card.get("card_id") or "")
+    if card_id:
+        try:
+            from sistemas.cartas import get_carta, FILEIRAS_POR_CARTA
+            model = get_carta(card_id)
+            if model is not None:
+                row = str(model.fileira or FILEIRAS_POR_CARTA.get(card_id) or "")
+            else:
+                row = str(FILEIRAS_POR_CARTA.get(card_id) or "")
+            if row in ROWS:
+                return row
+        except Exception:
+            pass
+    return "melee"
 
 def embaralhar_deck(deck: list[dict], rng=None) -> list[dict]:
     """Retorna uma cópia embaralhada; produção usa SystemRandom e testes podem injetar RNG."""
@@ -32,9 +73,7 @@ def contar_faccoes_deck(cards: list[dict]) -> dict[str, int]:
     for card in cards or []:
         if card.get("especial") or str(card.get("categoria", "")).casefold() == "especial":
             continue
-        faction = canonical_faction(card.get("faccao"))
-        if faction not in FACTION_TYPES:
-            faction = FACTIONS.get(str(card.get("tipo", "")))
+        faction = faction_for_card(card)
         if faction in counts:
             counts[faction] += 1
     return counts
@@ -55,7 +94,7 @@ def validar_faccao_deck(cards: list[dict], faction: str) -> tuple[bool, dict[str
 # Contrato de cobertura: cada habilidade declarada no catálogo precisa estar ligada
 # a um ramo do motor (unidade, Primordial ou carta tática especial).
 HABILIDADES_UNIDADE_IMPLEMENTADAS = frozenset({
-    "",  # Unidade de força pura: não ativa habilidade especial.
+    "",  # Unidade sem habilidade especial.
     "primeira_luz", "retaliacao", "impeto", "ultimo_folego", "contragolpe",
     "encadeamento", "adaptacao", "sangue_frio", "instinto", "precisao",
     "drenagem", "cacador_arcano", "quebra_ritmo", "lei_primeva",
@@ -262,7 +301,7 @@ CARD_IDENTITY_ABILITIES = {
 }
 
 
-# Cartas V18 de força pura não mantêm efeitos de identidade ocultos.
+# Cartas V18 sem habilidade especial não mantêm efeitos de identidade ocultos.
 from sistemas.cartas import CARTAS_SEM_EFEITO_IDS as _CARTAS_SEM_EFEITO_IDS
 CARD_IDENTITY_ABILITIES = {k: v for k, v in CARD_IDENTITY_ABILITIES.items() if k not in _CARTAS_SEM_EFEITO_IDS}
 
@@ -301,9 +340,9 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
     elif effect == "pilgrim_duel":
         if other.get("last_row") == row: card["bonus"] += 2
     elif effect == "forge_rhythm":
-        card["bonus"] += min(2, sum(1 for u in allies if canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == "Ordem Áurea" and u.get("row") == row))
+        card["bonus"] += min(2, sum(1 for u in allies if faction_for_card(u) == "Ordem Áurea" and u.get("row") == row))
     elif effect == "tide_resonance":
-        if any(canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == "Véu Carmesim" for u in enemies):
+        if any(faction_for_card(u) == "Véu Carmesim" for u in enemies):
             card["bonus"] += 2
         elif len(enemies) > len(allies):  # Etapa 3: alternativa contra facções que não são o Conclave.
             card["bonus"] += 1
@@ -315,7 +354,7 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
         if strongest: strongest["bonus"] = max(-2, int(strongest.get("bonus", 0)) - 1)
         player["astral_thread_ready"] = True
     elif effect == "furnace_charge":
-        if any(canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == "Ordem Áurea" for u in allies): card["bonus"] += 1
+        if any(faction_for_card(u) == "Ordem Áurea" for u in allies): card["bonus"] += 1
     elif effect == "covering_shot" and weakest_other_row:
         weakest_other_row["bonus"] = int(weakest_other_row.get("bonus", 0)) + 1
     elif effect == "wandering_ember":
@@ -330,7 +369,7 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
     elif effect == "devouring_eclipse":
         if any(int(u.get("bonus", 0)) > 0 for u in enemies): card["bonus"] += 2
     elif effect == "conductive_spark":
-        if any(canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == "Lua Negra" for u in allies): card["bonus"] += 1
+        if any(faction_for_card(u) == "Lua Negra" for u in allies): card["bonus"] += 1
     elif effect == "echo_orb":
         card["bonus"] += min(2, sum(1 for c in player.get("discard", []) if c.get("especial")))
     elif effect == "counterflame":
@@ -344,16 +383,16 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
         card["bonus"] += 2 if player.get("legado_vitoria", False) else 0
     elif effect == "devoto":
         # Devoto: se aliada de mesma facção em campo, +1 de poder
-        faccao = canonical_faction(card.get("faccao") or FACTIONS.get(str(card.get("tipo", ""))))
-        count = sum(1 for u in allies if canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == faccao)
+        faccao = faction_for_card(card)
+        count = sum(1 for u in allies if faction_for_card(u) == faccao)
         card["bonus"] += 1 if count >= 2 else 0
     elif effect == "escolha_ritmo":
         # Escolha de ritmo: jogador escolhe fileira ao jogar; permanece se ganhar rodada
         card["bonus"] += 1
     elif effect == "sinergia_faccao":
         # Sinergia de facção: +1 para cada aliada da mesma facção
-        faccao = canonical_faction(card.get("faccao") or FACTIONS.get(str(card.get("tipo", ""))))
-        card["bonus"] += sum(1 for u in allies if canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == faccao)
+        faccao = faction_for_card(card)
+        card["bonus"] += sum(1 for u in allies if faction_for_card(u) == faccao)
     elif effect == "shared_sentinel":
         occupied = {u.get("row") for u in allies}
         if all(r == row or r in occupied for r in ROWS): card["bonus"] += 1
@@ -361,7 +400,7 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
         if len(allies) < len(enemies): card["bonus"] += 2
     elif effect == "ember_kin":
         card["bonus"] += 1
-        ally = next((u for u in same_row if canonical_faction(u.get("faccao") or FACTIONS.get(str(u.get("tipo", "")))) == "Ordem Áurea"), None)
+        ally = next((u for u in same_row if faction_for_card(u) == "Ordem Áurea"), None)
         if ally: ally["bonus"] = int(ally.get("bonus", 0)) + 1
     elif effect == "mist_trail":
         if player.get("last_row") is not None and player.get("last_row") != row: card["bonus"] += 1
@@ -537,15 +576,16 @@ def preparar_carta(card: dict) -> dict:
     special = str(card.get("categoria", "")).casefold() == "especial"
     skill = str(card.get("habilidade", ""))
     try:
-        from sistemas.cartas import HABILIDADES
+        from sistemas.cartas import HABILIDADES, FILEIRAS_POR_CARTA, get_carta
         skill_data = HABILIDADES.get(skill, {})
+        model = get_carta(str(card.get("id", "")))
+        fileira_catalogo = (model.fileira or FILEIRAS_POR_CARTA.get(model.id, "melee")) if model else FILEIRAS_POR_CARTA.get(str(card.get("id", "")), "melee")
     except Exception:
         skill_data = {}
-    row = str(card.get("fileira") or TYPE_ROW.get(str(card.get("tipo", "")), "melee"))
-    if row not in ROWS:
-        row = TYPE_ROW.get(str(card.get("tipo", "")), "melee")
-    kind = str(card.get("tipo", "Força"))
-    faction = str(card.get("faccao") or FACTIONS.get(kind, "Ordem Áurea"))
+        fileira_catalogo = "melee"
+    # Cartas antigas salvas no banco recebem a classificação tática atual pelo ID.
+    row = row_for_card(card)
+    faction = faction_for_card(card) or "Ordem Áurea"
     category = "Especial" if special else "Unidade"
     identity = CARD_IDENTITY_ABILITIES.get(str(card["id"]), {})
     raridade = str(card.get("raridade", "Comum"))
@@ -605,9 +645,10 @@ def preparar_carta(card: dict) -> dict:
         "id": str(card["id"]), "nome": str(card.get("nome", "Carta")),
         "categoria": category,
         "papel_gwent": str(card.get("papel_gwent", "Tática" if special else ROW_LABELS[row])),
+        "tipo_combate": "Carta especial" if special else ROW_LABELS[row],
         "especial": special,
         "poder": 0 if special else max(1, min(15, int(card.get("poder", 1)))),
-        "raridade": raridade, "potencia_raridade": budget, "tipo": kind,
+        "raridade": raridade, "potencia_raridade": budget,
         "faccao": faction,
         "arquetipo_faccao": FACTION_ARCHETYPES.get(faction, {}).get("name", "Estratégia Geral"),
         "arquetipo_descricao": FACTION_ARCHETYPES.get(faction, {}).get("description", ""),
@@ -678,7 +719,7 @@ def preparar_carta_pessoal(definition: dict, exemplar: dict, *, owner_id: int | 
     payload.update({
         "id": str(definition["card_id"]), "nome": str(definition["nome"]),
         "categoria": "Unidade", "raridade": rarity, "poder": power,
-        "tipo": str(definition["tipo"]), "faccao": str(definition["faccao"]),
+        "faccao": str(definition["faccao"]),
         "fileira": str(definition["fileira"]),
         "habilidade": str(definition.get("habilidade") or ""),
         "descricao": str(definition.get("descricao") or ""), "custo": 0,
@@ -1242,7 +1283,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
             targets = [
                 unit for unit in player["board"]
                 if unit.get("row") == row
-                and canonical_faction(unit.get("faccao") or FACTIONS.get(str(unit.get("tipo", "")))) == "Os Esquecidos"
+                and faction_for_card(unit) == "Os Esquecidos"
             ]
             if not targets:
                 return {"error": "O Papa Esquecido precisa de ao menos uma unidade dos Esquecidos na fileira escolhida."}
@@ -1427,7 +1468,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 summoned = {
                     "id": f"espiritos_lobos_{uid}_{state['round']}_{len(player['board'])}",
                     "nome": "Lobos Espirituais", "categoria": "Unidade", "especial": False,
-                    "poder": min(6, 3 + potencia_raridade), "bonus": 0, "tipo": "Magia", "faccao": "Lua Negra",
+                    "poder": min(6, 3 + potencia_raridade), "bonus": 0, "faccao": "Lua Negra",
                     "habilidade": "", "row": row, "fileira": row, "weather_resist": 0, "escudo": 0,
                 }
                 player["board"].append(summoned)
@@ -1568,7 +1609,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
             if detalhes:
                 state["last_event"] += " " + " ".join(detalhes)
         else:
-            fileira_obrigatoria = str(card.get("row") or card.get("fileira") or TYPE_ROW.get(str(card.get("tipo", "")), "melee"))
+            fileira_obrigatoria = row_for_card(card)
             if row not in ROWS:
                 row = fileira_obrigatoria
             if row != fileira_obrigatoria:
@@ -1595,7 +1636,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
             elif skill == "adaptacao" and last_row is not None and last_row != row: card["bonus"] += 1
             elif skill == "cacador_arcano":
                 # Etapa 3: também caça unidades fortalecidas, para funcionar contra qualquer facção.
-                if any(canonical_faction(c.get("faccao") or FACTIONS.get(str(c.get("tipo", "")))) == "Lua Negra" for c in other["board"]) or any(int(c.get("bonus", 0)) > 0 for c in other["board"]):
+                if any(faction_for_card(c) == "Lua Negra" for c in other["board"]) or any(int(c.get("bonus", 0)) > 0 for c in other["board"]):
                     card["bonus"] += 1
             elif skill == "quebra_ritmo" and enemy_last_row == row: card["bonus"] += 1
             elif skill == "olho_tempestade" and state.get("weather", {}).get(row): card["bonus"] += 2
@@ -1643,12 +1684,12 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     unidade_revivida = revivida
                     extras_entrada.append(f"Ressurgiu {revivida['nome']} do descarte.")
             # Sinergias de cartas: recompensam composições e posicionamento coordenado.
-            if skill == "dupla_fornalha" and any(c.get("tipo") == "Força" and c.get("row") == row for c in player["board"]):
+            if skill == "dupla_fornalha" and any(c.get("row") == row for c in player["board"]):
                 card["bonus"] += 2
-            elif skill == "irmandade_veu" and any(c.get("tipo") == "Destreza" and c.get("row") != row for c in player["board"]):
+            elif skill == "irmandade_veu" and any(c.get("row") != row for c in player["board"]):
                 card["bonus"] += 2
             elif skill == "circulo_arcano" and (
-                any(c.get("tipo") == "Magia" and c.get("row") == row for c in player["board"])
+                any(c.get("row") == row for c in player["board"])
                 or any(c.get("especial") for c in player["discard"])
             ):
                 card["bonus"] += 2
@@ -1669,7 +1710,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     f"A raridade {card.get('raridade', 'Comum')} ampliou a habilidade em {potencia_aplicada} ponto(s)."
                 )
             # Passiva visível: a primeira unidade da facção do deck recebe +1 nesta rodada.
-            card_faction = canonical_faction(card.get("faccao") or FACTIONS.get(str(card.get("tipo", ""))))
+            card_faction = faction_for_card(card)
             if card_faction == player["faction"] and not player["faction_boost_used"]:
                 card["bonus"] += FACTION_BOOST.get(player["faction"], 1)
                 player["faction_boost_used"] = True
@@ -1832,7 +1873,7 @@ def executar_turno_ia(state: dict, ai_user_id: int = AI_PLAYER_ID) -> dict:
         # Unidades têm fileira fixa; cartas especiais podem escolher uma fileira quando o efeito pede.
         for card in list(ai.get("hand", [])):
             is_special = bool(card.get("especial") or str(card.get("categoria", "")).casefold() == "especial")
-            legal_rows = ROWS if is_special else (str(card.get("row") or card.get("fileira") or TYPE_ROW.get(str(card.get("tipo", "")), "melee")),)
+            legal_rows = ROWS if is_special else (row_for_card(card),)
             for row in legal_rows:
                 consider("play", row, card)
 

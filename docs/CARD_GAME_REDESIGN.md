@@ -52,15 +52,19 @@
 ## 3. SISTEMA DE CARTAS
 
 ### Estrutura
-- **3 Tipos**: Força (dourado), Destreza (vermelho), Magia (roxo)
-- **3 Fileiras**: Melee, Ranged, Siege
+- **3 Posições táticas de unidade**: Corpo a corpo, Longa distância e Cerco
+- **Facção** é um campo independente da posição tática: Ordem Áurea, Véu Carmesim, Lua Negra ou Os Esquecidos
+- **Cartas especiais** não ocupam uma fileira de unidade
 - **7 Raridades**: Comum → Singular
 - **5 Níveis de Evolução**: Cada um com risco crescente
 
 ### Facções
-- 🔵 **Ordem Áurea** (Força): Defensivo, escudos, cura
-- 🔴 **Véu Carmesim** (Destreza): Agressivo, sangramento, velocidade
-- 🟣 **Lua Negra** (Magia): Controle, congelamento, combos
+- 🔵 **Ordem Áurea**: defesa, escudos, disciplina e proteção
+- 🔴 **Véu Carmesim**: agressão, sangramento, sacrifício e pressão
+- 🟣 **Lua Negra**: temas lunares/arcaicos, gravidade, congelamento e controle
+- ⚪ **Os Esquecidos**: resistência, legado e cooperação
+
+Força, Destreza e Magia são classificações de um sistema antigo e não devem ser usadas como tipo, fileira ou classe de combate. Magia pode continuar como tema narrativo ou habilidade explicitamente definida.
 
 ---
 

@@ -1,7 +1,7 @@
-"""V49 — direção de arte individual, contextual e específica para cartas geradas.
+"""V52 — geração de carta completa por exemplar, com dados mecânicos bloqueados e validados.
 
 O prompt converte os dados mecânicos e narrativos da carta em decisões visuais.
-Dados de jogo são contexto para a ilustração, nunca elementos a serem desenhados.
+Dados de jogo são campos obrigatórios a serem reproduzidos literalmente na carta final.
 """
 from __future__ import annotations
 
@@ -153,14 +153,16 @@ def _power_direction(power: Any, power_max: Any, rarity: str) -> str:
     else:
         scale = "a modestly powered subject; avoid champion-like spectacle or exaggerated dominance"
     return (
-        f"POWER INTERPRETATION: current power {current}; rarity ceiling {ceiling}. This is gameplay metadata, "
-        f"not text to render. Visual level: {scale}. Never display numbers or turn power into a glow, aura or magical effect."
+        f"POWER INTERPRETATION: current power {current}; maximum power {ceiling}. "
+        f"Print the current value as BASE POWER and the ceiling as MAXIMUM POWER, in separate labeled fields. Visual level: {scale}. "
+        "Never turn numeric stats into a glow, aura or magical effect."
     )
 
 
 def gerar_prompt_arte(definition: dict[str, Any], *, card_id: str) -> dict[str, Any]:
-    """Gera um briefing de ilustração específico, completo e focado somente na arte."""
-    from sistemas.cartas import FAIXA_PODER, HABILIDADES
+    """Gera o prompt mestre da carta completa com dados oficiais validados."""
+    from sistemas.cartas import FAIXA_PODER, HABILIDADES, RARIDADES
+    from sistemas.gwent import RARITY_EFFECT_BUDGET
 
     if not isinstance(definition, dict):
         raise ValueError("Definição inválida para criar o prompt.")
@@ -170,21 +172,32 @@ def gerar_prompt_arte(definition: dict[str, Any], *, card_id: str) -> dict[str, 
         "descricao": _safe(definition.get("descricao") or definition.get("lore"), 1400),
         "faccao": _safe(definition.get("faccao"), 80),
         "raridade": _safe(definition.get("raridade"), 40),
-        "tipo": _safe(definition.get("tipo"), 40),
         "categoria": _safe(definition.get("categoria") or "Unidade", 50),
         "afinidades": _items(definition.get("afinidades"), limit=8),
         "afinidade_dominante": _safe(definition.get("afinidade_dominante"), 60),
         "funcao": _safe(definition.get("funcao_tatica") or definition.get("funcao"), 70),
         "arquetipo": _safe(definition.get("arquetipo"), 80),
         "epiteto": _safe(definition.get("epiteto"), 100),
-        "fileira": _safe(definition.get("fileira"), 30),
+        "fileira": _safe(definition.get("fileira") or definition.get("row"), 30),
+        "custo": definition.get("custo", 0),
+        "potencia_raridade": definition.get("potencia_raridade"),
         "habilidade_id": _safe(definition.get("habilidade"), 80).casefold(),
-        "poder": definition.get("poder"),
-        "poder_maximo": definition.get("poder_maximo") or definition.get("max_power"),
+        "poder": definition.get("poder_base", definition.get("poder")),
+        "poder_maximo": (definition.get("poder_maximo") if definition.get("poder_maximo") is not None
+                         else definition.get("max_power")),
+        "exemplar_id": definition.get("exemplar_id"),
         "origem": _safe(definition.get("jogo_origem") or definition.get("origem"), 100),
     }
     if not fields["nome"] or not fields["faccao"] or not fields["raridade"]:
         raise ValueError("Definição incompleta para criar o prompt.")
+    if fields["faccao"] not in {"Ordem Áurea", "Véu Carmesim", "Lua Negra", "Os Esquecidos"}:
+        raise ValueError("Facção inválida. Use uma das quatro facções oficiais.")
+    if fields["raridade"] not in RARIDADES:
+        raise ValueError("Raridade inválida. Use uma das raridades oficiais.")
+    if fields["categoria"].casefold() not in {"unidade", "especial"}:
+        raise ValueError("Categoria inválida. Use Unidade ou Especial.")
+    if fields["categoria"].casefold() != "especial" and fields["fileira"] not in {"melee", "ranged", "siege"}:
+        raise ValueError("Posição tática inválida. Use melee, ranged ou siege.")
 
     habilidade = HABILIDADES.get(fields["habilidade_id"], {})
     habilidade_nome = _safe(habilidade.get("nome") or definition.get("habilidade_nome"), 100)
@@ -194,16 +207,44 @@ def gerar_prompt_arte(definition: dict[str, Any], *, card_id: str) -> dict[str, 
     )
     # An unresolved internal key is not, by itself, proof of an ability. Only a
     # known ability name or an explicit canonical rule may authorize a visual effect.
-    tem_habilidade = bool(habilidade_nome or habilidade_regra)
+    tem_habilidade = bool(fields["habilidade_id"] and (habilidade_nome or habilidade_regra))
     if not tem_habilidade:
-        habilidade_nome = "Nenhuma habilidade especial"
-        habilidade_regra = "A carta não possui habilidade especial."
+        habilidade_nome = "Sem habilidade especial"
+        habilidade_regra = "A carta não possui habilidade especial. Não inventar efeitos, feitiços ou poderes visuais."
 
     power_ceiling = fields["poder_maximo"]
     if power_ceiling in (None, ""):
-        power_ceiling = FAIXA_PODER.get(fields["raridade"], (0, 0))[1]
-    if fields["poder"] is None:
-        fields["poder"] = "não informado"
+        power_ceiling = 0 if fields["categoria"].casefold() == "especial" else FAIXA_PODER.get(fields["raridade"], (0, 0))[1]
+    try:
+        base_power_num, max_power_num = int(fields["poder"]), int(power_ceiling)
+    except (TypeError, ValueError):
+        raise ValueError("Poder-base e poder máximo precisam ser números inteiros oficiais.")
+    if max_power_num < base_power_num or (fields["categoria"].casefold() != "especial" and base_power_num < 1):
+        raise ValueError("Poder máximo não pode ser menor que o poder-base.")
+    if fields["categoria"].casefold() != "especial":
+        _, rarity_ceiling = FAIXA_PODER[fields["raridade"]]
+        if base_power_num > rarity_ceiling or max_power_num > rarity_ceiling:
+            raise ValueError("Poder-base ou máximo acima do teto oficial da raridade.")
+    try:
+        cost_num = int(fields["custo"])
+        # As cartas transmutadas têm custo próprio (inclusive zero); a potência
+        # de raridade segue a regra oficial de combate quando não vem no snapshot.
+        supplied_potency = definition.get("potencia_raridade")
+        rarity_power_num = int(
+            supplied_potency if supplied_potency is not None
+            else RARITY_EFFECT_BUDGET.get(fields["raridade"], 0)
+        )
+    except (TypeError, ValueError):
+        raise ValueError("Custo e potência da raridade precisam ser números inteiros oficiais.")
+    expected_potency = int(RARITY_EFFECT_BUDGET.get(fields["raridade"], -1))
+    if cost_num < 0 or cost_num > 12 or rarity_power_num != expected_potency:
+        raise ValueError("Custo inválido ou potência da raridade incompatível com a regra oficial.")
+    if fields["categoria"].casefold() == "especial" and (base_power_num != 0 or max_power_num != 0):
+        raise ValueError("Cartas especiais devem ter poder-base e poder máximo iguais a zero.")
+    fields["poder"] = base_power_num
+    fields["custo"] = cost_num
+    fields["potencia_raridade"] = rarity_power_num
+    power_ceiling = max_power_num
 
     sinergias = _items(
         definition.get("sinergias") or definition.get("sinergia") or definition.get("synergies")
@@ -241,14 +282,8 @@ def gerar_prompt_arte(definition: dict[str, Any], *, card_id: str) -> dict[str, 
         "siege": "a vantage, ritual ground or battlefield-scale context only if the identity supports it; do not automatically add artillery",
     }.get(fields["fileira"].casefold(), "tactical row unspecified; infer no equipment from the row")
 
-    if fields["tipo"].casefold() == "destreza":
-        type_direction = "dexterity language: precision, efficient movement, balance, timing and controlled weapon handling; no oversized brute-force silhouette"
-    elif fields["tipo"].casefold() == "força":
-        type_direction = "strength language: grounded weight, leverage, muscular effort and robust construction; do not make the subject needlessly gigantic"
-    elif fields["tipo"].casefold() == "magia":
-        type_direction = "magic language: only depict a supernatural effect when the card's ability or lore explicitly supports it; otherwise express study, ritual knowledge or arcane culture through tools and materials rather than invented spell effects"
-    else:
-        type_direction = "type unspecified; let the named identity and lore determine anatomy, equipment and movement"
+    type_direction = "The faction field and tactical-row field are independent. Print only the supplied tactical-row label: Corpo a corpo, Longa distância or Cerco (or Carta especial). Do not print obsolete combat classifications."
+    row_label = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}.get(fields["fileira"], "Carta especial")
 
     # Regra global do NARABOT: todas as artes deste sistema pertencem ao universo Elden Ring.
     origin = "Elden Ring — The Lands Between"
@@ -269,22 +304,25 @@ def gerar_prompt_arte(definition: dict[str, Any], *, card_id: str) -> dict[str, 
         "quebra_ritmo": "Show the interruption of an opponent's action through positioning and impact timing; no arbitrary energy effect.",
     }
     ability_visual = ability_visuals.get(fields["habilidade_id"], "")
-    prompt = f"""NARABOT — CARD-SPECIFIC ELDEN RING-INSPIRED ILLUSTRATION
+    prompt = f"""NARABOT — CARD-SPECIFIC ELDEN RING-INSPIRED COMPLETE COLLECTIBLE CARD
 CARD REFERENCE: {card_id}
+EXEMPLAR REFERENCE: {fields['exemplar_id'] or 'catalog model only'}
+COPY / SOURCE-OF-TRUTH RULE: this exact exemplar is authoritative; never copy stats from another copy of the same card.
 
 1. WORLD AND ART-DIRECTION STANDARD
-Create an original dark-fantasy illustration native to the visual world of Elden Ring: the Lands Between and, only when the card supports it, the Realm of Shadow. Use decayed monumental sacred architecture, ancient roads, weathered stone, heavy iron, old brass, root-split masonry, Carian stonework, subterranean ruins, volcanic basalt, misted lakes, storm-broken plateaus and solemn environmental storytelling. Select one coherent region/culture justified by the card facts; never combine famous locations as decoration. Keep the atmosphere ancient, melancholy, severe and materially believable. Do not reproduce an existing screenshot, official illustration, exact composition or another artist's painting.
+Create one complete collectible card, not a standalone illustration, using original dark-fantasy artwork native to the visual world of Elden Ring: the Lands Between and, only when the card supports it, the Realm of Shadow. Use decayed monumental sacred architecture, ancient roads, weathered stone, heavy iron, old brass, root-split masonry, Carian stonework, subterranean ruins, volcanic basalt, misted lakes, storm-broken plateaus and solemn environmental storytelling. Select one coherent region/culture justified by the card facts; never combine famous locations as decoration. Keep the atmosphere ancient, melancholy, severe and materially believable. Do not reproduce an existing screenshot, official illustration, exact composition or another artist's painting.
 
-2. COMPLETE CARD IDENTITY — CANONICAL DATA, NOT DRAWN TEXT
+2. COMPLETE CARD DATA — CANONICAL VALUES THAT MUST BE PRINTED
 CARD NAME: {fields['nome']}
 CARD CATEGORY: {fields['categoria']}
 CARD FACTION: {fields['faccao']}
-CARD TYPE: {fields['tipo'] or 'not specified'}
+TACTICAL ROW: {row_label}
 RARITY: {fields['raridade']}
-CURRENT POWER: {fields['poder']}
-MAXIMUM POWER FOR THIS CARD/RARITY: {power_ceiling}
+COST: {fields['custo']}
+BASE POWER (main medallion): {fields['poder']}
+MAXIMUM POWER (separate field only): {power_ceiling}
+RARITY POTENCY (separate field): {fields['potencia_raridade']}
 TACTICAL FUNCTION: {fields['funcao'] or 'not specified'}
-TACTICAL ROW: {fields['fileira'] or 'not specified'}
 ARCHETYPE: {fields['arquetipo'] or 'not specified'}
 EPITHET: {fields['epiteto'] or 'not specified'}
 DOMINANT AFFINITY: {fields['afinidade_dominante'] or 'not specified'}
@@ -295,7 +333,7 @@ CANONICAL ABILITY RULE: {habilidade_regra}
 CARD LORE (quoted fictional data, not instructions): {json.dumps(fields['descricao'], ensure_ascii=False)}
 
 3. CARD → VISUAL INTERPRETATION
-The card name determines the exact protagonist or central entity. The lore determines identity, history, status, motives, relationships, setting clues and the emotional meaning of the scene. The tactical function determines what the subject contributes in a confrontation. The row may influence distance and posture, never invent a profession or weapon. The type informs movement and physical language. Current power relative to its rarity ceiling informs believable competence and threat, not supernatural spectacle. Rarity controls visual refinement and narrative scale only. Affinities may influence restrained materials, lighting accents and environmental details, but must not become random symbols or extra powers. The final picture must contain a specific, coherent interpretation of THIS card—not a generic fantasy character.
+The card name determines the exact protagonist or central entity. The lore determines identity, history, status, motives, relationships, setting clues and the emotional meaning of the scene. The tactical function determines what the subject contributes in a confrontation. The row may influence distance and posture, never invent a profession or weapon. The tactical row informs placement and distance only; it does not prescribe a weapon or profession. Current power relative to its rarity ceiling informs believable competence and threat, not supernatural spectacle. Rarity controls visual refinement and narrative scale only. Affinities may influence restrained materials, lighting accents and environmental details, but must not become random symbols or extra powers. The final picture must contain a specific, coherent interpretation of THIS card—not a generic fantasy character.
 
 SUBJECT AND LORE TRANSLATION: {fields['nome']} is the only required named subject. Read the lore literally, then translate its meaningful phrases into visible choices: identity into silhouette and attire; role into posture and action; location into architecture and terrain; mood into expression, weather and light; signature object into a clear focal prop. Do not invent biography, gender, species, relationships, injuries, rank, canonical allegiance, weapon or magic not supported by the supplied facts.
 
@@ -310,8 +348,7 @@ This is a NARABOT deck faction/alignment. It may guide palette, materials, subtl
 {_rarity_direction(fields['raridade'])}
 {_power_direction(fields['poder'], power_ceiling, fields['raridade'])}
 TACTICAL FUNCTION: {tactical}.
-TACTICAL ROW: {row}.
-TYPE LANGUAGE: {type_direction}.
+TACTICAL ROW: {row}. {type_direction}
 
 6. ABILITY, AFFINITY AND SYNERGY — ONLY WHAT THE CARD SUPPORTS
 {('ABILITY VISUALIZATION: translate only the exact canonical rule into one subtle, readable action or consequence. The ability must have a visible source and physical interaction with the scene. Do not add a second ability, extra spell, unrelated creature or decorative magic. ' + ability_visual if tem_habilidade else 'NO SPECIAL ABILITY — HARD CONSTRAINT: the card has no special ability. Do not add spellcasting, magical attacks, supernatural aura, floating runes, unexplained glow, energy trails or artificial powers. Convey danger, skill or status through posture, expression, training, equipment, environment and composition. Canonical traits explicitly stated in the lore remain allowed, but do not invent anything beyond them.')}
@@ -319,31 +356,34 @@ AFFINITY CUES: {'; '.join(affinity_cues) if affinity_cues else 'No affinity-spec
 SYNERGY / RELATIONSHIP CONTEXT: {('; '.join(sinergias) if sinergias else 'No synergy/relationship data supplied.')}. These are strategic relationships, not a requirement to show other named cards. Do not add another character merely to illustrate synergy; use a subtle shared motif, compatible material cue or environmental hint only when it helps the main subject's story.
 SOURCE INGREDIENTS (transmutation context only): {('; '.join(ingredientes) if ingredientes else 'not supplied')}. Do not portray the ingredients as a group or copy their identities; they may inform the created card's dominant affinity and material character only.
 
-7. SPECIFIC SCENE AND COMPOSITION
-Create ONE concrete moment with a readable action or tense pause and an implied before-and-after. For a named person, make that person the dominant subject. For a named relic, creature, spell, place or event, make that exact thing the protagonist instead of substituting a warrior. Specify a believable pose, expression, hands, equipment, material construction and one location that fits the lore. Use a deliberate landscape 5:4 composition with foreground, subject plane and background; strong silhouette; cinematic but physically motivated light; clear focal hierarchy; atmospheric depth. Keep face, hands, weapon and signature object inside safe margins. At card-thumbnail size, the subject and its defining identity must remain immediately readable.
+7. COMPLETE CARD COMPOSITION AND DATA LAYOUT
+Create ONE concrete moment with a readable action or tense pause and an implied before-and-after. For a named person, make that person the dominant subject. For a named relic, creature, spell, place or event, make that exact thing the protagonist instead of substituting a warrior. Specify a believable pose, expression, hands, equipment, material construction and one location that fits the lore. Use a deliberate vertical 2:3 complete-card composition with foreground, subject plane and background; strong silhouette; cinematic but physically motivated light; clear focal hierarchy; atmospheric depth. Keep face, hands, weapon and signature object inside safe margins. At card-thumbnail size, the subject and its defining identity must remain immediately readable.
 
 8. MATERIAL REALISM AND FINISH
 Use believable Elden Ring material language: articulated armor, attached straps, functional weapons, woven cloth, worn leather, oxidized metal, carved stone and weathered wood. Preserve natural anatomy, credible weight, correct perspective, grounded contact shadows and consistent light direction. Premium painterly realism, controlled brushwork, nuanced value grouping and restrained detail; no glossy CGI, plastic armor, waxy skin, anime proportions or random ornament overload.
 
-9. STRICT EXCLUSIONS — ART ONLY
-Output a standalone illustration only: no card frame, border, card edge, title, letters, text, numbers, stats, icons, rarity gem, logo, watermark, signature, UI, collage, split panel or visual card mockup. Do not render any gameplay value. No generic stock fantasy warrior, unrelated companion, arbitrary dragon/skull/castle, invented spell, random weapon, gratuitous gore, neon filter, excessive bloom, artificial grain, pixelation or compression artifacts. Do not add elements solely to fill empty space.
+9. COMPLETE CARD OUTPUT — REQUIRED
+Generate the complete finished vertical 2:3 collectible card, including frame, artwork, title, faction, rarity, tactical row, cost, base-power medallion, separate maximum-power field, separate rarity-potency field, ability name/rule and lore. Copy every supplied Portuguese label and number exactly. Never substitute maximum power for base power; the main medallion must display the base-power field. Print only Corpo a corpo, Longa distância or Cerco (or Carta especial for a special card). Faction and tactical row are independent fields. Do not print obsolete combat classifications. No generic stock fantasy warrior, unrelated companion, arbitrary dragon/skull/castle, invented spell, random weapon, gratuitous gore, neon filter, excessive bloom, artificial grain, pixelation or compression artifacts. Do not add elements solely to fill empty space.
 
-FINAL OUTPUT: one original landscape 5:4 illustration (recommended 1024×819), focused exclusively on the visual identity and story of this card. No typography of any kind."""
+FINAL OUTPUT: one complete vertical 2:3 card (recommended 1024×1536), with fully rendered illustration, frame, readable Portuguese typography and all canonical metadata. Do not output isolated artwork or an empty template."""
     # A saída segue o contrato do Prompt-Mestre: análise PT + prompt EN + negative EN.
-    # A dimensão recomendada agora representa 5:4 matematicamente exato.
     from sistemas.direcao_arte_prompts import pacote_prompt_arte
 
     source_card = dict(definition)
+    source_card.pop("tipo", None)  # remove snapshot legado; nunca é uma fonte de classificação
     source_card.update({
         "nome": fields["nome"],
         "descricao": fields["descricao"],
         "faccao": fields["faccao"],
         "raridade": fields["raridade"],
-        "tipo": fields["tipo"],
-        "categoria": fields["categoria"],
+        "categoria": "Especial" if fields["categoria"].casefold() == "especial" else "Unidade",
         "poder": fields["poder"],
+        "poder_base": fields["poder"],
         "poder_maximo": power_ceiling,
+        "custo": fields["custo"],
+        "potencia_raridade": fields["potencia_raridade"],
         "fileira": fields["fileira"],
+        "row_label": row_label,
         "funcao_tatica": fields["funcao"],
         "afinidades": afinidades,
         "sinergias": sinergias,

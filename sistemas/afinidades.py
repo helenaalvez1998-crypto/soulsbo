@@ -10,12 +10,7 @@ import unicodedata
 from collections import Counter
 from typing import Any, Iterable
 
-FACCOES = ("Ordem Áurea", "Véu Carmesim", "Lua Negra")
-TIPO_PARA_FACCAO = {
-    "Força": "Ordem Áurea",
-    "Destreza": "Véu Carmesim",
-    "Magia": "Lua Negra",
-}
+FACCOES = ("Ordem Áurea", "Véu Carmesim", "Lua Negra", "Os Esquecidos")
 FACCAO_ALIASES = {
     "ordem aurea": "Ordem Áurea", "veu carmesim": "Véu Carmesim",
     "lua negra": "Lua Negra",
@@ -66,8 +61,16 @@ def _texto_carta(carta: dict[str, Any]) -> str:
 
 def classificar_carta(carta: dict[str, Any]) -> dict[str, Any]:
     """Extrai facção, origem, afinidades e função sem alterar o objeto de entrada."""
-    tipo = str(carta.get("tipo", ""))
-    faccao = str(carta.get("faccao") or TIPO_PARA_FACCAO.get(tipo, ""))
+    faccao = str(carta.get("faccao") or "")
+    if not faccao:
+        card_id = str(carta.get("card_id") or carta.get("id") or "")
+        if card_id:
+            try:
+                from sistemas.cartas import get_carta
+                model = get_carta(card_id)
+                faccao = str(model.faccao) if model else ""
+            except Exception:
+                faccao = ""
     if normalizar(faccao) in FACCAO_ALIASES:
         faccao = FACCAO_ALIASES[normalizar(faccao)]
     texto = _texto_carta(carta)

@@ -22,7 +22,7 @@ Instale `boto3` com `pip install -r requirements.txt`.
 - Sem as variáveis do R2, o endpoint de upload retorna HTTP 503; não grava silenciosamente no disco local.
 
 ## Importante
-A validação atual em `sistemas/arte_upload_criador.py` aceita imagens horizontais próximas de 5:4 (500×400 a 1200×960). Ela ainda não aceita uma carta vertical completa. A validação de carta completa e o override com restauração são etapas seguintes; não substitua essa validação sem ajustar o contrato visual e os testes.
+A validação atual em `sistemas/arte_upload_criador.py` aceita cartas completas verticais próximas de 2:3 (mínimo 512×768, saída limitada a 1536×2304). A normalização preserva o enquadramento integral com `thumbnail`; não usa `ImageOps.fit` nem corta moldura, textos ou ilustração. O contrato do Ateliê é uma carta completa gerada por IA e vinculada ao exemplar específico.
 
 
 ## Ateliê de Cartas — submissões para aprovação

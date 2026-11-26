@@ -1050,6 +1050,18 @@ class Database:
             await self.conn.execute(
                 "ALTER TABLE cartas_atelie_submissoes ADD COLUMN image_key TEXT NOT NULL DEFAULT ''"
             )
+        if "exemplar_id" not in atelier_cols:
+            await self.conn.execute(
+                "ALTER TABLE cartas_atelie_submissoes ADD COLUMN exemplar_id INTEGER"
+            )
+        if "full_card" not in atelier_cols:
+            await self.conn.execute(
+                "ALTER TABLE cartas_atelie_submissoes ADD COLUMN full_card INTEGER NOT NULL DEFAULT 0"
+            )
+        await self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_atelie_exemplar_status "
+            "ON cartas_atelie_submissoes(card_id, exemplar_id, status, created_at)"
+        )
         # Migração incremental do armazenamento de arte de líderes, caso exista
         # uma instalação de pré-lançamento sem o token de revisão SHA-256.
         leader_art_cols = {r["name"] for r in await self._all("PRAGMA table_info(cartas_gwent_lideres_artes)")}
@@ -3787,18 +3799,27 @@ class Database:
     async def coliseu_atelie_criar_submissao_web(
         self, user_id: int, card_id: str, prompt_text: str, image_data: bytes,
         mime_type: str = "image/jpeg", artist_name: str = "", image_key: str = "",
+        exemplar_id: int | None = None, full_card: bool = True,
     ):
-        """Registra uma arte comunitária pendente; a aprovação define a arte oficial do modelo."""
+        """Registra arte; cartas completas novas pertencem a um exemplar específico."""
         async with self.transaction() as tx:
-            owned = await tx._one(
-                "SELECT 1 FROM cartas_exemplares WHERE user_id=? AND card_id=? LIMIT 1",
-                (int(user_id), str(card_id)),
-            )
+            if exemplar_id is not None:
+                owned = await tx._one(
+                    "SELECT 1 FROM cartas_exemplares WHERE user_id=? AND card_id=? AND id=? LIMIT 1",
+                    (int(user_id), str(card_id), int(exemplar_id)),
+                )
+            else:
+                # Compatibilidade com integrações antigas que enviavam arte por modelo.
+                owned = await tx._one(
+                    "SELECT 1 FROM cartas_exemplares WHERE user_id=? AND card_id=? LIMIT 1",
+                    (int(user_id), str(card_id)),
+                )
             if not owned:
                 return {"status": "not_owned"}
             pending = await tx._one(
-                "SELECT id FROM cartas_atelie_submissoes WHERE user_id=? AND card_id=? AND status='pending' LIMIT 1",
-                (int(user_id), str(card_id)),
+                """SELECT id FROM cartas_atelie_submissoes
+                   WHERE user_id=? AND card_id=? AND exemplar_id IS ? AND status='pending' LIMIT 1""",
+                (int(user_id), str(card_id), int(exemplar_id) if exemplar_id is not None else None),
             )
             if pending:
                 return {"status": "pending_exists", "submission_id": int(pending["id"])}
@@ -3810,17 +3831,19 @@ class Database:
                 return {"status": "pending_limit"}
             cur = await tx.conn.execute(
                 """INSERT INTO cartas_atelie_submissoes
-                   (user_id,card_id,prompt_text,image_data,image_key,mime_type,artist_name,status)
-                   VALUES (?,?,?,?,?,?,?,'pending')""",
-                (int(user_id), str(card_id), str(prompt_text)[:12000],
+                   (user_id,card_id,exemplar_id,full_card,prompt_text,image_data,image_key,mime_type,artist_name,status)
+                   VALUES (?,?,?,?,?,?,?,?,?,'pending')""",
+                (int(user_id), str(card_id), int(exemplar_id) if exemplar_id is not None else None,
+                 1 if full_card else 0, str(prompt_text)[:12000],
                  bytes(image_data) if not image_key else b"", str(image_key)[:500],
                  str(mime_type)[:80], str(artist_name)[:100]),
             )
-            return {"status": "ok", "submission_id": int(cur.lastrowid)}
+            return {"status": "ok", "submission_id": int(cur.lastrowid),
+                    "exemplar_id": int(exemplar_id) if exemplar_id is not None else None}
 
     async def coliseu_atelie_listar_pendentes_web(self, limite: int = 50):
         rows = await self._all(
-            """SELECT id,user_id,card_id,prompt_text,mime_type,artist_name,created_at
+            """SELECT id,user_id,card_id,exemplar_id,full_card,prompt_text,mime_type,artist_name,created_at
                FROM cartas_atelie_submissoes WHERE status='pending'
                ORDER BY created_at ASC,id ASC LIMIT ?""", (max(1, min(int(limite), 100)),),
         )
@@ -3837,8 +3860,9 @@ class Database:
             new_status = "approved" if aprovado else "rejected"
             if aprovado:
                 await tx.conn.execute(
-                    "UPDATE cartas_atelie_submissoes SET status='archived' WHERE card_id=? AND status='approved'",
-                    (str(row["card_id"]),),
+                    """UPDATE cartas_atelie_submissoes SET status='archived'
+                       WHERE card_id=? AND exemplar_id IS ? AND status='approved'""",
+                    (str(row["card_id"]), row["exemplar_id"]),
                 )
             await tx.conn.execute(
                 """UPDATE cartas_atelie_submissoes SET status=?,reviewer_id=?,rejection_reason=?,
@@ -3847,27 +3871,8 @@ class Database:
             )
             return {"status": "ok", "submission": dict(row), "new_status": new_status}
 
-    async def coliseu_gwent_zerar_deck(self, user_id: int, faction: str, leader_id: str):
-        """Persiste um deck vazio e remove sua relíquia, sem tocar na coleção do jogador."""
-        async with self.transaction() as tx:
-            await tx.conn.execute(
-                """INSERT INTO cartas_gwent_decks
-                   (user_id,card_ids_json,exemplar_ids_json,faction,leader_id,relic_id)
-                   VALUES (?, '[]', '[]', ?, ?, '')
-                   ON CONFLICT(user_id) DO UPDATE SET
-                     card_ids_json='[]', exemplar_ids_json='[]', faction=excluded.faction,
-                     leader_id=excluded.leader_id, relic_id='', updated_at=CURRENT_TIMESTAMP""",
-                (int(user_id), str(faction), str(leader_id)),
-            )
-        return {"ok": True, "cards": 0, "faction": str(faction),
-                "leader_id": str(leader_id), "relic_id": ""}
-
     async def coliseu_atelie_remover_todas_as_artes_ativas(self):
-        """Retira as artes oficiais de todas as cartas sem apagar os uploads ou créditos.
-
-        As submissões aprovadas são arquivadas; o histórico e os BLOBs continuam
-        preservados para auditoria e eventual restauração manual.
-        """
+        """Arquiva artes oficiais, preservando histórico e arquivos enviados."""
         async with self.transaction() as tx:
             resumo = await tx._one(
                 "SELECT COUNT(*) AS total, COUNT(DISTINCT card_id) AS cards "
@@ -3881,26 +3886,35 @@ class Database:
                 "cartas_limpas": int(resumo["cards"] or 0) if resumo else 0,
             }
 
-    async def coliseu_atelie_obter_arte_oficial_metadata(self, card_id: str):
-        """Consulta metadados sem copiar o BLOB da arte em toda requisição de imagem."""
+    async def coliseu_atelie_obter_arte_oficial_metadata(self, card_id: str, exemplar_id: int | None = None):
+        """Prefere a arte daquele exemplar; arte antiga por modelo é fallback legado."""
         return await self._one(
-            """SELECT id,user_id,card_id,mime_type,artist_name,created_at,image_key,
+            """SELECT id,user_id,card_id,exemplar_id,full_card,mime_type,artist_name,created_at,image_key,
                       length(image_data) AS image_size
-               FROM cartas_atelie_submissoes WHERE card_id=? AND status='approved'
-               ORDER BY reviewed_at DESC,id DESC LIMIT 1""",
-            (str(card_id),),
+               FROM cartas_atelie_submissoes
+               WHERE card_id=? AND status='approved'
+                 AND (exemplar_id IS ? OR (? IS NOT NULL AND exemplar_id IS NULL))
+               ORDER BY CASE WHEN exemplar_id IS ? THEN 0 ELSE 1 END, reviewed_at DESC,id DESC LIMIT 1""",
+            (str(card_id), int(exemplar_id) if exemplar_id is not None else None,
+             int(exemplar_id) if exemplar_id is not None else None,
+             int(exemplar_id) if exemplar_id is not None else None),
         )
 
-    async def coliseu_atelie_obter_arte_oficial(self, card_id: str):
+    async def coliseu_atelie_obter_arte_oficial(self, card_id: str, exemplar_id: int | None = None):
         return await self._one(
-            """SELECT id,user_id,card_id,image_data,image_key,mime_type,artist_name,created_at
-               FROM cartas_atelie_submissoes WHERE card_id=? AND status='approved'
-               ORDER BY reviewed_at DESC,id DESC LIMIT 1""", (str(card_id),),
+            """SELECT id,user_id,card_id,exemplar_id,full_card,image_data,image_key,mime_type,artist_name,created_at
+               FROM cartas_atelie_submissoes
+               WHERE card_id=? AND status='approved'
+                 AND (exemplar_id IS ? OR (? IS NOT NULL AND exemplar_id IS NULL))
+               ORDER BY CASE WHEN exemplar_id IS ? THEN 0 ELSE 1 END, reviewed_at DESC,id DESC LIMIT 1""",
+            (str(card_id), int(exemplar_id) if exemplar_id is not None else None,
+             int(exemplar_id) if exemplar_id is not None else None,
+             int(exemplar_id) if exemplar_id is not None else None),
         )
 
     async def coliseu_atelie_historico_web(self, user_id: int, limite: int = 30):
         rows = await self._all(
-            """SELECT id,card_id,artist_name,status,rejection_reason,created_at,reviewed_at
+            """SELECT id,card_id,exemplar_id,full_card,artist_name,status,rejection_reason,created_at,reviewed_at
                FROM cartas_atelie_submissoes WHERE user_id=?
                ORDER BY id DESC LIMIT ?""", (int(user_id), max(1, min(int(limite), 100))),
         )

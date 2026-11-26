@@ -1240,7 +1240,7 @@ class NaraBot(commands.Bot):
                         or definition.get("categoria") != "Unidade"):
                     return web.json_response({"error": f"Carta pessoal inválida: {card_id}."}, status=409)
                 unit_count += 1
-                faction_units.append({"tipo": str(definition.get("tipo", "")), "categoria": "Unidade"})
+                faction_units.append({"faccao": str(definition.get("faccao", "")), "categoria": "Unidade"})
             elif card is None and card_id.startswith("jogo_"):
                 game_name = game_by_id.get(card_id, "")
                 if not game_name:
@@ -1250,14 +1250,14 @@ class NaraBot(commands.Bot):
                 except ValueError:
                     return web.json_response({"error": f"Carta de jogo inválida: {card_id}."}, status=409)
                 unit_count += 1
-                faction_units.append({"tipo": str(game_card.tipo), "categoria": str(game_card.categoria)})
+                faction_units.append({"faccao": str(game_card.faccao), "categoria": str(game_card.categoria)})
             elif card is None:
                 return web.json_response({"error": f"Carta inválida no deck: {card_id}."}, status=400)
             elif str(card.categoria).casefold() == "especial":
                 special_count += 1
             else:
                 unit_count += 1
-                faction_units.append({"tipo": str(card.tipo), "categoria": str(card.categoria)})
+                faction_units.append({"faccao": str(card.faccao), "categoria": str(card.categoria)})
         faction_ok, faction_counts = validar_faccao_deck(faction_units, faction)
         if not faction_ok:
             counts_text = " · ".join(f"{name}: {count}" for name, count in faction_counts.items())
@@ -2185,8 +2185,12 @@ class NaraBot(commands.Bot):
         if user_id is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
         card_id = str(request.query.get("card_id", "")).strip()[:120]
-        if not card_id:
-            return web.json_response({"error": "Selecione uma carta."}, status=400)
+        try:
+            exemplar_id = int(request.query.get("exemplar_id", "0"))
+        except (TypeError, ValueError):
+            exemplar_id = 0
+        if not card_id or exemplar_id <= 0:
+            return web.json_response({"error": "Selecione um exemplar específico da sua coleção."}, status=400)
         try:
             owned = await self.db._one(
                 "SELECT card_id,game_name FROM cartas_colecao WHERE user_id=? AND card_id=?",
@@ -2201,7 +2205,34 @@ class NaraBot(commands.Bot):
                 card = carta_de_jogo_por_id(card_id, str(owned["game_name"]))
             if card is None:
                 return web.json_response({"error": "Modelo de carta não encontrado no catálogo."}, status=404)
+            exemplar_rows = await self.db.coliseu_listar_exemplares(user_id, card_id)
+            exemplar = next((dict(row) for row in exemplar_rows if int(row["id"]) == exemplar_id), None)
+            if not exemplar:
+                return web.json_response({"error": "O exemplar selecionado não pertence à sua coleção."}, status=403)
+            from sistemas.cartas import CUSTO_RARIDADE, faixa_poder_exemplar
+            from sistemas.gwent import preparar_carta, RARITY_EFFECT_BUDGET
             payload = card.para_dict()
+            rarity = str(exemplar.get("rarity") or payload.get("raridade") or "Comum")
+            power = int(exemplar.get("power") if exemplar.get("power") is not None else payload.get("poder", 0))
+            payload.update({
+                "raridade": rarity,
+                "poder": power,
+                "poder_base": power,
+                "poder_maximo": int(faixa_poder_exemplar(card, rarity)[1]),
+                "custo": int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0))),
+                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
+                "exemplar_id": exemplar_id,
+            })
+            canonical = preparar_carta(payload)
+            payload.update({
+                "categoria": canonical.get("categoria", payload.get("categoria", "Unidade")),
+                "faccao": canonical.get("faccao", payload.get("faccao", "")),
+                "fileira": canonical.get("row", payload.get("fileira", "melee")),
+                "row_label": canonical.get("row_label", "Corpo a corpo"),
+                "habilidade_nome": canonical.get("habilidade_nome", "Sem habilidade especial"),
+                "habilidade_texto": canonical.get("habilidade_texto", "Sem habilidade especial."),
+            })
+            payload.pop("tipo", None)
             package = gerar_prompt_carta_estruturado(payload)
             faction = str(payload.get("faccao") or payload.get("facção") or "").strip().casefold()
             references = {
@@ -2217,18 +2248,25 @@ class NaraBot(commands.Bot):
             fixed_prompt = fixed_path.read_text(encoding="utf-8")
             analysis = str(package.get("analysis") or "")
             # Remove instruções técnicas antigas da análise; ela orienta somente o conteúdo visual.
-            analysis = re.sub(r"(?im)^.*(?:proporção|resolução|pixels|dimensões|horizontal 5:4|margens seguras|1200\s*[×x]\s*960).*$", "", analysis)
+            analysis = re.sub(r"(?im)^.*(?:proporção|resolução|pixels|dimensões|horizontal 5:4|vertical 2:3|margens seguras|1200\s*[×x]\s*960).*$", "", analysis)
             return web.json_response({
                 "card_id": card_id,
+                "exemplar_id": exemplar_id,
                 "name": payload.get("nome", card_id),
+                "rarity": rarity,
+                "power": power,
+                "max_power": payload["poder_maximo"],
                 "faction": payload.get("faccao", ""),
                 "analysis": analysis.strip(),
-                "prompt": fixed_prompt,
-                "negative_prompt": "",
+                "prompt": str(package.get("prompt") or fixed_prompt),
+                "negative_prompt": str(package.get("negative_prompt") or ""),
+                "recommended_aspect_ratio": package.get("recommended_aspect_ratio", "2:3"),
+                "recommended_width": package.get("recommended_width", 1024),
+                "recommended_height": package.get("recommended_height", 1536),
                 "reference_url": reference_url,
                 "reference_required": True,
                 "full_card": True,
-                "format_note": "Envie a imagem da carta completa. A análise artística não define resolução, dimensões, proporção ou orientação.",
+                "format_note": f"Gere e envie uma carta completa para o exemplar #{exemplar_id}. Valores oficiais: poder-base {power}, poder máximo {payload['poder_maximo']}, raridade {rarity}, custo {payload['custo']}, potência da raridade {payload['potencia_raridade']}. A arte será vinculada somente a este exemplar.",
             })
         except Exception:
             log.exception("Falha ao gerar prompt do Ateliê para %s.", user_id)
@@ -2243,8 +2281,12 @@ class NaraBot(commands.Bot):
         try:
             data = await request.json()
             card_id = str(data.get("card_id", "")).strip()[:120]
-            if not card_id:
-                return web.json_response({"error": "Selecione uma carta."}, status=400)
+            try:
+                exemplar_id = int(data.get("exemplar_id", 0))
+            except (TypeError, ValueError):
+                exemplar_id = 0
+            if not card_id or exemplar_id <= 0:
+                return web.json_response({"error": "Selecione um exemplar específico."}, status=400)
 
             owned = await self.db._one(
                 "SELECT card_id,game_name FROM cartas_colecao WHERE user_id=? AND card_id=?",
@@ -2263,7 +2305,30 @@ class NaraBot(commands.Bot):
             if card is None:
                 return web.json_response({"error": "Modelo de carta não encontrado no catálogo."}, status=404)
 
+            exemplar_rows = await self.db.coliseu_listar_exemplares(user_id, card_id)
+            exemplar = next((dict(row) for row in exemplar_rows if int(row["id"]) == exemplar_id), None)
+            if not exemplar:
+                return web.json_response({"error": "O exemplar selecionado não pertence à sua coleção."}, status=403)
+            from sistemas.cartas import CUSTO_RARIDADE, faixa_poder_exemplar
+            from sistemas.gwent import preparar_carta, RARITY_EFFECT_BUDGET
             payload = card.para_dict()
+            rarity = str(exemplar.get("rarity") or payload.get("raridade") or "Comum")
+            power = int(exemplar.get("power") if exemplar.get("power") is not None else payload.get("poder", 0))
+            payload.update({
+                "raridade": rarity, "poder": power, "poder_base": power,
+                "poder_maximo": int(faixa_poder_exemplar(card, rarity)[1]),
+                "custo": int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0))),
+                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
+                "exemplar_id": exemplar_id,
+            })
+            canonical = preparar_carta(payload)
+            payload.update({"faccao": canonical.get("faccao", payload.get("faccao", "")),
+                            "categoria": canonical.get("categoria", payload.get("categoria", "Unidade")),
+                            "fileira": canonical.get("row", payload.get("fileira", "melee")),
+                            "row_label": canonical.get("row_label", "Corpo a corpo"),
+                            "habilidade_nome": canonical.get("habilidade_nome", "Sem habilidade especial"),
+                            "habilidade_texto": canonical.get("habilidade_texto", "Sem habilidade especial.")})
+            payload.pop("tipo", None)
             package = gerar_prompt_carta_estruturado(payload)
             faction = str(payload.get("faccao") or payload.get("facção") or "").strip().casefold()
             references = {
@@ -2287,14 +2352,14 @@ class NaraBot(commands.Bot):
 
             analysis = str(package.get("analysis") or "").strip()
             analysis = re.sub(
-                r"(?im)^.*(?:proporção|resolução|pixels|dimensões|horizontal 5:4|margens seguras|1200\s*[×x]\s*960).*$",
+                r"(?im)^.*(?:proporção|resolução|pixels|dimensões|horizontal 5:4|vertical 2:3|margens seguras|1200\s*[×x]\s*960).*$",
                 "", analysis,
             ).strip()
             fixed_prompt = prompt_path.read_text(encoding="utf-8")
             card_name = str(payload.get("nome", card_id))[:120]
 
             pdf_bytes = await asyncio.to_thread(
-                gerar_pdf_atelie, fixed_prompt, analysis, reference_path, card_name,
+                gerar_pdf_atelie, str(package.get("prompt") or fixed_prompt), analysis, reference_path, card_name,
             )
             safe_name = re.sub(r"[^A-Za-z0-9_-]+", "-", card_name).strip("-")[:60] or "carta"
             return web.Response(
@@ -2314,6 +2379,7 @@ class NaraBot(commands.Bot):
 
     async def _enviar_submissao_atelie_discord(
         self, submission_id: int, user_id: int, card_id: str, artist_name: str, image_data: bytes,
+        exemplar_id: int | None = None,
     ) -> bool:
         """Publica no canal privado do Ateliê a mesma submissão salva no banco compartilhado."""
         channel_id = int(getattr(config, "COLISEU_ART_CHANNEL_ID", 0) or 0)
@@ -2329,7 +2395,7 @@ class NaraBot(commands.Bot):
                 return False
         embed = discord.Embed(
             title=f"Nova arte para revisão · #{submission_id}",
-            description=f"**Carta:** `{card_id}`\n**Artista:** {artist_name[:100]}\n**Autor:** <@{user_id}>\n**Status:** Em análise",
+            description=f"**Carta:** `{card_id}`\n**Exemplar:** `#{exemplar_id}`\n**Artista:** {artist_name[:100]}\n**Autor:** <@{user_id}>\n**Status:** Em análise",
             color=discord.Color.gold(),
         )
         embed.set_image(url="attachment://arte_atelie.jpg")
@@ -2356,6 +2422,10 @@ class NaraBot(commands.Bot):
         try:
             form = await request.post()
             card_id = str(form.get("card_id", "")).strip()[:120]
+            try:
+                exemplar_id = int(form.get("exemplar_id", "0"))
+            except (TypeError, ValueError):
+                exemplar_id = 0
             prompt_text = str(form.get("prompt_text", ""))[:65000]
             if not prompt_text.strip():
                 return web.json_response({"error": "Gere o prompt individual antes de enviar a ilustração."}, status=400)
@@ -2363,8 +2433,8 @@ class NaraBot(commands.Bot):
             if not artist_name:
                 artist_name = f"Artista Discord {user_id}"
             upload = form.get("image")
-            if not card_id or upload is None or not hasattr(upload, "file"):
-                return web.json_response({"error": "Carta e arquivo de imagem são obrigatórios."}, status=400)
+            if not card_id or exemplar_id <= 0 or upload is None or not hasattr(upload, "file"):
+                return web.json_response({"error": "Exemplar específico e arquivo da carta completa são obrigatórios."}, status=400)
             raw = upload.file.read(8 * 1024 * 1024 + 1)
             from sistemas.atelie_coliseu import normalizar_imagem_carta, ArteInvalida
             try:
@@ -2377,7 +2447,7 @@ class NaraBot(commands.Bot):
             import uuid
             image_hash = hashlib.sha256(normalized.dados).hexdigest()
             card_key = hashlib.sha256(card_id.encode("utf-8")).hexdigest()[:24]
-            object_key = f"atelier/submissions/{int(user_id)}/{card_key}/{image_hash}-{uuid.uuid4().hex[:12]}.jpg"
+            object_key = f"atelier/submissions/{int(user_id)}/{card_key}/exemplar-{exemplar_id}/{image_hash}-{uuid.uuid4().hex[:12]}.jpg"
             try:
                 await asyncio.to_thread(upload_image, object_key, normalized.dados, "image/jpeg")
             except R2NotConfigured as exc:
@@ -2388,7 +2458,7 @@ class NaraBot(commands.Bot):
             try:
                 result = await self.db.coliseu_atelie_criar_submissao_web(
                     user_id, card_id, prompt_text, b"", "image/jpeg",
-                    artist_name, image_key=object_key,
+                    artist_name, image_key=object_key, exemplar_id=exemplar_id, full_card=True,
                 )
             except Exception:
                 try:
@@ -2403,14 +2473,14 @@ class NaraBot(commands.Bot):
                     log.exception("Falha ao remover objeto R2 não associado: %s", object_key)
             statuses = {
                 "not_owned": (403, "Você precisa possuir essa carta."),
-                "pending_exists": (409, "Você já tem uma submissão pendente para esta carta."),
+                "pending_exists": (409, "Você já tem uma submissão pendente para este exemplar."),
                 "pending_limit": (429, "Limite de três submissões pendentes atingido."),
             }
             if result.get("status") in statuses:
                 code, message = statuses[result["status"]]
                 return web.json_response({"error": message, **result}, status=code)
             notified = await self._enviar_submissao_atelie_discord(
-                int(result["submission_id"]), user_id, card_id, artist_name, normalized.dados,
+                int(result["submission_id"]), user_id, card_id, artist_name, normalized.dados, exemplar_id,
             )
             return web.json_response({"ok": True, "discord_notified": notified, **result}, status=201)
         except web.HTTPException:
@@ -2581,7 +2651,7 @@ class NaraBot(commands.Bot):
         if not image_data:
             return web.json_response({"error": "Selecione uma imagem para o líder."}, status=400)
         try:
-            normalized = await asyncio.to_thread(normalizar_imagem_carta, image_data)
+            normalized = await asyncio.to_thread(normalizar_imagem_carta, image_data, exigir_carta_completa=False)
         except ArteInvalida as exc:
             return web.json_response({"error": str(exc)}, status=400)
 
@@ -2649,21 +2719,32 @@ class NaraBot(commands.Bot):
         if user_id is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
         card_id = str(request.match_info.get("card_id", "")).strip()[:120]
-        art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
-        if not art:
+        try:
+            exemplar_id = int(request.query.get("exemplar_id", "0")) or None
+        except (TypeError, ValueError):
+            exemplar_id = None
+        art_row = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+        if not art_row:
             return web.json_response({"official": False})
+        art = dict(art_row)
+        query = f"?exemplar_id={exemplar_id}" if exemplar_id else ""
         return web.json_response({"official": True, "artist_name": str(art["artist_name"] or "Artista da comunidade"),
                                   "created_at": str(art["created_at"] or ""),
-                                  "image_url": f"/api/gwent/atelier/art/{card_id}"})
+                                  "exemplar_id": art.get("exemplar_id"), "full_card": bool(art.get("full_card", 0)),
+                                  "image_url": f"/api/gwent/atelier/art/{card_id}{query}"})
 
     async def _api_gwent_atelier_official_art(self, request: web.Request) -> web.Response:
         user_id = self._api_user_id(request)
         if user_id is None:
             raise web.HTTPUnauthorized(text="Faça login com o Discord.")
         card_id = str(request.match_info.get("card_id", "")).strip()[:120]
-        art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
+        try:
+            exemplar_id = int(request.query.get("exemplar_id", "0")) or None
+        except (TypeError, ValueError):
+            exemplar_id = None
+        art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
         if not art:
-            raise web.HTTPNotFound(text="Esta carta ainda utiliza a arte-base.")
+            raise web.HTTPNotFound(text="Este exemplar ainda utiliza a arte-base.")
         from sistemas.arte_cartas import detectar_mime_imagem
         if art["image_key"]:
             try:
@@ -2867,7 +2948,22 @@ class NaraBot(commands.Bot):
                 raise web.HTTPNotFound(text="Exemplar não encontrado na sua coleção.")
 
             # Só metadados nesta etapa. O BLOB de arte oficial é lido apenas no cache miss.
-            official_meta = await self.db.coliseu_atelie_obter_arte_oficial_metadata(card_id)
+            official_meta = await self.db.coliseu_atelie_obter_arte_oficial_metadata(card_id, exemplar_id)
+            if official_meta and int(official_meta["full_card"] or 0) == 1:
+                # Opção B: a imagem aprovada já é a carta final completa. Não aplicar
+                # moldura, medalhões, títulos ou quaisquer camadas do renderizador.
+                complete_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+                if complete_art:
+                    if complete_art["image_key"]:
+                        from sistemas.storage_r2 import download_image
+                        full_bytes = await asyncio.to_thread(download_image, str(complete_art["image_key"]))
+                    else:
+                        full_bytes = bytes(complete_art["image_data"] or b"")
+                    full_mime = await asyncio.to_thread(detectar_mime_imagem, full_bytes)
+                    if full_mime:
+                        full_etag = hashlib.sha256(f"atelier-full:{official_meta['id']}:{exemplar_id}".encode()).hexdigest()
+                        return _responder(full_bytes, full_mime, full_etag)
+                    log.warning("Arte completa oficial inválida: card=%s exemplar=%s", card_id, exemplar_id)
 
             catalog_card = get_carta(card_id)
             snapshot = None
@@ -2897,7 +2993,7 @@ class NaraBot(commands.Bot):
                         break
                 if snapshot is None and catalog_card is None:
                     if official_meta:
-                        official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
+                        official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
                         if official_art:
                             if official_art["image_key"]:
                                 from sistemas.storage_r2 import download_image
@@ -2925,7 +3021,7 @@ class NaraBot(commands.Bot):
                 card = snapshot
             if card is None:
                 if official_meta:
-                    official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
+                    official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
                     if official_art:
                         if official_art["image_key"]:
                             from sistemas.storage_r2 import download_image
@@ -2996,7 +3092,7 @@ class NaraBot(commands.Bot):
                     official_path = await asyncio.to_thread(official_lookup)
                     if official_path is None:
                         # BLOB só sai do SQLite quando a composição ainda não existe.
-                        official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
+                        official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
                         if not official_art or int(official_art["id"]) != official_id:
                             raise ValueError("A arte oficial mudou durante a renderização.")
                         if official_art["image_key"]:

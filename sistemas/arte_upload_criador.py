@@ -4,9 +4,9 @@ import io
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 MAX_UPLOAD_BYTES = 12 * 1024 * 1024
-MIN_WIDTH, MIN_HEIGHT = 500, 400
-MAX_WIDTH, MAX_HEIGHT = 1200, 960
-MIN_RATIO, MAX_RATIO = 1.15, 1.36
+MIN_WIDTH, MIN_HEIGHT = 512, 768
+MAX_WIDTH, MAX_HEIGHT = 1536, 2304
+MIN_RATIO, MAX_RATIO = 0.60, 0.73
 
 
 def normalizar_upload_arte(raw: bytes) -> dict:
@@ -24,16 +24,10 @@ def normalizar_upload_arte(raw: bytes) -> dict:
                 raise ValueError("Dimensões originais acima do limite de 4096 pixels.")
             ratio = width / max(1, height)
             if width < MIN_WIDTH or height < MIN_HEIGHT or not MIN_RATIO <= ratio <= MAX_RATIO:
-                raise ValueError("A imagem deve ter no mínimo 500×400 e proporção horizontal próxima de 5:4.")
+                raise ValueError("A carta completa deve ter no mínimo 512×768 e proporção vertical 2:3.")
             image = ImageOps.exif_transpose(image).convert("RGB")
-            # O upload aceita fontes horizontais próximas de 5:4, mas a saída
-            # normalizada tem proporção exata para corresponder ao Prompt-Mestre.
-            image = ImageOps.fit(
-                image,
-                (MAX_WIDTH, MAX_HEIGHT),
-                method=Image.Resampling.LANCZOS,
-                centering=(0.5, 0.48),
-            )
+            # Preserva integralmente a moldura e a composição; nunca corta uma carta completa.
+            image.thumbnail((MAX_WIDTH, MAX_HEIGHT), Image.Resampling.LANCZOS)
             output = io.BytesIO()
             image.save(output, format="PNG", optimize=True)
             return {"image_bytes": output.getvalue(), "width": image.width,
