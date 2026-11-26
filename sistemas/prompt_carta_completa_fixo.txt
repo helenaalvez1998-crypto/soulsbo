@@ -1,0 +1,83 @@
+# PROMPT DEFINITIVO — CRIAÇÃO DE CARTAS NARABOT (ELDEN RING)
+
+Vou enviar uma ou mais imagens de referência e os dados de uma carta. Sua tarefa é criar a imagem final da carta, seguindo rigorosamente as instruções abaixo.
+
+## 1. REFERÊNCIA VISUAL
+A imagem de referência é a principal orientação para o design. Reproduza fielmente sua estrutura visual, composição, proporções, hierarquia, posicionamento dos elementos, molduras, ornamentos, banners, ícones e acabamento.
+Não crie um layout diferente por iniciativa própria. Não simplifique o design. Não substitua elementos importantes por versões genéricas.
+A carta deve ter aparência de uma carta colecionável premium, com moldura ornamentada, metais trabalhados, relevos, detalhes medievais, texturas refinadas e acabamento cinematográfico.
+
+## 2. UNIVERSO E FIDELIDADE A ELDEN RING
+Todas as cartas pertencem ao universo de Elden Ring.
+A representação do personagem, criatura, arma, chefe, NPC ou local deve respeitar sua identidade original no jogo.
+- Preserve aparência, armadura, vestimentas, armas, acessórios e características reconhecíveis.
+- Respeite a ambientação, arquitetura, criaturas, símbolos e atmosfera de Elden Ring.
+- Não transforme personagens conhecidos em personagens genéricos.
+- Não invente equipamentos, características ou elementos que contradigam sua identidade original.
+- A facção determina a identidade visual da carta, mas não deve descaracterizar o personagem representado.
+
+## 3. ESTRUTURA DA CARTA
+Mantenha os elementos nas posições correspondentes à referência:
+- Cabeçalho: identificação da coleção, símbolo da facção, nome da carta e insígnia de raridade.
+- Lateral esquerda: indicador de poder e ícone da fileira de combate.
+- Área central: ilustração principal do personagem ou criatura.
+- Banner abaixo da ilustração: nome da facção, brasão central em destaque e tipo de combate escrito de forma grande e legível.
+- Painel inferior: ícone da habilidade, nome da habilidade e descrição do efeito.
+- Informações complementares: bônus de raridade, lore e sinergias, cada uma em sua área correspondente.
+O tipo de combate deve ter destaque visual e ser escrito exatamente como informado. Não substitua o tipo de combate por classe, profissão ou descrição genérica do personagem.
+
+## 4. IDENTIDADE DAS FACÇÕES
+Respeite a identidade visual da facção indicada nos dados da carta:
+- Ordem Áurea: ouro, marfim e preto; símbolos da Ordem Áurea, Erdtree, arquitetura sagrada e ornamentos dourados.
+- Véu Carmesim: vermelho profundo, preto e ouro envelhecido; atmosfera sombria, sangue, dinastias e arquitetura gótica.
+- Lua Negra: azul, prata e violeta; símbolos lunares, estrelas, magia e arquitetura cariana.
+- Os Esquecidos: verde profundo, dourado e preto; símbolos de fé e estrelas, arquitetura sagrada em ruínas e ornamentos verde-esmeralda e ouro, conforme a referência fornecida.
+A identidade da facção deve aparecer na moldura, nos banners, nos brasões, nos ornamentos e na atmosfera visual.
+
+## 5. RARIDADES
+A raridade precisa ter um design próprio, não apenas uma mudança de cor.
+Crie uma insígnia exclusiva para cada nível:
+- Comum: simples, discreta e funcional.
+- Rara: mais ornamentada, com detalhes diferenciados.
+- Épica: estrutura elaborada e presença visual marcante.
+- Lendária: ornamentos luxuosos, materiais nobres e símbolo imponente.
+- Mítica: design excepcional, efeitos visuais especiais e acabamento raro.
+- Primordial: aparência ancestral, monumental e poderosa.
+- Singular: identidade visual exclusiva, extremamente elaborada e inconfundível.
+Quanto maior a raridade, maior deve ser a complexidade, o refinamento e o impacto visual da insígnia. Não reutilize o mesmo formato para todas.
+
+## 6. DADOS DA CARTA — USAR SOMENTE OS DADOS ENVIADOS NA SOLICITAÇÃO ATUAL
+Os dados mudarão a cada carta. Portanto, leia as informações enviadas em cada solicitação e substitua integralmente os dados anteriores.
+Não reutilize nomes, valores, efeitos, lore, facções, raridades ou sinergias de cartas anteriores.
+Reproduza exatamente:
+- Nome da carta.
+- Raridade.
+- Facção.
+- Tipo de combate.
+- Poder base.
+- Poder máximo.
+- Potência da raridade.
+- Nome e descrição do efeito.
+- Lore.
+- Identificador, nome e efeito da sinergia.
+Não invente habilidades, bônus, lore ou sinergias. Se a carta não possuir habilidade especial, mantenha exatamente a informação fornecida. Não preencha espaços vazios com conteúdo inventado.
+A precisão textual é obrigatória: respeite nomes, acentos, números, pontuação e descrições. Não altere o significado dos efeitos.
+
+## 7. QUALIDADE FINAL
+A imagem deve apresentar:
+- Composição equilibrada e simétrica quando a referência exigir.
+- Texto nítido, legível e sem erros.
+- Brasões e ícones coerentes com a facção e a raridade.
+- Ilustração central detalhada e fiel ao universo de Elden Ring.
+- Moldura com profundidade, relevos, metais e ornamentos.
+- Separação visual clara entre poder, combate, habilidade, lore e sinergia.
+- Acabamento profissional de uma carta colecionável de alto nível.
+Não adicione marcas-d'água, textos aleatórios, elementos fora do universo ou informações que não foram fornecidas.
+
+## 8. REGRA PRINCIPAL
+A imagem de referência determina o design. Os dados enviados determinam o conteúdo. Elden Ring determina a fidelidade visual e narrativa.
+Não faça uma interpretação livre do modelo. Não explique como faria. Não entregue um tutorial, código ou descrição da imagem.
+Crie diretamente a imagem final da carta, utilizando a referência e os dados enviados na solicitação atual.
+
+## REGRA TÉCNICA DE COMPOSIÇÃO
+Ignore qualquer instrução de análise artística que imponha resolução, largura, altura, proporção, orientação, margens seguras ou dimensões. A composição deve seguir a referência visual da carta completa. Não aplique enquadramento horizontal 5:4.

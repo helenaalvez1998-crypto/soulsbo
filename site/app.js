@@ -694,11 +694,11 @@ async function generateAtelierPrompt() {
     atelierAnalysisText = data.analysis || '';
     $('#atelier-analysis').value = atelierAnalysisText;
     $('#atelier-prompt').value = atelierPromptText;
-    $('#atelier-negative').value = atelierNegativeText;
+    $('#atelier-negative').value = data.reference_url || ''; const refPreview = $('#atelier-reference-preview'); if (refPreview) { refPreview.src = data.reference_url || ''; refPreview.hidden = !data.reference_url; }
     $('#atelier-copy-prompt').disabled = !atelierPromptText;
-    $('#atelier-copy-negative').disabled = !atelierNegativeText;
-    $('#atelier-copy-bundle').disabled = !(atelierAnalysisText && atelierPromptText && atelierNegativeText);
-    showNotice(`Direção de arte e prompts gerados para ${data.name} · formato ${data.aspect_ratio || '5:4'}.`, 'success');
+    $('#atelier-copy-negative').disabled = true;
+    $('#atelier-copy-bundle').disabled = !(atelierAnalysisText && atelierPromptText);
+    showNotice(`Análise, prompt fixo e referência da facção carregados para ${data.name}.`, 'success');
   } catch (error) { showNotice(error.message, 'error'); }
   finally { button.disabled = false; }
 }
@@ -709,13 +709,13 @@ async function submitAtelierArt() {
   if (!cardId || !file) return showNotice('Selecione a carta e a imagem.', 'error');
   if (!atelierPromptText) return showNotice('Gere o prompt individual da carta antes de enviar.', 'error');
   if (file.size > 8 * 1024 * 1024) return showNotice('A imagem ultrapassa o limite de 8 MB.', 'error');
-  const form = new FormData(); form.append('card_id', cardId); form.append('prompt_text', `A. ANÁLISE ARTÍSTICA\n${atelierAnalysisText}\n\nB. PROMPT PROFISSIONAL\n${atelierPromptText}\n\nC. NEGATIVE PROMPT\n${atelierNegativeText}`); form.append('artist_name', ($('#atelier-artist-name').value || '').trim()); form.append('image', file);
+  const form = new FormData(); form.append('card_id', cardId); form.append('prompt_text', `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL\n${$('#atelier-negative').value}`); form.append('artist_name', ($('#atelier-artist-name').value || '').trim()); form.append('image', file);
   const button = $('#atelier-submit'); button.disabled = true;
   try {
     const response = await fetch('/api/gwent/atelier/submit', {method:'POST', credentials:'same-origin', body:form});
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Não foi possível enviar a ilustração.');
-    showNotice(`Ilustração enviada para aprovação · submissão #${data.submission_id}.`, 'success');
+    showNotice(`Carta completa enviada para aprovação · submissão #${data.submission_id}.`, 'success');
     $('#atelier-image').value = ''; $('#atelier-preview').hidden = true;
     await loadAtelierHistory(); await loadAtelierReviewQueue();
   } catch (error) { showNotice(error.message, 'error'); }
@@ -1493,14 +1493,9 @@ $('#atelier-copy-prompt').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(atelierPromptText); showNotice('Prompt copiado.', 'success'); }
   catch { $('#atelier-prompt').focus(); $('#atelier-prompt').select(); showNotice('Selecione e copie o prompt manualmente.', 'info'); }
 });
-$('#atelier-copy-negative').addEventListener('click', async () => {
-  if (!atelierNegativeText) return;
-  try { await navigator.clipboard.writeText(atelierNegativeText); showNotice('Negative prompt copiado.', 'success'); }
-  catch { $('#atelier-negative').focus(); $('#atelier-negative').select(); showNotice('Selecione e copie o negative prompt manualmente.', 'info'); }
-});
 $('#atelier-copy-bundle').addEventListener('click', async () => {
-  if (!atelierPromptText || !atelierNegativeText || !atelierAnalysisText) return;
-  const bundle = `A. ANÁLISE ARTÍSTICA\n${atelierAnalysisText}\n\nB. PROMPT PROFISSIONAL\n${atelierPromptText}\n\nC. NEGATIVE PROMPT\n${atelierNegativeText}`;
+  if (!atelierPromptText || !atelierAnalysisText) return;
+  const bundle = `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL DA FACÇÃO\n${$('#atelier-negative').value}`;
   try { await navigator.clipboard.writeText(bundle); showNotice('Pacote A+B+C copiado.', 'success'); }
   catch { showNotice('A cópia automática falhou. Copie os três campos manualmente.', 'info'); }
 });

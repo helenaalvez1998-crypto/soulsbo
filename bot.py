@@ -2201,15 +2201,32 @@ class NaraBot(commands.Bot):
                 return web.json_response({"error": "Modelo de carta não encontrado no catálogo."}, status=404)
             payload = card.para_dict()
             package = gerar_prompt_carta_estruturado(payload)
+            faction = str(payload.get("faccao") or payload.get("facção") or "").strip().casefold()
+            references = {
+                "ordem áurea": "/assets/atelier-referencias/ordem-aurea.png",
+                "ordem aurea": "/assets/atelier-referencias/ordem-aurea.png",
+                "lua negra": "/assets/atelier-referencias/lua-negra.png",
+                "véu carmesim": "/assets/atelier-referencias/veu-carmesim.png",
+                "veu carmesim": "/assets/atelier-referencias/veu-carmesim.png",
+                "os esquecidos": "/assets/atelier-referencias/os-esquecidos.png",
+            }
+            reference_url = references.get(faction)
+            fixed_path = Path(__file__).resolve().parent / "sistemas" / "prompt_carta_completa_fixo.txt"
+            fixed_prompt = fixed_path.read_text(encoding="utf-8")
+            analysis = str(package.get("analysis") or "")
+            # Remove instruções técnicas antigas da análise; ela orienta somente o conteúdo visual.
+            analysis = re.sub(r"(?im)^.*(?:proporção|resolução|pixels|dimensões|horizontal 5:4|margens seguras|1200\s*[×x]\s*960).*$", "", analysis)
             return web.json_response({
                 "card_id": card_id,
                 "name": payload.get("nome", card_id),
-                "analysis": package["analysis"],
-                "prompt": package["prompt"],
-                "negative_prompt": package["negative_prompt"],
-                "aspect_ratio": package["recommended_aspect_ratio"],
-                "width": package["recommended_width"],
-                "height": package["recommended_height"],
+                "faction": payload.get("faccao", ""),
+                "analysis": analysis.strip(),
+                "prompt": fixed_prompt,
+                "negative_prompt": "",
+                "reference_url": reference_url,
+                "reference_required": True,
+                "full_card": True,
+                "format_note": "Envie a imagem da carta completa. A análise artística não define resolução, dimensões, proporção ou orientação.",
             })
         except Exception:
             log.exception("Falha ao gerar prompt do Ateliê para %s.", user_id)

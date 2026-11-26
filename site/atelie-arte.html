@@ -149,14 +149,14 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#d5ad69!important
 </head><body><main>
 <h1>Ateliê de Arte</h1><p class="muted">Gere o prompt exclusivo da sua carta, crie a ilustração na ferramenta de sua preferência e envie o arquivo para vinculá-lo à sua carta.</p>
 <section class="panel"><h2 id="cardName">Carregando carta…</h2><div id="cardMeta" class="muted"></div>
-<p>O briefing é dividido em análise artística, prompt profissional e negative prompt. Use os campos B e C no gerador de imagens.</p>
+<p>O pacote contém análise artística, prompt fixo e referência visual automática conforme a facção.</p>
 <label>Análise artística (PT)<textarea id="analysis" readonly placeholder="A análise aparecerá aqui."></textarea></label>
-<label>Prompt profissional (EN)<textarea id="prompt" readonly placeholder="O prompt aparecerá aqui."></textarea></label>
-<label>Negative prompt específico (EN)<textarea id="negative" readonly placeholder="As restrições aparecerão aqui."></textarea></label>
-<div class="row"><button id="copy" disabled>Copiar prompt</button><button id="copyNegative" disabled>Copiar negative</button><button id="copyAll" disabled>Copiar pacote A+B+C</button><button id="reload">Atualizar prompt</button></div>
-<p class="muted" id="format">Formato obrigatório: horizontal 5:4.</p></section>
+<label>Prompt fixo<textarea id="prompt" readonly placeholder="O prompt definitivo aparecerá aqui."></textarea></label>
+<label>Referência visual da facção<img id="reference" class="preview" hidden alt="Referência visual da facção selecionada"></label>
+<div class="row"><button id="copy" disabled>Copiar prompt fixo</button><button id="copyAll" disabled>Copiar pacote com análise</button><button id="reload">Atualizar prompt</button></div>
+<p class="muted" id="format">Formato: carta completa; sem imposição de proporção pela análise artística.</p></section>
 <section class="panel"><h2>Enviar ilustração</h2>
-<p class="muted">PNG, JPG ou WEBP · até 12 MB · mínimo 500 × 400 · proporção horizontal 5:4; a imagem será ajustada para 1200 × 960 px. A imagem será normalizada e armazenada em PNG.</p>
+<p class="muted">PNG, JPG ou WEBP · até 8 MB · carta completa. A imagem mantém sua proporção e enquadramento; não será cortada para 5:4.</p>
 <input type="file" id="file" accept="image/png,image/jpeg,image/webp">
 <div class="row" style="margin-top:12px"><button id="upload">Enviar e validar imagem</button><button id="replace" hidden>Substituir arte atual</button></div>
 <p id="status" role="status"></p><img id="preview" class="preview" hidden alt="Prévia da arte enviada">
