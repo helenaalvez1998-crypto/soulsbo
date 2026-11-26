@@ -1433,11 +1433,22 @@ function renderGwentArena(data) {
     ), 0);
     const hasEnteringCard = cards.some(card => !cardsAlreadyOnBoard.has(String(card.id)));
     const weatherValue = weatherLevels[key] || 0;
+    const weatherDrops = weatherValue > 0 ? Array.from({length: 52}, (_, i) => {
+      // Valores determinísticos: a textura não muda aleatoriamente entre renderizações.
+      const seed = (i * 37 + key.length * 19 + (key.charCodeAt(0) || 0)) % 101;
+      const left = (seed * 97) % 100;
+      const duration = 0.46 + ((i * 13) % 8) * 0.075;
+      const delay = -(((i * 17) % 100) / 100 * duration);
+      const length = 16 + ((i * 7) % 12);
+      const alpha = (0.62 + ((i * 11) % 4) * 0.09).toFixed(2);
+      return `<i class="gwent-weather-drop" style="--drop-left:${left}%;--drop-duration:${duration.toFixed(2)}s;--drop-delay:${delay.toFixed(2)}s;--drop-length:${length}px;--drop-alpha:${alpha}"></i>`;
+    }).join('') : '';
     const weatherMarkup = weatherValue > 0
-      ? `<div class="gwent-weather-vfx" aria-hidden="true" data-weather-level="${Math.min(3, weatherValue)}" style="--weather-intensity:${Math.min(3, weatherValue)}">
+      ? `<div class="gwent-weather-vfx" aria-hidden="true" data-weather-vfx="v5" data-weather-level="${Math.min(3, weatherValue)}" style="--weather-intensity:${Math.min(3, weatherValue)}">
           <span class="gwent-weather-cloud gwent-weather-cloud-back"></span>
           <span class="gwent-weather-cloud gwent-weather-cloud-front"></span>
           <span class="gwent-weather-rain"></span>
+          <span class="gwent-weather-drop-layer">${weatherDrops}</span>
           <span class="gwent-weather-mist"></span>
           <span class="gwent-weather-lightning"></span>
         </div>`

@@ -5807,147 +5807,97 @@ body.gwent-match-active .gwent-row.has-weather > .gwent-board-cards { position: 
 
 
 /* =====================================================================
-   GWENT WEATHER V4 — motion fix
-   The previous rain animation shifted the tiled background by exactly
-   one tile height, so its start/end frame looked identical and the
-   movement was hard to perceive. This version uses multiple rain layers,
-   a larger vertical travel distance, transform-based cloud movement, and
-   targeted animation overrides so the site's global reduced-motion rule
-   does not accidentally freeze the weather effect.
+   GWENT WEATHER V5 — chuva com gotas individuais em movimento real.
+   As gotas usam transform (composição) e não dependem de background-position.
    ===================================================================== */
-body.gwent-match-active .gwent-weather-vfx {
+body.gwent-match-active .gwent-weather-vfx[data-weather-vfx="v5"] {
   overflow: hidden !important;
-  contain: paint !important;
   isolation: isolate !important;
+  contain: paint !important;
 }
-
-body.gwent-match-active .gwent-weather-cloud-back {
-  left: -4% !important;
-  animation: gwent-v4-cloud-back 23s linear infinite !important;
-  animation-delay: -11s !important;
-  will-change: transform, opacity;
+body.gwent-match-active .gwent-weather-drop-layer {
+  position: absolute !important;
+  z-index: 5 !important;
+  inset: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
-body.gwent-match-active .gwent-weather-cloud-front {
-  left: -8% !important;
-  animation: gwent-v4-cloud-front 13s linear infinite !important;
-  animation-delay: -4s !important;
-  will-change: transform, opacity;
+body.gwent-match-active .gwent-weather-drop-layer .gwent-weather-drop {
+  display: block !important;
+  position: absolute !important;
+  top: -42px !important;
+  left: var(--drop-left) !important;
+  width: 2.4px !important;
+  height: var(--drop-length) !important;
+  border-radius: 50% !important;
+  background: linear-gradient(180deg, rgba(223,241,255,0), rgba(218,238,255,var(--drop-alpha)) 30%, rgba(166,207,247,.96)) !important;
+  box-shadow: 0 0 4px rgba(177,216,255,.42) !important;
+  opacity: 0;
+  animation: gwent-v5-drop-fall var(--drop-duration) linear var(--drop-delay) infinite both !important;
+  animation-play-state: running !important;
+  will-change: transform, opacity !important;
 }
-
-body.gwent-match-active .gwent-weather-rain {
-  inset: -48px -20px !important;
-  opacity: .72 !important;
-  background-image: repeating-linear-gradient(
-    108deg,
-    transparent 0 9px,
-    rgba(205, 231, 255, .96) 9.8px 11.1px,
-    transparent 11.9px 23px
-  ) !important;
-  background-size: 23px 47px !important;
-  animation: gwent-v4-rain-far .52s linear infinite !important;
-  will-change: background-position;
+@keyframes gwent-v5-drop-fall {
+  0% { transform: translate3d(0,-90px,0) rotate(17deg); opacity: 0; }
+  9% { opacity: var(--drop-alpha); }
+  86% { opacity: var(--drop-alpha); }
+  100% { transform: translate3d(44px,520px,0) rotate(17deg); opacity: 0; }
 }
+/* Remove the old tiled rain texture. The visible rain now consists of
+   individual drops above, so the motion is unmistakable rather than a still backdrop. */
+body.gwent-match-active .gwent-weather-rain,
 body.gwent-match-active .gwent-weather-rain::before,
 body.gwent-match-active .gwent-weather-rain::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: -30px -15px !important;
-  display: block !important;
-  pointer-events: none !important;
-  background-repeat: repeat !important;
-  transform: skewX(-11deg);
-  will-change: background-position;
+  display: none !important;
+  background: none !important;
+  animation: none !important;
 }
-body.gwent-match-active .gwent-weather-rain::before {
-  opacity: .42;
-  background-image: repeating-linear-gradient(
-    108deg,
-    transparent 0 17px,
-    rgba(180, 215, 248, .82) 17.8px 19px,
-    transparent 19.8px 34px
-  );
-  background-size: 34px 59px;
-  animation: gwent-v4-rain-mid .76s linear infinite !important;
+/* Give the cloud a clear, independent horizontal path across the row. */
+body.gwent-match-active .gwent-weather-cloud-back {
+  animation: gwent-v5-cloud-back 21s linear -7s infinite !important;
+  animation-play-state: running !important;
 }
-body.gwent-match-active .gwent-weather-rain::after {
-  opacity: .58;
-  background-image: repeating-linear-gradient(
-    108deg,
-    transparent 0 26px,
-    rgba(229, 242, 255, .96) 26.8px 29px,
-    transparent 29.8px 49px
-  );
-  background-size: 49px 67px;
-  animation: gwent-v4-rain-near .43s linear infinite !important;
+body.gwent-match-active .gwent-weather-cloud-front {
+  animation: gwent-v5-cloud-front 9.5s linear -3s infinite !important;
+  animation-play-state: running !important;
 }
-
+@keyframes gwent-v5-cloud-back {
+  0% { transform: translate3d(-130%,0,0) scale(.86); opacity: .18; }
+  18% { opacity: .46; }
+  84% { opacity: .38; }
+  100% { transform: translate3d(820%,0,0) scale(1.08); opacity: .12; }
+}
+@keyframes gwent-v5-cloud-front {
+  0% { transform: translate3d(-140%,0,0) scale(.94); opacity: .14; }
+  12% { opacity: .68; }
+  82% { opacity: .62; }
+  100% { transform: translate3d(820%,0,0) scale(1.14); opacity: .08; }
+}
 body.gwent-match-active .gwent-weather-mist {
-  animation: gwent-v4-mist 7.5s ease-in-out infinite alternate !important;
-  will-change: transform, opacity;
+  animation: gwent-v5-mist 8s ease-in-out infinite alternate !important;
+  animation-play-state: running !important;
 }
-body.gwent-match-active .gwent-weather-lightning {
-  animation: gwent-v4-lightning 8.5s linear infinite !important;
-  will-change: opacity;
+@keyframes gwent-v5-mist {
+  from { transform: translate3d(-8%,0,0); opacity: .26; }
+  to { transform: translate3d(9%,-8px,0); opacity: .72; }
 }
-
-@keyframes gwent-v4-cloud-back {
-  0%   { transform: translate3d(-125%, 0, 0) scale(.88); opacity: .24; }
-  18%  { opacity: .50; }
-  78%  { opacity: .48; }
-  100% { transform: translate3d(760%, 0, 0) scale(1.08); opacity: .15; }
-}
-@keyframes gwent-v4-cloud-front {
-  0%   { transform: translate3d(-145%, 0, 0) scale(.96); opacity: .18; }
-  15%  { opacity: .72; }
-  82%  { opacity: .66; }
-  100% { transform: translate3d(760%, 0, 0) scale(1.12); opacity: .12; }
-}
-/* Move by two full tile heights: continuous downward motion with a seamless loop. */
-@keyframes gwent-v4-rain-far {
-  from { background-position: 0 0; }
-  to   { background-position: -23px 94px; }
-}
-@keyframes gwent-v4-rain-mid {
-  from { background-position: 0 0; }
-  to   { background-position: -34px 118px; }
-}
-@keyframes gwent-v4-rain-near {
-  from { background-position: 0 0; }
-  to   { background-position: -49px 134px; }
-}
-@keyframes gwent-v4-mist {
-  from { transform: translate3d(-5%, 0, 0); opacity: .35; }
-  to   { transform: translate3d(6%, -6px, 0); opacity: .92; }
-}
-@keyframes gwent-v4-lightning {
-  0%, 62%, 65%, 100% { opacity: 0; }
-  63% { opacity: .48; }
-  64% { opacity: .06; }
-  64.6% { opacity: .28; }
-}
-
-/* Reduced-motion users still receive slow weather movement; flashes are disabled. */
+/* Respect reduced motion with slower continuous movement, not a frozen frame. */
 @media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active .gwent-weather-drop-layer .gwent-weather-drop {
+    animation-duration: 1.25s !important;
+    animation-iteration-count: infinite !important;
+  }
   body.gwent-match-active .gwent-weather-cloud-back {
-    animation-duration: 48s !important;
+    animation-duration: 42s !important;
+    animation-iteration-count: infinite !important;
   }
   body.gwent-match-active .gwent-weather-cloud-front {
-    animation-duration: 36s !important;
-  }
-  body.gwent-match-active .gwent-weather-rain {
-    animation-duration: 1.6s !important;
-  }
-  body.gwent-match-active .gwent-weather-rain::before {
-    animation-duration: 2.2s !important;
-  }
-  body.gwent-match-active .gwent-weather-rain::after {
-    animation-duration: 1.8s !important;
+    animation-duration: 26s !important;
+    animation-iteration-count: infinite !important;
   }
   body.gwent-match-active .gwent-weather-mist {
-    animation-duration: 22s !important;
+    animation-duration: 20s !important;
+    animation-iteration-count: infinite !important;
   }
-  body.gwent-match-active .gwent-weather-lightning {
-    animation: none !important;
-    opacity: 0 !important;
-  }
+  body.gwent-match-active .gwent-weather-lightning { animation: none !important; opacity: 0 !important; }
 }
