@@ -1152,10 +1152,10 @@ class NaraBot(commands.Bot):
                 name: [leader_payload(key, value)
                        for key, value in LEADERS.items() if value["faction"] == name]
                 for name in DEFAULT_LEADERS},
-            "factions": [{"name": name, "preferred_type": kind,
+            "factions": [{"name": name, "preferred_type": None,
                           "description": FACTION_ARCHETYPES.get(name, {}).get(
                               "description", "Uma facção com identidade e estratégias próprias.")}
-                         for kind, name in FACTIONS.items()],
+                         for name in FACTIONS],
             "relic_id": saved_relic_id,
             "relics": relics_payload,
             "rules": {"cards": 12, "opening_hand": 10, "reserve": 2, "unique": True,
