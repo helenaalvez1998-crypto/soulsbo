@@ -35,6 +35,7 @@ FACTIONS = {
     "ordem aurea": "Ordem Áurea",
     "veu carmesim": "Véu Carmesim",
     "lua negra": "Lua Negra",
+    "os esquecidos": "Os Esquecidos",
 }
 
 
@@ -66,13 +67,19 @@ def direcao_faccao(valor: Any) -> str:
             "Express the faction through motivated moonlight, cool reflections, mist, deep shadows and ancient ruins, night landscapes, observatories or Carian architecture only when supported by the card's actual identity and lore. "
             "Do not automatically turn the subject into a wizard, sorcerer or lunar entity; do not add a moon, starfield, glintstone spell, runes or magical aura without explicit support. Never recolor or redesign canonical armor, garments, skin, hair, weapons or signature equipment."
         ),
+        "Os Esquecidos": (
+            "FACTION ART STANDARD — OS ESQUECIDOS: this is a NARABOT deck faction. "
+            "Use the supplied faction reference as the visual authority: deep emerald green, antique gold, warm ivory and blackened metal; "
+            "sacred geometric emblems and star motifs; weathered sanctuaries, solemn ruined architecture and restrained golden light. "
+            "Keep these elements as faction styling only. Do not assign unsupported religious identity, symbols, powers, clothing or canonical allegiance to the card subject."
+        ),
     }
     if canonical:
         return directions[canonical]
     raw = _text(valor, 100) or "blank"
     return (
-        f"FACTION FIELD VALIDATION: the card's faccao field is '{raw}', which does not match one of the game's exactly three official factions: "
-        "Ordem Áurea, Véu Carmesim or Lua Negra. Do not infer or assign a faction from the character name, lore, appearance, abilities, affinities or synergies. "
+        f"FACTION FIELD VALIDATION: the card's faccao field is '{raw}', which does not match one of the game's four official factions: "
+        "Ordem Áurea, Véu Carmesim, Lua Negra or Os Esquecidos. Do not infer or assign a faction from the character name, lore, appearance, abilities, affinities or synergies. "
         "Do not create a fourth faction. Keep faction-specific heraldry, uniform, palette and allegiance neutral until the actual faccao field is corrected."
     )
 
@@ -128,51 +135,61 @@ def gerar_analise_artistica(
     ability_name: str = "",
     ability_rule: str = "",
 ) -> str:
-    """Cria a análise artística em português. A facção vem somente de card['faccao']."""
+    """Descreve visualmente a carta usando somente os dados cadastrados nela."""
     name = _text(card.get("nome") or card.get("name") or "Carta sem nome", 160)
-    category = _text(card.get("categoria") or card.get("category") or "não informada", 80)
-    faction_raw = _text(card.get("faccao"), 80)
-    faction = normalizar_faccao(faction_raw) or (faction_raw or "não informada")
+    faction = _text(card.get("faccao") or card.get("facção") or "não informada", 80)
     rarity = _text(card.get("raridade") or card.get("rarity") or "não informada", 60)
-    card_type = _text(card.get("tipo") or card.get("type") or "não informado", 60)
-    description = _text(card.get("descricao") or card.get("lore") or "", 1200)
-    power = _text(card.get("poder") if card.get("poder") is not None else "não informado", 30)
+    card_type = _text(card.get("tipo_combate") or card.get("tipo") or card.get("type") or "não informado", 80)
+    category = _text(card.get("categoria") or card.get("category") or "", 80)
+    lore = _text(card.get("lore") or card.get("descricao") or card.get("description") or "", 1200)
+    power = _text(card.get("poder_base") if card.get("poder_base") is not None else card.get("poder", "não informado"), 30)
     power_max = _text(card.get("poder_maximo") or card.get("max_power") or "não informado", 30)
-    function = _text(card.get("funcao_tatica") or card.get("funcao") or card.get("papel_gwent") or "não informada", 100)
-    row = _text(card.get("fileira") or "não informada", 40)
-    archetype = _text(card.get("arquetipo") or card.get("epiteto") or "não informado", 140)
-    affinities = card.get("afinidades") or card.get("afinidade_dominante") or "não informadas"
-    if isinstance(affinities, (list, tuple, set)):
-        affinities = ", ".join(_text(x, 80) for x in list(affinities)[:8]) or "não informadas"
-    else:
-        affinities = _text(affinities, 180)
+    rarity_power = _text(card.get("potencia_raridade") or card.get("rarity_power") or "", 30)
+
+    if has_ability is None:
+        has_ability = bool(_text(ability_name, 120) or _text(ability_rule, 500))
+    effect_name = _text(ability_name or card.get("habilidade_nome") or card.get("efeito_nome") or "", 160)
+    effect_text = _text(ability_rule or card.get("habilidade_descricao") or card.get("habilidade_regra") or card.get("efeito") or card.get("descricao_efeito") or "", 700)
+
     synergies = card.get("sinergias") or card.get("sinergia") or card.get("synergies") or []
     if isinstance(synergies, (list, tuple, set)):
-        synergies = ", ".join(_text(x.get("nome") or x.get("name") or x, 100) if isinstance(x, dict) else _text(x, 100) for x in list(synergies)[:8]) or "não informadas"
+        synergy_text = "; ".join(
+            _text(item.get("nome") or item.get("name") or item.get("descricao") or item, 180)
+            if isinstance(item, dict) else _text(item, 180)
+            for item in list(synergies)[:10]
+        )
     else:
-        synergies = _text(synergies, 240)
-    if has_ability is None:
-        has_ability = bool(_text(ability_name, 100) or _text(ability_rule, 300))
-    ability_summary = (
-        f"Habilidade: {_text(ability_name, 100) or 'habilidade registrada'}. Interpretação: {_text(ability_rule, 300) or 'representar somente o efeito documentado'}."
-        if has_ability else "Habilidade: nenhuma habilidade especial registrada; não adicionar magia, aura, runas ou poderes artificiais."
+        synergy_text = _text(synergies, 500)
+
+    lines = [
+        f"CARTA: {name}.",
+        f"FACÇÃO: {faction}. A identidade visual deve corresponder a esta facção e à referência visual selecionada para ela.",
+        f"RARIDADE: {rarity}.",
+        f"TIPO DE COMBATE: {card_type}.",
+    ]
+    if category:
+        lines.append(f"CATEGORIA: {category}.")
+    if lore:
+        lines.append(f"LORE: {lore}")
+    if power != "não informado":
+        lines.append(f"PODER BASE: {power}.")
+    if power_max != "não informado":
+        lines.append(f"PODER MÁXIMO: {power_max}.")
+    if rarity_power:
+        lines.append(f"POTÊNCIA DA RARIDADE: {rarity_power}.")
+    if has_ability and (effect_name or effect_text):
+        lines.append(f"HABILIDADE/EFEITO: {effect_name or 'Efeito registrado'}. {effect_text}")
+    else:
+        lines.append("HABILIDADE: a ficha não registra habilidade especial; não inventar poderes ou efeitos.")
+    if synergy_text:
+        lines.append(f"SINERGIAS REGISTRADAS: {synergy_text}.")
+    lines.append(
+        "DIREÇÃO VISUAL: represente o personagem, criatura ou elemento identificado pelos dados da carta. "
+        "Use a facção, raridade, tipo de combate, habilidade e lore apenas para orientar a representação desses dados. "
+        "Não invente aparência, equipamento, poderes, personagens, locais ou acontecimentos ausentes da ficha. "
+        "Não acrescente informações nem altere o conteúdo da carta."
     )
-    lore_line = f"Lore: {description}" if description else "Lore: sem descrição narrativa suficiente; não preencher lacunas com biografia inventada."
-    return "\n".join((
-        f"ANÁLISE ARTÍSTICA — {name} ({category}).",
-        "Universo: Elden Ring / Terras Intermédias. Identificar primeiro o sujeito literal e preservar seu modelo canônico, quando reconhecível.",
-        f"Facção identificada exclusivamente pelo campo FACÇÃO: {faction}.",
-        f"Direção de facção: {direcao_faccao(faction_raw)}",
-        f"Identidade e narrativa: {lore_line}",
-        f"Classificação: raridade {rarity}; tipo {card_type}; arquétipo/função {archetype}; função tática {function}; fileira {row}.",
-        f"Atributos de jogo: poder {power}/{power_max}; calibrar competência, sem transformar números em efeitos visuais.",
-        ability_summary,
-        f"Afinidades: {affinities}; são contexto secundário e não determinam a facção.",
-        f"Sinergias: {synergies}; são contexto complementar, não exigem personagens adicionais.",
-        "Hierarquia: universo Elden Ring → modelo original do personagem → facção → identidade individual da carta → lore → cenário e composição → complementos artísticos.",
-        "Cena: " + (_text(scene_reference, 1000) if scene_reference else "criar um instante próprio a partir do nome e da lore, sem inventar fatos canônicos."),
-        "Composição: ilustração horizontal em proporção exata 5:4; protagonista e equipamento integralmente dentro das margens seguras.",
-    ))
+    return "\\n".join(lines)
 
 def gerar_negative_prompt(card: dict[str, Any], *, has_ability: bool = True) -> str:
     """Negative prompt global + restrições específicas derivadas da carta."""
@@ -282,13 +299,10 @@ Use cinematic but physically motivated lighting with one coherent source: overca
 12. COLOR PALETTE
 Priority: canonical character and equipment colors first; the faction's palette second, applied mainly to lighting, atmosphere, background, environmental materials and restrained complementary accents; individual affinities only as subtle accents supported by the lore. Do not recolor canonical armor, clothing, skin, hair, weapons or signature equipment. Do not apply a full-image faction filter.
 
-13. REFERENCE PROPORTIONS AND ELEMENT FIDELITY
-When a complete card reference or card-layout reference is supplied, reproduce the relative proportions of its elements faithfully. Preserve the same proportional relationship between the outer card shape, frame thickness, illustration window, header, title area, faction banner, combat-type label, icons, power indicators, ability panel, lore/synergy areas, internal margins and spacing. Keep each element at the same relative scale and in the same relative position as in the reference. Do not independently enlarge, shrink, stretch, compress, crop, rearrange or redesign any element. Do not let the illustration area consume space belonging to the text panels or other card elements. The finished card must retain the reference's visual balance and hierarchy. Treat these as relative layout proportions, not as permission to invent, omit or alter card data. If no complete-card reference is supplied, do not fabricate a card frame or interface; follow the artwork-only output requirement below.
-
-14. CINEMATIC COMPOSITION
+13. CINEMATIC COMPOSITION
 Create one dominant subject and one focal story beat. Use landscape composition with clear foreground, subject plane and background; choose eye-level intimacy, three-quarter action, low-angle threat or environmental scale according to this card. Maintain strong silhouette, natural perspective, depth and clear focal hierarchy. Keep face, hands, weapon and defining equipment fully inside safe margins. Avoid static catalogue pose unless the identity calls for it. The image must remain readable at card-thumbnail size.
 
-15. MANDATORY FORMAT — EXACT 5:4
+14. MANDATORY FORMAT — EXACT 5:4
 Mandatory 5:4 aspect ratio, horizontal composition. Exact landscape ratio 5:4 only. Compose natively for 5:4 from the beginning. Never use portrait, square, 3:4, 2:3, 16:9 or any other aspect ratio. Do not rely on later cropping; keep all important parts of the subject and signature equipment inside safe margins.
 
 15. QUALITY AND MATERIAL FINISH
@@ -298,7 +312,7 @@ Premium realistic Elden Ring dark-fantasy collectible-card illustration. Believa
 {negative}
 
 DETAILED CARD-SPECIFIC PRODUCTION BRIEF
-The following source brief adds card-specific visual facts. It is subordinate to Elden Ring canonical identity, the FACÇÃO-field rule, the hierarchy above, exact 5:4, reference-proportion fidelity and every explicit prohibition:
+The following source brief adds card-specific visual facts. It is subordinate to Elden Ring canonical identity, the FACÇÃO-field rule, the hierarchy above, exact 5:4 and every explicit prohibition:
 {detail}
 
 FINAL OUTPUT: one standalone illustration only, set in Elden Ring, exact horizontal 5:4. No card frame, border, title, text, numbers, stats, icon, logo, watermark, signature, rarity gem, user interface, collage or mockup. The requested output is artwork only."""
