@@ -96,6 +96,7 @@ CORES_FACCAO = {
     "Ordem Áurea": ((38, 31, 17), (230, 190, 91)),
     "Lua Negra": ((24, 18, 51), (139, 112, 214)),
     "Véu Carmesim": ((47, 13, 20), (190, 54, 68)),
+    "Os Esquecidos": ((52, 48, 40), (215, 210, 190)),
 }
 ROTULOS_FILEIRA = {"melee": "CORPO A CORPO", "ranged": "LONGA DISTÂNCIA", "siege": "CERCO"}
 LARGURA_PADRAO = 420
@@ -1035,17 +1036,33 @@ def _draw_gwent_unit(draw: ImageDraw.ImageDraw, box, faction: str, row: str, acc
 
 def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = ALTURA_PADRAO,
                illustration_bytes: bytes | None = None) -> Image.Image:
-    """Carta narrativa V11: arte ampla, moldura heráldica e leitura tática clara."""
+    """Renderiza a carta-base ou, se houver arte oficial completa, usa-a sem overlays."""
+    if illustration_bytes is not None:
+        # Arte oficial completa substitui a carta gerada: não aplicar template,
+        # moldura, nome, raridade, poder, ícones, habilidade ou efeitos por cima.
+        try:
+            with Image.open(io.BytesIO(illustration_bytes)) as uploaded:
+                if getattr(uploaded, "n_frames", 1) > 1:
+                    raise ValueError("A arte oficial precisa ser uma imagem estática.")
+                original = ImageOps.exif_transpose(uploaded).convert("RGBA")
+                return original.resize(
+                    (max(1, int(width)), max(1, int(height))),
+                    Image.Resampling.LANCZOS,
+                )
+        except (OSError, UnidentifiedImageError) as exc:
+            raise ValueError("Não foi possível abrir a arte oficial da carta.") from exc
+
     rarity = str(card.get("raridade", "Comum"))
     category = "Especial" if str(card.get("categoria", "Unidade")).casefold() == "especial" else "Unidade"
     ctype = str(card.get("tipo", "Magia"))
-    faction = molduras_cartas.normalizar_faccao(card.get("faccao") or {"Força":"Ordem Áurea","Destreza":"Véu Carmesim","Magia":"Lua Negra"}.get(ctype,"Ordem Áurea"))
-    row = str(card.get("fileira") or {"Força":"melee","Destreza":"ranged","Magia":"siege"}.get(ctype,"melee"))
+    faction = molduras_cartas.normalizar_faccao(card.get("faccao") or {"Força":"Ordem Áurea","Destreza":"Véu Carmesim","Magia":"Lua Negra","Fé":"Os Esquecidos"}.get(ctype,"Ordem Áurea"))
+    row = str(card.get("fileira") or {"Força":"melee","Destreza":"ranged","Magia":"siege","Fé":"melee"}.get(ctype,"melee"))
     seed = _seed(card); rng = random.Random(seed)
     palettes = {
         "Ordem Áurea": ((39,31,17),(91,69,31),(224,183,82),(245,230,180)),
         "Véu Carmesim": ((43,13,18),(83,23,31),(177,49,62),(238,178,177)),
         "Lua Negra": ((18,15,39),(39,29,76),(139,112,214),(224,215,255)),
+        "Os Esquecidos": ((52,48,40),(140,130,110),(215,210,190),(245,242,230)),
     }
     top, mid, accent, metal = palettes.get(faction, palettes["Ordem Áurea"])
     rarity_colors = {
@@ -1457,7 +1474,7 @@ def _draw_card_com_template(card: dict[str, Any], illustration_bytes: bytes) -> 
 
     category = str(card.get("categoria", "Unidade"))
     card_type = str(card.get("tipo", "Magia"))
-    faction = molduras_cartas.normalizar_faccao(card.get("faccao") or {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra"}.get(card_type, "Ordem Áurea"))
+    faction = molduras_cartas.normalizar_faccao(card.get("faccao") or {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra", "Fé": "Os Esquecidos"}.get(card_type, "Ordem Áurea"))
     row = str(card.get("fileira") or {"Força": "melee", "Destreza": "ranged", "Magia": "siege"}.get(card_type, "melee"))
     rarity_base, rarity_accent = CORES_RARIDADE.get(rarity, CORES_RARIDADE["Comum"])
     type_accent = CORES_FACCAO.get(faction, ((21, 29, 39), (44, 47, 61)))[1]

@@ -1,8 +1,7 @@
 """Regras do Ateliê de Cartas do Coliseu.
 
 Gera prompts individuais a partir do catálogo canônico do Coliseu.
-Uploads aprovados são imagens finais e são exibidos sem composição.
-O renderizador automático permanece apenas para cartas sem arte aprovada.
+A moldura oficial é aplicada separadamente pelo renderizador do NARABOT.
 """
 from __future__ import annotations
 
@@ -12,8 +11,8 @@ from typing import Any
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-ARTE_LARGURA = 1200
-ARTE_ALTURA = 960
+ARTE_LARGURA = 2400
+ARTE_ALTURA = 3600
 TAMANHO_MAXIMO_UPLOAD = 8 * 1024 * 1024
 PIXELS_MAXIMOS = 18_000_000
 
@@ -1521,11 +1520,7 @@ def gerar_prompt_carta(carta: dict[str, Any]) -> str:
 
 
 def normalizar_imagem_carta(dados: bytes) -> ImagemNormalizada:
-    """Valida a imagem enviada e preserva seus bytes e enquadramento originais.
-
-    A imagem aprovada no Ateliê é a carta final. Por isso, esta função não aplica
-    moldura, texto, recorte, redimensionamento, conversão de formato ou compressão.
-    """
+    """Valida, remove metadados e padroniza a imagem em memória para o Discord."""
     if not dados:
         raise ArteInvalida("O arquivo está vazio. Envie uma imagem PNG, JPG ou WEBP.")
     if len(dados) > TAMANHO_MAXIMO_UPLOAD:
@@ -1538,15 +1533,32 @@ def normalizar_imagem_carta(dados: bytes) -> ImagemNormalizada:
             if original.format not in {"PNG", "JPEG", "WEBP"}:
                 raise ArteInvalida("Formato não aceito. Utilize PNG, JPG ou WEBP.")
             largura, altura = original.size
-            if largura < 512 or altura < 512:
-                raise ArteInvalida("A imagem precisa ter pelo menos 512 × 512 pixels para manter a qualidade.")
+            if min(largura, altura) < 512:
+                raise ArteInvalida("A carta completa precisa ter pelo menos 512 pixels no menor lado.")
             if largura > 6000 or altura > 6000 or largura * altura > PIXELS_MAXIMOS:
                 raise ArteInvalida("A resolução é excessiva. Reduza a imagem para no máximo 18 megapixels.")
-            # Força a decodificação para rejeitar arquivos truncados/corrompidos,
-            # sem alterar os bytes originais que serão armazenados e exibidos.
-            original.load()
-            formato = str(original.format or "").upper()
-            return ImagemNormalizada(bytes(dados), largura, altura, formato)
+
+            orientada = ImageOps.exif_transpose(original)
+            if orientada.mode in {"RGBA", "LA"} or "transparency" in orientada.info:
+                camada = orientada.convert("RGBA")
+                fundo = Image.new("RGBA", camada.size, (16, 19, 25, 255))
+                fundo.alpha_composite(camada)
+                imagem = fundo.convert("RGB")
+            else:
+                imagem = orientada.convert("RGB")
+            # Carta completa: preservar proporção e enquadramento originais.
+            # Não cortar para 5:4 nem redimensionar para uma tela horizontal.
+            imagem.thumbnail((2400, 3600), Image.Resampling.LANCZOS)
+            saida = io.BytesIO()
+            imagem.save(saida, format="JPEG", quality=91, optimize=True, progressive=True)
+            normalizada = saida.getvalue()
+            if len(normalizada) > TAMANHO_MAXIMO_UPLOAD:
+                saida = io.BytesIO()
+                imagem.save(saida, format="JPEG", quality=84, optimize=True, progressive=True)
+                normalizada = saida.getvalue()
+            if len(normalizada) > TAMANHO_MAXIMO_UPLOAD:
+                raise ArteInvalida("Não consegui reduzir a imagem o suficiente. Envie uma versão com menos detalhes ou resolução menor.")
+            return ImagemNormalizada(normalizada, imagem.width, imagem.height)
     except ArteInvalida:
         raise
     except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError, SyntaxError, OverflowError) as exc:

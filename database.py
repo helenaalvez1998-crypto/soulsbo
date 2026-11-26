@@ -567,7 +567,8 @@ CREATE TABLE IF NOT EXISTS cartas_atelie_submissoes (
     user_id INTEGER NOT NULL,
     card_id TEXT NOT NULL,
     prompt_text TEXT NOT NULL DEFAULT '',
-    image_data BLOB NOT NULL,
+    image_data BLOB NOT NULL DEFAULT X'',
+    image_key TEXT NOT NULL DEFAULT '',
     mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
     artist_name TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL DEFAULT 'pending',
@@ -652,6 +653,55 @@ CREATE TABLE IF NOT EXISTS cartas_gwent_rewards (
 
 
 
+CREATE TABLE IF NOT EXISTS apostas_partidas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    opponent_id INTEGER,
+    card_id_a TEXT NOT NULL,
+    card_id_b TEXT NOT NULL,
+    winner_id INTEGER,
+    denarios_apostados INTEGER NOT NULL DEFAULT 0,
+    outcome TEXT NOT NULL DEFAULT 'pending',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY(opponent_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS apostas_cartas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partida_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    card_id TEXT NOT NULL,
+    card_nome TEXT NOT NULL,
+    rarity TEXT NOT NULL DEFAULT 'Comum',
+    denarios_ganhos INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(partida_id) REFERENCES apostas_partidas(id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS apostas_torneio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    torneio_nome TEXT NOT NULL,
+    card_id TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    denarios_apostados INTEGER NOT NULL DEFAULT 0,
+    multiplicador INTEGER NOT NULL DEFAULT 1,
+    ganhos INTEGER NOT NULL DEFAULT 0,
+    criado_em TEXT NOT NULL DEFAULT (date('now')),
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS users_aposta_cache (
+    user_id INTEGER PRIMARY KEY,
+    data TEXT NOT NULL DEFAULT (date('now')),
+    total_dia INTEGER NOT NULL DEFAULT 0,
+    ultimo_cooldown_risco TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
+
+
+
 CREATE TABLE IF NOT EXISTS cartas_recompensas (
     event_key TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
@@ -672,6 +722,42 @@ CREATE TABLE IF NOT EXISTS cartas_fragmentos (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+
+-- Conquistas e Achievements
+CREATE TABLE IF NOT EXISTS cartas_conquistas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    conquista TEXT NOT NULL,
+    progresso INTEGER NOT NULL DEFAULT 0,
+    total INTEGER NOT NULL DEFAULT 0,
+    desbloqueada_em TEXT NOT NULL DEFAULT (date('now')),
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cartas_conquista_usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    conquista_id INTEGER NOT NULL,
+    desbloqueada INTEGER NOT NULL DEFAULT 0,
+    data_desbloqueio TEXT NOT NULL DEFAULT (date('now')),
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY(conquista_id) REFERENCES cartas_conquistas(id) ON DELETE CASCADE
+);
+
+-- Tabela para rastrear progresso em eventos
+CREATE TABLE IF NOT EXISTS cartas_eventos_usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    evento TEXT NOT NULL,
+    progresso INTEGER NOT NULL DEFAULT 0,
+    total INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_cartas_conquista_user ON cartas_conquista_usuario(user_id, conquista_id);
+CREATE INDEX IF NOT EXISTS idx_cartas_eventos_user ON cartas_eventos_usuario(user_id);
 -- Inventário dedicado ao Laboratório; saldo separado de Almas e Fragmentos da Forja.
 CREATE TABLE IF NOT EXISTS cartas_materiais_transmutacao (
     user_id INTEGER NOT NULL,
@@ -957,6 +1043,13 @@ class Database:
         await self.conn.execute("PRAGMA cache_size = -20000")  # ~20 MB de cache de páginas
         await self.conn.executescript(SCHEMA)
         await self.conn.executescript(SCHEMA_CARTAS)
+        # Migração incremental: imagens novas do Ateliê passam a residir no R2.
+        # image_data é mantido para compatibilidade com submissões antigas em SQLite.
+        atelier_cols = {r["name"] for r in await self._all("PRAGMA table_info(cartas_atelie_submissoes)")}
+        if "image_key" not in atelier_cols:
+            await self.conn.execute(
+                "ALTER TABLE cartas_atelie_submissoes ADD COLUMN image_key TEXT NOT NULL DEFAULT ''"
+            )
         # Migração incremental do armazenamento de arte de líderes, caso exista
         # uma instalação de pré-lançamento sem o token de revisão SHA-256.
         leader_art_cols = {r["name"] for r in await self._all("PRAGMA table_info(cartas_gwent_lideres_artes)")}
@@ -2999,8 +3092,10 @@ class Database:
                 novas += int(resultado.get("status") == "ok")
             return novas
 
-    async def coliseu_entregar_drops_iniciais(self, user_id: int, quantidade: int = 12) -> int:
-        """Entrega uma única vez um deck inicial de modelos globais aleatórios por drops."""
+    async def coliseu_entregar_drops_iniciais(self, user_id: int, quantidade: int = 10) -> int:
+        """Entrega uma única vez um deck inicial de modelos globais aleatórios por drops.
+        Novo jogadores recebem exatamente 10 cartas para começar a jogar imediatamente.
+        """
         import secrets
         from sistemas.cartas import CARTAS_PACOTE
         user_id = int(user_id)
@@ -3028,7 +3123,8 @@ class Database:
             owned = {str(row["card_id"]) for row in owned_rows}
             pool = [c for c in CARTAS_PACOTE if c.raridade != "Singular" and c.categoria != "Especial"
                     and not c.id.startswith("primordial_") and c.id not in owned]
-            quantidade = max(0, min(int(quantidade), 12, len(pool)))
+            # Limita exatamente a 10 cartas para o deck inicial
+            quantidade = max(0, min(int(quantidade), 10, len(pool)))
             selecionadas = secrets.SystemRandom().sample(pool, quantidade)
             entregues = 0
             for carta in selecionadas:
@@ -3041,15 +3137,15 @@ class Database:
 
     async def coliseu_entregar_kit_especial_gwent(self, user_id: int, card_ids: list[str]) -> int:
         """Compatibilidade: kits fixos antigos foram substituídos por drops de boas-vindas."""
-        return await self.coliseu_entregar_drops_iniciais(user_id, quantidade=12)
+        return await self.coliseu_entregar_drops_iniciais(user_id, quantidade=10)
 
     async def coliseu_entregar_kit_gwent(self, user_id: int, card_ids: list[str]) -> int:
         """Compatibilidade: kits fixos antigos foram substituídos por drops de boas-vindas."""
-        return await self.coliseu_entregar_drops_iniciais(user_id, quantidade=12)
+        return await self.coliseu_entregar_drops_iniciais(user_id, quantidade=10)
 
     async def coliseu_entregar_kit_inicial(self, user_id: int, card_ids: list[str]) -> int:
         """Compatibilidade: kits fixos antigos foram substituídos por drops de boas-vindas."""
-        return await self.coliseu_entregar_drops_iniciais(user_id, quantidade=12)
+        return await self.coliseu_entregar_drops_iniciais(user_id, quantidade=10)
 
     async def coliseu_estado_usuario(self, user_id: int):
         user_id = int(user_id)
@@ -3690,7 +3786,7 @@ class Database:
     # ---------- Ateliê web: submissão comunitária e arte oficial por modelo ----------
     async def coliseu_atelie_criar_submissao_web(
         self, user_id: int, card_id: str, prompt_text: str, image_data: bytes,
-        mime_type: str = "image/jpeg", artist_name: str = "",
+        mime_type: str = "image/jpeg", artist_name: str = "", image_key: str = "",
     ):
         """Registra uma arte comunitária pendente; a aprovação define a arte oficial do modelo."""
         async with self.transaction() as tx:
@@ -3714,9 +3810,10 @@ class Database:
                 return {"status": "pending_limit"}
             cur = await tx.conn.execute(
                 """INSERT INTO cartas_atelie_submissoes
-                   (user_id,card_id,prompt_text,image_data,mime_type,artist_name,status)
-                   VALUES (?,?,?,?,?,?,'pending')""",
-                (int(user_id), str(card_id), str(prompt_text)[:12000], bytes(image_data),
+                   (user_id,card_id,prompt_text,image_data,image_key,mime_type,artist_name,status)
+                   VALUES (?,?,?,?,?,?,?,'pending')""",
+                (int(user_id), str(card_id), str(prompt_text)[:12000],
+                 bytes(image_data) if not image_key else b"", str(image_key)[:500],
                  str(mime_type)[:80], str(artist_name)[:100]),
             )
             return {"status": "ok", "submission_id": int(cur.lastrowid)}
@@ -3787,7 +3884,7 @@ class Database:
     async def coliseu_atelie_obter_arte_oficial_metadata(self, card_id: str):
         """Consulta metadados sem copiar o BLOB da arte em toda requisição de imagem."""
         return await self._one(
-            """SELECT id,user_id,card_id,mime_type,artist_name,created_at,prompt_text,
+            """SELECT id,user_id,card_id,mime_type,artist_name,created_at,image_key,
                       length(image_data) AS image_size
                FROM cartas_atelie_submissoes WHERE card_id=? AND status='approved'
                ORDER BY reviewed_at DESC,id DESC LIMIT 1""",
@@ -3796,7 +3893,7 @@ class Database:
 
     async def coliseu_atelie_obter_arte_oficial(self, card_id: str):
         return await self._one(
-            """SELECT id,user_id,card_id,image_data,mime_type,artist_name,created_at
+            """SELECT id,user_id,card_id,image_data,image_key,mime_type,artist_name,created_at
                FROM cartas_atelie_submissoes WHERE card_id=? AND status='approved'
                ORDER BY reviewed_at DESC,id DESC LIMIT 1""", (str(card_id),),
         )
@@ -4007,7 +4104,8 @@ class Database:
 
     async def _coliseu_drop_tx(self, tx, user_id: int, event_key: str, *, origem: str = "atividade",
                                permitir_primordial: bool = False, modelo_forcado=None,
-                               raridade_forcada: str | None = None):
+                               raridade_forcada: str | None = None,
+                               faccao_forcada: str | None = None):
         """Drop global idempotente. A raridade pertence ao exemplar, não ao modelo."""
         import secrets
         from sistemas.cartas import (CARTAS_PACOTE, CARTAS_PRIMORDIAIS, faixa_poder_exemplar,
@@ -4018,11 +4116,25 @@ class Database:
                     "card_rarity": ja["rarity"], "exemplar_id": ja["exemplar_id"], "card_power": ja["power"]}
 
         # O catálogo é global: qualquer modelo elegível pode sair em qualquer atividade.
-        modelos = [c for c in CARTAS_PACOTE if c.raridade != "Singular"]
+        # Relíquias não participam do sorteio comum. Elas entram por um sorteio raro
+        # próprio, mas continuam usando o mesmo inventário, exemplar e tratamento de duplicatas.
+        ids_reliquias = {
+            "reliquia_grande_runa_godrick", "reliquia_runa_nao_nascidos",
+            "reliquia_runa_morte", "reliquia_noite_chama",
+            "reliquia_lamina_negra", "reliquia_algemas_margit",
+        }
+        cartas_reliquias = [c for c in CARTAS_PACOTE if c.id in ids_reliquias]
+        modelos = [c for c in CARTAS_PACOTE if c.raridade != "Singular" and c.id not in ids_reliquias]
         primordiais = list(CARTAS_PRIMORDIAIS)
+        if faccao_forcada:
+            # Pacotes de facção são estritos: nenhuma carta de outra facção ou Relíquia global.
+            modelos = [c for c in modelos if c.para_dict().get("faccao") == faccao_forcada]
+            primordiais = [c for c in primordiais if c.para_dict().get("faccao") == faccao_forcada]
+            cartas_reliquias = []
+        chance_reliquia_bps = 50  # 0,50% em drops gerais; pacotes de facção não incluem Relíquias.
         pesos = [("Comum", 6940), ("Rara", 2200), ("Épica", 700),
                  ("Lendária", 100), ("Mítica", 50)]
-        if permitir_primordial:
+        if permitir_primordial and primordiais:
             pesos.append(("Primordial", 10))
         total = sum(p for _, p in pesos)
         if raridade_forcada in {nome for nome, _ in pesos}:
@@ -4036,8 +4148,22 @@ class Database:
                 if sorteio < acumulado:
                     raridade = nome
                     break
-        carta = (modelo_forcado if modelo_forcado is not None else
-                 secrets.choice(primordiais if raridade == "Primordial" else modelos))
+        # Uma Relíquia pode substituir a carta comum em 0,50% das tentativas.
+        # A raridade do exemplar continua obedecendo à roleta normal de raridade.
+        drop_reliquia = (
+            modelo_forcado is None
+            and faccao_forcada is None
+            and bool(cartas_reliquias)
+            and secrets.randbelow(10_000) < chance_reliquia_bps
+        )
+        if modelo_forcado is not None:
+            carta = modelo_forcado
+        elif drop_reliquia:
+            carta = secrets.choice(cartas_reliquias)
+            if raridade == "Primordial":
+                raridade = "Mítica"
+        else:
+            carta = secrets.choice(primordiais if raridade == "Primordial" else modelos)
         if raridade == "Primordial" and modelo_forcado is not None:
             # Um drop inicial não pode contornar as condições especiais de Primordial.
             raridade = "Mítica"
@@ -4147,25 +4273,30 @@ class Database:
 
     async def coliseu_abrir_pacote(self, user_id: int, catalogo_por_raridade: dict | None = None,
                                    almas_por_raridade: dict | None = None, preco: int = 120, quantidade: int = 3,
-                                   limite_pacotes_dia: int = 3):
-        """Compra um pacote e concede três exemplares em uma única transação."""
+                                   faccao: str | None = None):
+        """Compra pacote geral ou de facção; compras ilimitadas, condicionadas ao saldo."""
         import json, secrets, uuid
         user_id = int(user_id)
         preco = max(1, int(preco))
         quantidade = max(1, min(int(quantidade), 10))
-        limite_pacotes_dia = max(1, int(limite_pacotes_dia))
+        faccoes_validas = {
+            "Ordem Áurea": "ordem_aurea",
+            "Véu Carmesim": "veu_carmesim",
+            "Lua Negra": "lua_negra",
+            "Os Esquecidos": "os_esquecidos",
+        }
+        faccao = str(faccao).strip() if faccao else None
+        if faccao and faccao not in faccoes_validas:
+            return {"status": "faccao_invalida"}
+        slug = faccoes_validas.get(faccao, "geral")
+        transacao_kind = f"pacote_faccao_{slug}" if faccao else "pacote_fogueira"
+        origem_drop = f"pacote_faccao_{slug}" if faccao else "pacote_fogueira"
+
         async with self.transaction() as tx:
             await tx.conn.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (user_id,))
             await tx.conn.execute("INSERT OR IGNORE INTO cartas_pity(user_id) VALUES (?)", (user_id,))
             user = await tx._one("SELECT denarios FROM users WHERE user_id=?", (user_id,))
             saldo = int(user["denarios"] or 0) if user else 0
-            abertos = await tx._one(
-                "SELECT COUNT(*) AS n FROM cartas_transacoes WHERE user_id=? AND kind='pacote_fogueira' AND created_at>=datetime('now','-1 day')",
-                (user_id,),
-            )
-            pacotes_24h = int(abertos["n"] or 0) if abertos else 0
-            if pacotes_24h >= limite_pacotes_dia:
-                return {"status": "limite_pacotes_dia", "limite": limite_pacotes_dia, "abertos": pacotes_24h}
             if saldo < preco:
                 return {"status": "sem_saldo", "saldo": saldo, "preco": preco}
 
@@ -4181,8 +4312,10 @@ class Database:
                     raridade_forcada = ("Rara" if roll < 22 else "Épica" if roll < 29
                                         else "Lendária" if roll == 29 else "Mítica")
                 result = await self._coliseu_drop_tx(
-                    tx, user_id, f"pack:{pack_id}:{index}", origem="pacote_fogueira",
-                    permitir_primordial=not pity_ativado, raridade_forcada=raridade_forcada,
+                    tx, user_id, f"pack:{pack_id}:{index}", origem=origem_drop,
+                    permitir_primordial=(not pity_ativado),
+                    raridade_forcada=raridade_forcada,
+                    faccao_forcada=faccao,
                 )
                 if result.get("status") not in {"ok", "ja_concedido"}:
                     return {"status": "catalogo_invalido"}
@@ -4194,6 +4327,7 @@ class Database:
                     "outcome": result.get("outcome"), "almas": int(result.get("almas") or 0),
                     "fragmentos": int(result.get("fragmentos") or 0),
                     "exemplar_id": result.get("exemplar_id"), "pity_ativado": pity_ativado,
+                    "faccao": faccao or result.get("faccao"),
                 })
             cur = await tx.conn.execute(
                 "UPDATE users SET denarios=denarios-? WHERE user_id=? AND denarios>=?",
@@ -4207,10 +4341,15 @@ class Database:
             )
             await tx.conn.execute(
                 "INSERT INTO cartas_transacoes(tx_key,user_id,kind,denarios_delta,details_json) VALUES (?,?,?,?,?)",
-                (f"pack-purchase:{pack_id}", user_id, "pacote_fogueira", -preco,
-                 json.dumps({"cards": aberturas, "quantity": quantidade}, ensure_ascii=False)),
+                (f"pack-purchase:{pack_id}", user_id, transacao_kind, -preco,
+                 json.dumps({"cards": aberturas, "quantity": quantidade,
+                             "pack_type": "faction" if faccao else "standard",
+                             "faction": faccao}, ensure_ascii=False)),
             )
             novo_saldo = await tx._one("SELECT denarios FROM users WHERE user_id=?", (user_id,))
-            return {"status": "ok", "cards": aberturas, "pity": streak,
-                    "saldo": int(novo_saldo["denarios"] or 0),
-                    "pacotes_restantes": max(0, limite_pacotes_dia - pacotes_24h - 1), "preco": preco}
+            return {
+                "status": "ok", "cards": aberturas, "pity": streak,
+                "saldo": int(novo_saldo["denarios"] or 0), "pacotes_restantes": None,
+                "preco": preco, "faccao": faccao, "pack_unlimited": True,
+            }
+
