@@ -696,7 +696,7 @@ async function generateAtelierPrompt() {
     $('#atelier-prompt').value = atelierPromptText;
     $('#atelier-negative').value = data.reference_url || ''; const refPreview = $('#atelier-reference-preview'); if (refPreview) { refPreview.src = data.reference_url || ''; refPreview.hidden = !data.reference_url; }
     $('#atelier-copy-prompt').disabled = !atelierPromptText;
-    $('#atelier-copy-negative').disabled = true;
+    
     $('#atelier-copy-bundle').disabled = !(atelierPromptText && data.reference_url);
     showNotice(`Análise, prompt fixo e referência da facção carregados para ${data.name}.`, 'success');
   } catch (error) { showNotice(error.message, 'error'); }
@@ -1484,7 +1484,7 @@ async function sendGwentAction(action, card_id = '', row = '', card_ids = [], ta
 }
 
 $('#atelier-card').addEventListener('change', () => {
-  atelierPromptText = ''; atelierNegativeText = ''; atelierAnalysisText = ''; $('#atelier-analysis').value = ''; $('#atelier-prompt').value = ''; $('#atelier-negative').value = ''; $('#atelier-copy-prompt').disabled = true; $('#atelier-copy-negative').disabled = true; $('#atelier-copy-bundle').disabled = true;
+  atelierPromptText = ''; atelierNegativeText = ''; atelierAnalysisText = ''; $('#atelier-analysis').value = ''; $('#atelier-prompt').value = ''; $('#atelier-negative').value = ''; $('#atelier-copy-prompt').disabled = true;  $('#atelier-copy-bundle').disabled = true;
   loadAtelierOfficialArt();
 });
 $('#atelier-generate-prompt').addEventListener('click', generateAtelierPrompt);
@@ -1495,36 +1495,45 @@ $('#atelier-copy-prompt').addEventListener('click', async () => {
 });
 $('#atelier-copy-bundle').addEventListener('click', async () => {
   if (!atelierPromptText) return;
-  const referenceUrl = $('#atelier-reference-preview')?.src || '';
-  const bundle = `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText || 'Sem análise artística retornada para esta carta.'}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL DA FACÇÃO\nA imagem de referência está incluída como imagem no conteúdo copiado.`;
+  const referenceEl = $('#atelier-reference-preview');
+  const referenceUrl = referenceEl?.getAttribute('src') || '';
+  if (!referenceUrl) {
+    showNotice('A referência visual desta facção ainda não foi carregada. Gere novamente o pacote da carta.', 'error');
+    return;
+  }
+  const analysis = atelierAnalysisText || 'Não foi retornada análise artística para esta carta.';
+  const plainText = `ANÁLISE ARTÍSTICA (PT)\n${analysis}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL DA FACÇÃO\nA imagem da referência está anexada ao conteúdo copiado.`;
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   try {
-    if (referenceUrl && navigator.clipboard?.write && window.ClipboardItem) {
-      const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
-      if (!response.ok) throw new Error('Não foi possível carregar a imagem de referência.');
-      const sourceBlob = await response.blob();
-      const image = await createImageBitmap(sourceBlob);
-      const canvas = document.createElement('canvas');
-      canvas.width = image.width;
-      canvas.height = image.height;
-      const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0);
-      const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      if (!pngBlob) throw new Error('Não foi possível preparar a referência visual.');
-      const textBlob = new Blob([bundle], { type: 'text/plain' });
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'text/plain': textBlob, 'image/png': pngBlob })
-      ]);
+    const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
+    if (!response.ok) throw new Error(`Falha ao carregar referência visual (HTTP ${response.status}).`);
+    const referenceBlob = await response.blob();
+    const bitmap = await createImageBitmap(referenceBlob);
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width; canvas.height = bitmap.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Não foi possível preparar a imagem da referência.');
+    ctx.drawImage(bitmap, 0, 0); bitmap.close?.();
+    const pngBlob = await new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Falha ao converter a referência para PNG.')), 'image/png'));
+    const htmlText = `<section><h2>Análise artística (PT)</h2><p>${escapeHtml(analysis).replace(/\n/g,'<br>')}</p><h2>Prompt fixo</h2><p>${escapeHtml(atelierPromptText).replace(/\n/g,'<br>')}</p><h2>Referência visual da facção</h2><p>Imagem anexada como representação visual.</p></section>`;
+    if (navigator.clipboard?.write && window.ClipboardItem) {
+      const item = new ClipboardItem({
+        'text/plain': new Blob([plainText], {type:'text/plain'}),
+        'text/html': new Blob([htmlText], {type:'text/html'}),
+        'image/png': pngBlob
+      });
+      await navigator.clipboard.write([item]);
       showNotice('Análise, prompt fixo e imagem de referência copiados juntos.', 'success');
     } else {
-      await navigator.clipboard.writeText(`${bundle}\n\nURL da referência: ${referenceUrl}`);
-      showNotice('Texto copiado. Este navegador não permite copiar a imagem junto; anexe a referência separadamente.', 'info');
+      throw new Error('Este navegador não permite copiar texto e imagem juntos.');
     }
   } catch (error) {
     try {
-      await navigator.clipboard.writeText(`${bundle}\n\nURL da referência: ${referenceUrl}`);
-      showNotice('Os textos foram copiados. Anexe também a imagem de referência exibida no Ateliê.', 'info');
+      const combinedText = `${plainText}\n\nURL da referência: ${new URL(referenceUrl, location.href).href}`;
+      await navigator.clipboard.writeText(combinedText);
+      showNotice('Os textos foram copiados. Este navegador não aceitou a imagem no clipboard; anexe a referência exibida separadamente.', 'warning');
     } catch {
-      showNotice('Não foi possível copiar automaticamente. Verifique a permissão de área de transferência do navegador.', 'error');
+      showNotice(error.message || 'Não foi possível copiar o pacote. Verifique a permissão de área de transferência.', 'error');
     }
   }
 });
