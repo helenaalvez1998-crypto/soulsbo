@@ -209,6 +209,7 @@ let gwentSelectedHandCard = '';
 let gwentHandCardsById = new Map();
 let gwentLastTurnAnnouncement = null;
 let gwentLastViewportWidth = window.innerWidth;
+let gwentHistoryPopoverCleanup = null;
 
 const gwentRows = [
   ['melee', 'Corpo a corpo'], ['ranged', 'Longa distância'], ['siege', 'Cerco']
@@ -1272,6 +1273,7 @@ function replaceGwentArenaMarkup(arena, markup) {
 
   const scrollX = window.scrollX;
   const scrollY = window.scrollY;
+  closeGwentHistoryPopover();
   arena.replaceChildren(template.content);
 
   if (focusInfo) {
@@ -1293,6 +1295,94 @@ function replaceGwentArenaMarkup(arena, markup) {
     window.scrollTo(scrollX, scrollY);
     root.style.scrollBehavior = oldBehavior;
   }
+}
+
+
+function closeGwentHistoryPopover() {
+  if (typeof gwentHistoryPopoverCleanup === 'function') {
+    const cleanup = gwentHistoryPopoverCleanup;
+    gwentHistoryPopoverCleanup = null;
+    cleanup();
+  }
+}
+
+function bindGwentHistoryPopover(arena) {
+  const details = arena?.querySelector('.gwent-history');
+  if (!details) return;
+  const summary = details.querySelector('summary');
+  const sourceList = details.querySelector('ol');
+  if (!summary || !sourceList) return;
+
+  details.addEventListener('toggle', () => {
+    if (!details.open) {
+      closeGwentHistoryPopover();
+      return;
+    }
+
+    closeGwentHistoryPopover();
+    const popover = document.createElement('div');
+    popover.className = 'gwent-history-popover';
+    popover.setAttribute('role', 'region');
+    popover.setAttribute('aria-label', 'Histórico da partida');
+    popover.innerHTML = `<ol>${sourceList.innerHTML}</ol>`;
+    document.body.appendChild(popover);
+
+    const place = () => {
+      if (!popover.isConnected || !summary.isConnected) return;
+      const anchor = summary.getBoundingClientRect();
+      const width = Math.min(420, Math.max(220, window.innerWidth - 24));
+      popover.style.width = `${width}px`;
+      const left = Math.max(12, Math.min(window.innerWidth - width - 12, anchor.right - width));
+      const maxHeight = Math.min(Math.round(window.innerHeight * 0.55), 420);
+      popover.style.maxHeight = `${Math.max(150, maxHeight)}px`;
+      const estimatedHeight = Math.min(popover.scrollHeight || maxHeight, maxHeight);
+      const below = anchor.bottom + 8;
+      const top = below + estimatedHeight <= window.innerHeight - 12
+        ? below
+        : Math.max(12, anchor.top - estimatedHeight - 8);
+      popover.style.left = `${left}px`;
+      popover.style.top = `${top}px`;
+    };
+
+    const closeFromOutside = event => {
+      if (details.contains(event.target) || popover.contains(event.target)) return;
+      details.open = false;
+      closeGwentHistoryPopover();
+    };
+    const closeOnEscape = event => {
+      if (event.key !== 'Escape') return;
+      details.open = false;
+      closeGwentHistoryPopover();
+      summary.focus({preventScroll: true});
+    };
+    const reposition = () => place();
+
+    document.addEventListener('pointerdown', closeFromOutside, true);
+    document.addEventListener('keydown', closeOnEscape, true);
+    window.addEventListener('resize', reposition, {passive: true});
+    window.addEventListener('scroll', reposition, true);
+    requestAnimationFrame(place);
+
+    gwentHistoryPopoverCleanup = () => {
+      document.removeEventListener('pointerdown', closeFromOutside, true);
+      document.removeEventListener('keydown', closeOnEscape, true);
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+      popover.remove();
+    };
+  });
+}
+
+function gwentWeatherSnapshot(data) {
+  const raw = data?.weather;
+  const map = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const rows = new Set(Array.isArray(data?.weather_rows) ? data.weather_rows.map(String) : []);
+  const levels = {};
+  for (const row of ['melee', 'ranged', 'siege']) {
+    const parsed = Number(map[row] ?? (rows.has(row) ? 1 : 0));
+    levels[row] = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+  }
+  return levels;
 }
 
 function renderGwentArena(data) {
@@ -1330,6 +1420,8 @@ function renderGwentArena(data) {
   const handIsOpen = gwentHandOpen === null ? (prep || (data.is_your_turn && hand.length > 0)) : gwentHandOpen;
   arena.classList.toggle('hand-open', handIsOpen);
 
+  const weatherLevels = gwentWeatherSnapshot(data);
+  const activeWeatherRows = Object.entries(weatherLevels).filter(([, level]) => level > 0);
   const cardsAlreadyOnBoard = new Set(
     [...arena.querySelectorAll('.gwent-board-card[data-card-id]')].map(card => String(card.dataset.cardId))
   );
@@ -1337,13 +1429,10 @@ function renderGwentArena(data) {
     const cards = (side.board || []).filter(card => card.row === key);
     const rowPower = cards.reduce((total, card) => total + Math.max(
       1,
-      gwentEffectivePower(card, Number((data.weather && data.weather[key]) || 0))
+      gwentEffectivePower(card, weatherLevels[key] || 0)
     ), 0);
     const hasEnteringCard = cards.some(card => !cardsAlreadyOnBoard.has(String(card.id)));
-    // O estado meteorológico vem do snapshot público da partida. Aceita valores
-    // numéricos e strings para manter compatibilidade com partidas já salvas.
-    const weatherMap = data.weather && typeof data.weather === 'object' ? data.weather : {};
-    const weatherValue = Math.max(0, Number(weatherMap[key] ?? 0) || 0);
+    const weatherValue = weatherLevels[key] || 0;
     const weatherMarkup = weatherValue > 0
       ? `<div class="gwent-weather-vfx" aria-hidden="true" data-weather-level="${Math.min(3, weatherValue)}" style="--weather-intensity:${Math.min(3, weatherValue)}">
           <span class="gwent-weather-cloud gwent-weather-cloud-back"></span>
@@ -1351,10 +1440,9 @@ function renderGwentArena(data) {
           <span class="gwent-weather-rain"></span>
           <span class="gwent-weather-mist"></span>
           <span class="gwent-weather-lightning"></span>
-          <span class="gwent-weather-status">☂ CLIMA ATIVO</span>
         </div>`
       : '';
-    return `<div class="gwent-row ${hasEnteringCard ? 'has-entering' : ''} ${weatherValue > 0 ? 'has-weather' : ''}" data-row="${escapeHTML(key)}" data-weather-active="${weatherValue > 0 ? 'true' : 'false'}" data-card-count="${cards.length}" style="--row-card-count:${Math.max(1, cards.length)};--row-card-height:${Math.max(112, 238 - Math.max(0, cards.length - 1) * 18)}px">
+    return `<div class="gwent-row ${hasEnteringCard ? 'has-entering' : ''} ${weatherValue > 0 ? 'has-weather' : ''}" data-row="${escapeHTML(key)}" data-weather-active="${weatherValue > 0 ? 'true' : 'false'}" data-weather-level="${weatherValue}" data-card-count="${cards.length}" style="--row-card-count:${Math.max(1, cards.length)};--row-card-height:${Math.max(112, 238 - Math.max(0, cards.length - 1) * 18)}px">
       ${weatherMarkup}
       <h4><span>${escapeHTML(label)}</span><b>${number(rowPower)}</b></h4>
       <div class="gwent-board-cards">${cards.map(card => gwentCardView(card, !cardsAlreadyOnBoard.has(String(card.id)), weatherValue)).join('')}</div>
@@ -1362,6 +1450,7 @@ function renderGwentArena(data) {
   }).join('');
 
   const eventHistory = Array.isArray(data.event_log) ? data.event_log : [];
+  const activeWeatherLabel = activeWeatherRows.map(([row]) => ({melee:'Corpo a corpo',ranged:'Longa distância',siege:'Cerco'}[row] || row)).join(' · ');
   const eventPanel = `<details class="gwent-history"><summary>Histórico · ${number(eventHistory.length)}</summary><ol>${eventHistory.slice().reverse().map(item => `<li>${escapeHTML(item)}</li>`).join('') || '<li>A partida ainda não possui jogadas registradas.</li>'}</ol></details>`;
   const reward = data.reward;
   const rewardPanel = data.status === 'finished' && reward
@@ -1418,7 +1507,7 @@ function renderGwentArena(data) {
   gwentLastTurnAnnouncement = turnAnnouncement;
 
   replaceGwentArenaMarkup(arena, `<div class="gwent-arena-head">
-      <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${escapeHTML(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`)}</p></div>
+      <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${activeWeatherRows.length ? `⛈ CLIMA ATIVO · ${escapeHTML(activeWeatherLabel)}` : escapeHTML(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`)}</p></div>
       <div class="gwent-arena-head-actions">${eventPanel}<button type="button" class="gwent-exit" data-gwent-exit>Voltar ao lobby</button></div>
     </div>
     <div class="gwent-arena-toolbar">
@@ -1457,6 +1546,7 @@ function renderGwentArena(data) {
       </div>
       <div class="gwent-hand" id="gwent-hand-cards" data-can-play="${canPlayFromHand ? 'true' : 'false'}" style="${handLayoutStyle}" ${handIsOpen ? '' : 'hidden'}>${handMarkup}</div>
     </section>`);
+  bindGwentHistoryPopover(arena);
   gwentSelectedHandCard = gwentHandCardsById.has(String(gwentSelectedHandCard)) ? gwentSelectedHandCard : '';
 }
 
@@ -1633,6 +1723,10 @@ async function sendGwentAction(action, card_id = '', row = '', card_ids = [], ta
   try {
     const r = await fetch(`/api/gwent/matches/${matchId}/action`, {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action, card_id, row, card_ids, target_id})});
     const data = await parseGwentApiResponse(r); if (!r.ok) throw new Error(data.error || 'Jogada recusada.');
+    if (action === 'weather') {
+      const label = ({melee:'Corpo a corpo',ranged:'Longa distância',siege:'Cerco'})[row] || 'fileira selecionada';
+      showNotice(`Clima ativado em ${label}.`, 'success');
+    }
     if (gwentRefreshPromise) await gwentRefreshPromise;
     if (Number(currentGwentMatch) === matchId) {
       gwentActionInFlight = false;
