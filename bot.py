@@ -2802,7 +2802,13 @@ class NaraBot(commands.Bot):
                     if official_meta:
                         official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
                         if official_art:
-                            raw_art = bytes(official_art["image_data"])
+                            if official_art["image_key"]:
+                                from sistemas.storage_r2 import download_image
+                                raw_art = await asyncio.to_thread(
+                                    download_image, str(official_art["image_key"])
+                                )
+                            else:
+                                raw_art = bytes(official_art["image_data"] or b"")
                             raw_mime = await asyncio.to_thread(detectar_mime_imagem, raw_art)
                             if raw_mime:
                                 etag = hashlib.sha256(f"official-raw:{official_meta['id']}".encode()).hexdigest()
@@ -2824,7 +2830,13 @@ class NaraBot(commands.Bot):
                 if official_meta:
                     official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
                     if official_art:
-                        raw_art = bytes(official_art["image_data"])
+                        if official_art["image_key"]:
+                            from sistemas.storage_r2 import download_image
+                            raw_art = await asyncio.to_thread(
+                                download_image, str(official_art["image_key"])
+                            )
+                        else:
+                            raw_art = bytes(official_art["image_data"] or b"")
                         raw_mime = await asyncio.to_thread(detectar_mime_imagem, raw_art)
                         if raw_mime:
                             etag = hashlib.sha256(f"official-raw:{official_meta['id']}".encode()).hexdigest()
@@ -2890,7 +2902,13 @@ class NaraBot(commands.Bot):
                         official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id)
                         if not official_art or int(official_art["id"]) != official_id:
                             raise ValueError("A arte oficial mudou durante a renderização.")
-                        raw_art = bytes(official_art["image_data"])
+                        if official_art["image_key"]:
+                            from sistemas.storage_r2 import download_image
+                            raw_art = await asyncio.to_thread(
+                                download_image, str(official_art["image_key"])
+                            )
+                        else:
+                            raw_art = bytes(official_art["image_data"] or b"")
                         official_path = await self._gwent_render_path_cached(
                             f"official:{etag}",
                             lambda: official_renderer(raw_art),
