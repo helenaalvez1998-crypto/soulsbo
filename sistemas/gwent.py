@@ -775,6 +775,10 @@ def novo_estado(match_id: int, creator_id: int, opponent_id: int, decks: dict[st
         }
     return {
         "match_id": int(match_id), "status": "active", "phase": "mulligan", "round": 1,
+        # Convites antigos podem conter snapshots de 12 cartas; só recebem
+        # compras entre rodadas quando ambos os decks usam o formato de 20.
+        "deck_rules_version": 2 if all(len(decks.get(uid, [])) == 20 for uid in (str(creator_id), str(opponent_id))) else 1,
+        "round_draws": {},
         "players": players, "turn": str(creator_id), "round_starter": str(creator_id),
         "weather": {row: 0 for row in ROWS},
         "crowns": {str(creator_id): 0, str(opponent_id): 0},
@@ -953,6 +957,18 @@ def placar(state: dict) -> dict:
     } for uid, player in state["players"].items()}
 
 
+def _comprar_cartas(player: dict, quantidade: int) -> int:
+    """Move cartas da reserva para a mão sem ultrapassar o limite normal de 10."""
+    hand = player.setdefault("hand", [])
+    draw_pile = player.setdefault("draw_pile", [])
+    limite = 10
+    espaco = max(0, limite - len(hand))
+    quantidade_real = min(max(0, int(quantidade)), espaco, len(draw_pile))
+    for _ in range(quantidade_real):
+        hand.append(draw_pile.pop(0))
+    return quantidade_real
+
+
 def _resolve_round(state: dict) -> None:
     ids = list(state["players"])
     a, b = ids
@@ -978,9 +994,10 @@ def _resolve_round(state: dict) -> None:
     for pid, player in state["players"].items():
         board = player.get("board", [])
         # Espólios: quem vence a rodada com a unidade em campo compra uma carta.
-        if pid == winner and any(u.get("habilidade") == "espolios" for u in board) and player.get("draw_pile"):
-            player["hand"].append(player["draw_pile"].pop(0))
-            extras.append("Espólios de guerra: o vencedor comprou uma carta.")
+        if pid == winner and any(u.get("habilidade") == "espolios" for u in board):
+            compradas = _comprar_cartas(player, 1)
+            if compradas:
+                extras.append("Espólios de guerra: o vencedor comprou uma carta.")
         # Glória: a mais forte permanece no campo se a rodada for vencida.
         # Se o jogador venceu a rodada, a unidade mais forte fica em campo pro início da próxima.
         # Se perdeu, todas vão para o descarte normalmente.
@@ -1019,6 +1036,22 @@ def _resolve_round(state: dict) -> None:
         player["last_row"] = None
         player["synergy_used"] = {}
         player.pop("astral_thread_ready", None)
+    # Compra automática apenas para partidas criadas com as regras novas.
+    # Partidas antigas em andamento mantêm exatamente o comportamento anterior.
+    if int(state.get("deck_rules_version", 1)) >= 2:
+        draw_rounds = state.setdefault("round_draws", {})
+        round_key = str(state["round"])
+        if round_key not in draw_rounds:
+            quantidade_base = 2 if state["round"] == 2 else 1 if state["round"] == 3 else 0
+            resultados = {}
+            for pid, player in state["players"].items():
+                compradas = _comprar_cartas(player, quantidade_base)
+                resultados[pid] = compradas
+            draw_rounds[round_key] = resultados
+            for pid, compradas in resultados.items():
+                if compradas:
+                    extras.append(f"Jogador {pid} comprou {compradas} carta(s) para a nova rodada.")
+
     state["weather"] = {row: 0 for row in ROWS}
     # Iniciativa alternada: a pessoa que abriu a rodada anterior cede a abertura
     # da próxima, independentemente do vencedor. Isso evita snowball de iniciativa.
@@ -1100,7 +1133,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
         return {"error": "Você não participa desta partida."}
     player = state["players"][uid]
 
-    # Relíquia equipada é uma carta tática adicional, separada das 12 cartas do deck.
+    # Relíquia equipada é uma carta tática adicional, separada das 20 cartas do deck.
     # A ação "relic" converte a escolha equipada em uma carta temporária e usa o
     # mesmo resolvedor de especiais, preservando validações e o limite de uma ativação.
     if action == "relic":
@@ -1160,8 +1193,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     return {"error": "Carta selecionada não está na sua mão."}
                 player["hand"].remove(old)
                 player["discard"].append(old)
-                if player["draw_pile"]:
-                    player["hand"].append(player["draw_pile"].pop(0))
+                _comprar_cartas(player, 1)
         player["mulligan_done"] = True
         other = next(x for x in state["players"] if x != uid)
         if state["players"][other]["mulligan_done"]:
@@ -1456,12 +1488,11 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 for unit in allies:
                     unit["bonus"] = int(unit.get("bonus", 0)) + 2
             elif skill == "gwent_batedor":
-                quantidade = min(2, 1 + potencia_raridade, len(player["draw_pile"]))
-                if quantidade <= 0:
-                    return {"error": "Sua reserva de compra está vazia."}
-                for _ in range(quantidade):
-                    player["hand"].append(player["draw_pile"].pop(0))
-                eventos_especial.append(f"Passo do Cão de Caça comprou {quantidade} carta(s).")
+                quantidade = min(2, 1 + potencia_raridade)
+                compradas = _comprar_cartas(player, quantidade)
+                if compradas <= 0:
+                    return {"error": "Sua mão está cheia ou sua reserva de compra está vazia."}
+                eventos_especial.append(f"Passo do Cão de Caça comprou {compradas} carta(s).")
             elif skill == "gwent_muralha":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
@@ -1820,7 +1851,7 @@ def executar_turno_ia(state: dict, ai_user_id: int = AI_PLAYER_ID) -> dict:
     if current.get("status") != "active" or ai_uid not in current.get("players", {}):
         return current
 
-    # Limite defensivo: no máximo 13 jogadas por chamada (12 cartas + líder/clima/passe).
+    # Limite defensivo: limite defensivo de ações por chamada, incluindo cartas, líder, clima e passe.
     for _ in range(16):
         if current.get("status") != "active" or str(current.get("turn")) != ai_uid:
             break

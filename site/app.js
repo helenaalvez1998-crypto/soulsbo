@@ -309,11 +309,11 @@ function renderGwentBuilder() {
   const upgradeCost = {Comum:10, Rara:20, 'Épica':40, 'Lendária':80, 'Mítica':150, 'Primordial':250};
   const specialCount = selected.filter(card => card.categoria === 'Especial').length;
   const unitCount = selected.length - specialCount;
-  $('#gwent-deck-count').textContent = `${selected.length}/12 cartas · ${unitCount} unidades · ${specialCount} especiais`;
+  $('#gwent-deck-count').textContent = `${selected.length}/20 cartas · ${unitCount} unidades · ${specialCount} especiais`;
   const cardTile = (card, inDeck = false) => inDeck
     ? `<button type="button" class="gwent-card-tile gwent-deck-mini is-selected" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-deck-mini-name">${escapeHTML(card.nome || 'Carta')}</span></button>`
     : `<button type="button" class="gwent-card-tile" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-card-tile-hint">VER CARTA</span></button>`;
-  $('#gwent-deck-selected').innerHTML = selected.map(card => cardTile(card, true)).join('') || '<div class="empty-state">Selecione 12 cartas da coleção.</div>';
+  $('#gwent-deck-selected').innerHTML = selected.map(card => cardTile(card, true)).join('') || '<div class="empty-state">Selecione 20 cartas da coleção.</div>';
   const q = ($('#gwent-card-search').value || '').trim().toLocaleLowerCase('pt-BR');
   const selectedSet = new Set(selected.map(card => card.card_id || card.id));
   const factionFilter = $('#gwent-filter-faction')?.value || '';
@@ -337,16 +337,16 @@ function renderGwentBuilder() {
   const configChanged = selectedFaction !== gwentSavedFaction
     || ($('#gwent-leader')?.value || 'comandante_fornalha') !== gwentSavedLeader
     || ($('#gwent-relic-select')?.value || '') !== gwentSavedRelic;
-  $('#gwent-save-deck').disabled = selected.length !== 12 || unitCount < 8 || specialCount > 4 || !factionMatches
+  $('#gwent-save-deck').disabled = selected.length !== 20 || unitCount < 8 || specialCount > 4 || !factionMatches
     || (JSON.stringify(gwentDeckIds) === JSON.stringify(gwentSavedIds) && !configChanged);
   const resetButton = $('#gwent-reset-deck');
   if (resetButton) resetButton.disabled = selected.length === 0 && gwentSavedIds.length === 0;
-  $('#gwent-deck-status').textContent = selected.length === 12 && unitCount < 8
+  $('#gwent-deck-status').textContent = selected.length === 20 && unitCount < 8
     ? 'Inclua pelo menos 8 unidades no deck.'
     : specialCount > 4 ? 'O limite é de 4 cartas especiais por deck.'
-    : selected.length === 12 && !factionMatches
+    : selected.length === 20 && !factionMatches
       ? `A facção escolhida precisa ser predominante: Ordem Áurea ${factionCounts['Ordem Áurea']} · Véu Carmesim ${factionCounts['Véu Carmesim']} · Lua Negra ${factionCounts['Lua Negra']} · Os Esquecidos ${factionCounts['Os Esquecidos']}.`
-      : `${unitCount}/12 unidades e ${specialCount}/4 especiais. Facção predominante: ${selectedFaction}.`;
+      : `${unitCount} unidades e ${specialCount}/4 especiais. Facção predominante: ${selectedFaction}.`;
 }
 
 
@@ -441,7 +441,7 @@ function openGwentCollectionCardModal(cardId) {
             ? `<p class="muted">Obtenha um exemplar em pacotes ou recompensas para adicioná-lo ao seu deck.</p>`
             : inDeck
               ? `<button type="button" class="secondary" data-gwent-collection-remove="${escapeHTML(deckCardId)}">REMOVER DO DECK</button>`
-              : `<button type="button" class="primary" data-gwent-collection-add="${escapeHTML(deckCardId)}" ${gwentDeckIds.length >= 12 ? 'disabled' : ''}>ADICIONAR AO DECK</button>`}
+              : `<button type="button" class="primary" data-gwent-collection-add="${escapeHTML(deckCardId)}" ${gwentDeckIds.length >= 20 ? 'disabled' : ''}>ADICIONAR AO DECK</button>`}
         </footer>
       </div>
     </section>`;
@@ -460,7 +460,7 @@ document.addEventListener('click', event => {
     const cardId = add.dataset.gwentCollectionAdd;
     const card = collection.find(item => String(item.id) === String(cardId));
     const selected = gwentDeckIds.map(id => collection.find(item => item.id === id)).filter(Boolean);
-    if (gwentDeckIds.length >= 12) return showNotice('O deck já possui 12 cartas.', 'error');
+    if (gwentDeckIds.length >= 20) return showNotice('O deck já possui 20 cartas.', 'error');
     if (selected.some(item => (item.card_id || item.id) === (card?.card_id || card?.id))) return showNotice('O deck não pode repetir o mesmo modelo.', 'error');
     if (card?.categoria === 'Especial' && selected.filter(item => item.categoria === 'Especial').length >= 4) return showNotice('O deck aceita no máximo quatro cartas especiais.', 'error');
     gwentDeckIds.push(cardId);
@@ -1011,7 +1011,7 @@ async function loadGwentDeck() {
     applyGwentLeaders(data.leaders_by_faction);
     $('#gwent-faction').value = gwentSavedFaction;
     renderGwentLeaderOptions(gwentSavedLeader);
-    $('#gwent-deck-status').textContent = gwentSavedIds.length === 12 ? 'Deck carregado.' : 'Monte seu deck Gwent com 12 cartas únicas para liberar a arena.';
+    $('#gwent-deck-status').textContent = gwentSavedIds.length === 20 ? 'Deck carregado.' : 'Monte seu deck Gwent com 20 cartas únicas para liberar a arena.';
     renderGwentBuilder();
   } catch (e) { $('#gwent-deck-status').textContent = e.message; }
 }
@@ -1029,7 +1029,7 @@ async function saveGwentDeck() {
 }
 
 async function resetGwentDeck() {
-  if (!window.confirm('Redefinir seu deck Gwent? Todas as 12 posições e a configuração de facção, líder e relíquia serão zeradas. Suas cartas continuarão na coleção.')) return;
+  if (!window.confirm('Redefinir seu deck Gwent? Todas as 20 posições e a configuração de facção, líder e relíquia serão zeradas. Suas cartas continuarão na coleção.')) return;
   const button = $('#gwent-reset-deck');
   if (button) { button.disabled = true; button.textContent = 'Zerando...'; }
   try {
@@ -1084,7 +1084,7 @@ async function loadGwentMatches() {
 async function createGwentMatch() {
   const opponent_id = $('#gwent-opponent').value;
   if (!opponent_id) return showNotice('Selecione um adversário.', 'error');
-  if (gwentSavedIds.length !== 12) return showNotice('Salve primeiro um deck Gwent com 12 cartas.', 'error');
+  if (gwentSavedIds.length !== 20) return showNotice('Salve primeiro um deck Gwent com 20 cartas.', 'error');
   const button = $('#gwent-create-match'); button.disabled = true;
   try {
     const r = await fetch('/api/gwent/matches', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({opponent_id})});
@@ -1097,7 +1097,7 @@ async function createGwentMatch() {
 
 
 async function createGwentSoloMatch() {
-  if (gwentSavedIds.length !== 12) return showNotice('Salve primeiro um deck Gwent com 12 cartas.', 'error');
+  if (gwentSavedIds.length !== 20) return showNotice('Salve primeiro um deck Gwent com 20 cartas.', 'error');
   const button = $('#gwent-solo-match');
   if (!button) return;
   button.disabled = true;
@@ -1138,7 +1138,8 @@ function gwentCardView(card, isEntering = false, weatherValue = 0) {
   ].filter(([key]) => Number(card[key] || 0) > 0)
     .map(([key, glyph, label]) => `<i class="gwent-status" title="${label} ×${number(card[key])}">${glyph}</i>`).join('');
   const title = `${card.nome || 'Carta'} · ${power} poder efetivo · ${card.row_label || ''}${Number(card.escudo || 0) > 0 ? ' · Escudo' : ''}`;
-  return `<article class="gwent-board-card ${isEntering ? 'is-entering' : ''}" data-card-id="${escapeHTML(card.id)}" data-row="${escapeHTML(card.row || '')}" role="button" tabindex="0" aria-label="Inspecionar ${escapeHTML(card.nome || 'carta')}, ${power} de poder efetivo" title="${escapeHTML(title)}">${cardImageMarkup(card, card.nome || 'Carta')}<span class="gwent-board-power">${power}</span><span class="gwent-statuses">${statuses}</span>${Number(card.escudo || 0) > 0 ? '<i class="gwent-shield" title="Escudo">◆</i>' : ''}</article>`;
+  const vfxClasses = [...(gwentVfxCardClasses.get(String(card.id)) || [])].join(' ');
+  return `<article class="gwent-board-card ${isEntering ? 'is-entering' : ''} ${vfxClasses}" data-card-id="${escapeHTML(card.id)}" data-row="${escapeHTML(card.row || '')}" role="button" tabindex="0" aria-label="Inspecionar ${escapeHTML(card.nome || 'carta')}, ${power} de poder efetivo" title="${escapeHTML(title)}">${cardImageMarkup(card, card.nome || 'Carta')}<span class="gwent-board-power">${power}</span><span class="gwent-statuses">${statuses}</span>${Number(card.escudo || 0) > 0 ? '<i class="gwent-shield" title="Escudo">◆</i>' : ''}</article>`;
 }
 
 let gwentAlvos = {};
@@ -1385,6 +1386,99 @@ function gwentWeatherSnapshot(data) {
   return levels;
 }
 
+
+// Efeitos visuais de combate: estado anterior usado apenas para comparar mudanças
+// entre respostas da API. Não altera regras, pontuação ou estado do servidor.
+let gwentVfxMatchId = null;
+let gwentVfxPrevious = null;
+let gwentVfxCardClasses = new Map();
+let gwentVfxOneShot = [];
+
+function gwentVfxPrepare(data, mine, theirs, eventHistory) {
+  const matchId = String(data.match_id || currentGwentMatch || '');
+  if (gwentVfxMatchId !== matchId) {
+    gwentVfxMatchId = matchId;
+    gwentVfxPrevious = null;
+    gwentVfxCardClasses = new Map();
+    gwentVfxOneShot = [];
+  }
+  const cards = [...(mine.board || []), ...(theirs.board || [])];
+  const current = new Map(cards.map(card => [String(card.id), {
+    card, power: gwentEffectivePower(card, 0), row: String(card.row || 'melee')
+  }]));
+  const classes = new Map();
+  const oneShot = [];
+  const addClass = (id, cls) => {
+    if (!classes.has(id)) classes.set(id, new Set());
+    classes.get(id).add(cls);
+  };
+
+  // Reações permanentes enquanto a condição/status estiver presente.
+  cards.forEach(card => {
+    const id = String(card.id);
+    if (Number(card.geada || 0) > 0) addClass(id, 'vfx-status-frost');
+    if (Number(card.sangramento || 0) > 0) addClass(id, 'vfx-status-blood');
+    if (Number(card.podrida || 0) > 0) addClass(id, 'vfx-status-rot');
+    if (Number(card.loucura || 0) > 0) addClass(id, 'vfx-status-fire');
+    if (Number(card.escudo || 0) > 0) addClass(id, 'vfx-status-shield');
+  });
+
+  const previous = gwentVfxPrevious;
+  if (previous) {
+    for (const [id, item] of current) {
+      const old = previous.cards.get(id);
+      if (!old) {
+        addClass(id, 'vfx-card-enter');
+      } else if (item.power > old.power) {
+        addClass(id, 'vfx-power-up');
+      } else if (item.power < old.power) {
+        addClass(id, 'vfx-power-down');
+      }
+    }
+    for (const [id, old] of previous.cards) {
+      if (!current.has(id)) oneShot.push({type:'destroy', row:old.row});
+    }
+    if (!previous.leaderUsed && data.leader_used) oneShot.push({type:'leader'});
+    const oldLogSet = previous.logSet || new Set();
+    const freshEvents = (eventHistory || []).filter(entry => !oldLogSet.has(String(entry || '')));
+    // Funciona tanto com histórico cronológico quanto inverso.
+    freshEvents.forEach(entry => {
+      const text = String(entry || '').toLocaleLowerCase('pt-BR');
+      if (/miasma da podrid[aã]o|n[eé]voa de sellia|podrid[aã]o escarlate/.test(text)) oneShot.push({type:'rot'});
+      else if (/geada dos picos|lua g[eé]lida|geada cariana/.test(text)) oneShot.push({type:'frost'});
+      else if (/sangue corrompido|chuva/.test(text)) oneShot.push({type:'blood'});
+      else if (/chama do gigante|chama negra|chama/.test(text)) oneShot.push({type:'fire'});
+      if (/sinergia/.test(text)) oneShot.push({type:'synergy'});
+    });
+  }
+
+  gwentVfxPrevious = {
+    cards: current,
+    logSet: new Set((eventHistory || []).map(entry => String(entry || ''))),
+    leaderUsed: !!data.leader_used
+  };
+  gwentVfxCardClasses = classes;
+  gwentVfxOneShot = oneShot;
+}
+
+function gwentVfxPlay(arena) {
+  if (!arena) return;
+  // Classes de estado são aplicadas no HTML das cartas; aqui entram os efeitos de arena.
+  const battlefield = arena.querySelector('.gwent-battlefield');
+  if (!battlefield || !gwentVfxOneShot.length) return;
+  gwentVfxOneShot.forEach((effect, index) => {
+    const layer = document.createElement('div');
+    layer.className = `gwent-vfx-burst gwent-vfx-${effect.type}`;
+    layer.setAttribute('aria-hidden', 'true');
+    const target = effect.row
+      ? battlefield.querySelector(`.gwent-row[data-row="${effect.row}"]`) || battlefield
+      : battlefield;
+    target.appendChild(layer);
+    window.setTimeout(() => layer.remove(), effect.type === 'leader' ? 1100 : 900);
+  });
+  gwentVfxOneShot = [];
+}
+
 function renderGwentArena(data) {
   currentGwentData = data;
   const arena = $('#gwent-arena');
@@ -1461,6 +1555,7 @@ function renderGwentArena(data) {
   }).join('');
 
   const eventHistory = Array.isArray(data.event_log) ? data.event_log : [];
+  gwentVfxPrepare(data, mine, theirs, eventHistory);
   const activeWeatherLabel = activeWeatherRows.map(([row]) => ({melee:'Corpo a corpo',ranged:'Longa distância',siege:'Cerco'}[row] || row)).join(' · ');
   const eventPanel = `<details class="gwent-history"><summary>Histórico · ${number(eventHistory.length)}</summary><ol>${eventHistory.slice().reverse().map(item => `<li>${escapeHTML(item)}</li>`).join('') || '<li>A partida ainda não possui jogadas registradas.</li>'}</ol></details>`;
   const reward = data.reward;
@@ -1557,6 +1652,7 @@ function renderGwentArena(data) {
       </div>
       <div class="gwent-hand" id="gwent-hand-cards" data-can-play="${canPlayFromHand ? 'true' : 'false'}" style="${handLayoutStyle}" ${handIsOpen ? '' : 'hidden'}>${handMarkup}</div>
     </section>`);
+  gwentVfxPlay(arena);
   bindGwentHistoryPopover(arena);
   gwentSelectedHandCard = gwentHandCardsById.has(String(gwentSelectedHandCard)) ? gwentSelectedHandCard : '';
 }
@@ -2217,7 +2313,7 @@ document.addEventListener('click', async event => {
     await loadGwentMatches();
     return;
   }
-  if (add && gwentDeckIds.length < 12) {
+  if (add && gwentDeckIds.length < 20) {
     const card = collection.find(c => c.id === add.dataset.gwentAdd);
     const selected = gwentDeckIds.map(id => collection.find(c => c.id === id)).filter(Boolean);
     if (selected.some(item => (item.card_id || item.id) === (card?.card_id || card?.id))) return showNotice('O deck não pode repetir o mesmo modelo, mesmo usando exemplares diferentes.', 'error');
