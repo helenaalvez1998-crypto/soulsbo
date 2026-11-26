@@ -1,0 +1,50 @@
+NARABOT — PROMPT MESTRE FIXO PARA CARTA COMPLETA — MODELOS POR FACÇÃO
+
+GERE UMA CARTA COLECIONÁVEL COMPLETA, não uma ilustração isolada. A imagem anexada da facção selecionada é o MODELO VISUAL OFICIAL daquela facção. Existem quatro modelos completos independentes: Ordem Áurea, Véu Carmesim, Os Esquecidos e Lua Negra. Cada um possui pequenas diferenças próprias de composição, moldura, faixa, bandeira, ornamentos e cores. Reproduza o modelo correspondente à facção; não use um layout universal e não apenas recolora o modelo de outra facção.
+
+FONTE DA VERDADE: o bloco de análise dinâmica contém somente seis dados autorizados para impressão. Copie-os exatamente, sem inventar, corrigir, reequilibrar ou substituir valores.
+
+OS ÚNICOS SEIS CAMPOS QUE PODEM APARECER NA CARTA:
+1. NOME DA CARTA — faixa horizontal do título.
+2. PODER-BASE — número exato no medalhão circular superior esquerdo.
+3. RARIDADE — placa no canto inferior direito.
+4. POSIÇÃO TÁTICA — faixa horizontal escura abaixo do título.
+5. FACÇÃO — bandeira vertical lateral, símbolo e identidade cromática da facção.
+6. LORE — painel inferior de pergaminho.
+
+CAMPOS PROIBIDOS NA IMAGEM FINAL:
+CUSTO, PODER MÁXIMO, POTÊNCIA DA RARIDADE, CATEGORIA, HABILIDADE, SINERGIAS, atributos internos, IDs e quaisquer campos adicionais. Não criar ícones, medalhões, espaços ou rótulos para eles. Mesmo que esses dados existam no catálogo interno, não fazem parte da carta visual.
+
+REGRAS DE TAXONOMIA:
+- FACÇÃO e POSIÇÃO TÁTICA são campos independentes.
+- Posição tática deve ser reproduzida conforme o dado oficial: Corpo a corpo, Longa distância ou Cerco.
+- Não usar Força, Destreza ou Magia como classe de combate.
+- Não exibir Categoria nem converter Categoria em posição tática.
+
+MODELO VISUAL POR FACÇÃO:
+- Ordem Áurea: pergaminho marfim, detalhes dourados, faixa tática escura com marcadores dourados, bandeira dourada e placa de raridade dourada.
+- Véu Carmesim: ornamentos carmesim, faixa tática preta com marcadores vermelhos, bandeira lateral vermelha e placa de raridade vermelho-escura.
+- Os Esquecidos: identidade esmeralda e dourada, faixa tática verde-escura, marcadores verdes, bandeira esmeralda e placa de raridade verde.
+- Lua Negra: identidade azul lunar, faixa tática escura com marcadores azuis, bandeira azul e placa de raridade azul.
+Essas descrições são orientação complementar; a imagem de referência anexada da facção tem prioridade para proporções, posições e detalhes específicos.
+
+COMPOSIÇÃO:
+- Medalhão circular superior esquerdo com o PODER-BASE.
+- Ilustração principal grande na região superior.
+- Nome da carta em faixa horizontal abaixo da ilustração.
+- Posição tática na faixa escura imediatamente abaixo do nome.
+- Bandeira vertical lateral com símbolo e identificação da facção.
+- Lore na área inferior em pergaminho.
+- Raridade na placa do canto inferior direito.
+Não adicionar seções de habilidade, sinergia ou categoria.
+
+DIREÇÃO ARTÍSTICA:
+A ilustração deve representar o sujeito exato indicado pelo nome e pela lore, preservando identidade, anatomia, vestimentas, armaduras, armas e equipamentos canônicos quando aplicável. A facção orienta o modelo gráfico e acentos ambientais, mas não deve transformar o personagem em um arquétipo genérico nem alterar sua aparência canônica. Não inventar armas, poderes, feitiços, personagens adicionais ou acontecimentos não sustentados pelos dados.
+
+FIDELIDADE TEXTUAL:
+Reproduzir nome, poder-base, raridade, posição tática, facção e lore exatamente como fornecidos. Não resumir nem reescrever a lore. Se o texto não couber, ajustar tipografia e espaçamento dentro do painel existente; nunca omitir conteúdo nem criar outro campo.
+
+CONTROLE FINAL:
+Conferir os seis campos autorizados e confirmar que nenhum dos campos proibidos aparece. Confirmar que o medalhão exibe o PODER-BASE, que FACÇÃO e POSIÇÃO TÁTICA estão em locais distintos e que o modelo visual corresponde à facção selecionada.
+
+FORMATO: uma única carta completa vertical 2:3, com bordas integrais, ilustração, tipografia portuguesa legível e o modelo de referência específico da facção. Não devolver arte isolada, template vazio, ficha separada ou composição em painel.
