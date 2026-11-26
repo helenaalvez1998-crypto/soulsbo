@@ -810,19 +810,22 @@ async function generateAtelierPrompt() {
     }
 
     $('#atelier-copy-prompt').disabled = !(atelierAnalysisText && atelierPromptText && atelierReferenceUrl);
-    const copyReady = Boolean(atelierAnalysisText && atelierPromptText && atelierReferenceUrl);
-    $('#atelier-copy-bundle').disabled = !copyReady;
+    const promptsReady = Boolean(atelierAnalysisText && atelierPromptText);
+    const referenceReady = Boolean(atelierReferenceUrl);
+    $('#atelier-copy-prompts').disabled = !promptsReady;
+    $('#atelier-copy-reference').disabled = !referenceReady;
+    const copyReady = promptsReady && referenceReady;
     showNotice(
       copyReady
-        ? `Os dois prompts e a referência de ${faction || 'facção'} estão prontos para copiar.`
-        : 'Não foi possível montar o pacote completo. Confira se análise, prompt fixo e referência foram carregados.',
+        ? `Os dois prompts e a referência de ${faction || 'facção'} estão carregados. Use os botões separados.`
+        : 'Confira se a análise, o prompt fixo e a referência foram carregados.',
       copyReady ? 'success' : 'warning'
     );
   } catch (error) {
     atelierPromptText = '';
     atelierAnalysisText = '';
     atelierReferenceUrl = '';
-    $('#atelier-copy-bundle').disabled = true;
+    $('#atelier-copy-prompts').disabled = true; $('#atelier-copy-reference').disabled = true;
     showNotice(error.message, 'error');
   } finally {
     button.disabled = false;
@@ -1610,7 +1613,7 @@ async function sendGwentAction(action, card_id = '', row = '', card_ids = [], ta
 }
 
 $('#atelier-card').addEventListener('change', () => {
-  atelierPromptText = ''; atelierNegativeText = ''; atelierAnalysisText = ''; atelierReferenceUrl = ''; $('#atelier-analysis').value = ''; $('#atelier-prompt').value = ''; $('#atelier-negative').value = ''; $('#atelier-copy-prompt').disabled = true;  $('#atelier-copy-bundle').disabled = true;
+  atelierPromptText = ''; atelierNegativeText = ''; atelierAnalysisText = ''; atelierReferenceUrl = ''; $('#atelier-analysis').value = ''; $('#atelier-prompt').value = ''; $('#atelier-negative').value = ''; $('#atelier-copy-prompt').disabled = true; $('#atelier-copy-prompts').disabled = true; $('#atelier-copy-reference').disabled = true;
   loadAtelierOfficialArt();
 });
 $('#atelier-generate-prompt').addEventListener('click', generateAtelierPrompt);
@@ -1658,63 +1661,84 @@ $('#atelier-copy-prompt').addEventListener('click', async () => {
   }
 });
 
-$('#atelier-copy-bundle').addEventListener('click', async () => {
-  const button = $('#atelier-copy-bundle');
+$('#atelier-copy-prompts').addEventListener('click', async () => {
+  const button = $('#atelier-copy-prompts');
   const analysis = String($('#atelier-analysis')?.value || atelierAnalysisText || '').trim();
   const fixedPrompt = String($('#atelier-prompt')?.value || atelierPromptText || '').trim();
-  const referenceUrl = String(atelierReferenceUrl || $('#atelier-reference-preview')?.getAttribute('src') || '').trim();
 
-  if (!analysis || !fixedPrompt || !referenceUrl) {
-    showNotice('Gere novamente o pacote. São necessários a análise, o prompt fixo e a referência.', 'error');
+  if (!analysis || !fixedPrompt) {
+    showNotice('Gere primeiro a Análise artística e o Prompt fixo.', 'error');
     button.disabled = true;
     return;
   }
 
   const originalLabel = button.textContent;
   button.disabled = true;
-  button.textContent = 'COPIANDO PROMPTS E BAIXANDO REFERÊNCIA...';
-
-  let promptsCopied = false;
-  let referenceDownloaded = false;
+  button.textContent = 'COPIANDO OS 2 PROMPTS...';
   try {
-    const plainText =
-      `ANÁLISE ARTÍSTICA (PT)\n${analysis}\n\n` +
-      `PROMPT FIXO\n${fixedPrompt}`;
-
-    // Começa a operação de clipboard diretamente no gesto do usuário.
-    const copyPromise = atelierCopyPlainText(plainText).then(() => {
-      promptsCopied = true;
-    });
-
-    const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
-    if (!response.ok) throw new Error(`Não foi possível obter a referência visual (HTTP ${response.status}).`);
-    const referenceBlob = await response.blob();
-    if (!referenceBlob.type.startsWith('image/')) {
-      throw new Error('O servidor não retornou uma imagem válida para esta facção.');
-    }
-
-    const filename = `referencia-${referenceUrl.split('/').pop() || 'faccao.png'}`;
-    atelierDownloadBlob(referenceBlob, filename);
-    referenceDownloaded = true;
-
-    await copyPromise;
-    showNotice(
-      `Prompts copiados. A referência visual foi baixada como "${filename}". Anexe esse PNG à conversa com a IA.`,
-      'success'
-    );
+    const text =
+      `PROMPT FIXO\n${fixedPrompt}\n\n` +
+      `ANÁLISE ARTÍSTICA (PT)\n${analysis}`;
+    await atelierCopyPlainText(text);
+    showNotice('Os dois prompts foram copiados. Nenhuma imagem foi incluída nesta cópia.', 'success');
   } catch (error) {
-    if (promptsCopied && referenceDownloaded) {
-      showNotice('Prompts copiados e referência baixada. Anexe o PNG à conversa com a IA.', 'success');
-    } else if (promptsCopied) {
-      showNotice(`Os dois prompts foram copiados, mas a imagem não foi baixada: ${error.message}`, 'warning');
-    } else if (referenceDownloaded) {
-      showNotice(`A referência foi baixada, mas a cópia dos prompts falhou: ${error.message}`, 'warning');
-    } else {
-      showNotice(error.message || 'Não foi possível preparar o pacote.', 'error');
-    }
+    showNotice(error.message || 'Não foi possível copiar os prompts.', 'error');
   } finally {
     button.textContent = originalLabel;
-    button.disabled = !(analysis && fixedPrompt && referenceUrl);
+    button.disabled = !(analysis && fixedPrompt);
+  }
+});
+
+$('#atelier-copy-reference').addEventListener('click', async () => {
+  const button = $('#atelier-copy-reference');
+  const referenceUrl = String(
+    atelierReferenceUrl || $('#atelier-reference-preview')?.getAttribute('src') || ''
+  ).trim();
+
+  if (!referenceUrl) {
+    showNotice('Gere primeiro a referência visual da facção.', 'error');
+    button.disabled = true;
+    return;
+  }
+
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'COPIANDO IMAGEM...';
+  try {
+    const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Não foi possível carregar a imagem de referência (HTTP ${response.status}).`);
+    }
+
+    const sourceBlob = await response.blob();
+    if (!sourceBlob.type.startsWith('image/')) {
+      throw new Error('O servidor não retornou uma imagem válida.');
+    }
+
+    const pngBlob = await atelierEnsurePng(sourceBlob);
+
+    if (!navigator.clipboard?.write || !window.ClipboardItem) {
+      // Fallback explícito: entrega somente a imagem como arquivo, sem afirmar que foi copiada.
+      atelierDownloadBlob(pngBlob, `referencia-${referenceUrl.split('/').pop() || 'faccao.png'}`);
+      showNotice(
+        'Este navegador não permite copiar imagens diretamente. A imagem de referência foi baixada; anexe o PNG manualmente.',
+        'warning'
+      );
+      return;
+    }
+
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': pngBlob })
+    ]);
+    showNotice('Somente a imagem de referência foi copiada. Nenhum prompt foi incluído.', 'success');
+  } catch (error) {
+    showNotice(
+      `Não foi possível copiar a imagem de referência: ${error.message || 'erro desconhecido'}.`,
+      'error'
+    );
+  } finally {
+    button.textContent = originalLabel;
+    button.disabled = !referenceUrl;
   }
 });
 
