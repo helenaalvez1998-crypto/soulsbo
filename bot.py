@@ -778,6 +778,7 @@ class NaraBot(commands.Bot):
         app.router.add_post("/api/gwent/upgrade", self._api_gwent_upgrade)
         app.router.add_get("/api/gwent/cards/{card_id}/image", self._api_gwent_card_image)
         app.router.add_get("/api/gwent/atelier/prompt", self._api_gwent_atelier_prompt)
+        app.router.add_post("/api/gwent/atelier/pdf", self._api_gwent_atelier_pdf)
         app.router.add_post("/api/gwent/atelier/submit", self._api_gwent_atelier_submit)
         app.router.add_get("/api/gwent/atelier/history", self._api_gwent_atelier_history)
         app.router.add_get("/api/gwent/atelier/review", self._api_gwent_atelier_review_list)
@@ -2232,6 +2233,84 @@ class NaraBot(commands.Bot):
         except Exception:
             log.exception("Falha ao gerar prompt do Ateliê para %s.", user_id)
             raise web.HTTPInternalServerError(text="Não foi possível gerar o prompt da carta.")
+
+    async def _api_gwent_atelier_pdf(self, request: web.Request) -> web.Response:
+        user_id = self._api_user_id(request)
+        if user_id is None:
+            return web.json_response({"error": "Autenticação necessária."}, status=401)
+        if not self._api_origin_ok(request):
+            return web.json_response({"error": "Origem não autorizada."}, status=403)
+        try:
+            data = await request.json()
+            card_id = str(data.get("card_id", "")).strip()[:120]
+            if not card_id:
+                return web.json_response({"error": "Selecione uma carta."}, status=400)
+
+            owned = await self.db._one(
+                "SELECT card_id,game_name FROM cartas_colecao WHERE user_id=? AND card_id=?",
+                (user_id, card_id),
+            )
+            if not owned:
+                return web.json_response({"error": "Você precisa possuir essa carta para gerar o PDF."}, status=403)
+
+            from sistemas.cartas import get_carta, carta_de_jogo_por_id
+            from sistemas.atelie_coliseu import gerar_prompt_carta_estruturado
+            from sistemas.atelier_pdf import gerar_pdf_atelie
+
+            card = get_carta(card_id)
+            if card is None and card_id.startswith("jogo_") and owned["game_name"]:
+                card = carta_de_jogo_por_id(card_id, str(owned["game_name"]))
+            if card is None:
+                return web.json_response({"error": "Modelo de carta não encontrado no catálogo."}, status=404)
+
+            payload = card.para_dict()
+            package = gerar_prompt_carta_estruturado(payload)
+            faction = str(payload.get("faccao") or payload.get("facção") or "").strip().casefold()
+            references = {
+                "ordem áurea": "ordem-aurea.png",
+                "ordem aurea": "ordem-aurea.png",
+                "lua negra": "lua-negra.png",
+                "véu carmesim": "veu-carmesim.png",
+                "veu carmesim": "veu-carmesim.png",
+                "os esquecidos": "os-esquecidos.png",
+            }
+            reference_name = references.get(faction)
+            if not reference_name:
+                return web.json_response({"error": f"Não há referência cadastrada para a facção '{faction}'."}, status=400)
+
+            base_dir = Path(__file__).resolve().parent
+            prompt_path = base_dir / "sistemas" / "prompt_carta_completa_fixo.txt"
+            reference_path = base_dir / "site" / "assets" / "atelier-referencias" / reference_name
+            if not prompt_path.is_file() or not reference_path.is_file():
+                log.error("Prompt fixo ou referência do Ateliê ausente para facção %s.", faction)
+                return web.json_response({"error": "Prompt fixo ou imagem de referência não encontrado no servidor."}, status=500)
+
+            analysis = str(package.get("analysis") or "").strip()
+            analysis = re.sub(
+                r"(?im)^.*(?:proporção|resolução|pixels|dimensões|horizontal 5:4|margens seguras|1200\s*[×x]\s*960).*$",
+                "", analysis,
+            ).strip()
+            fixed_prompt = prompt_path.read_text(encoding="utf-8")
+            card_name = str(payload.get("nome", card_id))[:120]
+
+            pdf_bytes = await asyncio.to_thread(
+                gerar_pdf_atelie, fixed_prompt, analysis, reference_path, card_name,
+            )
+            safe_name = re.sub(r"[^A-Za-z0-9_-]+", "-", card_name).strip("-")[:60] or "carta"
+            return web.Response(
+                body=pdf_bytes,
+                content_type="application/pdf",
+                headers={
+                    "Content-Disposition": f'attachment; filename="narabot-{safe_name}-criacao.pdf"',
+                    "Cache-Control": "private, no-store",
+                    "X-Content-Type-Options": "nosniff",
+                },
+            )
+        except ValueError as exc:
+            return web.json_response({"error": str(exc)}, status=400)
+        except Exception:
+            log.exception("Falha ao gerar PDF do Ateliê para %s.", user_id)
+            return web.json_response({"error": "Não foi possível gerar o PDF do Ateliê."}, status=500)
 
     async def _enviar_submissao_atelie_discord(
         self, submission_id: int, user_id: int, card_id: str, artist_name: str, image_data: bytes,

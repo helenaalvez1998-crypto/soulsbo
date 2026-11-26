@@ -809,7 +809,7 @@ async function generateAtelierPrompt() {
       refPreview.hidden = !atelierReferenceUrl;
     }
 
-    $('#atelier-copy-prompt').disabled = !atelierPromptText;
+    $('#atelier-copy-prompt').disabled = !(atelierAnalysisText && atelierPromptText && atelierReferenceUrl);
     const copyReady = Boolean(atelierAnalysisText && atelierPromptText && atelierReferenceUrl);
     $('#atelier-copy-bundle').disabled = !copyReady;
     showNotice(
@@ -1615,10 +1615,49 @@ $('#atelier-card').addEventListener('change', () => {
 });
 $('#atelier-generate-prompt').addEventListener('click', generateAtelierPrompt);
 $('#atelier-copy-prompt').addEventListener('click', async () => {
-  if (!atelierPromptText) return;
-  try { await navigator.clipboard.writeText(atelierPromptText); showNotice('Prompt copiado.', 'success'); }
-  catch { $('#atelier-prompt').focus(); $('#atelier-prompt').select(); showNotice('Selecione e copie o prompt manualmente.', 'info'); }
+  const button = $('#atelier-copy-prompt');
+  const cardId = $('#atelier-card')?.value;
+  if (!cardId || !atelierPromptText || !atelierAnalysisText || !atelierReferenceUrl) {
+    showNotice('Gere primeiro a análise artística, o prompt fixo e a referência da facção.', 'error');
+    return;
+  }
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'GERANDO PDF...';
+  try {
+    const response = await fetch('/api/gwent/atelier/pdf', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ card_id: cardId })
+    });
+    if (!response.ok) {
+      let message = 'Não foi possível gerar o PDF.';
+      try { const data = await response.json(); message = data.error || message; } catch {}
+      throw new Error(message);
+    }
+    const pdfBlob = await response.blob();
+    if (pdfBlob.type !== 'application/pdf' || !pdfBlob.size) {
+      throw new Error('O servidor não retornou um PDF válido.');
+    }
+    const objectUrl = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = `narabot-${String($('#atelier-card option:checked')?.textContent || 'carta').trim().replace(/[^\p{L}\p{N}-]+/gu, '-')}-criacao.pdf`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    showNotice('PDF baixado: Prompt fixo, Análise artística e referência visual na última página.', 'success');
+  } catch (error) {
+    showNotice(error.message || 'Falha ao gerar o PDF para IA.', 'error');
+  } finally {
+    button.textContent = originalLabel;
+    button.disabled = !(atelierAnalysisText && atelierPromptText && atelierReferenceUrl);
+  }
 });
+
 $('#atelier-copy-bundle').addEventListener('click', async () => {
   const button = $('#atelier-copy-bundle');
   const analysis = String($('#atelier-analysis')?.value || atelierAnalysisText || '').trim();

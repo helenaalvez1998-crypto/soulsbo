@@ -185,8 +185,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
       <label>Análise artística (PT)<textarea id="atelier-analysis" rows="5" readonly placeholder="A análise aparecerá aqui."></textarea></label>
       <label>Prompt fixo<textarea id="atelier-prompt" rows="14" readonly placeholder="Selecione uma carta e gere o prompt."></textarea></label>
       <label>Referência visual da facção<textarea id="atelier-negative" rows="2" readonly placeholder="A referência será selecionada automaticamente."></textarea></label><img id="atelier-reference-preview" class="atelier-preview" alt="Referência visual da facção" hidden>
-      <div class="row"><button class="secondary" id="atelier-copy-prompt" type="button" disabled>Copiar prompt</button><button class="primary" id="atelier-copy-bundle" type="button" disabled>Copiar 2 prompts + baixar imagem de referência</button></div>
-      <small class="muted">Ao clicar, os dois prompts são copiados para a área de transferência e a imagem de referência da facção é baixada em PNG. Anexe esse PNG à conversa com a IA.</small></div>
+      <div class="row"><button class="secondary" id="atelier-copy-prompt" type="button" disabled>Baixar PDF para IA</button><button class="primary" id="atelier-copy-bundle" type="button" disabled>Copiar 2 prompts + baixar imagem de referência</button></div>
+      <small class="muted">O PDF é organizado nesta ordem: Prompt fixo, Análise artística (PT) e imagem de referência da facção na última página.</small></div>
     <div class="atelier-col"><div class="atl-num">3</div><h4>Envie a arte</h4>
       <label>Crédito do artista<input id="atelier-artist-name" type="text" maxlength="80" placeholder="Nome artístico ou apelido"></label>
       <label>Carta completa (PNG, JPG ou WEBP)<input id="atelier-image" type="file" accept="image/png,image/jpeg,image/webp"></label>
