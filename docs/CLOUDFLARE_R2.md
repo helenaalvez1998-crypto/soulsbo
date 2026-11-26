@@ -23,3 +23,18 @@ Instale `boto3` com `pip install -r requirements.txt`.
 
 ## Importante
 A validação atual em `sistemas/arte_upload_criador.py` aceita imagens horizontais próximas de 5:4 (500×400 a 1200×960). Ela ainda não aceita uma carta vertical completa. A validação de carta completa e o override com restauração são etapas seguintes; não substitua essa validação sem ajustar o contrato visual e os testes.
+
+
+## Ateliê de Cartas — submissões para aprovação
+
+A rota `POST /api/gwent/atelier/submit` agora:
+1. autentica o usuário e valida origem, carta, prompt e imagem;
+2. normaliza a imagem com o validador já existente;
+3. envia a imagem para `atelier/submissions/<user>/<card-hash>/<sha256>-<nonce>.jpg`;
+4. registra no SQLite a chave `image_key`, mantendo `image_data` vazio para novos envios;
+5. mantém submissões antigas em BLOB compatíveis;
+6. continua enviando a imagem em memória ao canal de revisão do Discord.
+
+As rotas de visualização da fila e de arte oficial recuperam imagens do R2 pelo backend. A imagem pendente não é exposta por URL pública; o endpoint de revisão continua exigindo autenticação e permissão administrativa.
+
+Na primeira inicialização após atualizar, o banco recebe a coluna `image_key` automaticamente. Não é necessário apagar nem recriar o SQLite.

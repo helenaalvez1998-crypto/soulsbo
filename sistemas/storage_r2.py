@@ -71,3 +71,23 @@ def public_url_for_key(object_key: str) -> str:
     """Converte uma chave R2 já armazenada em URL pública."""
     settings = _settings()
     return f"{settings['public_base_url']}/{quote(str(object_key).lstrip('/'), safe='/')}"
+
+
+def download_image(object_key: str) -> bytes:
+    """Baixa um objeto privado do R2 pelo backend."""
+    if not object_key or object_key.startswith("/") or ".." in object_key.split("/"):
+        raise ValueError("Chave de armazenamento inválida.")
+    settings = _settings()
+    response = _client(settings).get_object(Bucket=settings["bucket"], Key=object_key)
+    try:
+        return response["Body"].read()
+    finally:
+        response["Body"].close()
+
+
+def delete_image(object_key: str) -> None:
+    """Remove um objeto órfão após falha no registro da submissão."""
+    if not object_key or object_key.startswith("/") or ".." in object_key.split("/"):
+        raise ValueError("Chave de armazenamento inválida.")
+    settings = _settings()
+    _client(settings).delete_object(Bucket=settings["bucket"], Key=object_key)

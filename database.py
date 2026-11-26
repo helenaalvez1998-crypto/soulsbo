@@ -567,7 +567,8 @@ CREATE TABLE IF NOT EXISTS cartas_atelie_submissoes (
     user_id INTEGER NOT NULL,
     card_id TEXT NOT NULL,
     prompt_text TEXT NOT NULL DEFAULT '',
-    image_data BLOB NOT NULL,
+    image_data BLOB NOT NULL DEFAULT X'',
+    image_key TEXT NOT NULL DEFAULT '',
     mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
     artist_name TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL DEFAULT 'pending',
@@ -1042,6 +1043,13 @@ class Database:
         await self.conn.execute("PRAGMA cache_size = -20000")  # ~20 MB de cache de páginas
         await self.conn.executescript(SCHEMA)
         await self.conn.executescript(SCHEMA_CARTAS)
+        # Migração incremental: imagens novas do Ateliê passam a residir no R2.
+        # image_data é mantido para compatibilidade com submissões antigas em SQLite.
+        atelier_cols = {r["name"] for r in await self._all("PRAGMA table_info(cartas_atelie_submissoes)")}
+        if "image_key" not in atelier_cols:
+            await self.conn.execute(
+                "ALTER TABLE cartas_atelie_submissoes ADD COLUMN image_key TEXT NOT NULL DEFAULT ''"
+            )
         # Migração incremental do armazenamento de arte de líderes, caso exista
         # uma instalação de pré-lançamento sem o token de revisão SHA-256.
         leader_art_cols = {r["name"] for r in await self._all("PRAGMA table_info(cartas_gwent_lideres_artes)")}
@@ -3778,7 +3786,7 @@ class Database:
     # ---------- Ateliê web: submissão comunitária e arte oficial por modelo ----------
     async def coliseu_atelie_criar_submissao_web(
         self, user_id: int, card_id: str, prompt_text: str, image_data: bytes,
-        mime_type: str = "image/jpeg", artist_name: str = "",
+        mime_type: str = "image/jpeg", artist_name: str = "", image_key: str = "",
     ):
         """Registra uma arte comunitária pendente; a aprovação define a arte oficial do modelo."""
         async with self.transaction() as tx:
@@ -3802,9 +3810,10 @@ class Database:
                 return {"status": "pending_limit"}
             cur = await tx.conn.execute(
                 """INSERT INTO cartas_atelie_submissoes
-                   (user_id,card_id,prompt_text,image_data,mime_type,artist_name,status)
-                   VALUES (?,?,?,?,?,?,'pending')""",
-                (int(user_id), str(card_id), str(prompt_text)[:12000], bytes(image_data),
+                   (user_id,card_id,prompt_text,image_data,image_key,mime_type,artist_name,status)
+                   VALUES (?,?,?,?,?,?,?,'pending')""",
+                (int(user_id), str(card_id), str(prompt_text)[:12000],
+                 bytes(image_data) if not image_key else b"", str(image_key)[:500],
                  str(mime_type)[:80], str(artist_name)[:100]),
             )
             return {"status": "ok", "submission_id": int(cur.lastrowid)}
@@ -3875,7 +3884,7 @@ class Database:
     async def coliseu_atelie_obter_arte_oficial_metadata(self, card_id: str):
         """Consulta metadados sem copiar o BLOB da arte em toda requisição de imagem."""
         return await self._one(
-            """SELECT id,user_id,card_id,mime_type,artist_name,created_at,
+            """SELECT id,user_id,card_id,mime_type,artist_name,created_at,image_key,
                       length(image_data) AS image_size
                FROM cartas_atelie_submissoes WHERE card_id=? AND status='approved'
                ORDER BY reviewed_at DESC,id DESC LIMIT 1""",
@@ -3884,7 +3893,7 @@ class Database:
 
     async def coliseu_atelie_obter_arte_oficial(self, card_id: str):
         return await self._one(
-            """SELECT id,user_id,card_id,image_data,mime_type,artist_name,created_at
+            """SELECT id,user_id,card_id,image_data,image_key,mime_type,artist_name,created_at
                FROM cartas_atelie_submissoes WHERE card_id=? AND status='approved'
                ORDER BY reviewed_at DESC,id DESC LIMIT 1""", (str(card_id),),
         )

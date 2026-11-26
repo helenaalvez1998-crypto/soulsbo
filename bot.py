@@ -2274,10 +2274,36 @@ class NaraBot(commands.Bot):
                 normalized = normalizar_imagem_carta(raw)
             except ArteInvalida as exc:
                 return web.json_response({"error": str(exc)}, status=400)
-            result = await self.db.coliseu_atelie_criar_submissao_web(
-                user_id, card_id, prompt_text, normalized.dados, "image/jpeg",
-                artist_name,
-            )
+            # Envia a imagem ao R2 antes de registrar a submissão. A cópia em memória
+            # continua sendo usada apenas para anexar a imagem à notificação do Discord.
+            from sistemas.storage_r2 import upload_image, delete_image, R2NotConfigured
+            import uuid
+            image_hash = hashlib.sha256(normalized.dados).hexdigest()
+            card_key = hashlib.sha256(card_id.encode("utf-8")).hexdigest()[:24]
+            object_key = f"atelier/submissions/{int(user_id)}/{card_key}/{image_hash}-{uuid.uuid4().hex[:12]}.jpg"
+            try:
+                await asyncio.to_thread(upload_image, object_key, normalized.dados, "image/jpeg")
+            except R2NotConfigured as exc:
+                return web.json_response({"error": str(exc), "code": "r2_not_configured"}, status=503)
+            except Exception:
+                log.exception("Falha ao enviar imagem do Ateliê para o R2 (usuário %s).", user_id)
+                return web.json_response({"error": "Não foi possível armazenar a imagem no Cloudflare R2.", "code": "r2_upload_failed"}, status=502)
+            try:
+                result = await self.db.coliseu_atelie_criar_submissao_web(
+                    user_id, card_id, prompt_text, b"", "image/jpeg",
+                    artist_name, image_key=object_key,
+                )
+            except Exception:
+                try:
+                    await asyncio.to_thread(delete_image, object_key)
+                except Exception:
+                    log.exception("Falha ao remover objeto R2 órfão: %s", object_key)
+                raise
+            if result.get("status") != "ok":
+                try:
+                    await asyncio.to_thread(delete_image, object_key)
+                except Exception:
+                    log.exception("Falha ao remover objeto R2 não associado: %s", object_key)
             statuses = {
                 "not_owned": (403, "Você precisa possuir essa carta."),
                 "pending_exists": (409, "Você já tem uma submissão pendente para esta carta."),
@@ -2323,12 +2349,23 @@ class NaraBot(commands.Bot):
         except (TypeError, ValueError):
             raise web.HTTPNotFound(text="Submissão não encontrada.")
         art = await self.db._one(
-            "SELECT image_data,mime_type FROM cartas_atelie_submissoes WHERE id=? AND status='pending'",
+            "SELECT image_data,image_key,mime_type FROM cartas_atelie_submissoes WHERE id=? AND status='pending'",
             (submission_id,),
         )
         if not art:
             raise web.HTTPNotFound(text="Submissão não encontrada.")
-        response = web.Response(body=bytes(art["image_data"]), content_type=str(art["mime_type"] or "image/jpeg"))
+        if art["image_key"]:
+            try:
+                from sistemas.storage_r2 import download_image
+                image_data = await asyncio.to_thread(download_image, str(art["image_key"]))
+            except Exception:
+                log.exception("Falha ao recuperar imagem pendente #%s do R2.", submission_id)
+                raise web.HTTPBadGateway(text="Não foi possível recuperar a imagem armazenada.")
+        else:
+            image_data = bytes(art["image_data"] or b"")
+        if not image_data:
+            raise web.HTTPNotFound(text="Imagem da submissão indisponível.")
+        response = web.Response(body=image_data, content_type=str(art["mime_type"] or "image/jpeg"))
         response.headers["Cache-Control"] = "private, no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
@@ -2531,7 +2568,15 @@ class NaraBot(commands.Bot):
         if not art:
             raise web.HTTPNotFound(text="Esta carta ainda utiliza a arte-base.")
         from sistemas.arte_cartas import detectar_mime_imagem
-        dados_arte = bytes(art["image_data"])
+        if art["image_key"]:
+            try:
+                from sistemas.storage_r2 import download_image
+                dados_arte = await asyncio.to_thread(download_image, str(art["image_key"]))
+            except Exception:
+                log.exception("Falha ao recuperar arte oficial da carta %s no R2.", card_id)
+                raise web.HTTPBadGateway(text="Não foi possível recuperar a arte oficial.")
+        else:
+            dados_arte = bytes(art["image_data"] or b"")
         mime_real = await asyncio.to_thread(detectar_mime_imagem, dados_arte)
         if mime_real is None:
             raise web.HTTPUnprocessableEntity(text="A arte oficial armazenada está inválida.")
