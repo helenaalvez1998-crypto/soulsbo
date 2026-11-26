@@ -13,7 +13,7 @@ from typing import Any
 
 from levels import PATENTES
 
-VERSAO_ARTES = 29
+VERSAO_ARTES = 30
 
 TIPOS = ("Destreza", "Força", "Magia")
 
@@ -485,8 +485,7 @@ def carta_jogo(nome_jogo: str, marco: str) -> Carta:
     opcoes = identidades[tipo]
     nome_base, epitetos = opcoes[(n // 13) % len(opcoes)]
     epiteto = epitetos[(n // 19) % len(epitetos)]
-    selo = hashlib.sha256(f"{slug}:{marco}".encode("utf-8")).hexdigest()[:4].upper()
-    titulo = f"{nome_base} {epiteto} · Selo {selo}"
+    titulo = f"{nome_base} {epiteto}"
 
     descricoes = {
         "Força": "Combatente da Ordem Áurea, treinado para sustentar a formação e proteger seus aliados.",
@@ -532,8 +531,7 @@ def carta_patente(indice: int, nivel_minimo: int, nome_patente: str) -> Carta:
         "Magia": ("Mestre Cariano", "Feiticeiro Cariano", "Aprendiz Cariano", "Novato de Raya Lucaria"),
     }
     indice_nome = 0 if nivel_minimo >= 75 else 1 if nivel_minimo >= 30 else 2 if nivel_minimo >= 10 else 3
-    selo = hashlib.sha256(seed.encode("utf-8")).hexdigest()[:4].upper()
-    titulo = f"{nomes_por_tipo[tipo][indice_nome]} · Selo {selo}"
+    titulo = f"{nomes_por_tipo[tipo][indice_nome]} — {nome_patente}"
 
     return Carta(
         id=f"patente_{indice + 1}",

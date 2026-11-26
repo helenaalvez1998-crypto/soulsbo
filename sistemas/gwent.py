@@ -8,7 +8,7 @@ ROW_LABELS = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "
 TYPE_ROW = {"Força": "melee", "Destreza": "ranged", "Magia": "siege"}
 FACTIONS = {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra", "Fé": "Os Esquecidos"}
 FACTION_TYPES = {value: key for key, value in FACTIONS.items()}
-LEGACY_FACTION_ALIASES = {"Casa Cariana": "Lua Negra", "Lua Sombria": "Lua Negra", "Dinastia Mohgwyn": "Véu Carmesim"}
+LEGACY_FACTION_ALIASES = {"Casa Cariana": "Lua Negra", "Lua Sombria": "Lua Negra", "Dinastia Mohgwyn": "Véu Carmesim", "Fé": "Os Esquecidos", "Luteranos": "Os Esquecidos"}
 
 def canonical_faction(value: str | None) -> str | None:
     """Converte nomes antigos de facção para os nomes atuais sem quebrar decks salvos."""
@@ -80,6 +80,7 @@ FACTION_ARCHETYPES = {
     "Ordem Áurea": {"name": "Formação e Resistência", "description": "Proteção de fileira, fortalecimento de aliados e +1 na primeira unidade da Ordem Áurea jogada em cada rodada."},
     "Lua Negra": {"name": "Feitiçaria e Controle", "description": "Magia lunar, cosmos, gravidade, congelamento e +1 na primeira unidade da Lua Negra jogada em cada rodada."},
     "Véu Carmesim": {"name": "Sangue e Sacrifício", "description": "Sangramento, sacrifício, heresia e +1 na primeira unidade do Véu Carmesim jogada em cada rodada."},
+    "Os Esquecidos": {"name": "Fé e Glória", "description": "Devoção, evangelho, irmandade e +1 na primeira unidade dos Esquecidos jogada em cada rodada."},
 }
 LEADERS = {
     # Ordem Áurea — força régia, proteção e purificação.
@@ -90,6 +91,8 @@ LEADERS = {
     "mestre_veu": {"name": "Mohg", "faction": "Véu Carmesim", "description": "Aplica uma marca de Sangramento aos 2 inimigos mais fortes da fileira escolhida; uma segunda marca causa Hemorragia (-2 de bônus).", "effect": "mohg_blood_rite"},
     "sombra_caminhante": {"name": "Rykard", "faction": "Véu Carmesim", "description": "Sacrifica seu aliado mais fraco na fileira escolhida; os demais aliados dessa fileira recebem +2 de bônus.", "effect": "rykard_devour"},
     "voz_caidos": {"name": "Esgar", "faction": "Véu Carmesim", "description": "Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus.", "effect": "esgar_blood_priest"},
+    # Líder próprio dos Esquecidos, baseado na identidade do Papa Esquecido.
+    "lider_papa_esquecido": {"name": "Papa Esquecido", "faction": "Os Esquecidos", "description": "Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.", "effect": "forgotten_blessing"},
     # Lua Negra — feitiçaria, gravidade e domínio astral.
     "arquimaga_eclipse": {"name": "Rennala", "faction": "Lua Negra", "description": "Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus.", "effect": "rennala_full_moon"},
     "mestre_eclipse": {"name": "Astel", "faction": "Lua Negra", "description": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes.", "effect": "astel_gravity"},
@@ -171,6 +174,13 @@ CARD_SYNERGY_TAGS = {
     "gwent_v75_lua_cartografo_lunar": {"v75_lunar_paths"},
     "gwent_v75_lua_graviturgista": {"v75_frost_lore"},
     "gwent_v75_lua_guardia": {"v75_lunar_paths"},
+    # V75 — unidades dos Esquecidos conectadas aos combos de fé já existentes.
+    "luterano_apostolo": {"fe", "evangelho"},
+    "luterano_pastor": {"fe", "irmandade"},
+    "luterano_mistico": {"fe", "devocao"},
+    "luterano_profeta": {"fe", "soberania"},
+    "luterano_vigia": {"fe", "gloria_divina"},
+    "luterano_anjo2": {"fe", "gloria_divina"},
 }
 SYNERGY_COMBOS = {
     "cinzas_fornalha": {"name": "Aliança da Árvore Áurea", "tags": {"cinzas", "fornalha"}, "bonus": 2, "description": "Cavaleiro da Árvore Áurea ou Cavaleiros de Radahn e uma unidade da Fornalha coordenam a formação (+2)."},
@@ -466,12 +476,13 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
 
 
 # Passiva de facção: a primeira unidade da própria facção recebe +1 por rodada.
-FACTION_BOOST = {"Ordem Áurea": 1, "Lua Negra": 1, "Véu Carmesim": 1, "Fé": 1}
+FACTION_BOOST = {"Ordem Áurea": 1, "Lua Negra": 1, "Véu Carmesim": 1, "Os Esquecidos": 1}
 
 DEFAULT_LEADERS = {
     "Ordem Áurea": "comandante_fornalha",
     "Lua Negra": "arquimaga_eclipse",
     "Véu Carmesim": "mestre_veu",  # Etapa 3: padrão mais forte; quem já escolheu um líder não é afetado.
+    "Os Esquecidos": "lider_papa_esquecido",
 }
 
 
@@ -701,7 +712,9 @@ def novo_estado(match_id: int, creator_id: int, opponent_id: int, decks: dict[st
             "hand": deck[:10], "draw_pile": deck[10:], "discard": [], "board": [],
             "passed": False, "leader_used": False, "weather_used": False,
             "faction": faction, "leader_id": leader_id, "leader_name": LEADERS[leader_id]["name"],
-            "equipped_relic_id": str(config.get("relic_id") or ""), "relic_used": False, "faction_boost_used": False,
+            "equipped_relic_id": str(config.get("relic_id") or ""),
+            "relic_card_owned": bool(config.get("relic_owned", False)),
+            "relic_used": False, "faction_boost_used": False,
             "mulligan_done": False, "last_row": None, "synergy_used": {}, "baixas": 0,
         }
     return {
@@ -1038,6 +1051,8 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
         relic_id = str(player.get("equipped_relic_id") or "")
         if not relic_id:
             return {"error": "Você não equipou uma Relíquia para esta partida."}
+        if not player.get("relic_card_owned", False):
+            return {"error": "Você precisa possuir a carta desta Relíquia para ativá-la."}
         if player.get("relic_used"):
             return {"error": "Sua Relíquia já foi ativada nesta partida."}
         relic_cards = {
@@ -1223,6 +1238,16 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 return {"error": "Loretta precisa de ao menos uma unidade aliada em Longa Distância."}
             for unit in targets:
                 unit["bonus"] = int(unit.get("bonus", 0)) + 2
+        elif effect == "forgotten_blessing":
+            targets = [
+                unit for unit in player["board"]
+                if unit.get("row") == row
+                and canonical_faction(unit.get("faccao") or FACTIONS.get(str(unit.get("tipo", "")))) == "Os Esquecidos"
+            ]
+            if not targets:
+                return {"error": "O Papa Esquecido precisa de ao menos uma unidade dos Esquecidos na fileira escolhida."}
+            for unit in targets:
+                unit["bonus"] = int(unit.get("bonus", 0)) + 1
         else:
             return {"error": "Habilidade de líder não reconhecida."}
         player["leader_used"] = True

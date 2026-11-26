@@ -1,10 +1,11 @@
 const $ = (selector) => document.querySelector(selector);
 let collection = [];
+let cardCatalog = [];
 let currentUser = null;
 const text = (value, fallback = '—') => value === null || value === undefined || value === '' ? fallback : String(value);
 const number = (value) => new Intl.NumberFormat('pt-BR').format(Number(value || 0));
 // Manter sincronizado com VERSAO_ARTES em sistemas/cartas.py.
-const CARD_IMAGE_VERSION = 28;
+const CARD_IMAGE_VERSION = 29;
 const imageUrl = (card) => {
   const raw = card.image_url || `/api/gwent/cards/${encodeURIComponent(card.card_id || String(card.id || '').split('::')[0])}/image`;
   if (!raw.includes('/api/gwent/cards/')) return raw;
@@ -18,7 +19,7 @@ const cardImageMarkup = (card, alt = '') =>
   `<img data-card-src="${escapeHTML(imageUrl(card))}" loading="lazy" decoding="async" alt="${escapeHTML(alt)}">`;
 // V51 — linguagem visual semântica das cartas (ícones vetoriais locais, sem dependência externa).
 const CARD_SIGILS = {
-  'ordem áurea': '✦', 'véu carmesim': '血', 'lua negra': '☾',
+  'ordem áurea': '✦', 'véu carmesim': '血', 'lua negra': '☾', 'os esquecidos': '✝',
   'corpo a corpo': '⚔', 'longa distância': '➶', 'cerco': '⌖',
   'especial': '◇', 'relíquia': '♜', 'primordial': '✹'
 };
@@ -153,6 +154,7 @@ async function loadAccount() {
       $('#profile-status').textContent = 'Conecte sua conta Discord';
       $('#login-button').hidden = false; $('#logout-button').hidden = true;
       collection = [];
+      cardCatalog = [];
       showNotice('Entre com sua conta Discord para acessar o Gwent.');
       return;
     }
@@ -164,11 +166,12 @@ async function loadAccount() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Falha ao carregar cartas do Gwent.');
     collection = Array.isArray(data.cards) ? data.cards : [];
+    cardCatalog = Array.isArray(data.catalog) ? data.catalog : [];
     $('#souls').textContent = number(data.summary?.souls);
     $('#fragments').textContent = number(data.summary?.fragments);
     $('#denarios').textContent = number(data.summary?.denarios);
     $('#gwent-xp').textContent = number(data.summary?.xp);
-    showNotice(`Gwent sincronizado: ${collection.length} cartas disponíveis.`, 'success');
+    showNotice(`Gwent sincronizado: ${collection.length} exemplares na coleção · ${cardCatalog.length} modelos no catálogo.`, 'success');
   } catch (error) { showNotice(error.message || 'Falha ao conectar ao servidor.', 'error'); }
 }
 $('#login-button').addEventListener('click', () => { const next = window.location.pathname + window.location.search; window.location.href = `/auth/discord/login?next=${encodeURIComponent(next)}`; });
@@ -260,6 +263,9 @@ const gwentFactionInfo = {
     ['mestre_veu', 'Mohg', 'Aplica marcas de Sangramento aos 2 inimigos mais fortes da fileira.'],
     ['sombra_caminhante', 'Rykard', 'Sacrifica o aliado mais fraco e fortalece os demais da fileira.'],
     ['voz_caidos', 'Esgar', 'Ressuscita uma unidade de poder-base até 5 do descarte.']
+  ]},
+  'Os Esquecidos': { description: 'Fé, devoção e glória: evangelho, irmandade e fortalecimento das unidades esquecidas.', leaders: [
+    ['lider_papa_esquecido', 'Papa Esquecido', 'Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.']
   ]}
 };
 // Os líderes vêm do servidor (fonte única); a lista fixa acima serve só de reserva se a API não enviar.
@@ -283,12 +289,12 @@ function renderGwentLeaderOptions(selected = '') {
   if (leaderHelp) leaderHelp.textContent = `${leader[1]}: ${leader[2]}`;
   const preview = $('#gwent-leader-card');
   if (preview) {
-    const sigils = {'Ordem Áurea':'✧','Véu Carmesim':'♜','Lua Negra':'☾'};
-    const portraits = {Godfrey:'godfrey',Morgott:'morgott',Radagon:'radagon',Mohg:'mohg',Rykard:'rykard',Esgar:'esgar',Rennala:'rennala',Astel:'astel',Loretta:'loretta'};
-    const portrait = portraits[leader[1]] || 'godfrey';
+    const sigils = {'Ordem Áurea':'✧','Véu Carmesim':'♜','Lua Negra':'☾','Os Esquecidos':'✝'};
+    const factionClass = {'Ordem Áurea':'gold','Véu Carmesim':'blood','Lua Negra':'moon','Os Esquecidos':'faith'}[faction] || 'gold';
     const hasCustomArt = !!leader[3];
-    const artUrl = leader[3] || leader[4] || `assets/leaders/${portrait}.webp`;
-    preview.innerHTML = `<div class="gwent-leader-relic v52-leader-card faction-${faction === 'Ordem Áurea' ? 'gold' : faction === 'Véu Carmesim' ? 'blood' : 'moon'} ${hasCustomArt ? 'has-custom-leader-art' : ''}" style="--leader-art:url('${escapeHTML(artUrl)}')"><div class="leader-art-backdrop" aria-hidden="true"></div><div class="leader-relic-sigil">${sigils[faction] || '✦'}</div><small>${escapeHTML(faction)}</small><strong>${escapeHTML(leader[1])}</strong><p>${escapeHTML(leader[2])}</p><em>LÍDER · CARTA DE COMANDO</em></div>`;
+    const artUrl = leader[3] || leader[4] || '';
+    const artValue = artUrl ? `url('${escapeHTML(artUrl)}')` : 'none';
+    preview.innerHTML = `<div class="gwent-leader-relic v52-leader-card faction-${factionClass} ${hasCustomArt ? 'has-custom-leader-art' : ''}" style="--leader-art:${artValue}"><div class="leader-art-backdrop" aria-hidden="true"></div><div class="leader-relic-sigil">${sigils[faction] || '✦'}</div><small>${escapeHTML(faction)}</small><strong>${escapeHTML(leader[1])}</strong><p>${escapeHTML(leader[2])}</p><em>LÍDER · CARTA DE COMANDO</em></div>`;
   }
 }
 function renderGwentBuilder() {
@@ -310,11 +316,12 @@ function renderGwentBuilder() {
     && (!factionFilter || c.faccao === factionFilter)
     && (!rarityFilter || c.raridade === rarityFilter)
     && (`${c.nome} ${c.faccao} ${c.row_label || c.fileira} ${c.papel_gwent} ${c.categoria} ${c.habilidade} ${c.habilidade_texto} ${c.descricao}`.toLocaleLowerCase('pt-BR').includes(q)));
-  $('#gwent-card-pool').innerHTML = pool.map(card => cardTile(card)).join('') || '<div class="empty-state">Nenhuma carta disponível.</div>';
+  $('#gwent-card-pool').innerHTML = pool.map(card => cardTile(card)).join('') || '<div class="empty-state">Nenhuma carta disponível na sua coleção com esses filtros.</div>';
+  renderGwentCatalog();
   const selectedFaction = $('#gwent-faction')?.value || 'Ordem Áurea';
-  const factionByType = {'Força':'Ordem Áurea','Destreza':'Véu Carmesim','Magia':'Lua Negra'};
-  const factionAliases = {'Lua Sombria':'Lua Negra','Casa Cariana':'Lua Negra','Dinastia Mohgwyn':'Véu Carmesim'};
-  const factionCounts = {'Ordem Áurea':0,'Véu Carmesim':0,'Lua Negra':0};
+  const factionByType = {'Força':'Ordem Áurea','Destreza':'Véu Carmesim','Magia':'Lua Negra','Fé':'Os Esquecidos'};
+  const factionAliases = {'Lua Sombria':'Lua Negra','Casa Cariana':'Lua Negra','Dinastia Mohgwyn':'Véu Carmesim','Fé':'Os Esquecidos'};
+  const factionCounts = {'Ordem Áurea':0,'Véu Carmesim':0,'Lua Negra':0,'Os Esquecidos':0};
   selected.filter(card => card.categoria !== 'Especial').forEach(card => {
     const rawFaction = card.faccao || '';
     const faction = factionAliases[rawFaction] || (Object.prototype.hasOwnProperty.call(factionCounts, rawFaction) ? rawFaction : factionByType[card.tipo] || '');
@@ -333,27 +340,50 @@ function renderGwentBuilder() {
     ? 'Inclua pelo menos 8 unidades no deck.'
     : specialCount > 4 ? 'O limite é de 4 cartas especiais por deck.'
     : selected.length === 12 && !factionMatches
-      ? `A facção escolhida precisa ser predominante: Ordem Áurea ${factionCounts['Ordem Áurea']} · Véu Carmesim ${factionCounts['Véu Carmesim']} · Lua Negra ${factionCounts['Lua Negra']}.`
+      ? `A facção escolhida precisa ser predominante: Ordem Áurea ${factionCounts['Ordem Áurea']} · Véu Carmesim ${factionCounts['Véu Carmesim']} · Lua Negra ${factionCounts['Lua Negra']} · Os Esquecidos ${factionCounts['Os Esquecidos']}.`
       : `${unitCount}/12 unidades e ${specialCount}/4 especiais. Facção predominante: ${selectedFaction}.`;
 }
 
 
+function renderGwentCatalog() {
+  const target = $('#gwent-catalog-pool');
+  if (!target) return;
+  const q = ($('#gwent-card-search')?.value || '').trim().toLocaleLowerCase('pt-BR');
+  const factionFilter = $('#gwent-filter-faction')?.value || '';
+  const rarityFilter = $('#gwent-filter-rarity')?.value || '';
+  const ownedIds = new Set(collection.map(card => String(card.card_id || card.id || '').split('::')[0]));
+  const pool = cardCatalog.filter(card =>
+    (!factionFilter || card.faccao === factionFilter)
+    && (!rarityFilter || card.raridade === rarityFilter)
+    && (`${card.nome} ${card.faccao} ${card.row_label || card.fileira} ${card.papel_gwent} ${card.categoria} ${card.habilidade_nome} ${card.habilidade_texto}`.toLocaleLowerCase('pt-BR').includes(q))
+  );
+  const ownedCount = pool.filter(card => ownedIds.has(String(card.card_id || card.id))).length;
+  const count = $('#gwent-catalog-count');
+  if (count) count.textContent = `${pool.length} modelos · ${ownedCount} na coleção · ${pool.length - ownedCount} não obtidos`;
+  target.innerHTML = pool.map(card => {
+    const cardId = String(card.card_id || card.id || '');
+    const owned = ownedIds.has(cardId);
+    return `<article class="gwent-catalog-card ${owned ? 'is-owned' : 'is-locked'}" tabindex="0" role="button" data-gwent-inspect="${escapeHTML(cardId)}" aria-label="Ver detalhes de ${escapeHTML(card.nome || 'Carta')}"><div class="gwent-catalog-art">${cardImageMarkup(card, card.nome || 'Carta')}</div><div class="gwent-catalog-meta"><b>${escapeHTML(card.nome || 'Carta')}</b><small>${escapeHTML(card.raridade || 'Comum')} · ${escapeHTML(card.faccao || 'Sem facção')}</small><span class="gwent-catalog-state">${owned ? '✓ Na sua coleção' : 'Ainda não obtida'}</span><span class="gwent-catalog-open">Ver detalhes</span></div></article>`;
+  }).join('') || '<p class="muted">Nenhuma carta corresponde aos filtros.</p>';
+  observeCardImages(target);
+}
 function closeGwentCollectionCardModal() {
   document.getElementById('gwent-collection-card-modal')?.remove();
 }
 function openGwentCollectionCardModal(cardId) {
-  const card = collection.find(item => String(item.id) === String(cardId));
+  const ownedCard = collection.find(item => String(item.id) === String(cardId))
+    || collection.find(item => String(item.card_id || '') === String(cardId));
+  const catalogCard = cardCatalog.find(item => String(item.card_id || item.id || '') === String(cardId));
+  const card = ownedCard || catalogCard;
   if (!card) return;
   closeGwentCollectionCardModal();
-  const inDeck = gwentDeckIds.includes(card.id);
+  const isOwned = !!ownedCard;
+  const deckCardId = ownedCard ? String(ownedCard.id) : '';
+  const inDeck = !!deckCardId && gwentDeckIds.includes(deckCardId);
   const special = card.categoria === 'Especial';
   const abilityName = card.habilidade_nome || card.efeito_nome || (special ? 'Efeito especial' : 'Sem habilidade especial');
   const abilityText = card.habilidade_texto || card.texto_efeito || (special ? 'Efeito não informado.' : 'Esta unidade não possui habilidade especial.');
   const rarityBudget = rarityPower(card);
-  const evolveCost = ({Comum:20,Rara:40,'Épica':80,'Lendária':160})[card.raridade];
-  const upgradeCost = ({Comum:10,Rara:20,'Épica':40,'Lendária':80,'Mítica':150,'Primordial':250})[card.raridade];
-  const canEvolve = !!card.exemplar_id && !special && !!evolveCost;
-  const canUpgrade = !!card.exemplar_id && !special && !!upgradeCost && Number(card.poder) < Number(card.max_power);
   const src = imageUrl(card);
   const modalCard = {...card};
   if (src.includes('/api/gwent/cards/')) {
@@ -381,7 +411,7 @@ function openGwentCollectionCardModal(cardId) {
       <div class="gwent-collection-art-column">
         <div class="gwent-collection-art">${cardImageMarkup(modalCard, card.nome || 'Carta')}</div>
         <strong class="gwent-collection-card-name">${escapeHTML(card.nome || 'Carta')}</strong>
-        <small>EXEMPLAR #${number(card.exemplar_id || 0)}</small>
+        <small>${isOwned ? `EXEMPLAR #${number(card.exemplar_id || 0)}` : 'MODELO GLOBAL · AINDA NÃO OBTIDA'}</small>
       </div>
       <div class="gwent-collection-info">
         <header>
@@ -402,11 +432,11 @@ function openGwentCollectionCardModal(cardId) {
         ${card.descricao ? `<section class="gwent-collection-section"><small>LORE</small><p class="gwent-collection-lore">${escapeHTML(card.descricao)}</p></section>` : ''}
         ${(synergies.length || combos.length) ? `<section class="gwent-collection-section"><small>SINERGIAS</small>${synergies.length ? `<div class="gwent-collection-chips">${synergies.map(x=>`<span>${escapeHTML(x)}</span>`).join('')}</div>` : ''}${combos.map(x=>`<article class="gwent-collection-combo"><b>${escapeHTML(x.nome || 'Combo')}</b><p>${escapeHTML(x.descricao || '')}</p></article>`).join('')}</section>` : ''}
         <footer class="gwent-collection-actions">
-          ${inDeck
-            ? `<button type="button" class="secondary" data-gwent-collection-remove="${escapeHTML(card.id)}">REMOVER DO DECK</button>`
-            : `<button type="button" class="primary" data-gwent-collection-add="${escapeHTML(card.id)}" ${gwentDeckIds.length >= 12 ? 'disabled' : ''}>ADICIONAR AO DECK</button>`}
-          ${canEvolve ? `<button type="button" class="secondary" data-gwent-evolve="${escapeHTML(String(card.exemplar_id))}">EVOLUIR · ${evolveCost} FRAGMENTOS</button>` : ''}
-          ${canUpgrade ? `<button type="button" class="secondary" data-gwent-upgrade="${escapeHTML(String(card.exemplar_id))}">LAPIDAR +1 · ${upgradeCost} ALMAS</button>` : ''}
+          ${!isOwned
+            ? `<p class="muted">Obtenha um exemplar em pacotes ou recompensas para adicioná-lo ao seu deck.</p>`
+            : inDeck
+              ? `<button type="button" class="secondary" data-gwent-collection-remove="${escapeHTML(deckCardId)}">REMOVER DO DECK</button>`
+              : `<button type="button" class="primary" data-gwent-collection-add="${escapeHTML(deckCardId)}" ${gwentDeckIds.length >= 12 ? 'disabled' : ''}>ADICIONAR AO DECK</button>`}
         </footer>
       </div>
     </section>`;
@@ -442,6 +472,11 @@ document.addEventListener('click', event => {
 });
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') closeGwentCollectionCardModal();
+  const catalogCard = event.target.closest('.gwent-catalog-card[data-gwent-inspect]');
+  if (catalogCard && (event.key === 'Enter' || event.key === ' ')) {
+    event.preventDefault();
+    openGwentCollectionCardModal(catalogCard.dataset.gwentInspect);
+  }
 });
 let atelierPromptText = '';
 let atelierNegativeText = '';
@@ -704,35 +739,52 @@ async function decideAtelierSubmission(id, approve) {
 async function loadGwentStore() {
   if (!currentUser) return;
   const status = $('#gwent-store-status');
+  const packContainer = $('#gwent-pack-options');
   try {
     const response = await fetch('/api/gwent/store', {credentials:'same-origin', cache:'no-store'});
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Não foi possível carregar o mercado.');
-    const pack = data.pack || {};
-    $('#gwent-store-wallet').textContent = `${number(data.summary?.denarios)} Denários disponíveis`;
-    $('#gwent-pack-limit').textContent = `${number(pack.remaining)} de ${number(pack.daily_limit || 3)} pacotes restantes nas próximas 24 horas.`;
-    const button = $('#gwent-open-pack');
-    button.disabled = !pack.available || Number(data.summary?.denarios || 0) < Number(pack.price || 120);
-    button.textContent = Number(data.summary?.denarios || 0) < Number(pack.price || 120)
-      ? 'Denários insuficientes' : `Abrir por ${number(pack.price || 120)} Denários`;
-    if (status) status.textContent = `Cada pacote contém ${number(pack.cards || 3)} cartas. Duplicatas geram recursos; a coleção é compartilhada com os drops.`;
+    const balance = Number(data.summary?.denarios || 0);
+    $('#gwent-store-wallet').textContent = `${number(balance)} Denários disponíveis`;
+    const packs = Array.isArray(data.packs) ? data.packs : [];
+    if (packContainer) {
+      const icons = {'Ordem Áurea':'☀','Véu Carmesim':'🩸','Lua Negra':'☾','Os Esquecidos':'✝'};
+      packContainer.innerHTML = packs.map(pack => {
+        const faction = pack.faction || '';
+        const price = Number(pack.price || 120);
+        const canBuy = balance >= price;
+        const label = canBuy ? `Comprar · ${number(price)} Denários` : 'Denários insuficientes';
+        return `<article class="gwent-store-card gwent-pack-option ${faction ? 'faction-pack' : ''}">
+          <div class="pack-crest">${faction ? (icons[faction] || '✦') : '✦'}</div>
+          <span class="pack-tag">${faction ? 'PACOTE DE FACÇÃO' : 'PACOTE GERAL'}</span>
+          <h4>${escapeHTML(pack.name || 'Pacote do Coliseu')}</h4>
+          <p>${escapeHTML(pack.description || 'Três cartas para sua coleção.')}</p>
+          <small class="pack-pool">${number(pack.card_pool || 0)} modelos elegíveis · ${number(pack.cards || 3)} cartas por pacote</small>
+          <button class="primary" type="button" data-buy-pack data-pack-faction="${escapeHTML(faction)}" ${canBuy ? '' : 'disabled'}>${label}</button>
+        </article>`;
+      }).join('');
+    }
+    if (status) status.textContent = 'Compre quantos pacotes quiser. Não existe limite diário; cada pacote custa 120 Denários e entrega 3 cartas. A proteção de raridade continua compartilhada entre os pacotes.';
   } catch (error) { if (status) status.textContent = error.message; }
 }
 
-async function buyGwentPack() {
-  const button = $('#gwent-open-pack');
+async function buyGwentPack(faction = null, triggerButton = null) {
+  const button = triggerButton || $('#gwent-open-pack');
   if (!button || button.disabled || !currentUser) return;
-  if (!window.confirm('Comprar um pacote com 3 cartas por 120 Denários?')) return;
+  const packageName = faction ? `Pacote ${faction}` : 'Pacote do Coliseu';
+  if (!window.confirm(`Comprar ${packageName} com 3 cartas por 120 Denários?`)) return;
   button.disabled = true;
   const status = $('#gwent-store-status');
   try {
     const response = await fetch('/api/gwent/store/pack', {
-      method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({})
+      method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({faction})
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Não foi possível comprar o pacote.');
     const cards = Array.isArray(data.cards) ? data.cards : [];
-    $('#gwent-pack-results').innerHTML = `<div class="gwent-pack-opened"><h4>Pacote aberto</h4><div class="gwent-pack-opened-cards">${cards.map(card => `<article class="pk" data-r="${escapeHTML(String(card.rarity||'comum').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))}"><b>${escapeHTML(card.card_name || card.card_id)}</b><span>${escapeHTML(card.rarity)} · ${number(card.power)} poder</span><small>${card.outcome === 'carta' ? 'Novo exemplar' : card.outcome === 'almas' ? `Duplicata · +${number(card.almas)} Almas` : `Duplicata · +${number(card.fragmentos)} fragmentos`}</small></article>`).join('')}</div></div>`;
+    const factionLine = data.faccao ? `<p class="muted">${escapeHTML(data.faccao)}</p>` : '';
+    $('#gwent-pack-results').innerHTML = `<div class="gwent-pack-opened"><h4>${escapeHTML(packageName)} aberto</h4>${factionLine}<div class="gwent-pack-opened-cards">${cards.map(card => `<article class="pk" data-r="${escapeHTML(String(card.rarity||'comum').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))}"><b>${escapeHTML(card.card_name || card.card_id)}</b><span>${escapeHTML(card.rarity)} · ${number(card.power)} poder</span><small>${card.outcome === 'carta' ? 'Novo exemplar' : card.outcome === 'almas' ? `Duplicata · +${number(card.almas)} Almas` : `Duplicata · +${number(card.fragmentos)} fragmentos`}</small></article>`).join('')}</div></div>`;
     revealPack();
     showNotice('Pacote comprado e aberto. As cartas já estão na sua coleção.', 'success');
     await loadAccount(); await loadGwentStore(); await loadDropHistory();
@@ -790,7 +842,24 @@ async function loadGwentDeck() {
     gwentSavedLeader = data.leader_id || 'comandante_fornalha';
     gwentSavedRelic = data.relic_id || '';
     const relicSelect = $('#gwent-relic-select');
-    if (relicSelect) { relicSelect.value = gwentSavedRelic; relicSelect.dispatchEvent(new Event('change', {bubbles:true})); }
+    if (relicSelect) {
+      const ownedRelics = Array.isArray(data.relics) ? data.relics : [];
+      const options = ['<option value="">Sem Relíquia</option>'];
+      for (const relic of ownedRelics) {
+        const label = relic.owned
+          ? `${relic.name} · ${relic.rarity} · Possuída (${number(relic.owned_count)})`
+          : `${relic.name} · ${relic.rarity} · Não obtida`;
+        options.push(`<option value="${escapeHTML(relic.id)}" ${relic.owned ? '' : 'disabled'}>${escapeHTML(label)}</option>`);
+      }
+      relicSelect.innerHTML = options.join('');
+      const savedIsOwned = ownedRelics.some(relic => relic.id === gwentSavedRelic && relic.owned);
+      relicSelect.value = savedIsOwned ? gwentSavedRelic : '';
+      relicSelect.dispatchEvent(new Event('change', {bubbles:true}));
+      const relicStatus = $('#gwent-relic-status');
+      if (relicStatus && !ownedRelics.some(relic => relic.owned)) {
+        relicStatus.textContent = 'Você ainda não possui Relíquias. Elas têm 0,50% de chance em cada drop de carta.';
+      }
+    }
     applyGwentLeaders(data.leaders_by_faction);
     $('#gwent-faction').value = gwentSavedFaction;
     renderGwentLeaderOptions(gwentSavedLeader);
@@ -1472,7 +1541,11 @@ $('#atelier-leader-art-upload')?.addEventListener('click', uploadAtelierLeaderAr
 $('#atelier-leader-art-remove')?.addEventListener('click', removeAtelierLeaderArt);
 $('#gwent-create-match').addEventListener('click', createGwentMatch);
 $('#gwent-solo-match')?.addEventListener('click', createGwentSoloMatch);
-$('#gwent-open-pack').addEventListener('click', buyGwentPack);
+$('#gwent-pack-options')?.addEventListener('click', event => {
+  const button = event.target.closest('[data-buy-pack]');
+  if (!button) return;
+  buyGwentPack(button.dataset.packFaction || null, button);
+});
 
 function closeGwentHandHoverPreview() {
   document.getElementById('gwent-hand-hover-preview')?.remove();
@@ -1767,28 +1840,6 @@ document.addEventListener('click', async event => {
     $('#gwent-arena').hidden = true;
     await loadGwentMatches();
     return;
-  }
-  const evolve = event.target.closest('[data-gwent-evolve]');
-  if (evolve) {
-    evolve.disabled = true;
-    try {
-      const response = await fetch('/api/gwent/evolve', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({exemplar_id:Number(evolve.dataset.gwentEvolve)})});
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || (result.status === 'fragmentos_insuficientes' ? `Você precisa de ${result.necessarios} fragmentos; possui ${result.saldo}.` : result.status === 'destino_ja_possuido' ? `Você já possui um exemplar ${result.rarity} deste modelo. Lapide esse exemplar ou escolha outra evolução.` : 'Não foi possível evoluir esta carta.'));
-      showNotice(`Ascensão concluída: ${result.rarity} · ${result.power}/${result.max_power ?? result.power} poder. O potencial de lapidação foi ampliado.`, 'success');
-      await loadAccount(); await loadGwentDeck(); await loadDropHistory();
-    } catch (error) { showNotice(error.message, 'error'); evolve.disabled = false; }
-  }
-  const upgrade = event.target.closest('[data-gwent-upgrade]');
-  if (upgrade) {
-    upgrade.disabled = true;
-    try {
-      const response = await fetch('/api/gwent/upgrade', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({exemplar_id:Number(upgrade.dataset.gwentUpgrade)})});
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || (result.status === 'almas_insuficientes' ? `Você precisa de ${result.necessarias} Almas; possui ${result.saldo}.` : 'Não foi possível lapidar esta carta.'));
-      showNotice(`Carta lapidada: ${result.power}/${result.max_power} poder.`, 'success');
-      await loadAccount(); await loadGwentDeck(); await loadDropHistory();
-    } catch (error) { showNotice(error.message, 'error'); upgrade.disabled = false; }
   }
   if (add && gwentDeckIds.length < 12) {
     const card = collection.find(c => c.id === add.dataset.gwentAdd);
@@ -2469,18 +2520,15 @@ window.addEventListener('resize', () => {
   const preview = document.querySelector('#gwent-relic-preview');
   const status = document.querySelector('#gwent-relic-status');
   if (!select || !preview) return;
-  const key = 'narabot_gwent_relic_loadout_v20';
   const render = () => {
     const relic = relics[select.value];
     preview.innerHTML = relic
       ? `<div class="v52-relic-seal"><i>♜</i><span>${escapeHTML(relic[3])}</span></div><small>${escapeHTML(relic[1])} · ${escapeHTML(relic[3])}</small><b>${escapeHTML(relic[0])}</b><p>${escapeHTML(relic[2])}</p><span class="gwent-relic-equipped">PREPARADA</span>`
       : '<b>Nenhuma Relíquia selecionada</b><p>Você entrará sem Relíquia equipada.</p>';
-    if (status) status.textContent = 'Relíquia selecionada. Salve o deck para registrar a escolha na sua conta.';
+    if (status) status.textContent = relic ? 'Carta possuída. Salve o deck para equipar esta Relíquia. Chance de Relíquia: 0,50% por drop.' : 'Somente cartas de Relíquia que você possui podem ser equipadas. Chance de drop: 0,50% por carta.';
   };
-  try { select.value = localStorage.getItem(key) || ''; } catch (_) {}
   render();
   select.addEventListener('change', () => {
-    try { localStorage.setItem(key, select.value); } catch (_) {}
     render();
     if (typeof renderGwentBuilder === 'function') renderGwentBuilder();
   });

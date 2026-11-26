@@ -12,6 +12,7 @@ import json
 import hashlib
 import secrets
 from pathlib import Path
+from urllib.parse import quote
 
 from aiohttp import web
 
@@ -332,7 +333,8 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 items.append({"id": int(item["id"]), "card_id": str(item["card_id"]),
                               "name": str(getattr(card, "nome", None) or item["card_id"]),
                               "rarity": str(item["rarity"]), "power": int(item["power"] or 0),
-                              "faction": classification["faccao"], "eligible": True})
+                              "faction": classification["faccao"], "eligible": True,
+                              "image_url": f"/api/gwent/cards/{quote(str(item['card_id']), safe='')}/image?thumb=1"})
         materials = await bot.db.coliseu_listar_materiais_transmutacao(uid)
         history = await bot.db._all(
             """SELECT tx_key,status,ingredient_ids_json,probability,generated_card_id,
@@ -604,8 +606,8 @@ def registrar_rotas(bot, app: web.Application) -> None:
             if not raw:
                 return web.json_response({"error": "Arquivo vazio."}, status=400)
             import hashlib
-            from config import get_data_dir
             from sistemas.arte_upload_criador import normalizar_upload_arte
+            from sistemas.storage_r2 import upload_image, R2NotConfigured
             try:
                 normalized = normalizar_upload_arte(raw)
             except ValueError as exc:
@@ -614,24 +616,22 @@ def registrar_rotas(bot, app: web.Application) -> None:
             width, height = normalized["width"], normalized["height"]
             fmt = normalized["source_format"]
             digest = hashlib.sha256(image_bytes).hexdigest()
-            base = Path(get_data_dir()) / "cartas_geradas_uploads" / str(int(uid)) / card_id
-            base.mkdir(parents=True, exist_ok=True)
-            target = base / f"{digest}.png"
-            if not target.exists():
-                temp = base / f".{digest}.tmp"
-                temp.write_bytes(image_bytes)
-                try:
-                    os.link(temp, target)
-                except FileExistsError:
-                    pass
-                finally:
-                    temp.unlink(missing_ok=True)
+            object_key = f"cartas/{int(uid)}/{card_id}/{digest}.png"
+            try:
+                stored = await asyncio.to_thread(upload_image, object_key, image_bytes, "image/png")
+            except R2NotConfigured as exc:
+                return web.json_response({"error": str(exc)}, status=503)
+            except Exception:
+                return web.json_response({"error": "Falha ao enviar a imagem para o Cloudflare R2."}, status=502)
+            storage_key = stored["storage_key"]
+            public_url = stored["public_url"]
             definition = json.loads(row["definition_json"] or "{}")
             manifest = {
                 "version": "v48", "card_id": card_id, "owner_id": int(uid),
                 "sha256": digest, "width": width, "height": height,
                 "format": "PNG", "source_format": fmt,
                 "source": "creator_upload", "status": "validated",
+                "storage": "cloudflare_r2", "storage_key": storage_key,
                 "faction": str(definition.get("faccao") or row["faction"]),
                 "rarity": str(definition.get("raridade") or row["rarity"]),
             }
@@ -643,14 +643,15 @@ def registrar_rotas(bot, app: web.Application) -> None:
             finally:
                 manifest_tmp.unlink(missing_ok=True)
             result = await bot.db.coliseu_registrar_arte_carta_gerada(
-                int(uid), card_id, str(target), digest, width, height,
+                int(uid), card_id, storage_key, digest, width, height,
                 replace_existing=replace_existing,
             )
             if result.get("status") != "arte_registrada":
                 return web.json_response({"error": "Não foi possível registrar a arte.", "detail": result}, status=409)
             return web.json_response({"status": "arte_registrada", "card_id": card_id,
                                       "width": width, "height": height,
-                                      "sha256": digest, "art_url": f"/api/gwent/cartas-geradas/{card_id}/arte"},
+                                      "sha256": digest, "art_url": f"/api/gwent/cartas-geradas/{card_id}/arte",
+                                      "public_url": public_url},
                                      headers={"Cache-Control": "no-store"})
         except Exception:
             # Erro técnico não deve ser convertido em rejeição de conteúdo nem consumir recursos.
@@ -663,8 +664,18 @@ def registrar_rotas(bot, app: web.Application) -> None:
         row = await bot.db.coliseu_obter_carta_gerada(uid, str(request.match_info["card_id"]))
         if not row or not row["art_path"]:
             return web.json_response({"error": "Arte não encontrada."}, status=404)
-        path = Path(str(row["art_path"])).resolve()
-        # Só serve arquivos dentro do diretório privado do proprietário.
+        stored_path = str(row["art_path"])
+        # Novos uploads usam uma chave do R2; registros antigos continuam locais.
+        if stored_path.startswith("http://") or stored_path.startswith("https://"):
+            raise web.HTTPFound(stored_path)
+        if not stored_path.startswith(("/", "\\\\")) and not re.match(r"^[A-Za-z]:[\\\\/]", stored_path):
+            try:
+                from sistemas.storage_r2 import public_url_for_key
+                public_url = public_url_for_key(stored_path)
+            except Exception:
+                return web.json_response({"error": "URL pública do R2 indisponível."}, status=503)
+            raise web.HTTPFound(public_url)
+        path = Path(stored_path).resolve()
         try:
             from config import get_data_dir
             allowed = (Path(get_data_dir()) / "cartas_geradas_uploads" / str(int(uid))).resolve()
@@ -721,6 +732,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
             items.append({
                 "id": int(row["id"]), "card_id": str(row["card_id"]),
                 "name": str(getattr(card, "nome", None) or getattr(card, "name", None) or row["card_id"]),
+                "image_url": f"/api/gwent/cards/{quote(str(row['card_id']), safe='')}/image?thumb=1",
                 "rarity": rarity, "power": power, "max_power": int(maximum),
                 "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "lap_cost": CUSTO_APRIMORAMENTO_ALMAS.get(rarity),
@@ -754,12 +766,10 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/forja", forja_page)
     app.router.add_get("/transmutacao", transmutacao_page)
     app.router.add_get("/evolucao", evolucao_page)
-    app.router.add_get("/apostas", apostas_page)
     app.router.add_get("/api/gwent/transmutacao", transmutacao_list)
     app.router.add_post("/api/gwent/transmutacao/preview", transmutacao_preview)
     app.router.add_post("/api/gwent/transmutacao/execute", transmutacao_execute)
     app.router.add_post("/api/gwent/transmutacao/discover", transmutacao_discover)
-    app.router.add_get("/cartas-geradas", generated_cards_page)
     app.router.add_get("/api/gwent/transmutacao/balanceamento", transmutacao_balance_report)
     app.router.add_get("/api/gwent/cartas-geradas", generated_cards)
     app.router.add_get("/api/gwent/cartas-geradas/{card_id}", generated_card_detail)
@@ -1096,7 +1106,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_post("/api/gwent/apostas/cartas", apostas_cartas)
     app.router.add_post("/api/gwent/apostas/torneio", apostas_torneio)
 
-    app.router.add_get("/rituais-ancestrais", rituais_page)
     app.router.add_get("/api/gwent/rituais-ancestrais", rituais_list)
     app.router.add_post("/api/gwent/rituais-ancestrais", rituais_execute)
 

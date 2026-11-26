@@ -4095,7 +4095,8 @@ class Database:
 
     async def _coliseu_drop_tx(self, tx, user_id: int, event_key: str, *, origem: str = "atividade",
                                permitir_primordial: bool = False, modelo_forcado=None,
-                               raridade_forcada: str | None = None):
+                               raridade_forcada: str | None = None,
+                               faccao_forcada: str | None = None):
         """Drop global idempotente. A raridade pertence ao exemplar, não ao modelo."""
         import secrets
         from sistemas.cartas import (CARTAS_PACOTE, CARTAS_PRIMORDIAIS, faixa_poder_exemplar,
@@ -4106,11 +4107,25 @@ class Database:
                     "card_rarity": ja["rarity"], "exemplar_id": ja["exemplar_id"], "card_power": ja["power"]}
 
         # O catálogo é global: qualquer modelo elegível pode sair em qualquer atividade.
-        modelos = [c for c in CARTAS_PACOTE if c.raridade != "Singular"]
+        # Relíquias não participam do sorteio comum. Elas entram por um sorteio raro
+        # próprio, mas continuam usando o mesmo inventário, exemplar e tratamento de duplicatas.
+        ids_reliquias = {
+            "reliquia_grande_runa_godrick", "reliquia_runa_nao_nascidos",
+            "reliquia_runa_morte", "reliquia_noite_chama",
+            "reliquia_lamina_negra", "reliquia_algemas_margit",
+        }
+        cartas_reliquias = [c for c in CARTAS_PACOTE if c.id in ids_reliquias]
+        modelos = [c for c in CARTAS_PACOTE if c.raridade != "Singular" and c.id not in ids_reliquias]
         primordiais = list(CARTAS_PRIMORDIAIS)
+        if faccao_forcada:
+            # Pacotes de facção são estritos: nenhuma carta de outra facção ou Relíquia global.
+            modelos = [c for c in modelos if c.para_dict().get("faccao") == faccao_forcada]
+            primordiais = [c for c in primordiais if c.para_dict().get("faccao") == faccao_forcada]
+            cartas_reliquias = []
+        chance_reliquia_bps = 50  # 0,50% em drops gerais; pacotes de facção não incluem Relíquias.
         pesos = [("Comum", 6940), ("Rara", 2200), ("Épica", 700),
                  ("Lendária", 100), ("Mítica", 50)]
-        if permitir_primordial:
+        if permitir_primordial and primordiais:
             pesos.append(("Primordial", 10))
         total = sum(p for _, p in pesos)
         if raridade_forcada in {nome for nome, _ in pesos}:
@@ -4124,8 +4139,22 @@ class Database:
                 if sorteio < acumulado:
                     raridade = nome
                     break
-        carta = (modelo_forcado if modelo_forcado is not None else
-                 secrets.choice(primordiais if raridade == "Primordial" else modelos))
+        # Uma Relíquia pode substituir a carta comum em 0,50% das tentativas.
+        # A raridade do exemplar continua obedecendo à roleta normal de raridade.
+        drop_reliquia = (
+            modelo_forcado is None
+            and faccao_forcada is None
+            and bool(cartas_reliquias)
+            and secrets.randbelow(10_000) < chance_reliquia_bps
+        )
+        if modelo_forcado is not None:
+            carta = modelo_forcado
+        elif drop_reliquia:
+            carta = secrets.choice(cartas_reliquias)
+            if raridade == "Primordial":
+                raridade = "Mítica"
+        else:
+            carta = secrets.choice(primordiais if raridade == "Primordial" else modelos)
         if raridade == "Primordial" and modelo_forcado is not None:
             # Um drop inicial não pode contornar as condições especiais de Primordial.
             raridade = "Mítica"
@@ -4235,25 +4264,30 @@ class Database:
 
     async def coliseu_abrir_pacote(self, user_id: int, catalogo_por_raridade: dict | None = None,
                                    almas_por_raridade: dict | None = None, preco: int = 120, quantidade: int = 3,
-                                   limite_pacotes_dia: int = 3):
-        """Compra um pacote e concede três exemplares em uma única transação."""
+                                   faccao: str | None = None):
+        """Compra pacote geral ou de facção; compras ilimitadas, condicionadas ao saldo."""
         import json, secrets, uuid
         user_id = int(user_id)
         preco = max(1, int(preco))
         quantidade = max(1, min(int(quantidade), 10))
-        limite_pacotes_dia = max(1, int(limite_pacotes_dia))
+        faccoes_validas = {
+            "Ordem Áurea": "ordem_aurea",
+            "Véu Carmesim": "veu_carmesim",
+            "Lua Negra": "lua_negra",
+            "Os Esquecidos": "os_esquecidos",
+        }
+        faccao = str(faccao).strip() if faccao else None
+        if faccao and faccao not in faccoes_validas:
+            return {"status": "faccao_invalida"}
+        slug = faccoes_validas.get(faccao, "geral")
+        transacao_kind = f"pacote_faccao_{slug}" if faccao else "pacote_fogueira"
+        origem_drop = f"pacote_faccao_{slug}" if faccao else "pacote_fogueira"
+
         async with self.transaction() as tx:
             await tx.conn.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (user_id,))
             await tx.conn.execute("INSERT OR IGNORE INTO cartas_pity(user_id) VALUES (?)", (user_id,))
             user = await tx._one("SELECT denarios FROM users WHERE user_id=?", (user_id,))
             saldo = int(user["denarios"] or 0) if user else 0
-            abertos = await tx._one(
-                "SELECT COUNT(*) AS n FROM cartas_transacoes WHERE user_id=? AND kind='pacote_fogueira' AND created_at>=datetime('now','-1 day')",
-                (user_id,),
-            )
-            pacotes_24h = int(abertos["n"] or 0) if abertos else 0
-            if pacotes_24h >= limite_pacotes_dia:
-                return {"status": "limite_pacotes_dia", "limite": limite_pacotes_dia, "abertos": pacotes_24h}
             if saldo < preco:
                 return {"status": "sem_saldo", "saldo": saldo, "preco": preco}
 
@@ -4269,8 +4303,10 @@ class Database:
                     raridade_forcada = ("Rara" if roll < 22 else "Épica" if roll < 29
                                         else "Lendária" if roll == 29 else "Mítica")
                 result = await self._coliseu_drop_tx(
-                    tx, user_id, f"pack:{pack_id}:{index}", origem="pacote_fogueira",
-                    permitir_primordial=not pity_ativado, raridade_forcada=raridade_forcada,
+                    tx, user_id, f"pack:{pack_id}:{index}", origem=origem_drop,
+                    permitir_primordial=(not pity_ativado),
+                    raridade_forcada=raridade_forcada,
+                    faccao_forcada=faccao,
                 )
                 if result.get("status") not in {"ok", "ja_concedido"}:
                     return {"status": "catalogo_invalido"}
@@ -4282,6 +4318,7 @@ class Database:
                     "outcome": result.get("outcome"), "almas": int(result.get("almas") or 0),
                     "fragmentos": int(result.get("fragmentos") or 0),
                     "exemplar_id": result.get("exemplar_id"), "pity_ativado": pity_ativado,
+                    "faccao": faccao or result.get("faccao"),
                 })
             cur = await tx.conn.execute(
                 "UPDATE users SET denarios=denarios-? WHERE user_id=? AND denarios>=?",
@@ -4295,10 +4332,15 @@ class Database:
             )
             await tx.conn.execute(
                 "INSERT INTO cartas_transacoes(tx_key,user_id,kind,denarios_delta,details_json) VALUES (?,?,?,?,?)",
-                (f"pack-purchase:{pack_id}", user_id, "pacote_fogueira", -preco,
-                 json.dumps({"cards": aberturas, "quantity": quantidade}, ensure_ascii=False)),
+                (f"pack-purchase:{pack_id}", user_id, transacao_kind, -preco,
+                 json.dumps({"cards": aberturas, "quantity": quantidade,
+                             "pack_type": "faction" if faccao else "standard",
+                             "faction": faccao}, ensure_ascii=False)),
             )
             novo_saldo = await tx._one("SELECT denarios FROM users WHERE user_id=?", (user_id,))
-            return {"status": "ok", "cards": aberturas, "pity": streak,
-                    "saldo": int(novo_saldo["denarios"] or 0),
-                    "pacotes_restantes": max(0, limite_pacotes_dia - pacotes_24h - 1), "preco": preco}
+            return {
+                "status": "ok", "cards": aberturas, "pity": streak,
+                "saldo": int(novo_saldo["denarios"] or 0), "pacotes_restantes": None,
+                "preco": preco, "faccao": faccao, "pack_unlimited": True,
+            }
+
