@@ -635,13 +635,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 "faction": str(definition.get("faccao") or row["faction"]),
                 "rarity": str(definition.get("raridade") or row["rarity"]),
             }
-            manifest_path = target.with_suffix(".manifest.json")
-            manifest_tmp = manifest_path.with_suffix(".manifest.tmp")
-            manifest_tmp.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-            try:
-                os.replace(manifest_tmp, manifest_path)
-            finally:
-                manifest_tmp.unlink(missing_ok=True)
+            # O manifesto é mantido no banco junto com os metadados da arte.
             result = await bot.db.coliseu_registrar_arte_carta_gerada(
                 int(uid), card_id, storage_key, digest, width, height,
                 replace_existing=replace_existing,
