@@ -1228,8 +1228,7 @@ class NaraBot(commands.Bot):
                          for name in FACTIONS],
             "relic_id": saved_relic_id,
             "relics": relics_payload,
-            "rules": {"cards": 20, "opening_hand": 10, "reserve": 10, "unique": True,
-                       "round_draws": {"2": 2, "3": 1}, "hand_limit": 10,
+            "rules": {"cards": 12, "opening_hand": 10, "reserve": 2, "unique": True,
                       "relics_per_match": 1, "relic_drop_chance_percent": 0.5}})
 
     async def _api_gwent_deck_save(self, request: web.Request) -> web.Response:
@@ -1254,11 +1253,11 @@ class NaraBot(commands.Bot):
         except Exception:
             return web.json_response({"error": "JSON inválido ou exemplar inválido."}, status=400)
         ids = [entry[0] for entry in entries]
-        if (len(entries) != 20 or any(not card_id or len(card_id) > 120 or exemplar_id < 0 for card_id, exemplar_id in entries)
-                or len(set(ids)) != 20):
-            return web.json_response({"error": "O deck Gwent exige exatamente 20 modelos diferentes."}, status=400)
+        if (len(entries) != 12 or any(not card_id or len(card_id) > 120 or exemplar_id < 0 for card_id, exemplar_id in entries)
+                or len(set(ids)) != 12):
+            return web.json_response({"error": "O deck Gwent exige exatamente 12 modelos diferentes."}, status=400)
         if relic_id and relic_id in ids:
-            return web.json_response({"error": "A Relíquia equipada não pode ocupar também uma das 20 posições do deck."}, status=400)
+            return web.json_response({"error": "A Relíquia equipada não pode ocupar também uma das 12 posições do deck."}, status=400)
         from sistemas.gwent import (DEFAULT_LEADERS, LEADERS, canonical_faction,
                                     validar_faccao_deck)
         faction = canonical_faction(faction) or "Ordem Áurea"
@@ -1410,7 +1409,7 @@ class NaraBot(commands.Bot):
             payload["custo"] = int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0)))
             payload["exemplar_id"] = int(record["id"])
             cards.append(preparar_carta(payload))
-        return cards if len(cards) == 20 else None
+        return cards if len(cards) == 12 else None
 
     async def _api_gwent_matches(self, request: web.Request) -> web.Response:
         user_id = self._api_user_id(request)
@@ -1450,7 +1449,7 @@ class NaraBot(commands.Bot):
         deck_a = await self._gwent_deck_snapshots(user_id)
         deck_b = await self._gwent_deck_snapshots(opponent_id)
         if not deck_a or not deck_b:
-            return web.json_response({"error": "Os dois jogadores precisam salvar um deck Gwent de 20 cartas."}, status=409)
+            return web.json_response({"error": "Os dois jogadores precisam salvar um deck Gwent de 12 cartas."}, status=409)
 
         import json
         from sistemas.gwent import canonical_faction
@@ -1526,8 +1525,8 @@ class NaraBot(commands.Bot):
             return web.json_response({"error": "Origem não autorizada."}, status=403)
 
         deck = await self._gwent_deck_snapshots(user_id)
-        if not deck or len(deck) != 20:
-            return web.json_response({"error": "Salve primeiro um deck Gwent válido com 20 cartas."}, status=409)
+        if not deck or len(deck) != 12:
+            return web.json_response({"error": "Salve primeiro um deck Gwent válido com 12 cartas."}, status=409)
 
         import copy
         import json

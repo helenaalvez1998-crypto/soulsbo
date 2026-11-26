@@ -3920,6 +3920,34 @@ class Database:
         )
         return [dict(row) for row in rows]
 
+    async def coliseu_gwent_zerar_deck(self, user_id: int, faction: str, leader_id: str):
+        """Limpa apenas o deck salvo do jogador, preservando coleção e exemplares."""
+        user_id = int(user_id)
+        faction = str(faction)
+        leader_id = str(leader_id)
+        async with self.transaction() as tx:
+            await tx.conn.execute(
+                """INSERT INTO cartas_gwent_decks
+                   (user_id, card_ids_json, exemplar_ids_json, faction, leader_id, relic_id)
+                   VALUES (?, '[]', '[]', ?, ?, '')
+                   ON CONFLICT(user_id) DO UPDATE SET
+                     card_ids_json='[]',
+                     exemplar_ids_json='[]',
+                     faction=excluded.faction,
+                     leader_id=excluded.leader_id,
+                     relic_id='',
+                     updated_at=CURRENT_TIMESTAMP""",
+                (user_id, faction, leader_id),
+            )
+        return {
+            "ok": True,
+            "card_ids": [],
+            "exemplar_ids": [],
+            "faction": faction,
+            "leader_id": leader_id,
+            "relic_id": "",
+        }
+
     async def coliseu_gwent_lideres_artes_listar(self):
         """Lista metadados das artes personalizadas dos líderes, sem carregar BLOBs."""
         rows = await self._all(
