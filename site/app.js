@@ -529,6 +529,35 @@ async function atelierEnsurePng(blob) {
   }
 }
 
+
+function atelierDownloadBlob(blob, filename) {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = objectUrl;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+}
+
+function atelierCopyPlainText(text) {
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  const field = document.createElement('textarea');
+  field.value = text;
+  field.setAttribute('readonly', '');
+  field.style.cssText = 'position:fixed;left:-10000px;top:0;opacity:0;';
+  document.body.appendChild(field);
+  field.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  field.remove();
+  return ok ? Promise.resolve() : Promise.reject(new Error('O navegador bloqueou a cópia dos prompts.'));
+}
+
 function atelierLegacyRichCopy(html) {
   const container = document.createElement('div');
   container.contentEditable = 'true';
@@ -1597,61 +1626,53 @@ $('#atelier-copy-bundle').addEventListener('click', async () => {
   const referenceUrl = String(atelierReferenceUrl || $('#atelier-reference-preview')?.getAttribute('src') || '').trim();
 
   if (!analysis || !fixedPrompt || !referenceUrl) {
-    showNotice('Gere novamente o pacote. São necessários os dois prompts e a imagem da referência.', 'error');
+    showNotice('Gere novamente o pacote. São necessários a análise, o prompt fixo e a referência.', 'error');
     button.disabled = true;
     return;
   }
 
   const originalLabel = button.textContent;
   button.disabled = true;
-  button.textContent = 'PREPARANDO OS 2 PROMPTS E A IMAGEM...';
+  button.textContent = 'COPIANDO PROMPTS E BAIXANDO REFERÊNCIA...';
 
+  let promptsCopied = false;
+  let referenceDownloaded = false;
   try {
-    const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
-    if (!response.ok) throw new Error(`Falha ao carregar a referência visual (HTTP ${response.status}).`);
-    const sourceBlob = await response.blob();
-    if (!sourceBlob.type.startsWith('image/')) {
-      throw new Error('O arquivo da referência não foi recebido como imagem.');
-    }
-
-    const pngBlob = await atelierEnsurePng(sourceBlob);
-    const imageDataUrl = await atelierBlobAsDataUrl(pngBlob);
     const plainText =
       `ANÁLISE ARTÍSTICA (PT)\n${analysis}\n\n` +
-      `PROMPT FIXO\n${fixedPrompt}\n\n` +
-      `REFERÊNCIA VISUAL DA FACÇÃO\nA imagem de referência está incluída no conteúdo copiado.`;
+      `PROMPT FIXO\n${fixedPrompt}`;
 
-    const htmlText = `
-      <html><body>
-        <h2>Análise artística (PT)</h2>
-        <pre style="white-space:pre-wrap;font-family:Arial,sans-serif;">${atelierEscapeHtml(analysis)}</pre>
-        <h2>Prompt fixo</h2>
-        <pre style="white-space:pre-wrap;font-family:Arial,sans-serif;">${atelierEscapeHtml(fixedPrompt)}</pre>
-        <h2>Referência visual da facção</h2>
-        <p><img src="${imageDataUrl}" alt="Referência visual da facção" style="max-width:100%;height:auto;"></p>
-      </body></html>`;
+    // Começa a operação de clipboard diretamente no gesto do usuário.
+    const copyPromise = atelierCopyPlainText(plainText).then(() => {
+      promptsCopied = true;
+    });
 
-    let copied = false;
-    if (navigator.clipboard?.write && window.ClipboardItem) {
-      // Uma única ClipboardItem com três representações: texto puro, HTML rico e PNG.
-      // Aplicativos compatíveis podem recuperar os dois prompts e a imagem da mesma colagem.
-      const clipboardItem = new ClipboardItem({
-        'text/plain': new Blob([plainText], { type: 'text/plain' }),
-        'text/html': new Blob([htmlText], { type: 'text/html' }),
-        'image/png': pngBlob
-      });
-      await navigator.clipboard.write([clipboardItem]);
-      copied = true;
-    } else {
-      copied = atelierLegacyRichCopy(htmlText);
+    const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
+    if (!response.ok) throw new Error(`Não foi possível obter a referência visual (HTTP ${response.status}).`);
+    const referenceBlob = await response.blob();
+    if (!referenceBlob.type.startsWith('image/')) {
+      throw new Error('O servidor não retornou uma imagem válida para esta facção.');
     }
 
-    if (!copied) {
-      throw new Error('O navegador não permitiu copiar texto e imagem juntos. Verifique a permissão da área de transferência e tente novamente.');
-    }
-    showNotice('Copiados juntos: Análise artística + Prompt fixo + imagem de referência.', 'success');
+    const filename = `referencia-${referenceUrl.split('/').pop() || 'faccao.png'}`;
+    atelierDownloadBlob(referenceBlob, filename);
+    referenceDownloaded = true;
+
+    await copyPromise;
+    showNotice(
+      `Prompts copiados. A referência visual foi baixada como "${filename}". Anexe esse PNG à conversa com a IA.`,
+      'success'
+    );
   } catch (error) {
-    showNotice(error.message || 'Não foi possível copiar o pacote completo.', 'error');
+    if (promptsCopied && referenceDownloaded) {
+      showNotice('Prompts copiados e referência baixada. Anexe o PNG à conversa com a IA.', 'success');
+    } else if (promptsCopied) {
+      showNotice(`Os dois prompts foram copiados, mas a imagem não foi baixada: ${error.message}`, 'warning');
+    } else if (referenceDownloaded) {
+      showNotice(`A referência foi baixada, mas a cópia dos prompts falhou: ${error.message}`, 'warning');
+    } else {
+      showNotice(error.message || 'Não foi possível preparar o pacote.', 'error');
+    }
   } finally {
     button.textContent = originalLabel;
     button.disabled = !(analysis && fixedPrompt && referenceUrl);
