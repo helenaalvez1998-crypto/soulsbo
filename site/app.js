@@ -1340,13 +1340,18 @@ function renderGwentArena(data) {
       gwentEffectivePower(card, Number((data.weather && data.weather[key]) || 0))
     ), 0);
     const hasEnteringCard = cards.some(card => !cardsAlreadyOnBoard.has(String(card.id)));
-    const weatherValue = Math.max(0, Number((data.weather && data.weather[key]) || 0));
+    // O estado meteorológico vem do snapshot público da partida. Aceita valores
+    // numéricos e strings para manter compatibilidade com partidas já salvas.
+    const weatherMap = data.weather && typeof data.weather === 'object' ? data.weather : {};
+    const weatherValue = Math.max(0, Number(weatherMap[key] ?? 0) || 0);
     const weatherMarkup = weatherValue > 0
-      ? `<div class="gwent-weather-vfx" aria-hidden="true" style="--weather-intensity:${Math.min(3, weatherValue)}">
+      ? `<div class="gwent-weather-vfx" aria-hidden="true" data-weather-level="${Math.min(3, weatherValue)}" style="--weather-intensity:${Math.min(3, weatherValue)}">
           <span class="gwent-weather-cloud gwent-weather-cloud-back"></span>
           <span class="gwent-weather-cloud gwent-weather-cloud-front"></span>
           <span class="gwent-weather-rain"></span>
           <span class="gwent-weather-mist"></span>
+          <span class="gwent-weather-lightning"></span>
+          <span class="gwent-weather-status">☂ CLIMA ATIVO</span>
         </div>`
       : '';
     return `<div class="gwent-row ${hasEnteringCard ? 'has-entering' : ''} ${weatherValue > 0 ? 'has-weather' : ''}" data-row="${escapeHTML(key)}" data-weather-active="${weatherValue > 0 ? 'true' : 'false'}" data-card-count="${cards.length}" style="--row-card-count:${Math.max(1, cards.length)};--row-card-height:${Math.max(112, 238 - Math.max(0, cards.length - 1) * 18)}px">

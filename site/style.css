@@ -5562,114 +5562,137 @@ body.gwent-match-active .gwent-row.has-entering {
 .gwent-pack-option .pack-crest{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(208,177,111,.1);border:1px solid rgba(208,177,111,.3);font-size:20px}
 
 /* ================================================================
-   GWENT WEATHER VFX — nuvem em deslocamento e chuva por fileira
-   Camada decorativa: não interfere nos controles nem nas regras.
+   GWENT WEATHER VFX V2 — tempestade visível na fileira afetada.
+   A camada é decorativa e pointer-events:none: cartas e controles continuam
+   totalmente interativos. O DOM é criado quando data.weather[key] > 0.
    ================================================================ */
-
-body.gwent-match-active .gwent-row.has-weather {
+body.gwent-match-active .gwent-board-side .gwent-row.has-weather {
+  position: relative !important;
   isolation: isolate;
-  border-color: rgba(133, 174, 218, .72);
+  overflow: hidden !important;
+  border-color: rgba(142, 190, 237, .88) !important;
   background:
-    linear-gradient(105deg, rgba(28, 43, 66, .96), rgba(12, 22, 39, .94) 55%, rgba(19, 30, 49, .96));
-  box-shadow: inset 0 0 28px rgba(67, 111, 163, .24), 0 0 12px rgba(100, 155, 213, .12);
+    linear-gradient(100deg, rgba(23, 39, 65, .97), rgba(13, 25, 44, .95) 55%, rgba(20, 34, 56, .97)) !important;
+  box-shadow: inset 0 0 30px rgba(78, 139, 204, .30), 0 0 16px rgba(83, 157, 231, .24) !important;
 }
 body.gwent-match-active .gwent-weather-vfx {
   position: absolute;
-  z-index: 1;
+  z-index: 4;
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
   pointer-events: none;
-  opacity: .82;
+  opacity: 1;
   contain: paint;
-  background: linear-gradient(180deg, rgba(111, 147, 190, .10), transparent 62%, rgba(66, 97, 137, .10));
-}
-body.gwent-match-active .gwent-weather-vfx::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(174, 202, 232, .10), transparent 42%);
-  opacity: .8;
+  isolation: isolate;
+  background: linear-gradient(180deg, rgba(112, 159, 211, .12), transparent 54%, rgba(67, 112, 165, .18));
+  mix-blend-mode: screen;
 }
 body.gwent-match-active .gwent-weather-cloud {
   position: absolute;
+  z-index: 2;
   left: 0;
-  width: clamp(112px, 19%, 220px);
-  height: 30px;
+  width: clamp(150px, 25%, 285px);
+  height: clamp(34px, 52%, 58px);
   border-radius: 50%;
-  opacity: .76;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .36));
+  opacity: .78;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .46));
   background:
-    radial-gradient(ellipse 30% 65% at 27% 62%, rgba(174, 191, 214, .88) 0 96%, transparent 100%),
-    radial-gradient(ellipse 34% 91% at 50% 39%, rgba(140, 160, 190, .93) 0 96%, transparent 100%),
-    radial-gradient(ellipse 29% 64% at 74% 63%, rgba(115, 139, 173, .90) 0 96%, transparent 100%),
-    linear-gradient(180deg, transparent 40%, rgba(80, 101, 133, .86) 43% 82%, transparent 84%);
+    radial-gradient(ellipse 25% 62% at 18% 66%, rgba(174, 193, 219, .92) 0 96%, transparent 100%),
+    radial-gradient(ellipse 30% 88% at 42% 39%, rgba(151, 174, 207, .96) 0 96%, transparent 100%),
+    radial-gradient(ellipse 28% 77% at 66% 47%, rgba(126, 151, 188, .94) 0 96%, transparent 100%),
+    radial-gradient(ellipse 22% 56% at 86% 68%, rgba(110, 139, 179, .88) 0 96%, transparent 100%),
+    linear-gradient(180deg, transparent 43%, rgba(75, 102, 143, .92) 46% 84%, transparent 87%);
   will-change: transform;
-  animation: gwent-weather-cloud-drift 19s linear infinite;
 }
 body.gwent-match-active .gwent-weather-cloud-back {
-  top: -11px;
-  opacity: .44;
-  scale: .82;
-  animation-duration: 27s;
-  animation-delay: -13s;
+  top: -10px;
+  opacity: .48;
+  transform: translateX(-30%);
+  animation: gwent-weather-cloud-drift-v2 16s linear infinite;
+  animation-delay: -8s;
 }
 body.gwent-match-active .gwent-weather-cloud-front {
-  top: 1px;
-  animation-duration: 20s;
-  animation-delay: -4s;
+  top: 4px;
+  opacity: .66;
+  transform: translateX(-10%);
+  animation: gwent-weather-cloud-drift-v2 11s linear infinite;
+  animation-delay: -3s;
 }
 body.gwent-match-active .gwent-weather-rain {
   position: absolute;
-  inset: -28px -12px;
-  opacity: .24;
-  background-image: repeating-linear-gradient(104deg,
-    transparent 0 13px,
-    rgba(169, 202, 236, .72) 13.5px 14.4px,
-    transparent 15px 27px);
-  background-size: 27px 42px;
-  transform: skewX(-8deg);
-  animation: gwent-weather-rain-fall .58s linear infinite;
+  z-index: 3;
+  inset: -38px -14px;
+  opacity: .42;
+  background-image: repeating-linear-gradient(106deg,
+    transparent 0 10px,
+    rgba(187, 218, 248, .82) 10.8px 12px,
+    transparent 12.8px 24px);
+  background-size: 24px 38px;
+  transform: skewX(-9deg);
+  animation: gwent-weather-rain-fall-v2 .42s linear infinite;
   will-change: background-position;
 }
 body.gwent-match-active .gwent-weather-mist {
   position: absolute;
-  right: -8%;
-  bottom: -17px;
-  width: 58%;
-  height: 34px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(140, 177, 215, .19), transparent 72%);
-  filter: blur(7px);
-  animation: gwent-weather-mist-drift 8s ease-in-out infinite alternate;
-}
-body.gwent-match-active .gwent-row.has-weather > h4,
-body.gwent-match-active .gwent-row.has-weather > .gwent-board-cards {
-  position: relative;
   z-index: 2;
+  left: -8%;
+  right: -8%;
+  bottom: -22px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(162, 197, 233, .27), transparent 72%);
+  filter: blur(7px);
+  animation: gwent-weather-mist-drift-v2 5.5s ease-in-out infinite alternate;
 }
-body.gwent-match-active .gwent-row.has-weather > h4 {
-  background: linear-gradient(180deg, rgba(30, 48, 76, .96), rgba(10, 19, 34, .98));
-  border-right-color: rgba(143, 190, 232, .78);
+body.gwent-match-active .gwent-weather-lightning {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(112deg, transparent 20%, rgba(198, 224, 255, .24) 49%, transparent 68%);
+  animation: gwent-weather-lightning-flash 7.2s linear infinite;
 }
-@keyframes gwent-weather-cloud-drift {
-  from { transform: translate3d(-165%, 0, 0); }
-  to { transform: translate3d(680%, 0, 0); }
+body.gwent-match-active .gwent-weather-status {
+  position: absolute;
+  z-index: 6;
+  top: 4px;
+  right: 7px;
+  padding: 3px 7px;
+  border: 1px solid rgba(170, 207, 245, .42);
+  border-radius: 999px;
+  background: rgba(7, 17, 31, .84);
+  color: #d9eaff;
+  font: 800 8px/1.2 Inter, sans-serif;
+  letter-spacing: .08em;
+  text-shadow: 0 1px 3px #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .28);
 }
-@keyframes gwent-weather-rain-fall {
+body.gwent-match-active .gwent-weather-vfx > span { pointer-events: none; }
+@keyframes gwent-weather-cloud-drift-v2 {
+  from { translate: -38% 0; }
+  to { translate: 470% 0; }
+}
+@keyframes gwent-weather-rain-fall-v2 {
   from { background-position: 0 0; }
-  to { background-position: -9px 42px; }
+  to { background-position: -12px 38px; }
 }
-@keyframes gwent-weather-mist-drift {
-  from { transform: translate3d(-8%, 0, 0); opacity: .38; }
-  to { transform: translate3d(8%, -3px, 0); opacity: .72; }
+@keyframes gwent-weather-mist-drift-v2 {
+  from { translate: -3% 0; opacity: .48; }
+  to { translate: 3% -4px; opacity: .86; }
+}
+@keyframes gwent-weather-lightning-flash {
+  0%, 69%, 73%, 100% { opacity: 0; }
+  70% { opacity: .42; }
+  71% { opacity: .08; }
+  72% { opacity: .30; }
 }
 @media (prefers-reduced-motion: reduce) {
-  body.gwent-match-active .gwent-weather-cloud,
-  body.gwent-match-active .gwent-weather-rain,
-  body.gwent-match-active .gwent-weather-mist {
-    animation: none !important;
-  }
-  body.gwent-match-active .gwent-weather-cloud-front { transform: translateX(18%); }
-  body.gwent-match-active .gwent-weather-cloud-back { transform: translateX(55%); scale: .82; }
+  /* Mantém o indicador visual estático para não desaparecer em dispositivos
+     configurados para reduzir movimento. */
+  body.gwent-match-active .gwent-weather-cloud-back { transform: translateX(8%); animation: none !important; }
+  body.gwent-match-active .gwent-weather-cloud-front { transform: translateX(22%); animation: none !important; }
+  body.gwent-match-active .gwent-weather-rain { animation: none !important; opacity: .28; }
+  body.gwent-match-active .gwent-weather-mist,
+  body.gwent-match-active .gwent-weather-lightning { animation: none !important; }
 }
