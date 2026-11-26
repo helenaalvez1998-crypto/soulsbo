@@ -11,9 +11,9 @@
   - Véu Carmesim: `veu-carmesim.png`
   - Os Esquecidos: `os-esquecidos.png`
 - A tela principal do Ateliê exibe o prompt fixo e a referência da facção; remove a função do negative prompt.
-- O upload preserva o enquadramento e a proporção da carta completa. Não recorta para 5:4 nem força 1200×960.
+- O upload preserva os bytes, formato, transparência, dimensões e enquadramento do arquivo original. Não recorta para 5:4, não força 1200×960 e não recompacta a imagem.
 - A validação mantém limite de 8 MB, formatos PNG/JPEG/WEBP, imagem estática, lado mínimo de 512 px e máximo de 18 megapixels.
-- O fluxo atual de submissão, aprovação, Discord e R2 foi preservado.
+- Toda arte aprovada é exibida diretamente como imagem final da carta. O renderizador automático só é usado quando não existe arte aprovada; não há composição, moldura, textos ou ícones adicionados ao upload.\n- O fluxo atual de submissão, aprovação, Discord e R2 foi preservado.
 
 ## Observação
 O fluxo foi validado por sintaxe Python. É necessário publicar em ambiente de teste e confirmar:

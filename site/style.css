@@ -5549,14 +5549,46 @@ body.gwent-match-active .gwent-row.has-entering {
 .gwent-target-actions button:disabled{opacity:.45;cursor:not-allowed}
 
 
-/* Mercado: pacotes gerais e de facção */
-.gwent-store-pack-section{margin:0 0 18px}
-.gwent-store-pack-section .section-head h4{font:700 18px Cinzel,Georgia,serif;color:#ead7b3;margin:5px 0}
-.gwent-store-extras{margin-top:12px}
-.gwent-pack-option{display:flex;flex-direction:column;gap:10px;min-height:245px}
-.gwent-pack-option .pack-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#d6b66f}
-.gwent-pack-option h4{margin:0}
-.gwent-pack-option .pack-pool{font-size:11px;color:var(--muted)}
-.gwent-pack-option .primary{margin-top:auto;width:100%}
-.gwent-pack-option.faction-pack{border-color:rgba(208,177,111,.35)}
-.gwent-pack-option .pack-crest{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(208,177,111,.1);border:1px solid rgba(208,177,111,.3);font-size:20px}
+/* V83 — arte final enviada é exibida inteira, sem recortes ou molduras externas. */
+.gwent-card-tile-art {
+  width:100% !important;
+  aspect-ratio:5 / 7 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  overflow:hidden !important;
+  background:transparent !important;
+}
+.gwent-card-tile-art img {
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  max-height:none !important;
+  aspect-ratio:auto !important;
+  object-fit:contain !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  filter:none !important;
+}
+.gwent-collection-art img {
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  height:auto !important;
+  max-height:76vh !important;
+  object-fit:contain !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  filter:none !important;
+}
+
+.atelier-preview {
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
+}

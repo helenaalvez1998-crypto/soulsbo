@@ -13,7 +13,7 @@ from typing import Any
 
 from levels import PATENTES
 
-VERSAO_ARTES = 30
+VERSAO_ARTES = 31
 
 TIPOS = ("Destreza", "Força", "Magia")
 
@@ -110,9 +110,9 @@ HABILIDADES: dict[str, dict[str, str]] = {
     "gwent_egide": {"nome": "Bênção da Árvore Áurea", "texto": "Concede escudo a uma unidade sua."},
     "gwent_requiem": {"nome": "Chamado dos Mortos", "texto": "Traz do descarte diretamente ao campo uma unidade com poder base 6 ou menos."},
     "gwent_passo": {"nome": "Passo do Lobo", "texto": "Move uma unidade sua para a fileira escolhida."},
-    "dupla_fornalha": {"nome": "Pacto da Fornalha", "texto": "+2 se houver outra unidade de Força na mesma fileira."},
-    "irmandade_veu": {"nome": "Formação do Véu", "texto": "+2 se houver uma unidade de Destreza em outra fileira."},
-    "circulo_arcano": {"nome": "Círculo de Ressonância", "texto": "+2 se houver Magia aliada na mesma fileira ou especial no descarte."},
+    "dupla_fornalha": {"nome": "Pacto da Fornalha", "texto": "+2 se houver outra unidade da Ordem Áurea na mesma fileira."},
+    "irmandade_veu": {"nome": "Formação do Véu", "texto": "+2 se houver uma unidade do Véu Carmesim em outra fileira."},
+    "circulo_arcano": {"nome": "Círculo de Ressonância", "texto": "+2 se houver uma unidade da Lua Negra na mesma fileira ou uma carta especial no descarte."},
     "gwent_sangramento": {"nome": "Sangramento", "texto": "Marca as unidades inimigas da fileira; a segunda marca reduz o bônus em 2 (mínimo -2) e consome as marcas. Marcas expiram no fim da rodada."},
     "gwent_geada_cariana": {"nome": "Geada Cariana", "texto": "Aplica até duas marcas às unidades inimigas da fileira escolhida; cada marca reduz 1 de poder efetivo até o fim da rodada."},
     "gwent_podrida": {"nome": "Podridão Escarlate", "texto": "Cada marca reduz 1 de poder efetivo; a segunda também corrói 1 ponto de bônus positivo, se houver. Marcas expiram no fim da rodada."},
@@ -155,19 +155,6 @@ FACCOES_IDENTIDADE_POR_CARTA = {
     "gwent_unidade_detonador": "Véu Carmesim",          # Guerreiro da Chama Frenética
     "gwent_unidade_devorador_mana": "Véu Carmesim",     # Cavaleiro de Sangue de Mohg
     "gwent_unidade_carniceiro_forja": "Véu Carmesim",   # Recusante de Volcano Manor
-    "luterano_cruzado": "Os Esquecidos",
-    "luterano_missionario": "Os Esquecidos",
-    "luterano_bispo": "Os Esquecidos",
-    "luterano_anjo": "Os Esquecidos",
-    "luterano_papa": "Os Esquecidos",
-    "luterano_sacerdote": "Os Esquecidos",
-    "luterano_irmao": "Os Esquecidos",
-    "luterano_diacon": "Os Esquecidos",
-    "gwent_unidade_sacerdote": "Os Esquecidos",
-    "gwent_unidade_cruzado": "Os Esquecidos",
-    "gwent_unidade_missionario": "Os Esquecidos",
-    "gwent_unidade_protetor": "Os Esquecidos",
-    "gwent_unidade_evangelista": "Os Esquecidos",
 }
 
 # A fileira é definida pelo papel tático da unidade, não pela facção.
@@ -220,36 +207,40 @@ class Carta:
     fileira: str = ""
 
     def para_dict(self) -> dict[str, Any]:
-        """Serializa somente campos canônicos do Gwent; nunca expõe categorias antigas."""
+        """Serializa a identidade atual da carta; tipos antigos ficam somente no modelo interno."""
         data = asdict(self)
-        faccoes = {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra"}
-        fileiras = {"Força": "melee", "Destreza": "ranged", "Magia": "siege"}
+        faccoes_legadas = {"Força": "Ordem Áurea", "Destreza": "Véu Carmesim", "Magia": "Lua Negra"}
+        fileiras_legadas = {"Força": "melee", "Destreza": "ranged", "Magia": "siege"}
         papeis = {
-            ("Força", "melee"): "Vanguarda",
-            ("Força", "ranged"): "Batedor de Guerra",
-            ("Força", "siege"): "Artilheiro",
-            ("Destreza", "melee"): "Duelista",
-            ("Destreza", "ranged"): "Batedor",
-            ("Destreza", "siege"): "Atirador de Elite",
-            ("Magia", "melee"): "Guardião Rúnico",
-            ("Magia", "ranged"): "Invocador",
-            ("Magia", "siege"): "Arcanista",
+            ("Ordem Áurea", "melee"): "Vanguarda",
+            ("Ordem Áurea", "ranged"): "Batedor de Guerra",
+            ("Ordem Áurea", "siege"): "Artilharia Áurea",
+            ("Véu Carmesim", "melee"): "Duelista",
+            ("Véu Carmesim", "ranged"): "Infiltrador",
+            ("Véu Carmesim", "siege"): "Atirador Carmesim",
+            ("Lua Negra", "melee"): "Guardião Rúnico",
+            ("Lua Negra", "ranged"): "Feiticeiro de Campo",
+            ("Lua Negra", "siege"): "Arcanista",
         }
         especial = str(self.categoria or "").casefold() == "especial"
-        faccao = FACCOES_IDENTIDADE_POR_CARTA.get(self.id, faccoes.get(self.tipo, "Ordem Áurea"))
-        fileira = self.fileira or FILEIRAS_POR_CARTA.get(self.id, fileiras.get(self.tipo, "melee"))
+        faccao = FACCOES_IDENTIDADE_POR_CARTA.get(self.id, faccoes_legadas.get(self.tipo, "Ordem Áurea"))
+        fileira = self.fileira or FILEIRAS_POR_CARTA.get(self.id, fileiras_legadas.get(self.tipo, "melee"))
         if fileira not in {"melee", "ranged", "siege"}:
-            fileira = fileiras.get(self.tipo, "melee")
+            fileira = fileiras_legadas.get(self.tipo, "melee")
         data.update({
             "categoria": "Especial" if especial else "Unidade",
             "faccao": faccao,
             "fileira": fileira,
-            "papel_gwent": "Tática" if especial else papeis[(self.tipo, fileira)],
-            # Campos de compatibilidade não carregam mais nomes de categorias antigas.
+            "row": fileira,
+            "row_label": {"melee": "Corpo a Corpo", "ranged": "Longa Distância", "siege": "Cerco"}[fileira],
+            "papel_gwent": "Tática" if especial else papeis[(faccao, fileira)],
+            "identidade": "Carta especial tática" if especial else f"Unidade {papeis[(faccao, fileira)]} da {faccao}",
             "categoria_arte": "Especial" if especial else "Unidade",
             "categoria_origem": "Especial" if especial else "Unidade",
             "jogo_origem": "",
         })
+        # `tipo` era Força/Destreza/Magia. Não deve mais sair na API/UI.
+        data.pop("tipo", None)
         return data
 
 
@@ -364,16 +355,7 @@ _CARTAS_BASE = [
     Carta("gwent_singular_primeiro", "Juramento Primordial do Crisol", "Relíquia", "Destreza", 10, "Singular", 0, "cacador_solitario", "Exemplar singular conquistado por um feito extraordinário."),
     Carta("gwent_singular_intocavel", "Adaga da Faca Negra", "Relíquia", "Destreza", 9, "Singular", 0, "precisao", "Conquistada ao concluir um desafio sem sofrer dano."),
     Carta("gwent_singular_nivel1", "Vontade de Marika", "Relíquia", "Força", 10, "Singular", 0, "ultimo_folego", "Conquistada ao vencer um desafio no nível um."),
-     Carta("gwent_singular_cacador_chefes", "Coroa do Lorde Prístino", "Relíquia", "Magia", 9, "Singular", 0, "paradoxo_eterno", "Conquistada ao derrotar todos os chefes de um desafio."),
-    # Nova facção: Os Esquecidos (Luteranos)
-    Carta("luterano_cruzado", "Cruzado Esquecido", "Chefe", "Força", 6, "Épica", 3, "sinergia_faccao", "Um guerreiro sagrado que luta pela fé, mesmo após ser esquecido pelo mundo. Ganha força com aliados da mesma facção."),
-    Carta("luterano_missionario", "Missionário Esquecido", "Unidade", "Destreza", 4, "Rara", 2, "legado", "Espalha a palavra divina. Se venceu a rodada anterior, entra com +2 de poder."),
-    Carta("luterano_bispo", "Bispo Esquecido", "Chefe", "Magia", 5, "Lendária", 3, "devoto", "Líder espiritual que fortalece aliados da mesma facção."),
-    Carta("luterano_anjo", "Anjo Esquecido", "Unidade", "Magia", 3, "Épica", 2, "gloria", "Mensageiro divino que permanece no campo se vencer a rodada."),
-    Carta("luterano_papa", "Papa Esquecido", "Chefe", "Magia", 7, "Mítica", 4, "sinergia_faccao", "Sumo sacerdote esquecido. Sua presença fortalece todos os aliados da fé."),
-    Carta("luterano_sacerdote", "Sacerdote Esquecido", "Unidade", "Magia", 4, "Rara", 2, "devoto", "Cura e fortalece aliados da mesma facção."),
-    Carta("luterano_irmao", "Irmão Esquecido", "Unidade", "Força", 3, "Comum", 1, "legado", "Um irmão de fé que ganha força ao vencer."),
-    Carta("luterano_diacon", "Diácono Esquecido", "Unidade", "Destreza", 2, "Comum", 1, "escolha_ritmo", "Auxilia nos rituais e escolhe o melhor momento para agir."),
+    Carta("gwent_singular_cacador_chefes", "Coroa do Lorde Prístino", "Relíquia", "Magia", 9, "Singular", 0, "paradoxo_eterno", "Conquistada ao derrotar todos os chefes de um desafio."),
 ]
 
 CARTAS_PRIMORDIAIS = [
@@ -425,18 +407,9 @@ CARTAS_EXPANSAO_V75 = [
     Carta("gwent_v75_lua_cartografo_lunar", "Cartógrafo das Cidades Eternas", "Covenant", "Magia", 4, "Rara", 2, "", "Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.", fileira="ranged"),
     Carta("gwent_v75_lua_graviturgista", "Graviturgista de Nokron", "Magia", "Magia", 5, "Épica", 3, "", "Dobra a gravidade sobre até dois inimigos fortalecidos na fileira escolhida; se atingir dois, recebe poder adicional.", fileira="siege"),
     Carta("gwent_v75_lua_guardia", "Guardiã do Juramento Lunar", "Chefe", "Magia", 5, "Épica", 3, "", "Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.", fileira="melee"),
-    # Nova facção: Os Esquecidos — fé, tradição e rituais sagrados.
-    Carta("luterano_apostolo", "Apóstolo Esquecido", "Covenant", "Força", 5, "Épica", 3, "", "Espalha a verdade divina; ao entrar em campo com aliado da mesma facção, ambos ganham +1 de poder.", fileira="melee"),
-    Carta("luterano_pastor", "Pastor Esquecido", "Unidade", "Destreza", 4, "Rara", 2, "legado", "Guia o rebanho fiel. Se venceu a rodada anterior, entra em campo com +2 de poder.", fileira="ranged"),
-    Carta("luterano_mistico", "Místico Esquecido", "Magia", "Magia", 5, "Rara", 2, "devoto", "Conecta-se ao sagrado; cada aliada da mesma facção em campo concede +1 de bônus adicional.", fileira="siege"),
-    Carta("luterano_profeta", "Profeta Esquecido", "Chefe", "Força", 6, "Mítica", 4, "sinergia_faccao", "Líder espiritual que une o rebanho. Ganha +1 de poder para cada aliada da Fé em campo.", fileira="melee"),
-    Carta("luterano_vigia", "Vigia da Noite", "Unidade", "Destreza", 3, "Comum", 1, "gloria", "Mantém a vigilância durante a noite. Permanece no campo ao vencer a rodada.", fileira="melee"),
-    Carta("luterano_anjo2", "Anjo de Segunda Ordem", "Covenant", "Magia", 5, "Lendária", 3, "gloria", "Brilho do sagrado. Ao vencer rodada, permanece no campo para o início da próxima.", fileira="siege"),
 ]
 
-_LUTERANO_CARTAS = []
-
-_CARTAS_BASE = [*_CARTAS_BASE, *CARTAS_EXPANSAO_V75, *_LUTERANO_CARTAS]
+_CARTAS_BASE = [*_CARTAS_BASE, *CARTAS_EXPANSAO_V75]
 
 CARTAS_POR_ID: dict[str, Carta] = {c.id: c for c in [*_CARTAS_BASE, *CARTAS_PRIMORDIAIS]}
 
@@ -485,12 +458,13 @@ def carta_jogo(nome_jogo: str, marco: str) -> Carta:
     opcoes = identidades[tipo]
     nome_base, epitetos = opcoes[(n // 13) % len(opcoes)]
     epiteto = epitetos[(n // 19) % len(epitetos)]
-    titulo = f"{nome_base} {epiteto}"
+    selo = hashlib.sha256(f"{slug}:{marco}".encode("utf-8")).hexdigest()[:4].upper()
+    titulo = f"{nome_base} {epiteto} · Selo {selo}"
 
     descricoes = {
-        "Força": "Combatente da Ordem Áurea, treinado para sustentar a formação e proteger seus aliados.",
-        "Destreza": "Combatente do Véu Carmesim, habituado a emboscadas, riscos calculados e confrontos de curta distância.",
-        "Magia": "Estudioso da Lua Negra, dedicado à feitiçaria, à observação dos astros e ao controle do campo.",
+        "Força": "Unidade da Ordem Áurea, treinada para sustentar a formação e proteger seus aliados.",
+        "Destreza": "Unidade do Véu Carmesim, especializada em pressão ofensiva, mobilidade e ataques oportunos.",
+        "Magia": "Unidade da Lua Negra, dedicada ao domínio arcano, à observação dos astros e ao controle do campo.",
     }
     descricao = descricoes[tipo]
     if habilidade:
@@ -531,7 +505,8 @@ def carta_patente(indice: int, nivel_minimo: int, nome_patente: str) -> Carta:
         "Magia": ("Mestre Cariano", "Feiticeiro Cariano", "Aprendiz Cariano", "Novato de Raya Lucaria"),
     }
     indice_nome = 0 if nivel_minimo >= 75 else 1 if nivel_minimo >= 30 else 2 if nivel_minimo >= 10 else 3
-    titulo = f"{nomes_por_tipo[tipo][indice_nome]} — {nome_patente}"
+    selo = hashlib.sha256(seed.encode("utf-8")).hexdigest()[:4].upper()
+    titulo = f"{nomes_por_tipo[tipo][indice_nome]} · Selo {selo}"
 
     return Carta(
         id=f"patente_{indice + 1}",
