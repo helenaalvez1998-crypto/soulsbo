@@ -1768,6 +1768,14 @@ class NaraBot(commands.Bot):
                 "winner_id": round_winner,
                 "result": "draw" if round_winner is None else ("win" if round_winner == str(user_id) else "loss"),
             })
+        raw_weather = state.get("weather") if isinstance(state.get("weather"), dict) else {}
+        weather_snapshot = {}
+        for row_key in ("melee", "ranged", "siege"):
+            try:
+                weather_snapshot[row_key] = max(0, int(raw_weather.get(row_key, 0) or 0))
+            except (TypeError, ValueError):
+                weather_snapshot[row_key] = 0
+        active_weather_rows = [row_key for row_key, level in weather_snapshot.items() if level > 0]
         public = {
             "match_id": match_id, "status": state["status"], "phase": state.get("phase", "battle"),
             "is_ai_match": is_ai_match, "ai_difficulty": state.get("ai_difficulty", ""),
@@ -1778,7 +1786,7 @@ class NaraBot(commands.Bot):
             "relic_options": opcoes_de_reliquia(state, user_id),
             "equipped_relic_id": own.get("equipped_relic_id", ""),
             "relic_used": own.get("relic_used", False),
-            "weather_used": own.get("weather_used", False), "weather": state.get("weather", {}),
+            "weather_used": own.get("weather_used", False), "weather": weather_snapshot, "weather_rows": active_weather_rows,
             "is_your_turn": state["turn"] == str(user_id), "your_id": str(user_id),
             "rounds": round_history, "mulligan_done": own.get("mulligan_done", True),
             "discard_count": len(own.get("discard", [])), "draw_count": len(own.get("draw_pile", [])),

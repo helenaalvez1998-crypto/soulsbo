@@ -1,0 +1,17 @@
+SOULSBOT — PATCH GWENT WEATHER + HISTORY V3
+
+Arquivos a substituir no GitHub:
+- bot.py
+- site/index.html
+- site/app.js
+- site/style.css
+
+O que esta correção faz:
+1. A API publica o estado climático como um mapa normalizado e também como weather_rows.
+2. O frontend usa o estado normalizado, mostra CLIMA ATIVO na fileira afetada e renderiza a chuva/nuvens/névoa/relâmpago.
+3. Ao ativar CLIMA, o jogador recebe confirmação visual.
+4. O Histórico é movido para um popover fixo anexado ao body, fora do contêiner da arena que usa overflow:hidden.
+5. index.html usa os identificadores de cache gwent-weather-v78 para forçar o navegador/CDN a buscar os novos app.js e style.css.
+
+Não exige migração de banco de dados nem alteração de variáveis de ambiente.
+Depois do commit, aguarde a FadeHost reiniciar/publicar e faça Ctrl+F5 no navegador.
