@@ -642,6 +642,19 @@ def preparar_carta(card: dict) -> dict:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: reforça até {budget} bônus já alterados pela habilidade: +1 nos positivos ou -1 nos negativos. Não muda o poder inicial nem os escudos.").strip()
         elif has_synergy:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: ao completar combo compatível, reforça até {budget} bônus já alterados: +1 nos positivos ou -1 nos negativos.").strip()
+    # Monte os parâmetros fora da f-string para manter compatibilidade com Python 3.11.
+    image_params = {
+        "rarity": raridade,
+        "power": 0 if special else max(1, min(15, int(card.get("poder", 1)))),
+        "thumb": "1",
+    }
+    exemplar_id = card.get("exemplar_id")
+    if str(exemplar_id or "").isdigit() and int(exemplar_id) > 0:
+        image_params["exemplar_id"] = int(exemplar_id)
+    image_url = (
+        f"/api/gwent/public-cards/{quote(str(card['id']), safe='')}/image?"
+        f"{urlencode(image_params)}"
+    )
     return {
         "id": str(card["id"]), "nome": str(card.get("nome", "Carta")),
         "categoria": category,
@@ -668,15 +681,7 @@ def preparar_carta(card: dict) -> dict:
             if CARD_SYNERGY_TAGS.get(str(card["id"]), set()) & set(combo["tags"])
         ],
         "descricao": str(card.get("descricao", ""))[:240],
-        "image_url": (
-            f"/api/gwent/public-cards/{quote(str(card['id']), safe='')}/image?"
-            f"{urlencode({
-                'rarity': raridade,
-                'power': 0 if special else max(1, min(15, int(card.get('poder', 1)))),
-                **({'exemplar_id': int(card['exemplar_id'])} if str(card.get('exemplar_id', '')).isdigit() and int(card.get('exemplar_id', 0)) > 0 else {}),
-                'thumb': '1',
-            })}"
-        ),
+        "image_url": image_url,
     }
 
 
