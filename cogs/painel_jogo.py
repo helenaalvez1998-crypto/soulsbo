@@ -199,6 +199,21 @@ class ForjaView(discord.ui.View):
             return False
         return True
 
+    @discord.ui.button(label="Lapidar +1", emoji="✦", style=discord.ButtonStyle.primary, row=2, disabled=True)
+    async def lapidar(self, interaction, button):
+        if not self.selected:
+            return await interaction.response.send_message("Selecione um exemplar primeiro.", ephemeral=True)
+        result = await self.bot.db.coliseu_aprimorar_exemplar(self.user_id, int(self.selected["id"]))
+        if result.get("status") == "ok":
+            await interaction.response.edit_message(content=(f"✦ Lapidação concluída no exemplar **#{result['exemplar_id']}**. "
+                f"Poder: **{result['power']}/{result['max_power']}** · Almas gastas: **{result['almas_gastas']}**."), embed=None, view=None)
+        else:
+            messages = {"almas_insuficientes": f"Almas insuficientes: precisa de {result.get('necessarias', '?')}; saldo {result.get('saldo', 0)}.",
+                        "limite_poder_modelo": "Este exemplar já atingiu o poder máximo.",
+                        "carta_especial_nao_aprimora": "Cartas especiais não podem ser lapidadas.",
+                        "nao_encontrado": "Exemplar não encontrado na sua coleção."}
+            await interaction.response.edit_message(content="⛔ " + messages.get(result.get("status"), "Não foi possível lapidar o exemplar."), embed=None, view=None)
+
     @discord.ui.button(label="Ascender", emoji="⬆️", style=discord.ButtonStyle.success, row=2, disabled=True)
     async def ascender(self, interaction, button):
         if not self.selected:
@@ -232,28 +247,8 @@ class PainelJogoView(discord.ui.View):
             url=f"{base_url}/forja", row=1,
         ))
         self.add_item(discord.ui.Button(
-            label="Receitas de Linhagem", emoji="🔥", style=discord.ButtonStyle.link,
+            label="Receitas de Linhagem", emoji="🜂", style=discord.ButtonStyle.link,
             url=f"{base_url}/linhagens", row=1,
-        ))
-        self.add_item(discord.ui.Button(
-            label="Transmutação", emoji="🧪", style=discord.ButtonStyle.link,
-            url=f"{base_url}/transmutacao", row=3,
-        ))
-        self.add_item(discord.ui.Button(
-            label="Rituais Ancestrais", emoji="🔥", style=discord.ButtonStyle.link,
-            url=f"{base_url}/rituais-ancestrais", row=3,
-        ))
-        self.add_item(discord.ui.Button(
-            label="Biblioteca de Cartas", emoji="🃏", style=discord.ButtonStyle.link,
-            url=f"{base_url}/biblioteca-cartas", row=3,
-        ))
-        self.add_item(discord.ui.Button(
-            label="Cartas Geradas", emoji="✦", style=discord.ButtonStyle.link,
-            url=f"{base_url}/cartas-geradas", row=3,
-        ))
-        self.add_item(discord.ui.Button(
-            label="Ateliê de Arte", emoji="🎨", style=discord.ButtonStyle.link,
-            url=f"{base_url}/atelie-arte", row=3,
         ))
         if callback_voltar is not None:
             voltar = discord.ui.Button(label="Voltar aos Jogos", emoji="↩️", style=discord.ButtonStyle.secondary, row=1)

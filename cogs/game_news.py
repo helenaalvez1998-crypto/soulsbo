@@ -12,7 +12,6 @@ O módulo não altera a lógica do catálogo de jogos/mods; usa tabelas própria
 """
 import asyncio
 import hashlib
-import logging
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -21,8 +20,6 @@ import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
-
-log = logging.getLogger("nara")
 
 DEFAULT_FEEDS = [
     ("Gematsu", "https://www.gematsu.com/feed"),
@@ -218,7 +215,7 @@ class GameNewsCog(commands.Cog):
             try:
                 items = await self._fetch_feed(self._session, feed["url"])
             except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as exc:
-                log.warning(f"[news] Feed {feed['nome']} indisponível: {exc}")
+                print(f"[news] Feed {feed['nome']} indisponível: {exc}")
                 continue
             # Na primeira leitura, registra o conteúdo já existente para não despejar notícias antigas.
             if not self._feed_initialised(feed["id"]):
@@ -235,7 +232,7 @@ class GameNewsCog(commands.Cog):
                 try:
                     await self._publish(channel, feed["nome"], item)
                 except (discord.Forbidden, discord.HTTPException) as exc:
-                    log.error(f"[news] Falha ao publicar no Discord: {exc}")
+                    print(f"[news] Falha ao publicar no Discord: {exc}")
                     break
 
     @poll_news.before_loop
