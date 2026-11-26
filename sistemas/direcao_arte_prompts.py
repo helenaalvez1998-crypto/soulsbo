@@ -45,43 +45,43 @@ def normalizar_faccao(valor: Any) -> str:
 
 
 def direcao_faccao(valor: Any) -> str:
-    """Direção visual compartilhada. A entrada deve vir exclusivamente de card['faccao']."""
+    """Instruções visuais do modelo completo específico da facção."""
     canonical = normalizar_faccao(valor)
     directions = {
         "Ordem Áurea": (
-            "FACTION ART STANDARD — ORDEM ÁUREA (LIGHT, LAW AND FAITH): this is a NARABOT deck faction, not proof that the named subject is canonically a member of the Golden Order. "
-            "Faction signature: majesty, order, nobility, spirituality and sacred authority. Use aged gold, solar yellow, warm ivory, muted bronze and neutral weathered stone as a controlled palette. "
-            "Express the faction primarily through motivated golden or warm reflected light, environmental atmosphere, monumental but weathered stone, restrained sacred geometry and subtle background motifs. "
-            "Leyndell, Altus Plateau, Erdtree-related architecture, temples or processional spaces may be selected only when the character's canonical identity or card lore supports that location. "
-            "Do not automatically add angel wings, halos, a giant Erdtree, a paladin archetype or a full-frame gold filter. The faction must never recolor, replace or redesign canonical armor, garments, skin, hair, weapons or signature equipment."
+            "FACTION CARD TEMPLATE — ORDEM ÁUREA. Use the supplied Ordem Áurea complete-card image as the exact layout and styling reference. "
+            "Preserve its warm ivory/parchment field, fine dark outline, golden-brown accents, restrained gold ornament, circular power medallion at upper left, "
+            "large upper illustration, centered name panel, dark tactical strip with gold lettering and diamond markers, gold faction ribbon on the right, "
+            "open lore panel and gold rarity plaque at bottom right. Its visual identity is sacred, solar, noble and disciplined. "
+            "Keep the faction's gold/ivory palette and tree/solar motifs; do not copy the reference character or its lore."
         ),
         "Véu Carmesim": (
-            "FACTION ART STANDARD — VÉU CARMESIM (BLOOD, SACRIFICE AND HERESY): this is a NARABOT deck faction, not a claim that every card subject is an official member of Mohg's blood dynasty. "
-            "Faction signature: blood, violence, combat, mystery, lineage and dark elegance. Use deep crimson, blood red, claret, oxblood, blackened iron, tarnished silver and neutral ash-grey as controlled environmental and lighting accents. "
-            "Express the faction through dramatic motivated red reflections, deep shadows, severe atmosphere, restrained heraldic or ritual context only when supported, and a fitting fortress, noble estate, battlefield, ruin or ceremonial environment selected from the card's actual story. "
-            "Do not automatically make the subject a vampire, assassin, blood mage or demon; do not add horns, tridents, gore, bloodflame or blood magic without explicit card support. Never recolor or redesign canonical armor, garments, skin, hair, weapons or signature equipment."
+            "FACTION CARD TEMPLATE — VÉU CARMESIM. Use the supplied Véu Carmesim complete-card image as the exact layout and styling reference. "
+            "Preserve its warm parchment field, dark red corner ornaments, fine pale border, circular power medallion at upper left, "
+            "dominant upper illustration, pale title strip, black tactical strip with crimson diamond markers, vertical crimson faction banner on the right, "
+            "spacious lore area, crimson divider detail and dark red rarity plaque at bottom right. "
+            "Its visual identity is blood-red, severe, ritualistic and somber. Do not copy the reference priest or its lore."
         ),
         "Lua Negra": (
-            "FACTION ART STANDARD — LUA NEGRA (MAGIC, COSMOS AND SECRETS): this is a NARABOT deck faction, not proof that the named subject canonically belongs to the Carian royal family or a lunar order. "
-            "Faction signature: mystery, darkness, cold, lunar forces, melancholy and restrained supernatural atmosphere. Use deep blue, lunar blue, blue-grey, silver, cold white and blue-black as controlled environmental and lighting accents. "
-            "Express the faction through motivated moonlight, cool reflections, mist, deep shadows and ancient ruins, night landscapes, observatories or Carian architecture only when supported by the card's actual identity and lore. "
-            "Do not automatically turn the subject into a wizard, sorcerer or lunar entity; do not add a moon, starfield, glintstone spell, runes or magical aura without explicit support. Never recolor or redesign canonical armor, garments, skin, hair, weapons or signature equipment."
+            "FACTION CARD TEMPLATE — LUA NEGRA. Use the supplied Lua Negra complete-card image as the exact layout and styling reference. "
+            "Preserve its pale parchment field, fine dark border, circular power medallion at upper left, expansive upper illustration, "
+            "pale title strip, black tactical strip with blue diamond markers, vertical deep-blue faction banner on the right, "
+            "spacious centered lore panel, blue divider detail and deep-blue rarity plaque at bottom right. "
+            "Its visual identity is lunar, nocturnal, cold and mysterious, using deep blue, silver and moonlit highlights. Do not copy Hanni or her lore."
         ),
         "Os Esquecidos": (
-            "FACTION ART STANDARD — OS ESQUECIDOS: this is a NARABOT deck faction. "
-            "Use the supplied faction reference as the visual authority: deep emerald green, antique gold, warm ivory and blackened metal; "
-            "sacred geometric emblems and star motifs; weathered sanctuaries, solemn ruined architecture and restrained golden light. "
-            "Keep these elements as faction styling only. Do not assign unsupported religious identity, symbols, powers, clothing or canonical allegiance to the card subject."
+            "FACTION CARD TEMPLATE — OS ESQUECIDOS. Use the supplied Os Esquecidos complete-card image as the exact layout and styling reference. "
+            "Preserve its pale parchment field, fine dark border, circular power medallion at upper left, large upper illustration, "
+            "pale title strip, dark emerald tactical strip with green diamond markers, vertical emerald faction banner on the right, "
+            "spacious lore panel, green divider detail and emerald rarity plaque at bottom right. "
+            "Its visual identity is ancient, solemn and mysterious, using emerald green, antique gold and ivory. Do not copy the reference pope or his lore."
         ),
     }
     if canonical:
         return directions[canonical]
     raw = _text(valor, 100) or "blank"
-    return (
-        f"FACTION FIELD VALIDATION: the card's faccao field is '{raw}', which does not match one of the game's four official factions: "
-        "Ordem Áurea, Véu Carmesim, Lua Negra or Os Esquecidos. Do not infer or assign a faction from the character name, lore, appearance, abilities, affinities or synergies. "
-        "Do not create a fourth faction. Keep faction-specific heraldry, uniform, palette and allegiance neutral until the actual faccao field is corrected."
-    )
+    return (f"FACTION VALIDATION: '{raw}' is not one of the four registered factions. Do not infer a faction or choose a template. "
+            "Request correction before generating the card.")
 
 
 # Referências explícitas para personagens/identidades recorrentes. A referência
@@ -135,7 +135,7 @@ def gerar_analise_artistica(
     ability_name: str = "",
     ability_rule: str = "",
 ) -> str:
-    """Resumo de produção baseado nos dados oficiais, sem classes antigas."""
+    """Ficha artística enxuta: somente os seis dados oficiais solicitados."""
     name = _text(card.get("nome") or card.get("name") or "Carta sem nome", 160)
     faction = _text(card.get("faccao") or "não informada", 80)
     rarity = _text(card.get("raridade") or "não informada", 60)
@@ -143,177 +143,112 @@ def gerar_analise_artistica(
     row = _text(card.get("fileira") or card.get("row") or "", 30)
     labels = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}
     row_label = "Carta especial" if category.casefold() == "especial" else labels.get(row, "não informada")
-    lore = _text(card.get("lore") or card.get("descricao") or card.get("description") or "", 1200)
+    lore = _text(card.get("lore") or card.get("descricao") or card.get("description") or "", 1400)
     base_power = card.get("poder_base", card.get("poder", "não informado"))
-    max_power = card.get("poder_maximo", card.get("max_power", "não informado"))
-    cost = card.get("custo", "não informado")
-    rarity_power = card.get("potencia_raridade", card.get("rarity_power", "não informado"))
-    effect_name = _text(ability_name or card.get("habilidade_nome") or card.get("efeito_nome") or "", 160)
-    effect_text = _text(ability_rule or card.get("habilidade_texto") or card.get("habilidade_descricao") or card.get("habilidade_regra") or card.get("efeito") or "", 700)
-    if has_ability is None:
-        has_ability = bool(effect_name or effect_text)
-    synergies = card.get("sinergias") or card.get("sinergia") or card.get("synergies") or []
-    if isinstance(synergies, (list, tuple, set)):
-        synergy_text = "; ".join(_text(x.get("nome") or x.get("name") or x.get("descricao") or x, 180) if isinstance(x, dict) else _text(x, 180) for x in list(synergies)[:10])
-    else:
-        synergy_text = _text(synergies, 500)
-    lines = [
-        f"CARTA: {name}.", f"FACÇÃO: {faction}.", f"RARIDADE: {rarity}.",
-        f"POSIÇÃO TÁTICA: {row_label}.", f"CATEGORIA: {category}.",
-        f"CUSTO: {cost}.", f"PODER-BASE (valor do medalhão): {base_power}.",
-        f"PODER MÁXIMO (campo separado): {max_power}.",
-        f"POTÊNCIA DA RARIDADE (campo separado): {rarity_power}.",
-    ]
-    if lore: lines.append(f"LORE: {lore}")
-    if has_ability:
-        lines.append(f"HABILIDADE: {effect_name or 'Efeito registrado'}. {effect_text}")
-    else:
-        lines.append("HABILIDADE: Sem habilidade especial. Não inventar um efeito.")
-    if synergy_text: lines.append(f"SINERGIAS: {synergy_text}.")
-    if scene_reference: lines.append(f"REFERÊNCIA DE CENA: {_text(scene_reference, 1200)}")
-    lines.append("REGRA: reproduzir todos os nomes, rótulos e valores exatamente como fornecidos. A facção e a posição tática são campos independentes. Não usar Força, Destreza ou Magia como classe de combate.")
-    return "\n".join(lines)
+    return "\n".join([
+        f"NOME DA CARTA: {name}",
+        f"PODER-BASE: {base_power}",
+        f"RARIDADE: {rarity}",
+        f"POSIÇÃO TÁTICA: {row_label}",
+        f"FACÇÃO: {faction}",
+        f"LORE: {lore or '[LORE NÃO CADASTRADA]'}",
+    ])
 
-def gerar_negative_prompt(card: dict[str, Any], *, has_ability: bool = True) -> str:
-    """Negative prompt para evitar divergência visual sem proibir texto ou moldura."""
-    base = [
-        "misspelled Portuguese text, gibberish typography, wrong accent marks, incorrect card name, incorrect faction name, wrong tactical row label, wrong digits, substituted numbers, duplicated stats, duplicated labels, invented abilities, missing required card fields, extra unrequested attributes",
-        "legacy combat class labels Força, Destreza or Magia, faction inferred from combat role, faction substituted for tactical row, tactical row substituted for faction",
-        "wrong power badge value, maximum power shown as base power, rarity potency shown as combat power, cost shown as power, power values swapped or merged",
-        "generic medieval fantasy, inaccurate Elden Ring identity, incorrect face, inaccurate species, wrong silhouette, incorrect canonical armor, clothing or signature weapon, unrelated companions, unsupported character, random dragon or skull",
-        "broken anatomy, extra limbs, malformed hands, fused fingers, impossible weapon grip, floating equipment, impossible perspective, inconsistent light, unreadable layout, overlapping panels, cropped title, clipped text, cluttered composition",
+
+def gerar_negative_prompt(card: dict[str, Any], *, has_ability: bool = False) -> str:
+    """Negative prompt alinhado ao layout atual de seis campos."""
+    return "; ".join([
+        "misspelled Portuguese text, gibberish typography, wrong accent marks, incorrect card name, incorrect faction, wrong tactical position, wrong rarity, wrong base-power digit",
+        "cost field, maximum power field, rarity potency field, category field, ability field, synergy field, extra statistics, extra labels, invented card attributes",
+        "faction confused with tactical position, tactical position confused with faction, Força, Destreza or Magia used as combat class",
+        "wrong faction template, generic universal recolored template, copied sample character, copied sample card title, copied sample lore, copied sample power number",
+        "generic medieval fantasy, inaccurate Elden Ring identity, incorrect face, inaccurate species, wrong silhouette, incorrect canonical armor, clothing or signature weapon",
+        "broken anatomy, extra limbs, malformed hands, fused fingers, impossible weapon grip, floating equipment, impossible perspective, inconsistent light, unreadable layout, overlapping panels, cropped title, clipped lore, cluttered composition",
         "anime, manga, cartoon, chibi, science fiction, futuristic armor, cyberpunk, glossy CGI, plastic armor, waxy skin, neon filter, excessive bloom, oversaturation, pixelation, compression artifacts, watermark, signature, external brand logo",
-    ]
-    if not has_ability:
-        base.append("invented ability, spellcasting, magical attack, supernatural aura, floating runes, unexplained glow, energy beam or visual effect not present in the supplied card data")
-    return "; ".join(base)
+    ])
+
 
 def montar_prompt_mestre(
     *, card: dict[str, Any], detail_prompt: str, scene_reference: str = "",
     has_ability: bool = True, ability_name: str = "", ability_rule: str = "",
     faction_direction: str = "", negative_prompt: str = "",
 ) -> str:
-    """Monta um prompt integral para gerar a carta completa, com dados bloqueados."""
+    """Prompt integral para a nova identidade visual: seis campos e template por facção."""
     name = _text(card.get("nome") or card.get("name") or "Carta sem nome", 160)
-    category = _text(card.get("categoria") or "Unidade", 60)
     faction_raw = _text(card.get("faccao") or "", 80)
     faction = normalizar_faccao(faction_raw)
     rarity = _text(card.get("raridade") or "", 40)
+    category = _text(card.get("categoria") or "Unidade", 60)
     row = _text(card.get("fileira") or card.get("row") or "", 20)
     row_labels = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}
-    special = category.casefold() == "especial"
-    row_label = "Carta especial" if special else row_labels.get(row, "")
+    row_label = "Carta especial" if category.casefold() == "especial" else row_labels.get(row, "")
     if not faction:
         raise ValueError(f"Facção ausente ou inválida para gerar a carta {name}.")
     if not rarity:
         raise ValueError(f"Raridade ausente para gerar a carta {name}.")
-    if not special and not row_label:
+    if not row_label:
         raise ValueError(f"Posição tática ausente ou inválida para gerar a carta {name}.")
-    if special and row_label != "Carta especial":
-        raise ValueError(f"Categoria especial inconsistente para gerar a carta {name}.")
     try:
         base_power = int(card.get("poder_base", card.get("poder")))
-        max_power = int(card.get("poder_maximo", card.get("max_power", base_power)))
-        cost = int(card.get("custo", 0))
-        rarity_power = int(card.get("potencia_raridade", card.get("rarity_power", 0)) or 0)
     except (TypeError, ValueError):
-        raise ValueError(f"Valores numéricos incompletos ou inválidos para gerar a carta {name}.")
-    if special:
-        if base_power != 0 or max_power != 0:
-            raise ValueError(f"Carta especial {name}: poder-base e poder máximo devem ser zero.")
-    elif base_power < 1 or max_power < base_power:
-        raise ValueError(f"Carta {name}: poder-base/poder máximo inconsistentes.")
+        raise ValueError(f"Poder-base inválido para gerar a carta {name}.")
     lore = _text(card.get("descricao") or card.get("lore") or "Sem lore cadastrada.", 1400)
-    effect_name = _text(ability_name or card.get("habilidade_nome") or "Sem habilidade especial", 140)
-    effect_rule = _text(ability_rule or card.get("habilidade_texto") or card.get("habilidade_descricao") or "Sem habilidade especial.", 700)
-    if not has_ability:
-        effect_name, effect_rule = "Sem habilidade especial", "Sem habilidade especial. Não adicionar efeitos novos."
-    synergies = card.get("sinergias") or []
-    if isinstance(synergies, (list, tuple, set)):
-        synergy_text = "; ".join(_text(x.get("nome") or x.get("name") or x, 160) if isinstance(x, dict) else _text(x, 160) for x in list(synergies)[:10]) or "Nenhuma sinergia cadastrada"
-    else:
-        synergy_text = _text(synergies, 600) or "Nenhuma sinergia cadastrada"
-    card_id = _text(card.get("id") or card.get("card_id") or "não informado", 100)
-    exemplar_id = _text(card.get("exemplar_id") or "não se aplica (modelo de criação)", 80)
-    power_label = str(base_power)
-    max_label = str(max_power)
-    cost_label = str(cost)
-    rarity_power_label = str(rarity_power)
-    affinity = card.get("afinidades") or card.get("afinidade_dominante") or "não informada"
-    if isinstance(affinity, (list, tuple, set)):
-        affinity = ", ".join(_text(x, 80) for x in list(affinity)[:8]) or "não informada"
     canonical = canonical_reference(card)
     faction_text = faction_direction or direcao_faccao(faction)
-    scene = _text(scene_reference, 1600) or "Derive a cena somente do nome, lore, identidade e habilidade cadastrados."
-    detail = _multiline(detail_prompt, 18000)
-    negative = negative_prompt or gerar_negative_prompt(card, has_ability=has_ability)
-    return f"""NARABOT — PROMPT MESTRE DE CARTA COMPLETA — VERSÃO 2.0
+    scene = _text(scene_reference, 1800) or "Create a scene grounded only in the exact card name, lore and canonical identity. Do not invent powers, equipment or biography."
+    # detail_prompt is intentionally not interpolated: legacy builders may contain
+    # category, cost, max power, rarity potency, abilities or synergies, all excluded
+    # from the new six-field card face.
+    negative = negative_prompt or gerar_negative_prompt(card, has_ability=False)
+    return f"""NARABOT — PROMPT MESTRE DE CARTA COMPLETA — NOVA IDENTIDADE VISUAL
 
-OBJETIVO: gerar UMA CARTA COLECIONÁVEL COMPLETA, pronta para o jogo, em orientação vertical 2:3. NÃO gerar somente uma ilustração. A saída final deve conter a arte, o design integral da carta, a moldura e todos os campos abaixo, com tipografia legível em português.
+OBJECTIVE: create ONE finished collectible card, not a standalone illustration. Use the attached faction-specific complete card as the visual template. Each of the four factions has its OWN complete template. Do not apply a universal layout and do not recolor another faction's template.
 
-FONTE OFICIAL E BLOQUEIO DE DADOS — NÃO INTERPRETAR NEM RECALCULAR:
-ID DO MODELO: {card_id}
-ID DO EXEMPLAR: {exemplar_id}
-NOME EXATO: {name}
-CATEGORIA: {category}
-FACÇÃO EXATA: {faction}
-RARIDADE EXATA: {rarity}
-POSIÇÃO TÁTICA EXATA: {row_label}
-CUSTO EXATO: {cost_label}
-PODER-BASE EXATO: {power_label}
-PODER MÁXIMO EXATO: {max_label}
-POTÊNCIA DA RARIDADE EXATA: {rarity_power_label}
-NOME DA HABILIDADE: {effect_name}
-REGRA DA HABILIDADE: {effect_rule}
+OFFICIAL CARD DATA — THESE SIX FIELDS ARE THE ONLY CARD DATA TO PRINT:
+CARD NAME: {name}
+BASE POWER (upper-left medallion): {base_power}
+RARITY: {rarity}
+TACTICAL POSITION: {row_label}
+FACTION: {faction}
 LORE: {lore}
-AFINIDADES: {affinity}
-SINERGIAS: {synergy_text}
 
-REGRAS NUMÉRICAS ABSOLUTAS:
-1. O medalhão principal deve exibir exatamente PODER-BASE = {power_label}. Nunca usar {max_label} no medalhão quando o poder-base for diferente.
-2. O valor {max_label} só pode aparecer no campo separado rotulado PODER MÁXIMO. Não o substituir pelo poder-base.
-3. O custo é {cost_label} e deve aparecer somente no campo de custo.
-4. POTÊNCIA DA RARIDADE é {rarity_power_label}; deve aparecer em seu próprio campo, nunca como poder ou custo.
-5. Não somar, arredondar, estimar, evoluir ou corrigir os números. Copiar os valores fonte exatamente.
-6. Se algum dado estiver ausente, não inventar um valor; deixar o campo sem número e registrar a ausência. Neste prompt, todos os valores obrigatórios foram fornecidos.
+HARD EXCLUSION RULE — NEVER PRINT OR VISUALLY REPRESENT:
+COST, MAXIMUM POWER, RARITY POTENCY, CATEGORY, ABILITY, SYNERGIES, combat attributes, internal IDs or any other data fields. Do not create icons, badges, empty boxes or labels for excluded fields. These values may exist in internal game records but are not part of this card design.
 
-REGRAS DE IDENTIDADE E TAXONOMIA:
-- FACÇÃO é identidade/alinhamento da carta; POSIÇÃO TÁTICA é uma classificação separada.
-- Para unidades, escrever a posição exatamente como “Corpo a corpo”, “Longa distância” ou “Cerco”, conforme o dado acima.
-- Nunca usar “Força”, “Destreza” ou “Magia” como classe, tipo de combate, fileira ou posição tática. Magia pode existir apenas como tema, lore ou habilidade quando os dados a sustentarem.
-- Não converter facção em posição, nem posição em facção. Não inventar outra facção.
-- Para especiais, escrever “Carta especial” em vez de uma posição de unidade.
+FIELD PLACEMENT:
+- BASE POWER: exact number {base_power} in the upper-left circular power medallion.
+- CARD NAME: exact name in the horizontal title panel below the artwork.
+- TACTICAL POSITION: exact label “{row_label}” in the dark horizontal strip below the title.
+- FACTION: exact faction identity {faction}, represented by the faction's vertical side banner and its emblem. The faction name may appear vertically as in its supplied reference.
+- LORE: reproduce the supplied lore in the lower parchment panel, preserving its meaning and wording. Do not add a lore heading unless the faction reference contains one.
+- RARITY: exact value “{rarity}” in the bottom-right rarity plaque.
 
-COMPOSIÇÃO E CONTEÚDO DA CARTA:
-- Tela vertical 2:3, carta única centralizada, bordas completas visíveis, sem cortes, sem mockup, sem mãos segurando a carta.
-- Moldura de qualidade premium, identidade visual coerente com a raridade e acentos de facção discretos; o design não pode esconder dados.
-- Ilustração principal grande e específica à identidade e lore, respeitando o universo Elden Ring e referências canônicas: {canonical}
-- Campo superior do nome: “{name}”.
-- Campo de facção: “{faction}”.
-- Campo de raridade: “{rarity}”.
-- Campo de posição tática: “{row_label}”.
-- Campo de custo: “{cost_label}”.
-- Medalhão de poder-base: “{power_label}”.
-- Campo distinto de poder máximo: “PODER MÁXIMO {max_label}”.
-- Campo distinto de potência da raridade: “POTÊNCIA DA RARIDADE {rarity_power_label}”.
-- Campo de habilidade: “{effect_name}” e o texto fiel “{effect_rule}”.
-- Campo de lore: reproduzir a lore sem alterar o sentido e sem acrescentar fatos.
-- Campo de sinergias: “{synergy_text}”, se houver espaço; não inventar relações.
-
-DIREÇÃO ARTÍSTICA DA FACÇÃO:
+VISUAL TEMPLATE — FACTION-SPECIFIC, NOT UNIVERSAL:
 {faction_text}
+The attached reference image for this faction is authoritative for card proportions, border, parchment, panel placement, typography, banner, emblem placement, divider treatment, color accents and rarity plaque. Match its structure closely. Small faction-specific differences are intentional and must be preserved. Never copy the sample character, sample card name, sample power number, sample lore or sample rarity; replace them with the six official data fields above.
 
-CENA E INTERPRETAÇÃO VISUAL:
-{scene}
-{detail}
+ART DIRECTION:
+- Main illustration occupies the same large upper artwork region as the faction reference.
+- Depict the exact named subject, preserving recognizable Elden Ring identity where applicable: {canonical}
+- Translate the supplied lore into a specific scene, pose, expression, equipment, setting and atmosphere. Do not invent weapons, abilities, magic, companions, canonical allegiance or biography.
+- Faction styling influences the card template, restrained environmental accents and lighting. It must not overwrite the subject's canonical appearance, armor, clothing, skin, hair or signature equipment.
+- Scene guidance: {scene}
 
-CONTROLE DE QUALIDADE ANTES DA ENTREGA:
-Confirme que o nome, facção, raridade, posição tática, custo, poder-base, poder máximo, potência da raridade, habilidade e lore coincidem caractere por caractere com a fonte acima. Conferir especialmente que o medalhão mostra {power_label}, não {max_label}. Corrigir qualquer campo duplicado, trocado, omitido, ilegível ou escrito incorretamente antes de finalizar. A arte não tem autorização para alterar os dados de jogo.
+TEXT AND LAYOUT RULES:
+- The card is a single complete vertical 2:3 collectible card.
+- Keep the entire border visible; no mockup, hands, background canvas or multiple-card sheet.
+- Use clear, accurate Portuguese typography with correct accents.
+- Preserve the exact six field values. Do not paraphrase, translate, abbreviate or invent them.
+- Fit lore legibly inside the existing lower panel; do not remove or shrink other required fields to add new fields.
+- Do not show the old dark-metal multi-stat card layout. Use the newly supplied faction-specific parchment template.
+
+FINAL VALIDATION:
+Verify that the image contains exactly the authorized information: name “{name}”, base power “{base_power}”, rarity “{rarity}”, tactical position “{row_label}”, faction “{faction}” and the supplied lore. Verify that COST, MAXIMUM POWER, RARITY POTENCY, CATEGORY, ABILITY and SYNERGIES do not appear anywhere. Confirm the correct faction-specific template was followed.
 
 NEGATIVE PROMPT:
 {negative}
 
-FORMATO FINAL: uma única carta completa em orientação vertical 2:3 (1024×1536 recomendado), com moldura, ilustração e todas as informações oficiais. Não entregar arte isolada, carta sem texto, ficha separada, folha de cartas ou composição em painel."""
+OUTPUT: one finished, high-resolution vertical 2:3 card, using the attached faction-specific reference as the template."""
 
 def pacote_prompt_arte(
     *,

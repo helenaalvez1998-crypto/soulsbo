@@ -149,11 +149,11 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#d5ad69!important
 </head><body><main>
 <h1>Ateliê de Arte</h1><p class="muted">Gere o prompt exclusivo da sua carta, crie a carta completa na ferramenta de sua preferência e envie o arquivo para vinculá-lo à sua carta.</p>
 <section class="panel"><h2 id="cardName">Carregando carta…</h2><div id="cardMeta" class="muted"></div>
-<p>O pacote contém análise artística, prompt fixo e referência visual automática conforme a facção.</p>
+<p>O pacote contém análise artística com seis dados oficiais, prompt fixo e o modelo completo específico da facção selecionada.</p>
 <label>Análise artística (PT)<textarea id="analysis" readonly placeholder="A análise aparecerá aqui."></textarea></label>
 <label>Prompt fixo<textarea id="prompt" readonly placeholder="O prompt definitivo aparecerá aqui."></textarea></label>
 <label>Negative prompt<textarea id="negative" readonly placeholder="As restrições visuais aparecerão aqui."></textarea></label>
-<label>Referência visual da facção<img id="reference" class="preview" hidden alt="Referência visual da facção selecionada"></label>
+<label>Modelo completo de referência da facção<img id="reference" class="preview" hidden alt="Modelo completo de referência da facção selecionada"></label>
 <div class="row"><button id="copy" disabled>Copiar prompt fixo</button><button id="copyNegative" disabled>Copiar negative prompt</button><button id="copyAll" disabled>Copiar pacote completo</button><button id="reload">Atualizar prompt</button></div>
 <p class="muted" id="format">Formato: carta completa; orientação vertical 2:3; a imagem deve conter a carta completa.</p></section>
 <section class="panel"><h2>Enviar carta completa</h2>
@@ -180,9 +180,7 @@ async function load(){
  const def=card.definition||{};
  const tacticalRow=String(def.categoria||'').toLowerCase()==='especial'?'Carta especial':(rowLabels[def.fileira]||'Posição tática não cadastrada');
  const basePower=def.poder_base??def.poder??card.power;
- const maxPower=card.max_power??def.poder_maximo??basePower;
- const rarityPower=def.potencia_raridade??card.potencia_raridade??0;
- $('cardMeta').textContent=[card.faction,card.rarity,tacticalRow,'Poder-base '+basePower,'Poder máximo '+maxPower,'Potência da raridade '+rarityPower,'ID '+cardId].filter(Boolean).join(' · ');
+ $('cardMeta').textContent=['Facção: '+(card.faction||def.faccao||''),'Raridade: '+(card.rarity||def.raridade||''),'Posição tática: '+tacticalRow,'Poder-base: '+basePower].filter(Boolean).join(' · ');
  $('analysis').value=p.analysis||'';$('prompt').value=p.prompt||'';$('negative').value=p.negative_prompt||'';$('copy').disabled=!p.prompt;$('copyNegative').disabled=!p.negative_prompt;$('copyAll').disabled=!(p.analysis&&p.prompt&&p.negative_prompt);$('format').textContent=`Formato obrigatório: vertical ${p.recommended_aspect_ratio||'2:3'} · ${p.recommended_width||1024} × ${p.recommended_height||1536}px.`;
  currentArt=['validated','stored'].includes(card.art_status)&&!!card.art_path;
  $('replace').hidden=!currentArt;$('upload').hidden=currentArt;

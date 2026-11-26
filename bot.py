@@ -2255,7 +2255,6 @@ class NaraBot(commands.Bot):
                 "name": payload.get("nome", card_id),
                 "rarity": rarity,
                 "power": power,
-                "max_power": payload["poder_maximo"],
                 "faction": payload.get("faccao", ""),
                 "analysis": analysis.strip(),
                 "prompt": str(package.get("prompt") or fixed_prompt),
@@ -2266,7 +2265,7 @@ class NaraBot(commands.Bot):
                 "reference_url": reference_url,
                 "reference_required": True,
                 "full_card": True,
-                "format_note": f"Gere e envie uma carta completa para o exemplar #{exemplar_id}. Valores oficiais: poder-base {power}, poder máximo {payload['poder_maximo']}, raridade {rarity}, custo {payload['custo']}, potência da raridade {payload['potencia_raridade']}. A arte será vinculada somente a este exemplar.",
+                "format_note": f"Gere e envie a carta completa do exemplar #{exemplar_id}, usando o modelo visual específico da facção. Dados visíveis: nome, poder-base {power}, raridade {rarity}, posição tática e facção. A lore deve ser reproduzida integralmente. A arte será vinculada somente a este exemplar.",
             })
         except Exception:
             log.exception("Falha ao gerar prompt do Ateliê para %s.", user_id)
