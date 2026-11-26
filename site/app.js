@@ -4,13 +4,18 @@ let cardCatalog = [];
 let currentUser = null;
 const text = (value, fallback = '—') => value === null || value === undefined || value === '' ? fallback : String(value);
 const number = (value) => new Intl.NumberFormat('pt-BR').format(Number(value || 0));
-// Manter sincronizado com VERSAO_ARTES em sistemas/cartas.py.
-const CARD_IMAGE_VERSION = 32;
+const isCardImageUrl = (value) => /\/api\/gwent\/(?:public-)?cards\/[^/]+\/image/.test(String(value || ''));
 const imageUrl = (card) => {
-  const raw = card.image_url || `/api/gwent/cards/${encodeURIComponent(card.card_id || String(card.id || '').split('::')[0])}/image`;
-  if (!raw.includes('/api/gwent/cards/')) return raw;
+  const cardId = card.card_id || String(card.id || '').split('::')[0];
+  const raw = card.image_url || `/api/gwent/public-cards/${encodeURIComponent(cardId)}/image`;
+  if (!isCardImageUrl(raw)) return raw;
   const url = new URL(raw, window.location.origin);
-  if (!url.searchParams.has('v')) url.searchParams.set('v', String(CARD_IMAGE_VERSION));
+  // Compatibilidade com dados antigos: qualquer carta publicada usa rota pública.
+  url.pathname = url.pathname.replace('/api/gwent/cards/', '/api/gwent/public-cards/');
+  const rarity = card.raridade || card.rarity;
+  const power = card.poder ?? card.power;
+  if (rarity) url.searchParams.set('rarity', String(rarity));
+  if (power !== null && power !== undefined && Number.isFinite(Number(power))) url.searchParams.set('power', String(Number(power)));
   // Grade/deck usam miniatura. O modal pede perfil HD independente.
   if (!url.searchParams.has('detail')) url.searchParams.set('thumb', '1');
   return `${url.pathname}${url.search}`;
@@ -119,7 +124,7 @@ if (document.body && 'MutationObserver' in window) {
 }
 document.addEventListener('error', (event) => {
   const image = event.target;
-  if (!(image instanceof HTMLImageElement) || !image.src.includes('/api/gwent/cards/')) return;
+  if (!(image instanceof HTMLImageElement) || !isCardImageUrl(image.src)) return;
   const attempts = Number(image.dataset.cardRetry || 0);
   if (attempts < CARD_IMAGE_RETRY_DELAYS.length) {
     image.dataset.cardRetry = String(attempts + 1);
@@ -385,7 +390,7 @@ function openGwentCollectionCardModal(cardId) {
   const rarityBudget = rarityPower(card);
   const src = imageUrl(card);
   const modalCard = {...card};
-  if (src.includes('/api/gwent/cards/')) {
+  if (isCardImageUrl(src)) {
     const hi = new URL(src, window.location.origin);
     hi.searchParams.delete('thumb');
     hi.searchParams.set('detail', '1');
@@ -1811,7 +1816,7 @@ function showGwentImageHoverPreview(source, alt = '') {
   image.alt = alt || '';
   try {
     const highRes = new URL(source, window.location.origin);
-    if (highRes.pathname.includes('/api/gwent/cards/')) {
+    if (isCardImageUrl(highRes.pathname)) {
       highRes.searchParams.delete('thumb');
       highRes.searchParams.set('detail', '1');
     }
@@ -1855,7 +1860,7 @@ function openGwentBoardCardModal(cardId) {
   const isSpecial = !!card.especial || card.categoria === 'Especial';
   const modalCard = {...card};
   const src = imageUrl(card);
-  if (src.includes('/api/gwent/cards/')) {
+  if (isCardImageUrl(src)) {
     const hi = new URL(src, window.location.origin);
     hi.searchParams.delete('thumb');
     hi.searchParams.set('detail', '1');
@@ -1935,7 +1940,7 @@ function openGwentPlayCardModal(cardId) {
     : 'Você poderá jogar esta carta quando chegar sua vez.';
   const modalCard = {...card};
   const modalImageUrl = imageUrl(card);
-  if (modalImageUrl.includes('/api/gwent/cards/')) {
+  if (isCardImageUrl(modalImageUrl)) {
     const highRes = new URL(modalImageUrl, window.location.origin);
     highRes.searchParams.delete('thumb');
     highRes.searchParams.set('detail', '1');

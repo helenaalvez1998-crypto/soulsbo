@@ -1,6 +1,7 @@
 """Motor estratégico Gwent do NARABOT: regras puras, sem dependência do Discord."""
 from __future__ import annotations
 from copy import deepcopy
+from urllib.parse import quote, urlencode
 
 ROWS = ("melee", "ranged", "siege")
 AI_PLAYER_ID = -1  # Identidade técnica reservada à NARA; nunca recebe ranking/recompensas.
@@ -667,7 +668,15 @@ def preparar_carta(card: dict) -> dict:
             if CARD_SYNERGY_TAGS.get(str(card["id"]), set()) & set(combo["tags"])
         ],
         "descricao": str(card.get("descricao", ""))[:240],
-        "image_url": f"/api/gwent/cards/{card['id']}/image",
+        "image_url": (
+            f"/api/gwent/public-cards/{quote(str(card['id']), safe='')}/image?"
+            f"{urlencode({
+                'rarity': raridade,
+                'power': 0 if special else max(1, min(15, int(card.get('poder', 1)))),
+                **({'exemplar_id': int(card['exemplar_id'])} if str(card.get('exemplar_id', '')).isdigit() and int(card.get('exemplar_id', 0)) > 0 else {}),
+                'thumb': '1',
+            })}"
+        ),
     }
 
 
@@ -717,7 +726,8 @@ def preparar_carta_pessoal(definition: dict, exemplar: dict, *, owner_id: int | 
         return None
     payload = dict(definition)
     payload.update({
-        "id": str(definition["card_id"]), "nome": str(definition["nome"]),
+        "id": str(definition["card_id"]), "exemplar_id": exemplar_id,
+        "nome": str(definition["nome"]),
         "categoria": "Unidade", "raridade": rarity, "poder": power,
         "faccao": str(definition["faccao"]),
         "fileira": str(definition["fileira"]),

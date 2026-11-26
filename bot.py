@@ -832,6 +832,7 @@ class NaraBot(commands.Bot):
         app.router.add_get("/api/gwent/drops/history", self._api_gwent_drop_history)
         app.router.add_post("/api/gwent/evolve", self._api_gwent_evolve)
         app.router.add_post("/api/gwent/upgrade", self._api_gwent_upgrade)
+        app.router.add_get("/api/gwent/public-cards/{card_id}/image", self._api_gwent_public_card_image)
         app.router.add_get("/api/gwent/cards/{card_id}/image", self._api_gwent_card_image)
         app.router.add_get("/api/gwent/atelier/prompt", self._api_gwent_atelier_prompt)
         app.router.add_post("/api/gwent/atelier/pdf", self._api_gwent_atelier_pdf)
@@ -1076,7 +1077,17 @@ class NaraBot(commands.Bot):
         card = preparar_carta_pessoal(definition, exemplar, owner_id=int(user_id))
         if card is None:
             return None
-        card["image_url"] = f"/api/gwent/atelier/art/{quote(card_id, safe='')}"
+        rarity = str(card.get("raridade") or exemplar.get("rarity") or "Comum")
+        power = int(card.get("poder") or exemplar.get("power") or 0)
+        exemplar_id = int(exemplar.get("id") or 0)
+        image_query = urlencode({
+            "rarity": rarity, "power": power,
+            **({"exemplar_id": exemplar_id} if exemplar_id > 0 else {}),
+            "thumb": "1",
+        })
+        card["image_url"] = (
+            f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?{image_query}"
+        )
         return card
 
     async def _api_gwent_deck(self, request: web.Request) -> web.Response:
@@ -1098,6 +1109,7 @@ class NaraBot(commands.Bot):
         from sistemas.cartas import (get_carta, carta_de_jogo_por_id, CUSTO_RARIDADE,
                                      faixa_poder_exemplar, VERSAO_ARTES, CARTAS_POR_ID)
         from sistemas.gwent import preparar_carta, RARITY_EFFECT_BUDGET
+        from sistemas.arte_cartas import preparar_payload_carta_base, etag_carta_base
         cards = []
         for index, card_id in enumerate(ids):
             exemplar_id = int(exemplar_ids[index]) if index < len(exemplar_ids) and exemplar_ids[index] else 0
@@ -1134,9 +1146,11 @@ class NaraBot(commands.Bot):
                 item["id"] = f"{card_id}::{int(record['id'])}"
                 item["max_power"] = faixa_poder_exemplar(card, rarity)[1]
                 item["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(rarity, 0))
+                image_source = preparar_payload_carta_base(payload)
+                image_version = etag_carta_base(image_source, tamanho=(210, 310), quality=82)
                 item["image_url"] = (
-                    f"/api/gwent/cards/{quote(card_id, safe='')}/image"
-                    f"?exemplar_id={int(record['id'])}&v={VERSAO_ARTES}"
+                    f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?"
+                    f"{urlencode({'rarity': rarity, 'power': int(record['power'] or payload.get('poder', 0)), 'exemplar_id': int(record['id']), 'v': image_version, 'thumb': '1'})}"
                 )
                 cards.append(item)
         from sistemas.gwent import (LEADERS, DEFAULT_LEADERS, FACTIONS, FACTION_ARCHETYPES,
@@ -1189,7 +1203,7 @@ class NaraBot(commands.Bot):
                 "id": relic_card_id, "name": relic_model.nome,
                 "rarity": relic_model.raridade, "owned": bool(copies),
                 "owned_count": len(copies),
-                "image_url": f"/api/gwent/cards/{quote(relic_card_id, safe='')}/image?v={VERSAO_ARTES}",
+                "image_url": f"/api/gwent/public-cards/{quote(relic_card_id, safe='')}/image?thumb=1",
             })
         saved_relic_id = str(row["relic_id"] or "") if row else ""
         owned_relic_ids = {item["id"] for item in relics_payload if item["owned"]}
@@ -1393,6 +1407,7 @@ class NaraBot(commands.Bot):
             payload["raridade"] = rarity
             payload["poder"] = int(record["power"] or payload.get("poder", 0))
             payload["custo"] = int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0)))
+            payload["exemplar_id"] = int(record["id"])
             cards.append(preparar_carta(payload))
         return cards if len(cards) == 12 else None
 
@@ -2077,6 +2092,7 @@ class NaraBot(commands.Bot):
                                          faixa_poder_exemplar, VERSAO_ARTES, CARTAS_PACOTE,
                                          CARTAS_PRIMORDIAIS)
             from sistemas.gwent import preparar_carta, RARITY_EFFECT_BUDGET
+            from sistemas.arte_cartas import preparar_payload_carta_base, etag_carta_base
             estado = await self.db.coliseu_estado_usuario(user_id)
             owned_rows = await self.db.coliseu_listar_colecao(user_id)
             game_by_id = {str(r["card_id"]): str(r["game_name"] or "") for r in owned_rows}
@@ -2093,8 +2109,7 @@ class NaraBot(commands.Bot):
                         from sistemas.gwent import RARITY_EFFECT_BUDGET
                         personal["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(str(personal.get("raridade", "Comum")), 0))
                         personal["image_url"] = (
-                            f"/api/gwent/cards/{quote(card_id, safe='')}/image"
-                            f"?exemplar_id={int(record['id'])}&v=transmutacao-v36"
+                            f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?thumb=1"
                         )
                         cards.append(personal)
                     continue
@@ -2119,9 +2134,11 @@ class NaraBot(commands.Bot):
                 item["source"] = str(record["source"] or "")
                 item["max_power"] = faixa_poder_exemplar(card, rarity)[1]
                 item["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(rarity, 0))
+                image_source = preparar_payload_carta_base(payload)
+                image_version = etag_carta_base(image_source, tamanho=(210, 310), quality=82)
                 item["image_url"] = (
-                    f"/api/gwent/cards/{quote(card_id, safe='')}/image"
-                    f"?exemplar_id={int(record['id'])}&v={VERSAO_ARTES}"
+                    f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?"
+                    f"{urlencode({'rarity': rarity, 'power': int(record['power'] or payload.get('poder', 0)), 'exemplar_id': int(record['id']), 'v': image_version, 'thumb': '1'})}"
                 )
                 cards.append(item)
             # Catálogo global separado da coleção: modelos não possuídos também ficam visíveis.
@@ -2133,7 +2150,10 @@ class NaraBot(commands.Bot):
                     "card_id": model.id,
                     "id": model.id,
                     "owned": model.id in owned_ids,
-                    "image_url": f"/api/gwent/cards/{quote(model.id, safe='')}/image?v={VERSAO_ARTES}&thumb=1",
+                    "image_url": (
+                        f"/api/gwent/public-cards/{quote(model.id, safe='')}/image?"
+                        f"v={etag_carta_base(preparar_payload_carta_base(model))}&thumb=1"
+                    ),
                 })
                 catalog.append(model_payload)
 
@@ -2796,11 +2816,11 @@ class NaraBot(commands.Bot):
         if not art_row:
             return web.json_response({"official": False})
         art = dict(art_row)
-        query = f"?exemplar_id={exemplar_id}" if exemplar_id else ""
+        image_query = urlencode({**({"exemplar_id": exemplar_id} if exemplar_id else {}), "thumb": "1"})
         return web.json_response({"official": True, "artist_name": str(art["artist_name"] or "Artista da comunidade"),
                                   "created_at": str(art["created_at"] or ""),
                                   "exemplar_id": art.get("exemplar_id"), "full_card": bool(art.get("full_card", 0)),
-                                  "image_url": f"/api/gwent/atelier/art/{card_id}{query}"})
+                                  "image_url": f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?{image_query}"})
 
     async def _api_gwent_atelier_official_art(self, request: web.Request) -> web.Response:
         user_id = self._api_user_id(request)
@@ -2912,6 +2932,381 @@ class NaraBot(commands.Bot):
             finally:
                 if not release_in_callback:
                     semaphore.release()
+
+    def _gwent_public_image_r2_url(self, path: Path, card_id: str, etag: str, mime: str) -> str | None:
+        """Publica a variante imutável num bucket R2 isolado; sem configuração, usa o disco local."""
+        try:
+            from sistemas.storage_r2 import (
+                R2NotConfigured, upload_public_card_image, public_card_url_for_key,
+            )
+            ext = {"image/webp": "webp", "image/png": "png", "image/jpeg": "jpg", "image/gif": "gif"}.get(mime, "png")
+            card_hash = hashlib.sha256(card_id.encode("utf-8")).hexdigest()[:24]
+            object_key = f"cards/{card_hash}/{etag}.{ext}"
+            manifest = path.with_name(path.name + ".public-r2.json")
+
+            if manifest.is_file():
+                try:
+                    saved = json.loads(manifest.read_text(encoding="utf-8"))
+                    if saved.get("etag") == etag and saved.get("key") == object_key:
+                        return public_card_url_for_key(object_key)
+                except (OSError, ValueError, TypeError):
+                    pass
+
+            result = upload_public_card_image(object_key, path.read_bytes(), mime)
+            # Escrita temporária exclusiva evita colisão quando vários usuários
+            # pedem a mesma imagem pela primeira vez ao mesmo tempo.
+            import tempfile
+            with tempfile.NamedTemporaryFile(
+                prefix=f"{manifest.name}.", suffix=".tmp",
+                dir=manifest.parent, mode="w", encoding="utf-8", delete=False,
+            ) as temp_file:
+                temp_manifest = Path(temp_file.name)
+                json.dump({"etag": etag, "key": object_key}, temp_file, ensure_ascii=False)
+            try:
+                temp_manifest.replace(manifest)
+            finally:
+                temp_manifest.unlink(missing_ok=True)
+            return str(result["public_url"])
+        except Exception as exc:
+            # R2 é um acelerador opcional: falha de CDN nunca impede a imagem local.
+            try:
+                from sistemas.storage_r2 import R2NotConfigured
+                if isinstance(exc, R2NotConfigured):
+                    return None
+            except Exception:
+                pass
+            log.warning("Não foi possível publicar carta-base no R2; usando cache local (%s).", type(exc).__name__)
+            return None
+
+    async def _api_gwent_public_card_image(self, request: web.Request) -> web.Response:
+        """Serve arte publicada de cartas sem login, com cache compartilhado e CDN opcional."""
+        card_id = str(request.match_info.get("card_id", "")).strip()
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,120}", card_id):
+            raise web.HTTPNotFound(text="Carta não encontrada.")
+
+        is_thumbnail = request.query.get("thumb") == "1"
+        is_detail = request.query.get("detail") == "1"
+        image_size = (210, 310) if is_thumbnail else ((840, 1240) if is_detail else (420, 620))
+        image_quality = 82 if is_thumbnail else (90 if is_detail else 86)
+
+        def response_headers(etag: str, mime: str, *, immutable: bool) -> dict[str, str]:
+            max_age = 31536000 if immutable else 300
+            cache_control = f"public, max-age={max_age}" + (", immutable" if immutable else "")
+            return {
+                "Content-Type": mime,
+                "Content-Disposition": "inline",
+                "Cache-Control": cache_control,
+                "Cloudflare-CDN-Cache-Control": cache_control,
+                "ETag": f'"{etag}"',
+                "X-Content-Type-Options": "nosniff",
+            }
+
+        def not_modified(headers: dict[str, str]) -> bool:
+            incoming = request.headers.get("If-None-Match", "")
+            tag = headers["ETag"]
+            return any(token.strip() in ("*", tag, f"W/{tag}") for token in incoming.split(","))
+
+        async def serve_file(path: Path, etag: str, mime: str, *, versioned: bool) -> web.Response:
+            headers = response_headers(etag, mime, immutable=versioned)
+            if not_modified(headers):
+                return web.Response(status=304, headers=headers)
+            # Coalesce o primeiro upload para o R2: vários usuários abrindo
+            # a mesma carta ao mesmo tempo compartilham uma única publicação.
+            locks = self._gwent_image_locks
+            publish_key = f"r2:{card_id}:{etag}"
+            if len(locks) > 512:
+                for old_key, old_lock in list(locks.items()):
+                    if not old_lock.locked():
+                        locks.pop(old_key, None)
+                    if len(locks) <= 384:
+                        break
+            publish_lock = locks.setdefault(publish_key, asyncio.Lock())
+            async with publish_lock:
+                cdn_url = await asyncio.to_thread(
+                    self._gwent_public_image_r2_url, path, card_id, etag, mime,
+                )
+            if cdn_url:
+                return web.Response(status=302, headers={**headers, "Location": cdn_url})
+            return web.FileResponse(path, headers=headers)
+
+        try:
+            from sistemas.cartas import (
+                get_carta, carta_de_jogo_por_id, RARIDADES, CUSTO_RARIDADE,
+                faixa_poder_exemplar,
+            )
+            from sistemas.arte_cartas import (
+                preparar_payload_carta_base, etag_carta_base, webp_disponivel,
+                cache_carta_webp_existente, render_carta_webp,
+                cache_carta_existente, render_carta,
+                cache_arte_oficial_webp_existente, render_arte_oficial_webp_cacheada_por_id,
+                cache_arte_oficial_por_id_existente, render_arte_oficial_cacheada_por_id,
+                detectar_mime_imagem, validar_imagem_bytes,
+            )
+
+            # Cartas criadas pela forja/transmutação só ficam públicas depois de
+            # publicadas e validadas. O caminho é limitado à pasta de artes geradas.
+            if card_id.startswith("transmutacao_"):
+                generated = await self.db._one(
+                    "SELECT art_path,art_status,status FROM cartas_geradas WHERE card_id=?",
+                    (card_id,),
+                )
+                if (not generated or str(generated["status"]) != "published"
+                        or str(generated["art_status"]) != "validated"):
+                    raise web.HTTPNotFound(text="Carta publicada não encontrada.")
+                from config import get_data_dir
+                art_path = Path(str(generated["art_path"] or "")).resolve()
+                root = (Path(get_data_dir()) / "cartas_geradas").resolve()
+                try:
+                    art_path.relative_to(root)
+                except ValueError:
+                    raise web.HTTPNotFound(text="Arte da carta indisponível.")
+                if not art_path.is_file() or art_path.suffix.casefold() not in (".png", ".webp", ".jpg", ".jpeg"):
+                    raise web.HTTPNotFound(text="Arte da carta indisponível.")
+                expected = await self.db._one(
+                    "SELECT content_hash FROM cartas_geradas_artes "
+                    "WHERE generated_card_id=? AND status='validated' ORDER BY id DESC LIMIT 1",
+                    (card_id,),
+                )
+                digest = str(expected["content_hash"] or "") if expected else ""
+                if not re.fullmatch(r"[a-fA-F0-9]{64}", digest):
+                    raise web.HTTPUnprocessableEntity(text="Integridade da arte publicada inválida.")
+
+                output_mime = "image/webp" if webp_disponivel() else "image/png"
+                output_ext = ".webp" if output_mime == "image/webp" else ".png"
+                generated_etag = hashlib.sha256(
+                    f"generated:{card_id}:{digest}:{image_size}:{image_quality}:{output_mime}".encode("utf-8")
+                ).hexdigest()
+                cache_root = Path(get_data_dir()) / "cartas_cache" / "public-art"
+                cache_root.mkdir(parents=True, exist_ok=True)
+                card_hash = hashlib.sha256(card_id.encode("utf-8")).hexdigest()[:16]
+                generated_cache = cache_root / (
+                    f"{card_hash}-{generated_etag}-{image_size[0]}x{image_size[1]}{output_ext}"
+                )
+
+                if not generated_cache.is_file() or generated_cache.stat().st_size < 64:
+                    actual_digest = await asyncio.to_thread(
+                        lambda: hashlib.sha256(art_path.read_bytes()).hexdigest()
+                    )
+                    if not secrets.compare_digest(actual_digest, digest):
+                        raise web.HTTPUnprocessableEntity(text="Integridade da arte publicada inválida.")
+
+                    def render_generated_variant() -> Path:
+                        from PIL import Image, ImageOps
+                        import tempfile
+                        with Image.open(art_path) as original:
+                            rendered = ImageOps.exif_transpose(original)
+                            rendered.thumbnail(image_size, Image.Resampling.LANCZOS)
+                            if rendered.mode not in ("RGB", "RGBA"):
+                                rendered = rendered.convert("RGBA" if "A" in rendered.getbands() else "RGB")
+                            if output_mime == "image/webp":
+                                output_format = "WEBP"
+                                save_options = {"quality": image_quality, "method": 4}
+                            else:
+                                output_format = "PNG"
+                                save_options = {"optimize": False}
+                            with tempfile.NamedTemporaryFile(
+                                prefix=f"{generated_cache.stem}.", suffix=output_ext + ".tmp",
+                                dir=cache_root, delete=False,
+                            ) as temp_file:
+                                temp_path = Path(temp_file.name)
+                            try:
+                                rendered.save(temp_path, format=output_format, **save_options)
+                                temp_path.replace(generated_cache)
+                            finally:
+                                temp_path.unlink(missing_ok=True)
+                        return generated_cache
+
+                    cache_lookup = lambda: generated_cache if generated_cache.is_file() and generated_cache.stat().st_size >= 64 else None
+                    generated_cache = await self._gwent_render_path_cached(
+                        f"public-generated:{generated_etag}", render_generated_variant,
+                        cache_lookup=cache_lookup,
+                    )
+
+                requested_version = request.query.get("v", "").strip()
+                versioned = bool(requested_version and secrets.compare_digest(requested_version, generated_etag))
+                return await serve_file(generated_cache, generated_etag, output_mime, versioned=versioned)
+
+            model = get_carta(card_id)
+            if model is None and card_id.startswith("jogo_"):
+                game_row = await self.db._one(
+                    "SELECT game_name FROM cartas_colecao "
+                    "WHERE card_id=? AND COALESCE(game_name,'')<>'' "
+                    "ORDER BY obtained_at DESC LIMIT 1",
+                    (card_id,),
+                )
+                if game_row and game_row["game_name"]:
+                    try:
+                        model = carta_de_jogo_por_id(card_id, str(game_row["game_name"]))
+                    except ValueError:
+                        model = None
+            if model is None:
+                raise web.HTTPNotFound(text="Carta não encontrada no catálogo público.")
+
+            source = model.para_dict() if hasattr(model, "para_dict") else dict(model)
+            rarity = request.query.get("rarity", "").strip()
+            if rarity:
+                if rarity not in RARIDADES:
+                    raise web.HTTPBadRequest(text="Raridade inválida.")
+                source["raridade"] = rarity
+            else:
+                rarity = str(source.get("raridade") or "Comum")
+
+            power_raw = request.query.get("power", "").strip()
+            if power_raw:
+                try:
+                    power = int(power_raw)
+                except (TypeError, ValueError):
+                    raise web.HTTPBadRequest(text="Poder inválido.")
+                _minimum, maximum = faixa_poder_exemplar(model, rarity)
+                if power < 0 or power > int(maximum):
+                    raise web.HTTPBadRequest(text="Poder fora dos limites da carta.")
+                source["poder"] = power
+            source["custo"] = int(CUSTO_RARIDADE.get(rarity, source.get("custo", 0)))
+            source = preparar_payload_carta_base(source)
+
+            use_webp = webp_disponivel()
+            image_mime = "image/webp" if use_webp else "image/png"
+            base_etag = etag_carta_base(source, tamanho=image_size, quality=image_quality)
+
+            # Arte aprovada é pública. Quando a URL identifica um exemplar,
+            # prioriza sua arte aprovada e mantém a arte global como fallback.
+            exemplar_id_raw = request.query.get("exemplar_id", "").strip()
+            exemplar_id = None
+            if exemplar_id_raw:
+                try:
+                    exemplar_id = int(exemplar_id_raw)
+                    if exemplar_id <= 0:
+                        raise ValueError
+                except (TypeError, ValueError):
+                    raise web.HTTPBadRequest(text="Identificador de exemplar inválido.")
+            official_meta = await self.db.coliseu_atelie_obter_arte_oficial_metadata(card_id, exemplar_id)
+            if official_meta and int(official_meta["full_card"] or 0) == 1:
+                # A submissão aprovada é imutável por ID. Com o cache local presente,
+                # não buscamos novamente o BLOB/R2 em cada visualização.
+                from config import get_data_dir
+                output_mime = "image/webp" if use_webp else "image/png"
+                output_ext = ".webp" if use_webp else ".png"
+                full_etag = hashlib.sha256(
+                    f"atelier-full:{official_meta['id']}:{image_size}:{image_quality}:{output_mime}".encode("utf-8")
+                ).hexdigest()
+                cache_root = Path(get_data_dir()) / "cartas_cache" / "public-art"
+                cache_root.mkdir(parents=True, exist_ok=True)
+                card_hash = hashlib.sha256(card_id.encode("utf-8")).hexdigest()[:16]
+                cache_path = cache_root / (
+                    f"{card_hash}-{full_etag}-{image_size[0]}x{image_size[1]}{output_ext}"
+                )
+
+                if not cache_path.is_file() or cache_path.stat().st_size < 64:
+                    official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+                    if not official_art or int(official_art["id"]) != int(official_meta["id"]):
+                        raise web.HTTPNotFound(text="Arte oficial não está mais disponível.")
+                    if official_art["image_key"]:
+                        from sistemas.storage_r2 import download_image
+                        full_bytes = await asyncio.to_thread(download_image, str(official_art["image_key"]))
+                    else:
+                        full_bytes = bytes(official_art["image_data"] or b"")
+                    full_mime = await asyncio.to_thread(detectar_mime_imagem, full_bytes)
+                    if not full_mime:
+                        raise web.HTTPUnprocessableEntity(text="Arte oficial armazenada inválida.")
+
+                    def render_full_card_variant() -> Path:
+                        from PIL import Image, ImageOps
+                        import tempfile
+                        with Image.open(BytesIO(full_bytes)) as original:
+                            rendered = ImageOps.exif_transpose(original)
+                            rendered.thumbnail(image_size, Image.Resampling.LANCZOS)
+                            if rendered.mode not in ("RGB", "RGBA"):
+                                rendered = rendered.convert("RGBA" if "A" in rendered.getbands() else "RGB")
+                            if use_webp:
+                                output_format = "WEBP"
+                                save_options = {"quality": image_quality, "method": 4}
+                            else:
+                                output_format = "PNG"
+                                save_options = {"optimize": False}
+                            with tempfile.NamedTemporaryFile(
+                                prefix=f"{cache_path.stem}.", suffix=output_ext + ".tmp",
+                                dir=cache_root, delete=False,
+                            ) as temp_file:
+                                temp_path = Path(temp_file.name)
+                            try:
+                                rendered.save(temp_path, format=output_format, **save_options)
+                                temp_path.replace(cache_path)
+                            finally:
+                                temp_path.unlink(missing_ok=True)
+                        return cache_path
+
+                    cache_lookup = lambda: cache_path if cache_path.is_file() and cache_path.stat().st_size >= 64 else None
+                    cache_path = await self._gwent_render_path_cached(
+                        f"public-full:{full_etag}", render_full_card_variant,
+                        cache_lookup=cache_lookup,
+                    )
+
+                requested_version = request.query.get("v", "").strip()
+                versioned = bool(requested_version and secrets.compare_digest(requested_version, full_etag))
+                return await serve_file(cache_path, full_etag, output_mime, versioned=versioned)
+
+            if official_meta:
+                official_id = int(official_meta["id"])
+                image_etag = hashlib.sha256(
+                    f"official:{official_id}:{base_etag}".encode("utf-8")
+                ).hexdigest()
+                if use_webp:
+                    lookup = lambda: cache_arte_oficial_webp_existente(
+                        source, official_id, image_size, quality=image_quality,
+                    )
+                    renderer = lambda raw: render_arte_oficial_webp_cacheada_por_id(
+                        source, raw, official_id, image_size, quality=image_quality,
+                    )
+                else:
+                    lookup = lambda: cache_arte_oficial_por_id_existente(
+                        source, official_id, image_size,
+                    )
+                    renderer = lambda raw: render_arte_oficial_cacheada_por_id(
+                        source, raw, official_id, image_size,
+                    )
+                image_path = await asyncio.to_thread(lookup)
+                if image_path is None:
+                    official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+                    if not official_art or int(official_art["id"]) != official_id:
+                        raise web.HTTPNotFound(text="Arte oficial não está mais disponível.")
+                    if official_art["image_key"]:
+                        from sistemas.storage_r2 import download_image
+                        raw_art = await asyncio.to_thread(download_image, str(official_art["image_key"]))
+                    else:
+                        raw_art = bytes(official_art["image_data"] or b"")
+                    image_path = await self._gwent_render_path_cached(
+                        f"public-official:{image_etag}",
+                        lambda: renderer(raw_art),
+                        cache_lookup=lookup,
+                    )
+            else:
+                image_etag = base_etag
+                if use_webp:
+                    lookup = lambda: cache_carta_webp_existente(
+                        source, tamanho=image_size, quality=image_quality,
+                    )
+                    renderer = lambda: render_carta_webp(
+                        source, tamanho=image_size, quality=image_quality,
+                    )
+                else:
+                    lookup = lambda: cache_carta_existente(source, tamanho=image_size)
+                    renderer = lambda: render_carta(source, tamanho=image_size)
+                image_path = await asyncio.to_thread(lookup)
+                if image_path is None:
+                    image_path = await self._gwent_render_path_cached(
+                        f"public-base:{image_etag}", renderer, cache_lookup=lookup,
+                    )
+
+            requested_version = request.query.get("v", "").strip()
+            versioned = bool(requested_version and secrets.compare_digest(requested_version, image_etag))
+            return await serve_file(image_path, image_etag, image_mime, versioned=versioned)
+
+        except web.HTTPException:
+            raise
+        except Exception:
+            log.exception("Falha ao servir imagem pública da carta %s.", card_id)
+            raise web.HTTPInternalServerError(text="Não foi possível carregar a imagem da carta.")
+
 
     async def _api_gwent_card_image(self, request: web.Request) -> web.Response:
         """Entrega cache em arquivo; só consulta/renderiza a carta solicitada."""

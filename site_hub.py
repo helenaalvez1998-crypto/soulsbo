@@ -334,7 +334,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
                               "name": str(getattr(card, "nome", None) or item["card_id"]),
                               "rarity": str(item["rarity"]), "power": int(item["power"] or 0),
                               "faction": classification["faccao"], "eligible": True,
-                              "image_url": f"/api/gwent/cards/{quote(str(item['card_id']), safe='')}/image?thumb=1"})
+                              "image_url": f"/api/gwent/public-cards/{quote(str(item['card_id']), safe='')}/image?rarity={quote(str(item['rarity']), safe='')}&power={int(item['power'] or 0)}&exemplar_id={int(item['id'])}&thumb=1"})
         materials = await bot.db.coliseu_listar_materiais_transmutacao(uid)
         history = await bot.db._all(
             """SELECT tx_key,status,ingredient_ids_json,probability,generated_card_id,
@@ -786,7 +786,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
             items.append({
                 "id": int(row["id"]), "card_id": str(row["card_id"]),
                 "name": str(getattr(card, "nome", None) or getattr(card, "name", None) or row["card_id"]),
-                "image_url": f"/api/gwent/cards/{quote(str(row['card_id']), safe='')}/image?thumb=1",
+                "image_url": f"/api/gwent/public-cards/{quote(str(row['card_id']), safe='')}/image?rarity={quote(str(row['rarity']), safe='')}&power={int(row['power'] or 0)}&exemplar_id={int(row['id'])}&thumb=1",
                 "rarity": rarity, "power": power, "max_power": int(maximum),
                 "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "lap_cost": CUSTO_APRIMORAMENTO_ALMAS.get(rarity),
@@ -1076,9 +1076,11 @@ def registrar_rotas(bot, app: web.Application) -> None:
             from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75, HABILIDADES
             ids_pacote = {str(c.id) for c in CARTAS_PACOTE}
             ids_expansao_v75 = {str(c.id) for c in CARTAS_EXPANSAO_V75}
+            from sistemas.arte_cartas import preparar_payload_carta_base, etag_carta_base
             items = []
             for carta in CARTAS_POR_ID.values():
                 data = carta.para_dict()
+                public_image_version = etag_carta_base(preparar_payload_carta_base(carta))
                 habilidade_id = str(data.get("habilidade") or "")
                 habilidade = HABILIDADES.get(habilidade_id, {})
                 fileira_raw = str(data.get("fileira") or carta.fileira)
@@ -1092,6 +1094,10 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 }
                 items.append({
                     "card_id": str(carta.id),
+                    "image_url": (
+                        f"/api/gwent/public-cards/{quote(str(carta.id), safe='')}/image?"
+                        f"v={public_image_version}&thumb=1"
+                    ),
                     "nome": str(carta.nome),
                     "categoria": str(data.get("categoria") or carta.categoria),
                     "faccao": str(data.get("faccao") or carta.faccao),

@@ -327,10 +327,10 @@ ov.querySelector('.cd-close2').onclick=close;
 const artImg=ov.querySelector('.cd-card-art');
 if(artImg){
  const hdUrl=new URL(imageUrl(c),window.location.origin);
- if(hdUrl.pathname.includes('/api/gwent/cards/')){
+ if(hdUrl.pathname.includes('/api/gwent/public-cards/') || hdUrl.pathname.includes('/api/gwent/cards/')){
    hdUrl.searchParams.delete('thumb');
    hdUrl.searchParams.set('detail','1');
-   hdUrl.searchParams.set('v','29');
+   hdUrl.searchParams.delete('v');
    const hd=new Image(); hd.decoding='async';
    hd.onload=()=>{ if(ov && !ov.hidden && list[idx]===c) artImg.src=hdUrl.pathname+hdUrl.search; };
    hd.onerror=()=>{};

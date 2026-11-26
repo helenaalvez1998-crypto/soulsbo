@@ -1635,6 +1635,41 @@ def _fingerprint_templates(payload: Any) -> str:
     return digest.hexdigest()[:16]
 
 
+def preparar_payload_carta_base(card: Any) -> dict[str, Any]:
+    """Prepara uma carta-base pública sem consultar coleção ou dados de jogador."""
+    source = card.para_dict() if hasattr(card, "para_dict") else dict(card)
+    from .gwent import preparar_carta
+
+    gwent = preparar_carta(source)
+    source.update({
+        "gwent_mode": True,
+        "categoria": gwent["categoria"],
+        "categoria_arte": source.get("categoria_arte", source.get("categoria_origem", "Unidade")),
+        "faccao": gwent["faccao"],
+        "fileira": gwent["row"],
+        "row_label": gwent["row_label"],
+        "papel_gwent": gwent["papel_gwent"],
+        "habilidade_nome": gwent["habilidade_nome"],
+        "habilidade_texto": gwent["habilidade_texto"],
+    })
+    return source
+
+
+def etag_carta_base(
+    card: dict[str, Any], *, tamanho: tuple[int, int] = (210, 310), quality: int = 82,
+) -> str:
+    """Versão imutável da imagem-base; inclui carta, renderer, template e perfil."""
+    largura, altura = max(120, int(tamanho[0])), max(180, int(tamanho[1]))
+    quality = max(50, min(95, int(quality)))
+    image_format = "webp" if webp_disponivel() else "png"
+    source_json = json.dumps(card, ensure_ascii=False, sort_keys=True, default=str)
+    template_fingerprint = _fingerprint_templates({"card": card})
+    size_token = f"{largura}x{altura}:{image_format}:q{quality}"
+    return hashlib.sha256(
+        f"base:{size_token}:{VERSAO_RENDERIZADOR}:{template_fingerprint}:{source_json}".encode("utf-8")
+    ).hexdigest()
+
+
 def _cache_path(payload: Any, suffix: str) -> Path:
     root = get_data_dir() / "cartas_cache"
     root.mkdir(parents=True, exist_ok=True)
