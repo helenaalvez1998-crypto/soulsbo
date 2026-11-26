@@ -13,6 +13,7 @@ import asyncio
 import io
 import json
 import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
@@ -51,7 +52,8 @@ LAYOUT_PADRAO: dict[str, Any] = {
     "habilidade": [45, 946, 800, 1175],
 }
 
-_CACHE: dict[str, tuple[str, int, int, Image.Image, dict[str, Any]]] = {}
+_CACHE_MAX = 4  # cada imagem RGBA ocupa ~4 MB; evita reter as sete raridades em 256 MB de RAM
+_CACHE: OrderedDict[str, tuple[str, int, int, Image.Image, dict[str, Any]]] = OrderedDict()
 _LOCK = threading.RLock()
 
 
@@ -383,6 +385,7 @@ def carregar_template(raridade: str) -> tuple[Image.Image, dict[str, Any]] | Non
         existente = _CACHE.get(raridade)
         if (existente and existente[0] == origem_path
                 and existente[1] == info.st_mtime_ns and existente[2] == info.st_size):
+            _CACHE.move_to_end(raridade)
             return existente[3].copy(), json.loads(json.dumps(existente[4]))
         try:
             imagem, janela = processar_template(caminho.read_bytes())
@@ -395,4 +398,7 @@ def carregar_template(raridade: str) -> tuple[Image.Image, dict[str, Any]] | Non
             origem_path, info.st_mtime_ns, info.st_size, imagem.copy(),
             json.loads(json.dumps(layout)),
         )
+        _CACHE.move_to_end(raridade)
+        while len(_CACHE) > _CACHE_MAX:
+            _CACHE.popitem(last=False)
         return imagem, layout

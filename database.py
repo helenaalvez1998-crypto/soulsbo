@@ -1040,7 +1040,7 @@ class Database:
             await self.conn.execute("PRAGMA journal_mode = WAL")
             await self.conn.execute("PRAGMA synchronous = NORMAL")
         await self.conn.execute("PRAGMA temp_store = MEMORY")
-        await self.conn.execute("PRAGMA cache_size = -20000")  # ~20 MB de cache de páginas
+        await self.conn.execute("PRAGMA cache_size = -8192")  # ~8 MB: equilíbrio para hosts com 256 MB de RAM
         await self.conn.executescript(SCHEMA)
         await self.conn.executescript(SCHEMA_CARTAS)
         # Migração incremental: imagens novas do Ateliê passam a residir no R2.

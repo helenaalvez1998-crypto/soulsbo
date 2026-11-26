@@ -88,10 +88,9 @@ class ProgressaoXP(commands.Cog):
     async def conceder_xp(self, guild, user_id: int, quantidade: int, motivo: str):
         if quantidade <= 0:
             return
-        antigo_xp_row = await self.bot.db.get_user(user_id)
-        xp_antigo = int(antigo_xp_row['xp'])
-        antigo_nivel = nivel_por_xp(xp_antigo)
-        _, novo_nivel, total = await self.bot.db.add_reward(user_id, quantidade, 0)
+        # add_reward já devolve os níveis anterior/atual na mesma transação.
+        # Evita uma leitura e um commit extras a cada recompensa.
+        antigo_nivel, novo_nivel, total = await self.bot.db.add_reward(user_id, quantidade, 0)
         await self.notificar_recompensa(guild, user_id, antigo_nivel, novo_nivel, quantidade, motivo)
         return total
 
@@ -133,6 +132,20 @@ class ProgressaoXP(commands.Cog):
         if not elegivel:
             return
         self.ultimo_xp_msg[chave] = agora
+        # O cache só precisa cobrir o cooldown. Limita o crescimento em servidores
+        # grandes sem fazer uma varredura a cada mensagem.
+        if len(self.ultimo_xp_msg) > 10_000:
+            limite_cache = agora - (INTERVALO_MENSAGEM * 10)
+            cache_atual = {
+                uid: timestamp
+                for uid, timestamp in self.ultimo_xp_msg.items()
+                if timestamp >= limite_cache
+            }
+            if len(cache_atual) > 10_000:
+                cache_atual = dict(
+                    sorted(cache_atual.items(), key=lambda item: item[1], reverse=True)[:8_000]
+                )
+            self.ultimo_xp_msg = cache_atual
         await self.conceder_xp(
             message.guild, message.author.id,
             random.randint(XP_MENSAGEM_MIN, XP_MENSAGEM_MAX),

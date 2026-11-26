@@ -573,6 +573,9 @@ class NaraBot(commands.Bot):
             intents=intents,
             tree_cls=NaraCommandTree,
             allowed_mentions=discord.AllowedMentions.none(),
+            # As funcionalidades usam eventos/API e não dependem de 1.000 mensagens
+            # antigas em cache; reduz memória sem desativar on_message.
+            max_messages=100,
         )
         self.db = Database(config.DB_PATH)
         self.failed_extensions: list[str] = []
@@ -595,6 +598,59 @@ class NaraBot(commands.Bot):
         except (TypeError, ValueError):
             render_workers = 1
         self._gwent_render_semaphore = asyncio.Semaphore(max(1, min(2, render_workers)))
+        self._cpu_heavy_waiters = 0
+
+    async def _executar_cpu_limitado(
+        self,
+        func,
+        *args,
+        limite_espera: int = 2,
+        **kwargs,
+    ):
+        """Executa CPU/Pillow fora do event loop, serializando o uso de RAM/CPU.
+
+        A thread continua após o cancelamento da requisição; por isso o semáforo
+        só é liberado quando o trabalho real termina, não quando o cliente desconecta.
+        """
+        esperando = int(self._cpu_heavy_waiters)
+        if esperando >= max(1, limite_espera):
+            raise web.HTTPServiceUnavailable(
+                text="Processamento ocupado. Tente novamente em alguns segundos.",
+                headers={"Retry-After": "3"},
+            )
+
+        self._cpu_heavy_waiters = esperando + 1
+        try:
+            await self._gwent_render_semaphore.acquire()
+        finally:
+            self._cpu_heavy_waiters = max(0, int(self._cpu_heavy_waiters) - 1)
+
+        loop = asyncio.get_running_loop()
+        try:
+            future = loop.run_in_executor(None, lambda: func(*args, **kwargs))
+        except BaseException:
+            self._gwent_render_semaphore.release()
+            raise
+
+        liberar_no_callback = False
+
+        def _liberar_apos_cancelamento(done_future):
+            try:
+                done_future.exception()
+            except BaseException:
+                pass
+            finally:
+                self._gwent_render_semaphore.release()
+
+        try:
+            return await asyncio.shield(future)
+        except asyncio.CancelledError:
+            future.add_done_callback(_liberar_apos_cancelamento)
+            liberar_no_callback = True
+            raise
+        finally:
+            if not liberar_no_callback:
+                self._gwent_render_semaphore.release()
 
     def _handle_asyncio_exception(self, loop: asyncio.AbstractEventLoop, context: dict[str, Any]) -> None:
         exception = context.get("exception")
@@ -2357,8 +2413,13 @@ class NaraBot(commands.Bot):
             fixed_prompt = prompt_path.read_text(encoding="utf-8")
             card_name = str(payload.get("nome", card_id))[:120]
 
-            pdf_bytes = await asyncio.to_thread(
-                gerar_pdf_atelie, str(package.get("prompt") or fixed_prompt), analysis, reference_path, card_name,
+            pdf_bytes = await self._executar_cpu_limitado(
+                gerar_pdf_atelie,
+                str(package.get("prompt") or fixed_prompt),
+                analysis,
+                reference_path,
+                card_name,
+                limite_espera=2,
             )
             safe_name = re.sub(r"[^A-Za-z0-9_-]+", "-", card_name).strip("-")[:60] or "carta"
             return web.Response(
@@ -2370,6 +2431,8 @@ class NaraBot(commands.Bot):
                     "X-Content-Type-Options": "nosniff",
                 },
             )
+        except web.HTTPException:
+            raise
         except ValueError as exc:
             return web.json_response({"error": str(exc)}, status=400)
         except Exception:
@@ -2437,7 +2500,9 @@ class NaraBot(commands.Bot):
             raw = upload.file.read(8 * 1024 * 1024 + 1)
             from sistemas.atelie_coliseu import normalizar_imagem_carta, ArteInvalida
             try:
-                normalized = normalizar_imagem_carta(raw)
+                normalized = await self._executar_cpu_limitado(
+                    normalizar_imagem_carta, raw, limite_espera=2
+                )
             except ArteInvalida as exc:
                 return web.json_response({"error": str(exc)}, status=400)
             # Envia a imagem ao R2 antes de registrar a submissão. A cópia em memória
@@ -2650,7 +2715,12 @@ class NaraBot(commands.Bot):
         if not image_data:
             return web.json_response({"error": "Selecione uma imagem para o líder."}, status=400)
         try:
-            normalized = await asyncio.to_thread(normalizar_imagem_carta, image_data, exigir_carta_completa=False)
+            normalized = await self._executar_cpu_limitado(
+                normalizar_imagem_carta,
+                image_data,
+                limite_espera=2,
+                exigir_carta_completa=False,
+            )
         except ArteInvalida as exc:
             return web.json_response({"error": str(exc)}, status=400)
 

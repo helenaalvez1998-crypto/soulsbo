@@ -854,7 +854,7 @@ def construir_overlay(*, raridade: str, faccao: str, fileira: str, especial: boo
     return ov
 
 
-@functools.lru_cache(maxsize=64)
+@functools.lru_cache(maxsize=8)
 def overlay_pronto(raridade: str, faccao: str, fileira: str, especial: bool,
                    largura_raridade: int, largura: int, altura: int) -> Image.Image:
     """Overlay já redimensionado e em cache: ele não depende do conteúdo da carta, só da

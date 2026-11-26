@@ -23,7 +23,7 @@ STOPWORDS = {
 }
 
 
-@lru_cache(maxsize=16384)
+@lru_cache(maxsize=4096)
 def normalizar(texto: str) -> str:
     texto = unicodedata.normalize("NFKD", str(texto or "").casefold())
     texto = "".join(c for c in texto if not unicodedata.combining(c))
@@ -32,7 +32,7 @@ def normalizar(texto: str) -> str:
     return re.sub(r"\s+", " ", texto).strip()
 
 
-@lru_cache(maxsize=16384)
+@lru_cache(maxsize=4096)
 def _tokens_normalizados(texto_normalizado: str) -> frozenset[str]:
     return frozenset(t for t in texto_normalizado.split() if len(t) > 1 and t not in STOPWORDS)
 
@@ -46,7 +46,7 @@ def carregar_base() -> dict:
     return data
 
 
-@lru_cache(maxsize=32768)
+@lru_cache(maxsize=8192)
 def _token_ratio(a: str, b: str) -> float:
     if a == b:
         return 1.0

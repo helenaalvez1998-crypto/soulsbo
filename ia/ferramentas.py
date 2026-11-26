@@ -28,7 +28,7 @@ from utils import REDES, normalizar_link
 DOMINIOS = {"eldenring.wiki.fextralife.com", "www.ign.com", "eldenring.wiki.gg"}
 UA = {"User-Agent": "NaraBot/1.0"}
 _cache_paginas: OrderedDict[str, str] = OrderedDict()
-_CACHE_MAX_PAGINAS = 256
+_CACHE_MAX_PAGINAS = 64
 _MAX_HTML_BYTES = 1_000_000
 _TEXT_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "text/plain"}
 

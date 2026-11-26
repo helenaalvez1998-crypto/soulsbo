@@ -334,7 +334,7 @@ def render_kwargs(text_or_embed, file, view):
 
 
 _CACHE_GRADES: dict[tuple, bytes] = {}
-_CACHE_GRADES_MAX = 64
+_CACHE_GRADES_MAX = 3
 
 
 def _assinatura_grade(rows) -> tuple:

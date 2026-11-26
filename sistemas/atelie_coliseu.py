@@ -1603,7 +1603,8 @@ def normalizar_imagem_carta(dados: bytes, *, exigir_carta_completa: bool = True)
                 raise ArteInvalida("Envie uma imagem estática; GIFs e animações não são aceitos.")
             if original.format not in {"PNG", "JPEG", "WEBP"}:
                 raise ArteInvalida("Formato não aceito. Utilize PNG, JPG ou WEBP.")
-            largura, altura = original.size
+            orientada = ImageOps.exif_transpose(original)
+            largura, altura = orientada.size
             if min(largura, altura) < 512:
                 raise ArteInvalida("A carta completa precisa ter pelo menos 512 pixels no menor lado.")
             ratio = largura / max(1, altura)
@@ -1612,7 +1613,9 @@ def normalizar_imagem_carta(dados: bytes, *, exigir_carta_completa: bool = True)
             if largura > 6000 or altura > 6000 or largura * altura > PIXELS_MAXIMOS:
                 raise ArteInvalida("A resolução é excessiva. Reduza a imagem para no máximo 18 megapixels.")
 
-            orientada = ImageOps.exif_transpose(original)
+            # Reduz antes de criar cópias RGB/RGBA e camadas de composição.
+            # Mantém a mesma resolução final, mas reduz o pico de RAM para uploads grandes.
+            orientada.thumbnail((2400, 3600), Image.Resampling.LANCZOS)
             if orientada.mode in {"RGBA", "LA"} or "transparency" in orientada.info:
                 camada = orientada.convert("RGBA")
                 fundo = Image.new("RGBA", camada.size, (16, 19, 25, 255))
@@ -1622,7 +1625,6 @@ def normalizar_imagem_carta(dados: bytes, *, exigir_carta_completa: bool = True)
                 imagem = orientada.convert("RGB")
             # Carta completa: preservar proporção e enquadramento originais.
             # Não cortar para 5:4 nem redimensionar para uma tela horizontal.
-            imagem.thumbnail((2400, 3600), Image.Resampling.LANCZOS)
             saida = io.BytesIO()
             imagem.save(saida, format="JPEG", quality=91, optimize=True, progressive=True)
             normalizada = saida.getvalue()

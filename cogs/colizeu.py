@@ -3,6 +3,7 @@ import re
 import asyncio
 import io
 import datetime as dt
+from collections import OrderedDict
 import aiohttp
 import discord
 from discord import app_commands
@@ -234,7 +235,10 @@ class Colizeu(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         # Cacheia cada catálogo até a lista de platinas aprovadas mudar.
-        self._catalogos_cache: dict[int, tuple[tuple, bytes]] = {}
+        # Cache LRU limitado: as imagens são bytes completos e não devem crescer
+        # indefinidamente conforme novos usuários entram no pódio.
+        self._catalogos_cache: OrderedDict[int, tuple[tuple, bytes]] = OrderedDict()
+        self._catalogos_cache_max = 3
 
     async def cog_load(self):
         self.bot.add_dynamic_items(BotaoPerfilGladiador, BotaoAcaoColizeu)
@@ -294,6 +298,7 @@ class Colizeu(commands.Cog):
         cached = self._catalogos_cache.get(user_id)
         filename = f"catalogo_platinas_{user_id}.jpg"
         if cached and cached[0] == signature:
+            self._catalogos_cache.move_to_end(user_id)
             return discord.File(io.BytesIO(cached[1]), filename=filename)
 
         try:
@@ -350,6 +355,9 @@ class Colizeu(commands.Cog):
         data = await asyncio.to_thread(_compor_catalogo, thumbs)
         # Guarda apenas em cache local; o arquivo é recriado para cada envio/edição.
         self._catalogos_cache[user_id] = (signature, data)
+        self._catalogos_cache.move_to_end(user_id)
+        while len(self._catalogos_cache) > self._catalogos_cache_max:
+            self._catalogos_cache.popitem(last=False)
         return discord.File(io.BytesIO(data), filename=filename)
 
     async def montar_painel(self, guild: discord.Guild) -> tuple[str, list[discord.Embed], discord.ui.View, list[discord.File]]:
