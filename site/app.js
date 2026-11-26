@@ -697,7 +697,7 @@ async function generateAtelierPrompt() {
     $('#atelier-negative').value = data.reference_url || ''; const refPreview = $('#atelier-reference-preview'); if (refPreview) { refPreview.src = data.reference_url || ''; refPreview.hidden = !data.reference_url; }
     $('#atelier-copy-prompt').disabled = !atelierPromptText;
     $('#atelier-copy-negative').disabled = true;
-    $('#atelier-copy-bundle').disabled = !(atelierAnalysisText && atelierPromptText);
+    $('#atelier-copy-bundle').disabled = !(atelierPromptText && data.reference_url);
     showNotice(`Análise, prompt fixo e referência da facção carregados para ${data.name}.`, 'success');
   } catch (error) { showNotice(error.message, 'error'); }
   finally { button.disabled = false; }
@@ -1494,10 +1494,39 @@ $('#atelier-copy-prompt').addEventListener('click', async () => {
   catch { $('#atelier-prompt').focus(); $('#atelier-prompt').select(); showNotice('Selecione e copie o prompt manualmente.', 'info'); }
 });
 $('#atelier-copy-bundle').addEventListener('click', async () => {
-  if (!atelierPromptText || !atelierAnalysisText) return;
-  const bundle = `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL DA FACÇÃO\n${$('#atelier-negative').value}`;
-  try { await navigator.clipboard.writeText(bundle); showNotice('Pacote A+B+C copiado.', 'success'); }
-  catch { showNotice('A cópia automática falhou. Copie os três campos manualmente.', 'info'); }
+  if (!atelierPromptText) return;
+  const referenceUrl = $('#atelier-reference-preview')?.src || '';
+  const bundle = `ANÁLISE ARTÍSTICA (PT)\n${atelierAnalysisText || 'Sem análise artística retornada para esta carta.'}\n\nPROMPT FIXO\n${atelierPromptText}\n\nREFERÊNCIA VISUAL DA FACÇÃO\nA imagem de referência está incluída como imagem no conteúdo copiado.`;
+  try {
+    if (referenceUrl && navigator.clipboard?.write && window.ClipboardItem) {
+      const response = await fetch(referenceUrl, { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok) throw new Error('Não foi possível carregar a imagem de referência.');
+      const sourceBlob = await response.blob();
+      const image = await createImageBitmap(sourceBlob);
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (!pngBlob) throw new Error('Não foi possível preparar a referência visual.');
+      const textBlob = new Blob([bundle], { type: 'text/plain' });
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'text/plain': textBlob, 'image/png': pngBlob })
+      ]);
+      showNotice('Análise, prompt fixo e imagem de referência copiados juntos.', 'success');
+    } else {
+      await navigator.clipboard.writeText(`${bundle}\n\nURL da referência: ${referenceUrl}`);
+      showNotice('Texto copiado. Este navegador não permite copiar a imagem junto; anexe a referência separadamente.', 'info');
+    }
+  } catch (error) {
+    try {
+      await navigator.clipboard.writeText(`${bundle}\n\nURL da referência: ${referenceUrl}`);
+      showNotice('Os textos foram copiados. Anexe também a imagem de referência exibida no Ateliê.', 'info');
+    } catch {
+      showNotice('Não foi possível copiar automaticamente. Verifique a permissão de área de transferência do navegador.', 'error');
+    }
+  }
 });
 $('#atelier-image').addEventListener('change', () => {
   const file = $('#atelier-image').files?.[0];
