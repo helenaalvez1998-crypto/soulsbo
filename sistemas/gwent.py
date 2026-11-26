@@ -108,7 +108,7 @@ HABILIDADES_UNIDADE_IMPLEMENTADAS = frozenset({
     "legado", "devoto", "escolha_ritmo", "sinergia_faccao",
 })
 HABILIDADES_ESPECIAIS_IMPLEMENTADAS = frozenset({
-    "gwent_nevoa", "gwent_geada", "gwent_chuva", "gwent_chifre", "gwent_medico",
+    "gwent_clima", "gwent_nevoa", "gwent_geada", "gwent_chuva", "gwent_chifre", "gwent_medico",
     "gwent_queima", "gwent_purificar", "gwent_execucao", "gwent_vinculo",
     "gwent_batedor", "gwent_muralha",
     "gwent_egide", "gwent_requiem", "gwent_passo",
@@ -1383,6 +1383,14 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 alvo=next((u for u in alvos if u.get("id")==str(target_id)),None) if target_id else (max(alvos,key=lambda u:int(u.get("bonus",0))) if alvos else None)
                 if not alvo: return {"error": "Não há alvo na fileira escolhida."}
                 alvo["bonus"]=min(0,int(alvo.get("bonus",0))); player["relic_used"]=True; eventos_especial.append(f"Algemas de Margit anularam os bônus de {alvo['nome']}.")
+            elif skill == "gwent_clima":
+                if row not in ROWS:
+                    return {"error": "Escolha uma fileira válida para a Tempestade."}
+                state.setdefault("weather", {r: 0 for r in ROWS})
+                state["weather"][row] = max(1, int(state["weather"].get(row, 0) or 0))
+                eventos_especial.append(
+                    f"Tempestade dos Picos cobriu {ROW_LABELS[row]}; todas as unidades da fileira sofrem -1 de poder efetivo enquanto o clima durar."
+                )
             elif skill == "gwent_nevoa":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
@@ -1820,7 +1828,7 @@ def executar_turno_ia(state: dict, ai_user_id: int = AI_PLAYER_ID) -> dict:
     if current.get("status") != "active" or ai_uid not in current.get("players", {}):
         return current
 
-    # Limite defensivo: no máximo 13 jogadas por chamada (12 cartas + líder/clima/passe).
+    # Limite defensivo: até 12 cartas, habilidade de líder, relíquia e passe por chamada.
     for _ in range(16):
         if current.get("status") != "active" or str(current.get("turn")) != ai_uid:
             break
@@ -1892,13 +1900,11 @@ def executar_turno_ia(state: dict, ai_user_id: int = AI_PLAYER_ID) -> dict:
             for row in legal_rows:
                 consider("play", row, card)
 
-        # Líder e clima não consomem carta: a IA só os usa quando há ganho concreto.
+        # A habilidade de líder permanece separada das cartas.
+        # Clima agora só entra em campo por uma carta especial jogada da mão.
         if not ai.get("leader_used", False):
             for row in ROWS:
                 consider("leader", row)
-        if not ai.get("weather_used", False):
-            for row in ROWS:
-                consider("weather", row)
 
         # A Relíquia é avaliada pelo mesmo motor que valida as ações humanas.
         if ai.get("equipped_relic_id") and not ai.get("relic_used", False):

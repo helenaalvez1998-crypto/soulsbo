@@ -5909,3 +5909,376 @@ body.gwent-match-active .gwent-weather-mist {
   }
   body.gwent-match-active .gwent-weather-lightning { animation: none !important; opacity: 0 !important; }
 }
+
+
+/* GWENT STATUS VFX — efeitos ligados aos marcadores reais de cada unidade.
+   A chuva ambiental continua usando sua camada própria por fileira. */
+body.gwent-match-active .gwent-board-card {
+  isolation: isolate;
+}
+body.gwent-match-active .gwent-board-card > img {
+  position: relative;
+  z-index: 1;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx {
+  position: absolute;
+  z-index: 2;
+  inset: 2px;
+  display: block;
+  overflow: hidden;
+  border-radius: 5px;
+  pointer-events: none;
+  contain: paint;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx::before,
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+body.gwent-match-active .gwent-board-card .gwent-board-power,
+body.gwent-match-active .gwent-board-card .gwent-statuses,
+body.gwent-match-active .gwent-board-card .gwent-shield {
+  z-index: 5;
+}
+
+/* Sangramento: veios e gotas vermelhas descem pelo retrato da unidade. */
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--bleeding {
+  opacity: .62;
+  background: linear-gradient(180deg, rgba(85,0,12,.02), rgba(117,0,18,.20));
+  mix-blend-mode: screen;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--bleeding::before {
+  inset: -30% -12%;
+  background: repeating-linear-gradient(106deg,
+    transparent 0 8px,
+    rgba(207,31,52,.0) 8px 10px,
+    rgba(239,57,74,.72) 10.5px 11.5px,
+    rgba(95,0,14,.25) 12px 13px,
+    transparent 14px 20px);
+  animation: gwent-status-blood-drip 1.05s linear infinite;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--bleeding::after {
+  background:
+    radial-gradient(ellipse at 20% 91%, rgba(156,0,20,.55), transparent 34%),
+    radial-gradient(ellipse at 76% 82%, rgba(218,20,43,.38), transparent 31%),
+    linear-gradient(180deg, transparent 62%, rgba(100,0,15,.24));
+  animation: gwent-status-blood-pulse 2s ease-in-out infinite alternate;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--bleeding[data-level="2"] { opacity: .82; }
+
+/* Geada: película azul fria, cristais e brilho diagonal. */
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--frost {
+  opacity: .67;
+  background: linear-gradient(145deg, rgba(139,219,255,.16), rgba(20,94,155,.22) 58%, rgba(221,249,255,.13));
+  mix-blend-mode: screen;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--frost::before {
+  background:
+    linear-gradient(45deg, transparent 42%, rgba(226,250,255,.72) 43% 44%, transparent 45%),
+    linear-gradient(135deg, transparent 24%, rgba(173,233,255,.62) 25% 26%, transparent 27%),
+    repeating-linear-gradient(112deg, transparent 0 13px, rgba(224,248,255,.25) 14px 14.7px, transparent 16px 23px);
+  transform: translateX(-18%);
+  animation: gwent-status-frost-sheen 3.8s ease-in-out infinite alternate;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--frost::after {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(245,255,255,.95) 0 1px, transparent 2px),
+    radial-gradient(circle at 79% 28%, rgba(219,248,255,.86) 0 1px, transparent 2px),
+    radial-gradient(circle at 48% 72%, rgba(232,251,255,.75) 0 1px, transparent 2px),
+    linear-gradient(180deg, rgba(193,239,255,.12), transparent 48%, rgba(76,169,220,.16));
+  background-size: 100% 100%;
+  animation: gwent-status-frost-glint 2.8s ease-in-out infinite alternate;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--frost[data-level="2"] { opacity: .88; }
+
+/* Podridão Escarlate: esporos, manchas e névoa púrpura/esverdeada. */
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--rot {
+  opacity: .69;
+  background:
+    radial-gradient(ellipse at 22% 36%, rgba(142,191,45,.28), transparent 40%),
+    radial-gradient(ellipse at 76% 65%, rgba(126,35,80,.31), transparent 46%),
+    linear-gradient(135deg, rgba(44,81,18,.12), rgba(74,10,42,.18));
+  mix-blend-mode: screen;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--rot::before {
+  background:
+    radial-gradient(circle at 18% 23%, rgba(190,226,84,.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 68% 38%, rgba(222,112,156,.82) 0 1px, transparent 2px),
+    radial-gradient(circle at 41% 76%, rgba(172,210,72,.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 86% 82%, rgba(207,88,135,.72) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 50% 100%, rgba(97,130,28,.36), transparent 62%);
+  background-size: 100% 100%;
+  animation: gwent-status-rot-spores 3.4s ease-in-out infinite alternate;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--rot::after {
+  background: linear-gradient(112deg, transparent 12%, rgba(170,216,64,.17) 42%, rgba(139,45,96,.23) 59%, transparent 84%);
+  animation: gwent-status-rot-miasma 4.2s ease-in-out infinite alternate;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--rot[data-level="2"] { opacity: .9; }
+
+/* Loucura: calor vermelho/laranja e brasas ascendentes. */
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--madness {
+  opacity: .72;
+  background: linear-gradient(180deg, rgba(105,13,0,.08), rgba(255,87,0,.21) 68%, rgba(255,188,52,.2));
+  mix-blend-mode: screen;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--madness::before {
+  background:
+    radial-gradient(circle at 19% 80%, rgba(255,195,75,.95) 0 1px, transparent 2px),
+    radial-gradient(circle at 63% 66%, rgba(255,100,20,.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 92%, rgba(255,219,112,.85) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 50% 100%, rgba(239,65,7,.42), transparent 66%);
+  animation: gwent-status-embers 1.7s ease-in-out infinite alternate;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--madness::after {
+  background: linear-gradient(0deg, rgba(255,74,0,.19), transparent 58%, rgba(255,171,45,.08));
+  animation: gwent-status-fire-flicker .72s steps(2,end) infinite;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--madness[data-level="2"] { opacity: .92; }
+
+/* Escudo: aro de energia azul; não cobre o ícone ◆ já exibido pela carta. */
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--shield {
+  inset: 1px;
+  border: 1px solid rgba(128,226,255,.72);
+  border-radius: 5px;
+  opacity: .78;
+  box-shadow: inset 0 0 8px rgba(80,193,255,.42), 0 0 7px rgba(71,185,255,.34);
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--shield::before {
+  inset: -35% -80%;
+  background: linear-gradient(110deg, transparent 42%, rgba(213,250,255,.65) 49%, transparent 56%);
+  animation: gwent-status-shield-sweep 2.5s linear infinite;
+}
+body.gwent-match-active .gwent-board-card .gwent-unit-vfx--shield[data-level="2"] { opacity: 1; }
+
+@keyframes gwent-status-blood-drip {
+  from { transform: translateY(-8%); background-position: 0 0; }
+  to { transform: translateY(8%); background-position: -5px 38px; }
+}
+@keyframes gwent-status-blood-pulse {
+  from { opacity: .48; }
+  to { opacity: .92; }
+}
+@keyframes gwent-status-frost-sheen {
+  from { transform: translateX(-12%); opacity: .48; }
+  to { transform: translateX(12%); opacity: .94; }
+}
+@keyframes gwent-status-frost-glint {
+  from { opacity: .35; filter: brightness(.9); }
+  to { opacity: .9; filter: brightness(1.2); }
+}
+@keyframes gwent-status-rot-spores {
+  from { transform: translate(-2%, 1%) scale(.98); opacity: .45; }
+  to { transform: translate(2%, -2%) scale(1.04); opacity: .95; }
+}
+@keyframes gwent-status-rot-miasma {
+  from { transform: translateX(-12%); opacity: .25; }
+  to { transform: translateX(12%); opacity: .82; }
+}
+@keyframes gwent-status-embers {
+  from { transform: translateY(2%); opacity: .46; }
+  to { transform: translateY(-7%); opacity: .95; }
+}
+@keyframes gwent-status-fire-flicker {
+  0%, 100% { opacity: .32; }
+  35% { opacity: .7; }
+  60% { opacity: .42; }
+}
+@keyframes gwent-status-shield-sweep {
+  from { transform: translateX(-30%); }
+  to { transform: translateX(30%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active .gwent-board-card .gwent-unit-vfx::before,
+  body.gwent-match-active .gwent-board-card .gwent-unit-vfx::after {
+    animation: none !important;
+  }
+  body.gwent-match-active .gwent-board-card .gwent-unit-vfx--bleeding { opacity: .48; }
+  body.gwent-match-active .gwent-board-card .gwent-unit-vfx--frost { opacity: .58; }
+  body.gwent-match-active .gwent-board-card .gwent-unit-vfx--rot { opacity: .58; }
+  body.gwent-match-active .gwent-board-card .gwent-unit-vfx--madness { opacity: .58; }
+}
+
+
+/* SoulsBot Arena refresh — card hover, turn signal, leader-card, explanations and combat feedback. */
+body.gwent-match-active .gwent-board-side,
+body.gwent-match-active .gwent-row,
+body.gwent-match-active .gwent-board-cards,
+body.gwent-match-active .gwent-hand-zone,
+body.gwent-match-active .gwent-hand { overflow:visible !important; }
+body.gwent-match-active .gwent-board-cards { position:relative; z-index:7; display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; }
+body.gwent-match-active .gwent-board-card { position:relative; z-index:1; transform-origin:center center; transition:transform .18s ease, z-index 0s, filter .18s ease, box-shadow .18s ease; }
+body.gwent-match-active .gwent-board-card:hover,
+body.gwent-match-active .gwent-board-card:focus-visible { z-index:80; transform:translateY(-5px) scale(1.10); filter:brightness(1.08); box-shadow:0 12px 28px #000e,0 0 18px rgba(232,190,111,.4); }
+body.gwent-match-active .gwent-hand { position:relative; z-index:5; display:flex; flex-wrap:nowrap; align-items:flex-end; overflow:visible !important; width:100%; max-width:100%; }
+body.gwent-match-active .gwent-hand > .gwent-hand-card { position:relative; z-index:1; flex:0 1 128px; min-width:76px; transform-origin:center bottom; }
+body.gwent-match-active .gwent-hand > .gwent-hand-card:hover,
+body.gwent-match-active .gwent-hand > .gwent-hand-card:focus-visible { z-index:100; transform:translateY(-12px) scale(1.14); box-shadow:0 14px 34px #000f,0 0 19px rgba(232,190,111,.34); }
+#gwent-hand-hover-preview { display:none !important; }
+body.gwent-match-active .gwent-hand[hidden] { display:none !important; }
+
+body.gwent-match-active .gwent-arena-title h2 { font-size:clamp(23px,2vw,31px); letter-spacing:.06em; }
+body.gwent-match-active .gwent-arena-title .eyebrow { font-size:11px; letter-spacing:.16em; }
+body.gwent-match-active .gwent-score article small { font-size:11px; }
+body.gwent-match-active .gwent-score article span { font-size:10px; }
+body.gwent-match-active .gwent-turn-indicator { min-height:56px; padding:9px 14px; }
+body.gwent-match-active .gwent-turn-indicator strong { font-size:clamp(13px,1.1vw,17px); }
+body.gwent-match-active .gwent-turn-indicator small { font-size:11px; }
+body.gwent-match-active .gwent-turn-indicator.mine { border-color:rgba(67,239,162,.8); background:linear-gradient(105deg,rgba(5,61,43,.88),rgba(6,22,26,.98)); }
+body.gwent-match-active .gwent-turn-indicator.enemy { border-color:rgba(241,91,91,.72); border-left-color:#f06a6a; background:linear-gradient(105deg,rgba(75,20,27,.82),rgba(22,12,20,.98)); }
+body.gwent-match-active .gwent-turn-indicator.enemy strong { color:#ffb1b1; }
+
+body.gwent-match-active .gwent-hand-zone.is-my-turn { border-color:rgba(63,255,155,.68); box-shadow:inset 0 0 22px rgba(20,220,127,.07),0 0 18px rgba(40,255,153,.12); animation:gwent-hand-green-breathe 3.2s ease-in-out infinite; }
+body.gwent-match-active .gwent-hand-zone.is-my-turn .gwent-hand-card { box-shadow:0 5px 16px rgba(0,0,0,.48),0 0 9px rgba(46,255,150,.12); }
+body.gwent-match-active .gwent-hand-zone.is-enemy-turn { border-color:rgba(236,83,91,.42); box-shadow:inset 0 0 22px rgba(220,43,55,.06),0 0 12px rgba(232,60,75,.07); }
+body.gwent-match-active .gwent-hand-turn-tag { display:inline-flex; align-items:center; padding:5px 10px; border:1px solid rgba(78,220,150,.38); border-radius:6px; color:#92e9bd; background:rgba(15,75,51,.22); font:800 10px Cinzel,serif; letter-spacing:.08em; }
+body.gwent-match-active .gwent-hand-turn-tag.is-enemy { border-color:rgba(235,98,106,.36); color:#f1a1a5; background:rgba(89,25,33,.22); }
+@keyframes gwent-hand-green-breathe { 0%,100%{box-shadow:inset 0 0 18px rgba(20,220,127,.045),0 0 10px rgba(40,255,153,.08)} 50%{box-shadow:inset 0 0 25px rgba(20,220,127,.11),0 0 20px rgba(40,255,153,.18)} }
+
+body.gwent-match-active .gwent-hand-head { display:flex; align-items:center; justify-content:flex-start; gap:14px; min-width:0; }
+body.gwent-match-active .gwent-leader-card { display:flex; flex:0 0 auto; align-items:center; gap:8px; min-width:170px; max-width:230px; padding:5px 9px 5px 6px; border:1px solid rgba(219,184,111,.58); border-radius:8px; background:linear-gradient(135deg,rgba(34,38,52,.98),rgba(11,17,27,.98)); color:#efe0bf; text-align:left; cursor:pointer; box-shadow:inset 0 0 12px rgba(0,0,0,.4),0 3px 12px rgba(0,0,0,.24); transition:border-color .18s,box-shadow .18s,transform .18s; }
+body.gwent-match-active .gwent-leader-card:hover { transform:translateY(-2px); border-color:#f5d48f; box-shadow:0 0 16px rgba(229,184,105,.25); }
+body.gwent-match-active .gwent-leader-card-art { position:relative; display:grid; place-items:center; width:40px; height:48px; flex:0 0 40px; overflow:hidden; border:1px solid #b89456; border-radius:5px; background:radial-gradient(circle,#6a4c2b,#111827 72%); }
+body.gwent-match-active .gwent-leader-card-art img { width:100%; height:100%; object-fit:cover; }
+body.gwent-match-active .gwent-leader-card-art i { color:#f4d69c; font:24px Cinzel,serif; }
+body.gwent-match-active .gwent-leader-card-meta { display:grid; gap:3px; min-width:0; }
+body.gwent-match-active .gwent-leader-card-meta b { overflow:hidden; color:#f1d9a6; font:800 10px/1.2 Cinzel,serif; text-overflow:ellipsis; white-space:nowrap; }
+body.gwent-match-active .gwent-leader-card-meta small { overflow:hidden; color:#aebbd0; font:700 8px/1.2 Inter,sans-serif; text-overflow:ellipsis; white-space:nowrap; }
+body.gwent-match-active .gwent-leader-card-meta em { color:#91e7ba; font:900 7px/1 Inter,sans-serif; font-style:normal; letter-spacing:.08em; }
+body.gwent-match-active .gwent-leader-card.is-spent { filter:saturate(.4); opacity:.78; }
+body.gwent-match-active .gwent-hand-info { flex:1 1 auto; }
+body.gwent-match-active .gwent-hand-toggle { margin-left:auto; }
+
+.gwent-leader-modal { position:fixed; inset:0; z-index:10050; display:grid; place-items:center; padding:18px; background:rgba(2,5,12,.82); backdrop-filter:blur(9px); }
+.gwent-leader-dialog { position:relative; display:grid; grid-template-columns:minmax(160px,220px) minmax(260px,450px); gap:22px; width:min(720px,95vw); max-height:90vh; overflow:auto; padding:24px; border:1px solid #b9945e; border-radius:15px; background:radial-gradient(circle at 15% 15%,rgba(135,93,48,.2),transparent 40%),linear-gradient(145deg,#151e2e,#080d17); box-shadow:0 24px 80px #000e; color:#eadfc9; }
+.gwent-leader-close { position:absolute; top:10px; right:12px; width:34px; height:34px; border:1px solid #8a714c; border-radius:50%; background:#111a28; color:#f4d69b; font-size:22px; cursor:pointer; }
+.gwent-leader-art { display:grid; align-content:center; justify-items:center; gap:14px; min-height:250px; border:1px solid rgba(215,177,107,.55); border-radius:10px; background:radial-gradient(circle at center,rgba(157,111,54,.35),transparent 50%),linear-gradient(145deg,#252434,#0a101c); }
+.gwent-leader-art span { color:#e7c680; font:76px Cinzel,serif; text-shadow:0 0 30px rgba(230,190,109,.5); }
+.gwent-leader-art small { color:#d2b77e; font:800 9px Cinzel,serif; letter-spacing:.12em; text-align:center; }
+.gwent-leader-details h2 { margin:8px 0 12px; color:#f0d39b; font:900 clamp(22px,3vw,32px) Cinzel,serif; }
+.gwent-leader-state { display:inline-flex; padding:5px 9px; border:1px solid rgba(214,185,125,.5); border-radius:20px; color:#c6b27e; font:800 9px Inter,sans-serif; letter-spacing:.08em; }
+.gwent-leader-state.ready { border-color:#4bd79d; color:#8ff0bf; background:rgba(25,113,78,.18); }
+.gwent-leader-state.spent { border-color:#9b8293; color:#b9a5b5; }
+.gwent-leader-ability,.gwent-leader-simple { margin-top:14px; padding:12px; border:1px solid rgba(112,145,191,.32); border-radius:8px; background:rgba(8,16,29,.75); }
+.gwent-leader-ability small,.gwent-leader-simple small { color:#d6b77c; font:900 10px Cinzel,serif; letter-spacing:.12em; }
+.gwent-leader-ability p,.gwent-leader-simple p { margin:7px 0 0; color:#d0d8e5; font:500 13px/1.5 Inter,sans-serif; }
+.gwent-leader-simple { border-color:rgba(77,202,145,.35); background:rgba(11,54,42,.2); }
+.gwent-leader-row { display:grid; gap:6px; margin-top:14px; color:#d9c59e; font:800 10px Cinzel,serif; }
+.gwent-leader-row select { min-height:40px; padding:8px 10px; border:1px solid #8b7654; border-radius:7px; background:#111a28; color:#f4e4c5; }
+.gwent-leader-confirm { width:100%; min-height:46px; margin-top:14px; border:1px solid #eac77d; border-radius:8px; background:linear-gradient(135deg,#f2d48d,#a66d2d); color:#20170c; font:900 12px Cinzel,serif; cursor:pointer; }
+.gwent-leader-confirm:disabled { opacity:.45; cursor:not-allowed; }
+
+.gwent-play-card-explain-toggle { width:100%; min-height:40px; margin-top:10px; border:1px solid rgba(103,199,153,.65); border-radius:7px; background:linear-gradient(120deg,rgba(15,72,53,.9),rgba(10,30,31,.95)); color:#a8f0cb; font:900 10px Cinzel,serif; letter-spacing:.1em; cursor:pointer; }
+.gwent-play-card-simple-explanation { margin-top:9px; padding:13px; border:1px solid rgba(75,203,145,.4); border-radius:8px; background:rgba(8,42,33,.58); }
+.gwent-play-card-simple-explanation[hidden] { display:none !important; }
+.gwent-play-card-simple-explanation small { color:#91e6b9; font:900 9px Cinzel,serif; letter-spacing:.12em; }
+.gwent-play-card-simple-explanation p { margin:5px 0 12px; color:#e2eee8; font:500 13px/1.5 Inter,sans-serif; }
+.gwent-play-card-simple-explanation p:last-child { margin-bottom:0; }
+.gwent-play-card-preview { margin-top:9px; padding:9px 11px; border:1px solid rgba(216,178,109,.36); border-radius:7px; background:rgba(22,27,40,.8); color:#e3c98e; font:700 11px/1.4 Inter,sans-serif; }
+.gwent-row.is-card-preview { outline:2px solid rgba(100,234,173,.85); outline-offset:-2px; box-shadow:inset 0 0 22px rgba(58,232,159,.12); }
+.gwent-board-card.is-card-preview { outline:2px solid #71f0b7; outline-offset:2px; box-shadow:0 0 18px rgba(68,235,165,.55); }
+.gwent-board-side.is-card-preview > h3 { color:#a8f1c9; }
+.gwent-row-effects { display:flex; flex-wrap:wrap; gap:3px; min-width:0; }
+.gwent-row-effect-chip { display:inline-flex; align-items:center; padding:2px 4px; border:1px solid rgba(223,183,112,.35); border-radius:4px; background:rgba(9,16,25,.8); color:#d8c18e; font:800 7px/1.2 Inter,sans-serif; font-style:normal; letter-spacing:.02em; white-space:nowrap; }
+.gwent-row-effect-chip.is-weather { border-color:rgba(130,196,235,.55); color:#a9ddff; }
+.gwent-row-effect-chip.effect-sangramento { color:#ff999f; }
+.gwent-row-effect-chip.effect-geada { color:#9fddff; }
+.gwent-row-effect-chip.effect-podrida { color:#b9e78d; }
+.gwent-row-effect-chip.effect-loucura { color:#ffc18b; }
+.gwent-board-side .gwent-row h4 { grid-template-rows:auto auto; align-content:center; gap:4px; }
+.gwent-row-power { grid-column:2; grid-row:1/3; align-self:center; }
+.gwent-power-delta { position:absolute; top:4px; left:50%; z-index:90; padding:3px 5px; border-radius:5px; font:900 12px Cinzel,serif; pointer-events:none; animation:gwent-power-delta-float 1.05s ease-out forwards; }
+.gwent-power-delta.is-up { color:#a4ffd0; text-shadow:0 0 10px #1fe48c; }
+.gwent-power-delta.is-down { color:#ff9da5; text-shadow:0 0 10px #ed405a; }
+.gwent-board-card.has-power-up { animation:gwent-power-up .62s ease-out; }
+.gwent-board-card.has-power-down { animation:gwent-power-down .62s ease-out; }
+@keyframes gwent-power-delta-float { 0%{opacity:0;transform:translate(-50%,8px) scale(.8)} 20%{opacity:1} 100%{opacity:0;transform:translate(-50%,-26px) scale(1.1)} }
+@keyframes gwent-power-up { 0%,100%{filter:none} 35%{filter:brightness(1.45) drop-shadow(0 0 12px rgba(77,240,160,.85))} }
+@keyframes gwent-power-down { 0%,100%{filter:none} 35%{filter:brightness(1.3) drop-shadow(0 0 12px rgba(242,70,85,.85))} }
+.gwent-destroy-ghost { position:fixed !important; z-index:12000 !important; margin:0 !important; pointer-events:none !important; transform-origin:center !important; animation:gwent-destroy-at-place .72s ease-in forwards !important; }
+@keyframes gwent-destroy-at-place { 0%{opacity:1;filter:brightness(1.25) saturate(1.4);transform:scale(1)} 25%{opacity:1;filter:brightness(1.7) saturate(0);transform:scale(1.04) rotate(1deg)} 100%{opacity:0;filter:brightness(.2) saturate(0);transform:scale(.72) rotate(-4deg);clip-path:inset(0 0 100% 0)} }
+#turn-banner.your-turn { border-color:rgba(83,255,163,.8); color:#b7ffd6; box-shadow:0 0 34px rgba(45,255,150,.3),inset 0 0 25px rgba(45,255,150,.12); }
+#turn-banner.enemy-turn { border-color:rgba(245,95,105,.75); color:#ffc0c4; box-shadow:0 0 30px rgba(235,65,82,.22),inset 0 0 22px rgba(235,65,82,.1); }
+@media (max-width:700px) {
+  body.gwent-match-active .gwent-hand-head { flex-wrap:wrap; }
+  body.gwent-match-active .gwent-leader-card { min-width:140px; max-width:170px; }
+  .gwent-leader-dialog { grid-template-columns:1fr; width:min(500px,95vw); gap:14px; padding:18px; }
+  .gwent-leader-art { min-height:100px; }
+  .gwent-leader-art span { font-size:46px; }
+  body.gwent-match-active .gwent-row-effects { max-width:100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active .gwent-hand-zone.is-my-turn,
+  .gwent-power-delta,.gwent-board-card.has-power-up,.gwent-board-card.has-power-down,.gwent-destroy-ghost { animation:none !important; }
+}
+
+/* Final HUD pass: keep turn status readable without a large central banner. */
+body.gwent-match-active .gwent-turn-indicator {
+  min-height: 42px !important;
+  padding: 8px 13px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 8px;
+}
+body.gwent-match-active .gwent-turn-indicator strong {
+  font: 900 clamp(12px, 1vw, 15px)/1.25 Cinzel, Georgia, serif !important;
+  letter-spacing: .09em;
+}
+body.gwent-match-active .gwent-turn-indicator small {
+  display: block;
+  font-size: 10px !important;
+}
+body.gwent-match-active .gwent-turn-indicator.mine small,
+body.gwent-match-active .gwent-turn-indicator.enemy small { display:none; }
+body.gwent-match-active .gwent-turn-dot {
+  width: 8px; height: 8px; flex: 0 0 8px;
+  border-radius: 50%; background: #6fffb6;
+  box-shadow: 0 0 7px #3effa1, 0 0 15px rgba(54,255,154,.65);
+  animation: gwent-turn-dot-pulse 1.8s ease-in-out infinite;
+}
+body.gwent-match-active .gwent-turn-indicator.enemy .gwent-turn-dot,
+body.gwent-match-active .gwent-turn-indicator.passed .gwent-turn-dot {
+  background:#ff7c88; box-shadow:0 0 7px #ff596b,0 0 14px rgba(255,74,96,.52);
+}
+body.gwent-match-active .gwent-turn-indicator.prep .gwent-turn-dot,
+body.gwent-match-active .gwent-turn-indicator.finished .gwent-turn-dot { background:#e2c17f; box-shadow:0 0 8px rgba(226,193,127,.7); }
+@keyframes gwent-turn-dot-pulse { 0%,100%{opacity:.75;transform:scale(.88)} 50%{opacity:1;transform:scale(1.16)} }
+body.gwent-match-active .gwent-hand-zone.is-enemy-turn {
+  animation:gwent-hand-red-breathe 3.4s ease-in-out infinite;
+}
+@keyframes gwent-hand-red-breathe {
+  0%,100%{box-shadow:inset 0 0 16px rgba(220,43,55,.035),0 0 7px rgba(232,60,75,.05)}
+  50%{box-shadow:inset 0 0 22px rgba(220,43,55,.085),0 0 15px rgba(232,60,75,.13)}
+}
+body.gwent-match-active .gwent-leader-portrait { position:relative; display:grid; place-items:center; width:100%; height:100%; overflow:hidden; }
+body.gwent-match-active .gwent-leader-mini-image { width:100%; height:100%; object-fit:cover; }
+body.gwent-match-active .gwent-leader-portrait > i { color:#f4d69c; font:24px Cinzel,serif; }
+.gwent-leader-modal-image { display:block; width:100%; height:100%; object-fit:cover; border-radius:8px; }
+.gwent-leader-art .gwent-leader-portrait { display:block; width:min(100%,210px); height:250px; overflow:hidden; border:1px solid rgba(222,184,111,.55); border-radius:9px; background:#101725; box-shadow:0 12px 32px #0009; }
+.gwent-leader-art .gwent-leader-portrait > i { display:grid; place-items:center; width:100%; height:100%; color:#f4d69c; font:76px Cinzel,serif; }
+#turn-banner.your-turn { border-color:rgba(83,255,163,.85); color:#b7ffd6; box-shadow:0 0 34px rgba(45,255,150,.3),inset 0 0 25px rgba(45,255,150,.12); }
+#turn-banner.enemy-turn { border-color:rgba(245,95,105,.78); color:#ffc0c4; box-shadow:0 0 30px rgba(235,65,82,.22),inset 0 0 22px rgba(235,65,82,.1); }
+@media (max-width:760px) {
+  body.gwent-match-active .gwent-turn-indicator { min-height:38px !important; padding:7px 8px !important; }
+  body.gwent-match-active .gwent-turn-indicator strong { font-size:10px !important; }
+  .gwent-leader-dialog { grid-template-columns:1fr; width:min(500px,95vw); }
+  .gwent-leader-art { min-height:0; padding:10px; }
+  .gwent-leader-art .gwent-leader-portrait { width:110px; height:135px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active .gwent-turn-dot,
+  body.gwent-match-active .gwent-hand-zone.is-my-turn,
+  body.gwent-match-active .gwent-hand-zone.is-enemy-turn { animation:none !important; }
+}
+
+/* Hovered card must rise above its neighboring rows, including weather rows. */
+body.gwent-match-active .gwent-board-side:has(.gwent-board-card:hover),
+body.gwent-match-active .gwent-board-side:has(.gwent-board-card:focus-visible) { position:relative; z-index:120 !important; }
+body.gwent-match-active .gwent-row:has(.gwent-board-card:hover),
+body.gwent-match-active .gwent-row:has(.gwent-board-card:focus-visible) { position:relative !important; z-index:125 !important; overflow:visible !important; }
+body.gwent-match-active .gwent-row.has-weather:has(.gwent-board-card:hover),
+body.gwent-match-active .gwent-row.has-weather:has(.gwent-board-card:focus-visible) { overflow:visible !important; }

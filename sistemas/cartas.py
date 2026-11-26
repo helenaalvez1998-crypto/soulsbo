@@ -89,6 +89,7 @@ HABILIDADES: dict[str, dict[str, str]] = {
     "estandarte": {"nome": "Estandarte", "texto": "Concede +1 às outras unidades aliadas da mesma fileira."},
     "resistencia_climatica": {"nome": "Resistência Climática", "texto": "Ignora até 2 pontos de penalidade climática; sem clima ativo ao entrar, recebe +1."},
     "eco_arcano": {"nome": "Eco Arcano", "texto": "+2 se você tiver uma carta especial no descarte."},
+    "gwent_clima": {"nome": "Tempestade dos Picos", "texto": "Escolha uma fileira. A tempestade reduz em 1 o poder efetivo de todas as unidades dos dois lados nessa fileira enquanto o clima estiver ativo."},
     "gwent_nevoa": {"nome": "Névoa de Sellia", "texto": "Aplica 1 marca de Podridão Escarlate a todas as unidades inimigas da fileira escolhida; raridades Lendárias ou superiores aplicam uma segunda marca."},
     "gwent_geada": {"nome": "Lua Gélida", "texto": "Aplica 1 marca de Geada a todas as unidades inimigas em campo; raridades Lendárias ou superiores aplicam uma segunda marca."},
     "gwent_chuva": {"nome": "Sangue Corrompido", "texto": "Aplica uma marca de Sangramento a todas as unidades inimigas na fileira de Cerco; a segunda marca reduz 2 de bônus (mínimo -2) e consome as marcas."},
@@ -273,6 +274,7 @@ _CARTAS_BASE = [
     Carta("covenant_peregrinos_nevoa", "Peregrinos da Cidade Eterna", "Unidade", 'Lua Negra', 4, "Comum", 1, "primeira_luz", "Viajantes das cidades subterrâneas cruzam a escuridão em busca de uma nova estrela."),
     Carta("covenant_irmandade_ferro", "Guardas da Árvore Áurea", "Unidade", 'Ordem Áurea', 4, "Comum", 1, "retaliacao", "Defensores juramentados protegem os caminhos e santuários consagrados à Árvore Áurea."),
     # Cartas especiais do modo Gwent: entram na coleção por recompensas/pacotes do Discord.
+    Carta("gwent_especial_tempestade", "Tempestade dos Picos", "Especial", 'Lua Negra', 0, "Rara", 2, "gwent_clima", "Nuvens pesadas cobrem uma fileira. A chuva atravessa as defesas e enfraquece todas as unidades expostas enquanto o clima durar."),
     Carta("gwent_especial_nevoa", "Miasma da Podridão", "Especial", 'Lua Negra', 0, "Rara", 2, "gwent_nevoa", "Uma nuvem pútrida se espalha pelo campo, lembrando os pântanos corrompidos de Caelid."),
     Carta("gwent_especial_geada", "Geada dos Picos dos Gigantes", "Especial", 'Lua Negra', 0, "Rara", 2, "gwent_geada", "O frio dos Picos dos Gigantes avança sobre o campo e silencia o vigor dos combatentes."),
     Carta("gwent_especial_chuva", "Sangue Corrompido", "Especial", 'Véu Carmesim', 0, "Comum", 1, "gwent_chuva", "Um rito sanguíneo mancha o campo de batalha com a promessa de uma dívida ainda não paga."),
