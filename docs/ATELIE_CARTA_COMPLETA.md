@@ -23,3 +23,5 @@ O fluxo foi validado por sintaxe Python. É necessário publicar em ambiente de 
 4. Visualização na fila de aprovação e publicação após aprovação.
 
 Não apague o SQLite nem as variáveis R2 durante a atualização.
+
+O prompt fixo também exige carta isolada, sem fundo externo, em PNG com canal alfa. O fundo artístico interno da carta deve permanecer intacto.

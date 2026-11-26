@@ -10,3 +10,5 @@ O PDF é montado no servidor com ReportLab e contém, nesta ordem:
 A referência é escolhida no servidor com base na facção da carta e lida de `site/assets/atelier-referencias/`. O arquivo é enviado como `application/pdf` e baixado pelo navegador.
 
 Dependência adicionada: `reportlab>=4.2,<5.0`.
+
+O prompt fixo também exige carta isolada, sem fundo externo, em PNG com canal alfa. O fundo artístico interno da carta deve permanecer intacto.

@@ -81,3 +81,13 @@ Crie diretamente a imagem final da carta, utilizando a referência e os dados en
 
 ## REGRA TÉCNICA DE COMPOSIÇÃO
 Ignore qualquer instrução de análise artística que imponha resolução, largura, altura, proporção, orientação, margens seguras ou dimensões. A composição deve seguir a referência visual da carta completa. Não aplique enquadramento horizontal 5:4.
+
+## 9. CARTA ISOLADA, SEM FUNDO EXTERNO
+A saída deve conter somente a carta completa, isolada e recortada pelo seu contorno externo.
+- Gere a carta com fundo externo transparente, em PNG com canal alfa.
+- Todos os pixels fora do contorno externo da carta devem ser transparentes.
+- Não coloque a carta sobre cenário, mesa, pedestal, suporte, moldura de apresentação, mockup, painel, fundo sólido, degradê ou qualquer outro elemento externo.
+- Não acrescente sombra projetada ou brilho fora do contorno da carta.
+- Preserve integralmente o fundo artístico que faz parte do design interno da própria carta, incluindo ilustração, paisagem, textura, painéis, moldura e ornamentos.
+- A transparência se aplica somente à área externa à silhueta da carta; não remova nem torne transparentes elementos que pertencem ao design interno.
+- Não corte, esconda ou deixe fora da imagem nenhuma parte da moldura ou dos elementos da carta.
