@@ -11,8 +11,8 @@ from typing import Any
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-ARTE_LARGURA = 1200
-ARTE_ALTURA = 960
+ARTE_LARGURA = 2400
+ARTE_ALTURA = 3600
 TAMANHO_MAXIMO_UPLOAD = 8 * 1024 * 1024
 PIXELS_MAXIMOS = 18_000_000
 
@@ -1533,8 +1533,8 @@ def normalizar_imagem_carta(dados: bytes) -> ImagemNormalizada:
             if original.format not in {"PNG", "JPEG", "WEBP"}:
                 raise ArteInvalida("Formato não aceito. Utilize PNG, JPG ou WEBP.")
             largura, altura = original.size
-            if largura < 512 or altura < 512:
-                raise ArteInvalida("A imagem precisa ter pelo menos 512 × 512 pixels para manter a qualidade.")
+            if min(largura, altura) < 512:
+                raise ArteInvalida("A carta completa precisa ter pelo menos 512 pixels no menor lado.")
             if largura > 6000 or altura > 6000 or largura * altura > PIXELS_MAXIMOS:
                 raise ArteInvalida("A resolução é excessiva. Reduza a imagem para no máximo 18 megapixels.")
 
@@ -1546,12 +1546,9 @@ def normalizar_imagem_carta(dados: bytes) -> ImagemNormalizada:
                 imagem = fundo.convert("RGB")
             else:
                 imagem = orientada.convert("RGB")
-            imagem = ImageOps.fit(
-                imagem,
-                (ARTE_LARGURA, ARTE_ALTURA),
-                method=Image.Resampling.LANCZOS,
-                centering=(0.5, 0.48),
-            )
+            # Carta completa: preservar proporção e enquadramento originais.
+            # Não cortar para 5:4 nem redimensionar para uma tela horizontal.
+            imagem.thumbnail((2400, 3600), Image.Resampling.LANCZOS)
             saida = io.BytesIO()
             imagem.save(saida, format="JPEG", quality=91, optimize=True, progressive=True)
             normalizada = saida.getvalue()
@@ -1561,7 +1558,7 @@ def normalizar_imagem_carta(dados: bytes) -> ImagemNormalizada:
                 normalizada = saida.getvalue()
             if len(normalizada) > TAMANHO_MAXIMO_UPLOAD:
                 raise ArteInvalida("Não consegui reduzir a imagem o suficiente. Envie uma versão com menos detalhes ou resolução menor.")
-            return ImagemNormalizada(normalizada, ARTE_LARGURA, ARTE_ALTURA)
+            return ImagemNormalizada(normalizada, imagem.width, imagem.height)
     except ArteInvalida:
         raise
     except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError, SyntaxError, OverflowError) as exc:

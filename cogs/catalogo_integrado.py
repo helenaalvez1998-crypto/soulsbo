@@ -888,7 +888,7 @@ async def avisar_moderacao(jogo, guild_id: int) -> bool:
     try:
         canal = await obter_canal_moderacao(guild_id)
         if canal is None:
-            print(f"Canal central de moderação ausente/inacessível para guild={guild_id}; port #{jogo['id']} permanece pendente.")
+            log.warning(f"Canal central de moderação ausente/inacessível para guild={guild_id}; port #{jogo['id']} permanece pendente.")
             return False
         emb, file = jogo_embed(jogo)
         kw = {"file": file} if file else {}

@@ -1,8 +1,11 @@
-"""Execução transacional do Laboratório de Transmutação — V34.
+"""Execução transacional do Laboratório de Transmutação — V34 + Evolução com Risco.
 
 Geração, renderização e validação são preparadas antes do débito. A execução
 revalida propriedade, deck e saldo dentro de BEGIN IMMEDIATE. Somente uma
 tentativa legítima (sucesso ou falha aleatória) consome recursos.
+
+Sistema de Evolução por Níveis — Cada nível aumenta o poder, mas diminui a chance
+de sucesso e introduz risco de perda permanente da carta.
 """
 from __future__ import annotations
 

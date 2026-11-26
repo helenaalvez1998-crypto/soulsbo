@@ -79,6 +79,7 @@ FACCOES: dict[str, dict] = {
     "Ordem Áurea": dict(cor=(184, 143, 57), metal=(242, 218, 153), esc=(38, 29, 15)),
     "Véu Carmesim": dict(cor=(142, 42, 48), metal=(205, 139, 125), esc=(34, 12, 17)),
     "Lua Negra": dict(cor=(93, 111, 159), metal=(191, 202, 224), esc=(15, 20, 37)),
+    "Os Esquecidos": dict(cor=(215, 210, 190), metal=(225, 220, 200), esc=(45, 42, 35)),
 }
 
 # Nomes antigos ainda podem existir em cartas salvas, decks e templates.
