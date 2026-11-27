@@ -7856,3 +7856,110 @@ body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] 
     justify-content: flex-start !important;
   }
 }
+
+
+/* Auditoria clicável do bônus na inspeção de combate. */
+.gwent-board-card-stats .gwent-board-card-stat-action {
+  appearance:none;
+  display:grid;
+  align-content:center;
+  justify-items:center;
+  gap:5px;
+  width:100%;
+  min-width:0;
+  padding:11px 9px;
+  border:1px solid rgba(224,184,116,.68);
+  border-radius:0;
+  background:linear-gradient(145deg,rgba(72,53,29,.78),rgba(14,13,17,.96));
+  color:inherit;
+  font:inherit;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color .16s ease,filter .16s ease,transform .16s ease;
+}
+.gwent-board-card-stats .gwent-board-card-stat-action:hover,
+.gwent-board-card-stats .gwent-board-card-stat-action:focus-visible,
+.gwent-board-card-stats .gwent-board-card-stat-action[aria-expanded="true"] {
+  border-color:#f4cb82;
+  filter:brightness(1.18);
+  outline:2px solid rgba(244,203,130,.3);
+  outline-offset:2px;
+}
+.gwent-board-card-stats .gwent-board-card-stat-action small {
+  color:#e9c98e;
+  font:800 8px Cinzel,serif;
+  letter-spacing:.1em;
+}
+.gwent-board-card-stats .gwent-board-card-stat-action strong {
+  color:#f4cb82;
+  font:900 24px Cinzel,serif;
+  text-shadow:0 0 16px rgba(237,184,99,.22);
+}
+.gwent-board-card-stats .gwent-board-card-stat-action span {
+  color:#b9a27b;
+  font:700 7px Inter,sans-serif;
+  letter-spacing:.1em;
+}
+.gwent-bonus-breakdown {
+  display:grid;
+  gap:10px;
+  padding:13px 14px;
+  border:1px solid rgba(224,184,116,.62);
+  background:linear-gradient(145deg,rgba(47,36,24,.9),rgba(8,13,23,.96));
+  box-shadow:inset 0 0 22px rgba(197,151,79,.07);
+}
+.gwent-bonus-breakdown[hidden] { display:none!important; }
+.gwent-bonus-breakdown-heading,
+.gwent-bonus-origin-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.gwent-bonus-breakdown-heading small {
+  display:block;
+  color:#d7a95e;
+  font:900 8px Cinzel,serif;
+  letter-spacing:.18em;
+}
+.gwent-bonus-breakdown-heading strong {
+  display:block;
+  margin-top:4px;
+  color:#f2d49b;
+  font:900 13px Cinzel,serif;
+}
+.gwent-bonus-breakdown-heading > span {
+  color:#91a6c3;
+  font:800 7px Inter,sans-serif;
+  letter-spacing:.12em;
+}
+.gwent-bonus-origin-list {
+  display:grid;
+  gap:7px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.gwent-bonus-origin-item {
+  padding:9px 10px;
+  border:1px solid rgba(115,139,172,.3);
+  background:rgba(4,9,18,.58);
+}
+.gwent-bonus-origin-top b {
+  color:#e7d5b6;
+  font:800 10px Cinzel,serif;
+}
+.gwent-bonus-origin-top strong {
+  flex:0 0 auto;
+  color:#81e2ad;
+  font:900 15px Cinzel,serif;
+}
+.gwent-bonus-origin-item.is-negative .gwent-bonus-origin-top strong { color:#e58b8b; }
+.gwent-bonus-origin-item.is-untracked .gwent-bonus-origin-top strong { color:#d9b978; }
+.gwent-bonus-origin-item p,
+.gwent-bonus-origin-empty {
+  margin:5px 0 0;
+  color:#aab7ca;
+  font:500 10px/1.45 Inter,sans-serif;
+}
+.gwent-bonus-origin-empty { margin:0; }

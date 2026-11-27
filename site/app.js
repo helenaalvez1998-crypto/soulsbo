@@ -2637,6 +2637,25 @@ function openGwentBoardCardModal(cardId) {
   const currentPower = Math.max(1, basePower + bonus);
   const shield = Number(card.escudo || 0);
   const rarityBudget = rarityPower(card);
+  const bonusSources = Array.isArray(card.bonus_sources) ? card.bonus_sources : [];
+  const trackedBonusTotal = bonusSources.reduce((total, item) => total + (Number(item?.delta) || 0), 0);
+  const untrackedBonus = bonus - trackedBonusTotal;
+  const signedBonus = value => `${Number(value) > 0 ? '+' : ''}${number(value)}`;
+  const bonusSourceRows = bonusSources.map((item, index) => `
+    <li class="gwent-bonus-origin-item ${Number(item.delta) < 0 ? 'is-negative' : 'is-positive'}">
+      <div class="gwent-bonus-origin-top"><b>${escapeHTML(item.source || `Modificador ${index + 1}`)}</b><strong>${signedBonus(item.delta)}</strong></div>
+      <p>${escapeHTML(item.detail || 'Modificador aplicado durante o combate.')}</p>
+    </li>`).join('');
+  const untrackedOrigin = untrackedBonus !== 0 ? `
+    <li class="gwent-bonus-origin-item is-untracked">
+      <div class="gwent-bonus-origin-top"><b>Valor anterior sem histórico de origem</b><strong>${signedBonus(untrackedBonus)}</strong></div>
+      <p>Este valor já estava registrado na partida antes da ativação do rastreamento detalhado. Não é possível atribuir sua origem com segurança.</p>
+    </li>` : '';
+  const bonusBreakdownContent = bonusSources.length || untrackedOrigin
+    ? `<ol class="gwent-bonus-origin-list">${bonusSourceRows}${untrackedOrigin}</ol>`
+    : (bonus === 0
+      ? '<p class="gwent-bonus-origin-empty">Esta carta não possui bônus de combate no momento.</p>'
+      : '<p class="gwent-bonus-origin-empty">A origem deste bônus não foi registrada nesta partida. As próximas alterações serão discriminadas aqui.</p>');
   const rowLabel = card.row_label || gwentRowLabel(card.row || '');
   const isSpecial = !!card.especial || card.categoria === 'Especial';
   const modalCard = {...card};
@@ -2663,10 +2682,17 @@ function openGwentBoardCardModal(cardId) {
         </div>
         <div class="gwent-board-card-stats">
           <article><small>PODER ATUAL</small><strong>${number(currentPower)}</strong></article>
-          <article><small>BÔNUS</small><strong>${bonus > 0 ? '+' : ''}${number(bonus)}</strong></article>
+          <button type="button" class="gwent-board-card-stat-action" data-gwent-bonus-details aria-expanded="false" aria-controls="gwent-bonus-breakdown" title="Clique para ver a origem exata do bônus">
+            <small>BÔNUS · VER ORIGEM</small><strong>${bonus > 0 ? '+' : ''}${number(bonus)}</strong>
+            <span>CLIQUE PARA DETALHAR</span>
+          </button>
           <article><small>ESCUDO</small><strong>${number(shield)}</strong></article>
           <article class="gwent-rarity-potency"><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></article>
         </div>
+        <section class="gwent-bonus-breakdown" id="gwent-bonus-breakdown" hidden>
+          <div class="gwent-bonus-breakdown-heading"><div><small>RASTREIO DE COMBATE</small><strong>Origem do bônus ${signedBonus(bonus)}</strong></div><span>DETALHAMENTO</span></div>
+          ${bonusBreakdownContent}
+        </section>
         <section class="gwent-board-card-ability">
           <small>HABILIDADE</small>
           <strong>${escapeHTML(card.habilidade_nome || 'Sem habilidade especial')}</strong>
@@ -2680,6 +2706,14 @@ function openGwentBoardCardModal(cardId) {
   document.body.appendChild(modal);
   observeCardImages(modal);
   modal.addEventListener('click', event => {
+    const bonusToggle = event.target.closest('[data-gwent-bonus-details]');
+    if (bonusToggle) {
+      const breakdown = modal.querySelector('#gwent-bonus-breakdown');
+      const willOpen = !!breakdown?.hidden;
+      if (breakdown) breakdown.hidden = !willOpen;
+      bonusToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      return;
+    }
     if (event.target === modal || event.target.closest('[data-gwent-board-close]')) {
       closeGwentBoardCardModal();
     }

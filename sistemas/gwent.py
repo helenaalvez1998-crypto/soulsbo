@@ -1,6 +1,7 @@
 """Motor estratégico Gwent do NARABOT: regras puras, sem dependência do Discord."""
 from __future__ import annotations
 from copy import deepcopy
+import linecache
 from urllib.parse import quote, urlencode
 
 ROWS = ("melee", "ranged", "siege")
@@ -9,6 +10,124 @@ ROW_LABELS = {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "
 FACTIONS = ("Ordem Áurea", "Véu Carmesim", "Lua Negra", "Os Esquecidos")
 FACTION_TYPES = frozenset(FACTIONS)
 LEGACY_FACTION_ALIASES = {"Casa Cariana": "Lua Negra", "Lua Sombria": "Lua Negra", "Dinastia Mohgwyn": "Véu Carmesim", "Fé": "Os Esquecidos", "Luteranos": "Os Esquecidos"}
+
+
+# Rastreamento de origem do bônus de combate. A subclasse continua sendo um dict
+# comum para JSON/persistência; apenas intercepta alterações na chave "bonus".
+def _bonus_source_details(frame, card, delta: int) -> dict[str, str]:
+    caller = frame.f_code.co_name if frame else "desconhecido"
+    local = frame.f_locals if frame else {}
+    source_line = linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip() if frame else ""
+    name = str(card.get("nome") or "Carta")
+    ability_name = str(card.get("habilidade_nome") or card.get("habilidade") or "habilidade da carta")
+    ability_text = str(card.get("habilidade_texto") or card.get("descricao") or "Efeito aplicado durante a resolução do combate.")
+
+    if caller == "_aplicar_combo_de_cartas":
+        combo = local.get("combo") or {}
+        combo_name = str(combo.get("name") or local.get("combo_id") or "Combo de cartas")
+        return {"source": f"Combo: {combo_name}", "detail": str(combo.get("description") or "A combinação de cartas concedeu este modificador.")}
+
+    if caller == "_aplicar_habilidade_identidade":
+        identity = CARD_IDENTITY_ABILITIES.get(str(card.get("id", "")), {})
+        identity_name = str(identity.get("name") or ability_name)
+        identity_text = str(identity.get("text") or ability_text)
+        return {"source": f"Habilidade de identidade: {identity_name}", "detail": identity_text}
+
+    if caller == "_aplicar_potencia_raridade":
+        rarity = str(card.get("raridade") or "Comum")
+        return {
+            "source": f"Potência da raridade — {rarity}",
+            "detail": f"A potência da raridade ampliou em 1 ponto o efeito de {name}. Este ajuste é separado do poder-base.",
+        }
+
+    if caller == "_remover_unidade":
+        return {"source": "Habilidade Vingança", "detail": f"A queda de {name} ativou Vingança e fortaleceu os aliados da mesma fileira."}
+
+    if caller == "aplicar_jogada":
+        # A passiva de facção possui uma regra própria e precisa ser distinguida
+        # da habilidade impressa na carta que está entrando.
+        if "FACTION_BOOST" in source_line:
+            faction = str((local.get("player") or {}).get("faction") or card.get("faccao") or "facção")
+            return {
+                "source": f"Passiva de facção — {faction}",
+                "detail": "A primeira unidade da facção do deck jogada nesta rodada recebe o bônus passivo de facção.",
+            }
+
+        leader = local.get("leader")
+        if leader:
+            leader_name = str(leader.get("name") or "Líder")
+            leader_text = str(leader.get("description") or "Habilidade do líder ativada durante a partida.")
+            return {"source": f"Habilidade do líder — {leader_name}", "detail": leader_text}
+
+        action_card = local.get("card")
+        if action_card is not None:
+            action_name = str(action_card.get("nome") or name)
+            action_skill_name = str(action_card.get("habilidade_nome") or action_card.get("habilidade") or "efeito especial")
+            action_skill_text = str(action_card.get("habilidade_texto") or action_card.get("descricao") or "O efeito desta carta alterou o bônus de combate.")
+            if action_card.get("especial") or action_card.get("categoria") == "Especial" or str(action_skill_name).startswith("reliquia_"):
+                return {"source": f"Efeito de carta — {action_name}", "detail": action_skill_text}
+            if action_skill_name:
+                return {"source": f"Habilidade — {action_skill_name}", "detail": action_skill_text}
+            return {"source": f"Efeito de combate — {action_name}", "detail": action_skill_text}
+
+    # Fallback explícito: não inventa uma fonte quando o modificador veio de
+    # estado antigo ou de um caminho ainda não classificado.
+    if caller and caller != "desconhecido":
+        return {"source": f"Efeito de combate ({caller})", "detail": "O motor alterou o bônus nesta etapa. A descrição específica não foi identificada automaticamente."}
+    return {"source": "Origem não identificada", "detail": "O bônus foi alterado, mas o efeito de origem não pôde ser identificado."}
+
+
+class BonusTrackedDict(dict):
+    """Carta com trilha de auditoria dos acréscimos e reduções de bônus."""
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+
+    def __deepcopy__(self, memo):
+        clone = type(self)()
+        memo[id(self)] = clone
+        for key, value in self.items():
+            dict.__setitem__(clone, deepcopy(key, memo), deepcopy(value, memo))
+        return clone
+
+    def __setitem__(self, key, value):
+        if key == "bonus":
+            try:
+                old_value = int(dict.get(self, "bonus", 0) or 0)
+                new_value = int(value or 0)
+            except (TypeError, ValueError):
+                old_value, new_value = 0, 0
+
+            frame = __import__("sys")._getframe(1)
+            caller = frame.f_code.co_name
+            source_line = linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()
+            reset_targets = ("card", "revivida", "archived", "kept")
+            is_explicit_reset = any(
+                frame.f_locals.get(var_name) is self and f'{var_name}["bonus"] = 0' in source_line
+                for var_name in reset_targets
+            )
+            if is_explicit_reset:
+                dict.__setitem__(self, "bonus_sources", [])
+            else:
+                delta = new_value - old_value
+                if delta:
+                    details = _bonus_source_details(frame, self, delta)
+                    sources = list(dict.get(self, "bonus_sources", []) or [])
+                    sources.append({"delta": delta, **details})
+                    dict.__setitem__(self, "bonus_sources", sources[-100:])
+        dict.__setitem__(self, key, value)
+
+
+def _enable_bonus_tracking(state: dict) -> None:
+    """Converte cartas do estado em dicts auditáveis sem alterar seus dados."""
+    for player in state.get("players", {}).values():
+        for collection_name in ("hand", "draw_pile", "board", "discard"):
+            collection = player.get(collection_name)
+            if isinstance(collection, list):
+                player[collection_name] = [
+                    card if isinstance(card, BonusTrackedDict) else BonusTrackedDict(card)
+                    for card in collection
+                ]
+
 
 def canonical_faction(value: str | None) -> str | None:
     """Converte nomes antigos de facção para os nomes atuais sem quebrar decks salvos."""
@@ -1100,6 +1219,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     card_ids: list[str] | None = None,
                     target_id: str | None = None) -> dict:
     state = deepcopy(state)
+    _enable_bonus_tracking(state)
     # Compatibilidade com partidas iniciadas na versão anterior do motor.
     state.setdefault("phase", "battle")
     state.setdefault("weather", {row: 0 for row in ROWS})
