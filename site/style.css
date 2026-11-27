@@ -7184,3 +7184,84 @@ body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle { min-widt
     grid-column: 1 !important;
   }
 }
+
+
+/* ================================================================
+   CORREÇÃO VISUAL — centralização da mão, cartas de campo maiores
+   e brilho de entrada contido nos limites da carta.
+   ================================================================ */
+body.gwent-match-active .gwent-hand {
+  justify-content: safe center !important;
+  margin-inline: auto !important;
+}
+
+/* Mantém a mão centralizada no espaço útil depois da reserva do líder.
+   safe center volta ao início automaticamente quando o conteúdo excede a área. */
+@media (min-width: 901px) {
+  body.gwent-match-active .gwent-hand {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: safe center !important;
+    align-items: flex-end !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* A carta volta a usar sua altura dinâmica por fileira e mantém a proporção. */
+  body.gwent-match-active .gwent-board-card {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: var(--row-card-height, 168px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100% - 5px) !important;
+    aspect-ratio: 420 / 620 !important;
+  }
+}
+
+/* Não movimenta o pseudo-elemento para fora da carta: anima apenas o gradiente
+   dentro do próprio retângulo. Assim o brilho não vaza para o campo ao redor. */
+body.gwent-match-active .gwent-board-card.is-entering::before {
+  inset: 1px !important;
+  border-radius: 5px !important;
+  transform: none !important;
+  clip-path: inset(0 round 5px) !important;
+  background-image: linear-gradient(115deg, transparent 15%, rgba(255,255,255,.46) 48%, transparent 72%) !important;
+  background-size: 240% 100% !important;
+  background-position: -140% center !important;
+  animation: gwent-card-sheen-contained .68s ease-out .08s both !important;
+}
+@keyframes gwent-card-sheen-contained {
+  0% { opacity: 0; background-position: -140% center; }
+  24% { opacity: .78; }
+  100% { opacity: 0; background-position: 140% center; }
+}
+@media (max-width: 900px) {
+  body.gwent-match-active .gwent-hand {
+    justify-content: safe center !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active .gwent-board-card.is-entering::before,
+  body.gwent-match-active .gwent-board-card.is-entering::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+/* O anel de impacto também fica contido: a animação antiga escalava o pseudo
+   elemento para 1.5x e criava uma moldura solta ao redor da carta. */
+body.gwent-match-active .gwent-board-card.is-entering::after {
+  inset: 1px !important;
+  border-radius: 5px !important;
+  clip-path: inset(0 round 5px) !important;
+  box-shadow: inset 0 0 16px rgba(238,188,109,.2) !important;
+  animation: gwent-card-impact-contained .7s ease-out both !important;
+}
+@keyframes gwent-card-impact-contained {
+  0% { opacity: 0; border-color: rgba(245,205,133,0); }
+  24% { opacity: .95; border-color: rgba(255,225,167,.95); }
+  100% { opacity: 0; border-color: rgba(245,205,133,0); }
+}
