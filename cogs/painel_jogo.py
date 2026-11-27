@@ -248,7 +248,7 @@ class PainelJogoView(discord.ui.View):
             url=f"{base_url}/biblioteca-cartas", row=3,
         ))
         self.add_item(discord.ui.Button(
-            label="Cartas Geradas", emoji="✦", style=discord.ButtonStyle.link,
+            label="Cartas Geradas", emoji="✨", style=discord.ButtonStyle.link,
             url=f"{base_url}/cartas-geradas", row=3,
         ))
         self.add_item(discord.ui.Button(
