@@ -1,0 +1,21 @@
+CORRECAO DA ARENA GWENT — R3
+
+O pacote corrige a causa que impediu as atualizacoes anteriores de aparecerem:
+- altera o identificador de versao dos arquivos app.js e style.css no site/index.html;
+- configura o servidor para nao manter index.html, app.js e CSS em cache sem revalidacao;
+- posiciona o campo do jogador na esquerda e o campo adversario na direita em telas desktop;
+- coloca o indicador SUA VEZ na mesma faixa de ARENA e dos botoes superiores;
+- aumenta a hierarquia visual dos placares VOCE e NARA BOT.
+
+ARQUIVOS ALTERADOS
+- bot.py
+- site/index.html
+- site/app.js
+- site/style.css
+
+INSTALACAO
+1. Substitua os arquivos correspondentes do projeto pelos deste pacote. Preserve os demais arquivos e configuracoes locais.
+2. Publique/deploy o projeto e reinicie o processo do bot/servidor para carregar bot.py e os arquivos do site.
+3. Abra a Arena e faca uma recarga forcada do navegador (Ctrl+Shift+R ou Ctrl+F5).
+
+A versao dos arquivos no HTML foi alterada para forcar novas requisicoes de app.js e style.css. O servidor tambem passa a impedir o uso silencioso de copias antigas em cache.

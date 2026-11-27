@@ -777,32 +777,32 @@ class NaraBot(commands.Bot):
                     "health": "/api/status",
                     "site": "frontend não instalado",
                 })
-            return web.FileResponse(index_file)
+            return web.FileResponse(index_file, headers={"Cache-Control": "no-store, max-age=0"})
 
         async def estilo_site(_request: web.Request) -> web.Response:
             arquivo = site_dir / "style.css"
             if not arquivo.is_file():
                 raise web.HTTPNotFound(text="CSS do site não encontrado.")
-            return web.FileResponse(arquivo)
+            return web.FileResponse(arquivo, headers={"Cache-Control": "no-cache, must-revalidate"})
 
         async def script_site(_request: web.Request) -> web.Response:
             arquivo = site_dir / "app.js"
             if not arquivo.is_file():
                 raise web.HTTPNotFound(text="JavaScript do site não encontrado.")
-            return web.FileResponse(arquivo)
+            return web.FileResponse(arquivo, headers={"Cache-Control": "no-cache, must-revalidate"})
 
         async def elden_ui_css(_request: web.Request) -> web.Response:
             arquivo = site_dir / "elden-ui.css"
             if not arquivo.is_file():
                 raise web.HTTPNotFound(text="Sistema visual V49 não encontrado.")
-            return web.FileResponse(arquivo)
+            return web.FileResponse(arquivo, headers={"Cache-Control": "no-cache, must-revalidate"})
 
         async def narabot_visual_css(_request: web.Request) -> web.Response:
             """Entrega a camada visual do construtor de deck (V59)."""
             arquivo = site_dir / "narabot-visual-v59.css"
             if not arquivo.is_file():
                 raise web.HTTPNotFound(text="Folha visual V59 não encontrada.")
-            return web.FileResponse(arquivo)
+            return web.FileResponse(arquivo, headers={"Cache-Control": "no-cache, must-revalidate"})
 
         async def status_api(_request: web.Request) -> web.Response:
             return web.json_response({
