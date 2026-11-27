@@ -2024,7 +2024,9 @@ function renderGwentArena(data) {
   );
   const previousPowerSnapshot = gwentPreviousPowerSnapshot;
   const nextPowerSnapshot = new Map();
-  const board = (side, mirrored = false) => (mirrored ? [...gwentRows].reverse() : gwentRows).map(([key,label]) => {
+  // Os dois lados usam a mesma ordem vertical para que cada fileira fique frente a frente:
+  // Corpo a corpo vs Corpo a corpo, Longa distância vs Longa distância e Cerco vs Cerco.
+  const board = (side) => gwentRows.map(([key,label]) => {
     const cards = (side.board || []).filter(card => card.row === key);
     const rowPower = cards.reduce((total, card) => total + Math.max(
       1,
@@ -2131,8 +2133,8 @@ function renderGwentArena(data) {
   }
   gwentLastTurnAnnouncement = turnAnnouncement;
 
-  const enemyBoardMarkup = board(theirs, true);
-  const myBoardMarkup = board(mine, false);
+  const enemyBoardMarkup = board(theirs);
+  const myBoardMarkup = board(mine);
   const nextBoardIds = new Set([...(mine.board || []), ...(theirs.board || [])].map(card => String(card.id)));
   const sameRenderedRound = gwentLastRenderedMatch === String(data.match_id) && gwentLastRenderedRound === Number(data.round);
   gwentAnimateRemovedBoardCards(arena, nextBoardIds, sameRenderedRound);
