@@ -7265,3 +7265,80 @@ body.gwent-match-active .gwent-board-card.is-entering::after {
   24% { opacity: .95; border-color: rgba(255,225,167,.95); }
   100% { opacity: 0; border-color: rgba(245,205,133,0); }
 }
+
+
+/* Arena compacta: título, estado do turno e controles em uma única faixa. */
+body.gwent-match-active .gwent-arena-head {
+  display: grid !important;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, .72fr) auto !important;
+  align-items: center !important;
+  gap: clamp(12px, 1.6vw, 26px) !important;
+  padding: 10px 14px !important;
+  min-height: 76px !important;
+}
+body.gwent-match-active .gwent-arena-title { min-width: 0 !important; }
+body.gwent-match-active .gwent-arena-title .gwent-log {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+body.gwent-match-active .gwent-arena-head > .gwent-turn-indicator {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 9px 16px !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+}
+body.gwent-match-active .gwent-arena-head > .gwent-turn-indicator strong {
+  font-size: clamp(14px, 1.15vw, 18px) !important;
+  letter-spacing: .09em !important;
+}
+body.gwent-match-active .gwent-arena-toolbar {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  min-height: 0 !important;
+  padding: 0 14px 7px !important;
+}
+body.gwent-match-active .gwent-score article {
+  min-height: 92px !important;
+  padding: 13px 16px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 5px !important;
+  border-radius: 8px !important;
+}
+body.gwent-match-active .gwent-score article small {
+  font-size: clamp(13px, 1vw, 16px) !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+}
+body.gwent-match-active .gwent-score article strong {
+  font-size: clamp(30px, 2.5vw, 42px) !important;
+  line-height: 1 !important;
+}
+body.gwent-match-active .gwent-score article span {
+  font-size: clamp(12px, .9vw, 14px) !important;
+  line-height: 1.35 !important;
+}
+@media (max-width: 900px) {
+  body.gwent-match-active .gwent-arena-head {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 10px !important;
+  }
+  body.gwent-match-active .gwent-arena-head > .gwent-turn-indicator {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+  }
+  body.gwent-match-active .gwent-arena-head-actions { grid-column: 2 !important; grid-row: 1 !important; }
+}
+@media (max-width: 560px) {
+  body.gwent-match-active .gwent-arena-head { grid-template-columns: 1fr !important; }
+  body.gwent-match-active .gwent-arena-head-actions { grid-column: 1 !important; grid-row: auto !important; justify-content: flex-start !important; }
+  body.gwent-match-active .gwent-arena-head > .gwent-turn-indicator { grid-column: 1 !important; grid-row: auto !important; }
+  body.gwent-match-active .gwent-arena-toolbar { padding-inline: 8px !important; }
+  body.gwent-match-active .gwent-score article { min-height: 76px !important; padding: 9px !important; }
+}

@@ -2144,10 +2144,10 @@ function renderGwentArena(data) {
 
   replaceGwentArenaMarkup(arena, `<div class="gwent-arena-head">
       <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${activeWeatherRows.length ? `⛈ CLIMA ATIVO · ${escapeHTML(activeWeatherLabel)}` : escapeHTML(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`)}</p></div>
+      <div class="gwent-turn-indicator ${turnClass}" role="status" aria-live="polite"><span class="gwent-turn-dot" aria-hidden="true"></span><strong>${turnHeadline}</strong>${prep || data.status === 'finished' || mine.passed ? `<small>${turnSubline}</small>` : ''}</div>
       <div class="gwent-arena-head-actions">${eventPanel}<button type="button" class="gwent-theme-toggle${gwentEldenRingThemeEnabled() ? ' is-active' : ''}" data-gwent-theme-toggle aria-pressed="${gwentEldenRingThemeEnabled()}">${gwentEldenRingThemeEnabled() ? '✧ ELDEN RING · ATIVO' : '✧ TEMA ELDEN RING'}</button><button type="button" class="gwent-exit" data-gwent-exit>Voltar ao lobby</button></div>
     </div>
     <div class="gwent-arena-toolbar">
-      <div class="gwent-turn-indicator ${turnClass}" role="status" aria-live="polite"><span class="gwent-turn-dot" aria-hidden="true"></span><strong>${turnHeadline}</strong>${prep || data.status === 'finished' || mine.passed ? `<small>${turnSubline}</small>` : ''}</div>
       ${rewardPanel}
     </div>
     <div class="gwent-battlefield" aria-label="Campo de batalha">
