@@ -7342,3 +7342,93 @@ body.gwent-match-active .gwent-score article span {
   body.gwent-match-active .gwent-arena-toolbar { padding-inline: 8px !important; }
   body.gwent-match-active .gwent-score article { min-height: 76px !important; padding: 9px !important; }
 }
+
+/* ================================================================
+   ARENA HUD — correção definitiva do cabeçalho e dos placares
+   Mantém o turno na mesma faixa do título e dos controles.
+   ================================================================ */
+@media (min-width: 901px) {
+  body.gwent-match-active .gwent-arena-head {
+    display: grid !important;
+    grid-template-columns: minmax(300px, 1fr) minmax(250px, min(29vw, 470px)) auto !important;
+    grid-template-rows: minmax(58px, auto) !important;
+    align-items: center !important;
+    column-gap: clamp(12px, 1.2vw, 22px) !important;
+    row-gap: 0 !important;
+    min-height: 66px !important;
+    padding: 7px 12px !important;
+  }
+  body.gwent-match-active .gwent-arena-head > .gwent-arena-title {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+  body.gwent-match-active .gwent-arena-head > .gwent-turn-indicator {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+  }
+  body.gwent-match-active .gwent-arena-head > .gwent-arena-head-actions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    flex-wrap: nowrap !important;
+    gap: 7px !important;
+    min-width: max-content !important;
+  }
+  body.gwent-match-active .gwent-arena-toolbar {
+    min-height: 0 !important;
+    margin: 0 0 6px !important;
+    padding: 0 12px 4px !important;
+  }
+}
+
+/* Placar com hierarquia visual real: identificação, pontos e estado legíveis. */
+body.gwent-match-active .gwent-actions > .gwent-score article {
+  min-height: 88px !important;
+  grid-template-rows: auto auto !important;
+  align-content: center !important;
+  gap: 5px 12px !important;
+  padding: 12px 16px !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article small {
+  font-size: clamp(15px, 1.05vw, 19px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: .13em !important;
+  font-weight: 900 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article strong {
+  font-size: clamp(38px, 2.8vw, 50px) !important;
+  line-height: .98 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article span {
+  font-size: clamp(12px, .86vw, 15px) !important;
+  line-height: 1.35 !important;
+  font-weight: 650 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score-opponent article {
+  min-height: 88px !important;
+}
+@media (max-width: 900px) {
+  body.gwent-match-active .gwent-arena-head {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+  }
+  body.gwent-match-active .gwent-arena-head > .gwent-turn-indicator {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score article {
+    min-height: 76px !important;
+    padding: 9px 10px !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score article small { font-size: 13px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score article strong { font-size: 32px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score article span { font-size: 11px !important; }
+}
