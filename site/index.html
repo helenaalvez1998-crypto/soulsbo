@@ -35,6 +35,129 @@
 @media(max-width:420px){.more-grid{grid-template-columns:1fr}.home-insight-card{padding:13px}.oficios-heading h2{font-size:22px}}
 </style>
 
+
+<style id="gwent-catalog-grid-fix">
+/* Catálogo global: grade compacta de cartas, alinhada à referência visual */
+.gwent-catalog-section { min-width: 0; }
+.gwent-catalog-section #gwent-catalog-pool.gwent-catalog-pool {
+  display: grid !important;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+  width: 100%;
+}
+#gwent-catalog-pool > .gwent-catalog-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  padding: 9px;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(224,189,123,.24);
+  border-radius: 15px;
+  background: linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.012)),#121521;
+  box-shadow: 0 7px 20px rgba(0,0,0,.28);
+  cursor: pointer;
+  transition: transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+#gwent-catalog-pool > .gwent-catalog-card:hover,
+#gwent-catalog-pool > .gwent-catalog-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(224,189,123,.65);
+  box-shadow: 0 12px 26px rgba(0,0,0,.4);
+  outline: none;
+}
+.gwent-catalog-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #090c13;
+  border: 1px solid rgba(224,189,123,.18);
+}
+.gwent-catalog-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.gwent-catalog-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+  line-height: 1.3;
+}
+.gwent-catalog-meta > b {
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  color: #f1dfbd;
+  font: 700 12px/1.35 Cinzel,Georgia,serif;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.gwent-catalog-meta > small {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: #b9afc0;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gwent-catalog-state {
+  display: block;
+  max-width: 100%;
+  color: #c8b98f;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.gwent-catalog-card.is-owned .gwent-catalog-state { color: #91c9a0; }
+.gwent-catalog-card.is-locked .gwent-catalog-state { color: #a6adbb; }
+.gwent-catalog-open {
+  display: block;
+  width: 100%;
+  margin-top: 3px;
+  padding: 6px 4px;
+  border-top: 1px solid rgba(224,189,123,.16);
+  color: #d6b66d;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-align: center;
+}
+@media (max-width: 1500px) {
+  .gwent-catalog-section #gwent-catalog-pool.gwent-catalog-pool {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1050px) {
+  .gwent-catalog-section #gwent-catalog-pool.gwent-catalog-pool {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 11px;
+  }
+}
+@media (max-width: 650px) {
+  .gwent-catalog-section #gwent-catalog-pool.gwent-catalog-pool {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  #gwent-catalog-pool > .gwent-catalog-card { padding: 6px; border-radius: 11px; }
+  .gwent-catalog-meta > b { font-size: 10px; }
+}
+@media (max-width: 390px) {
+  .gwent-catalog-section #gwent-catalog-pool.gwent-catalog-pool {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="splash"><div><div class="s-fan"><i>⚔</i><i>✦</i><i>⚜</i><i>♜</i><i>☗</i></div><h1>GWENT</h1><p>DO COLISEU</p><div class="s-press">— CLIQUE PARA ENTRAR NA ARENA —</div></div></div>
