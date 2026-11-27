@@ -7567,3 +7567,292 @@ body.gwent-match-active .gwent-actions > .gwent-score-opponent article {
     grid-row: 3 !important;
   }
 }
+
+
+/* ================================================================
+   GWENT HUD R4 — indicador de turno centralizado e cristais de rodada.
+   Os cristais espelham diretamente `crowns` retornado pelo backend.
+   ================================================================ */
+@media (min-width: 901px) {
+  body.gwent-match-active #gwent-arena .gwent-arena-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, min(28vw, 430px)) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(58px, auto) !important;
+    align-items: center !important;
+    column-gap: clamp(10px, 1vw, 18px) !important;
+    row-gap: 0 !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-arena-head > .gwent-arena-title {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: stretch !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-arena-head > .gwent-turn-indicator {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: auto !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-arena-head > .gwent-arena-head-actions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    min-width: max-content !important;
+  }
+}
+@media (max-width: 900px) {
+  body.gwent-match-active #gwent-arena .gwent-arena-head > .gwent-turn-indicator {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    justify-self: center !important;
+    width: min(440px, 100%) !important;
+    max-width: 440px !important;
+    margin-inline: auto !important;
+  }
+}
+
+/* Libera os espaços laterais do HUD para os medidores dos dois jogadores. */
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you {
+  display: grid !important;
+  grid-template-columns: 86px minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 86px !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you > article,
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent > article {
+  grid-column: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you > .gwent-crystal-meter { grid-column: 1 !important; }
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you > article { grid-column: 2 !important; }
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent > article { grid-column: 1 !important; }
+body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent > .gwent-crystal-meter { grid-column: 2 !important; }
+
+body.gwent-match-active #gwent-arena .gwent-crystal-meter {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  min-height: 76px !important;
+  padding: 6px 4px !important;
+  border: 1px solid rgba(139, 163, 190, .32) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(155deg, rgba(19, 31, 48, .98), rgba(7, 13, 23, .98)) !important;
+  box-shadow: inset 0 0 13px rgba(0, 0, 0, .55), 0 3px 10px rgba(0, 0, 0, .28) !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-meter > small {
+  color: #aebbd0 !important;
+  font: 900 7px/1 Cinzel, Georgia, serif !important;
+  letter-spacing: .12em !important;
+  white-space: nowrap !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-pair {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal {
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  width: 27px !important;
+  height: 34px !important;
+  opacity: .34 !important;
+  filter: grayscale(.78) brightness(.7) !important;
+  transition: opacity .25s ease, filter .25s ease, transform .25s ease !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal svg {
+  display: block !important;
+  width: 26px !important;
+  height: 33px !important;
+  overflow: visible !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-base {
+  fill: #26364b;
+  stroke: #71839b;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-facet { fill: #34475f; }
+body.gwent-match-active #gwent-arena .gwent-crystal-facet-left { fill: #26384f; }
+body.gwent-match-active #gwent-arena .gwent-crystal-facet-right { fill: #425a74; }
+body.gwent-match-active #gwent-arena .gwent-crystal-facet-core { fill: #31445d; }
+body.gwent-match-active #gwent-arena .gwent-crystal-shine { fill: rgba(220, 238, 255, .48); }
+
+/* Cristal do jogador: acende em verde ao vencer uma rodada. */
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 5px rgba(73, 255, 174, .82)) drop-shadow(0 0 11px rgba(44, 228, 146, .55)) !important;
+  transform: translateY(-1px) !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit .gwent-crystal-base {
+  fill: #1d9b6b; stroke: #a1ffd3;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit .gwent-crystal-facet-top { fill: #b4ffe0; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit .gwent-crystal-facet-left { fill: #36c98b; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit .gwent-crystal-facet-right { fill: #68f0b0; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit .gwent-crystal-facet-core { fill: #b4ffe0; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="you"] .gwent-crystal.is-lit .gwent-crystal-shine { fill: #f0fff8; }
+
+/* Cristais da Nara: acendem em ouro/âmbar no mesmo padrão. */
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 5px rgba(255, 207, 111, .82)) drop-shadow(0 0 11px rgba(224, 163, 68, .5)) !important;
+  transform: translateY(-1px) !important;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit .gwent-crystal-base {
+  fill: #a87326; stroke: #ffe2a0;
+}
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit .gwent-crystal-facet-top { fill: #ffedbd; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit .gwent-crystal-facet-left { fill: #c58a38; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit .gwent-crystal-facet-right { fill: #f2bd62; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit .gwent-crystal-facet-core { fill: #ffe4a4; }
+body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] .gwent-crystal.is-lit .gwent-crystal-shine { fill: #fff8e6; }
+
+@media (max-width: 900px) {
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you,
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent {
+    gap: 5px !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you {
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent {
+    grid-template-columns: minmax(0, 1fr) 62px !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-crystal-meter {
+    min-height: 68px !important;
+    padding: 4px 2px !important;
+    gap: 5px !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-crystal-meter > small { font-size: 6px !important; }
+  body.gwent-match-active #gwent-arena .gwent-crystal-pair { gap: 2px !important; }
+  body.gwent-match-active #gwent-arena .gwent-crystal { width: 22px !important; height: 29px !important; }
+  body.gwent-match-active #gwent-arena .gwent-crystal svg { width: 21px !important; height: 28px !important; }
+}
+@media (max-width: 430px) {
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-you,
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent {
+    grid-template-columns: 70px minmax(0, 1fr) !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-actions > .gwent-score-opponent {
+    grid-template-columns: minmax(0, 1fr) 70px !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-crystal-meter > small { font-size: 7px !important; }
+  body.gwent-match-active #gwent-arena .gwent-crystal { width: 24px !important; height: 31px !important; }
+  body.gwent-match-active #gwent-arena .gwent-crystal svg { width: 23px !important; height: 30px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active #gwent-arena .gwent-crystal { transition: none !important; }
+}
+
+
+/* ================================================================
+   GWENT HUD R5 — espelhamento interno dos dois campos (sem trocar lados).
+   Seu campo: atributos na borda externa esquerda; cartas voltadas ao centro.
+   Campo adversário: atributos na borda externa direita; cartas voltadas ao centro.
+   ================================================================ */
+@media (min-width: 901px) {
+  body.gwent-match-active #gwent-arena .gwent-board-mine .gwent-row {
+    grid-template-columns: clamp(88px, 7.3vw, 116px) minmax(0, 1fr) !important;
+    padding: 4px 0 4px 7px !important;
+    background: linear-gradient(90deg, rgba(48,39,25,.92), rgba(17,17,15,.86) 22%, rgba(7,9,11,.93)) !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-mine .gwent-row h4 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    flex-direction: row-reverse !important;
+    text-align: right !important;
+    border-left: 0 !important;
+    border-right: 1px solid #9b783f !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-mine .gwent-row .gwent-board-cards {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    flex-direction: row-reverse !important;
+    justify-content: flex-start !important;
+  }
+
+  body.gwent-match-active #gwent-arena .gwent-board-enemy .gwent-row {
+    grid-template-columns: minmax(0, 1fr) clamp(88px, 7.3vw, 116px) !important;
+    padding: 4px 7px 4px 0 !important;
+    background: linear-gradient(270deg, rgba(48,39,25,.92), rgba(17,17,15,.86) 22%, rgba(7,9,11,.93)) !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-enemy .gwent-row h4 {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    flex-direction: row !important;
+    text-align: left !important;
+    border-right: 0 !important;
+    border-left: 1px solid #9b783f !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-enemy .gwent-row .gwent-board-cards {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+  }
+}
+
+/* Em telas estreitas, os campos ficam empilhados, mas mantêm a mesma
+   orientação espelhada: seu painel com métricas à esquerda e o adversário à direita. */
+@media (max-width: 900px) {
+  body.gwent-match-active #gwent-arena .gwent-board-mine .gwent-row {
+    grid-template-columns: 70px minmax(0, 1fr) !important;
+    padding: 3px 0 3px 5px !important;
+    background: linear-gradient(90deg, rgba(48,39,25,.92), rgba(17,17,15,.86) 32%, rgba(7,9,11,.93)) !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-mine .gwent-row h4 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    flex-direction: row-reverse !important;
+    text-align: right !important;
+    border-left: 0 !important;
+    border-right: 1px solid #9b783f !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-mine .gwent-row .gwent-board-cards {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    flex-direction: row-reverse !important;
+    justify-content: flex-start !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-enemy .gwent-row {
+    grid-template-columns: minmax(0, 1fr) 70px !important;
+    padding: 3px 5px 3px 0 !important;
+    background: linear-gradient(270deg, rgba(48,39,25,.92), rgba(17,17,15,.86) 32%, rgba(7,9,11,.93)) !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-enemy .gwent-row h4 {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    flex-direction: row !important;
+    text-align: left !important;
+    border-right: 0 !important;
+    border-left: 1px solid #9b783f !important;
+  }
+  body.gwent-match-active #gwent-arena .gwent-board-enemy .gwent-row .gwent-board-cards {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+  }
+}

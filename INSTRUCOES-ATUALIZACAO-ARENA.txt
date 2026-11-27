@@ -1,21 +1,24 @@
-CORRECAO DA ARENA GWENT — R3
+CORRECAO DA ARENA GWENT — R5
 
-O pacote corrige a causa que impediu as atualizacoes anteriores de aparecerem:
-- altera o identificador de versao dos arquivos app.js e style.css no site/index.html;
-- configura o servidor para nao manter index.html, app.js e CSS em cache sem revalidacao;
-- posiciona o campo do jogador na esquerda e o campo adversario na direita em telas desktop;
-- coloca o indicador SUA VEZ na mesma faixa de ARENA e dos botoes superiores;
-- aumenta a hierarquia visual dos placares VOCE e NARA BOT.
+Esta versao mantem VOCÊ no lado esquerdo e NARA BOT no lado direito, mas espelha o conteudo interno de cada campo:
+- no campo do jogador, trilhos de atributos/pontuacao vao para a borda externa esquerda e as cartas ficam voltadas para o centro;
+- no campo adversario, trilhos de atributos/pontuacao vao para a borda externa direita e as cartas ficam voltadas para o centro;
+- textos e sequencia visual das cartas acompanham o espelhamento;
+- a disposicao responsiva conserva a orientacao dos dois paineis.
 
-ARQUIVOS ALTERADOS
-- bot.py
-- site/index.html
-- site/app.js
+O cabeçalho e o placar inferior R4 permanecem preservados. A versao dos arquivos CSS e JS foi atualizada para R5 para evitar cache antigo.
+
+ARQUIVOS ALTERADOS NESTA REVISAO
 - site/style.css
+- site/index.html
+- INSTRUCOES-ATUALIZACAO-ARENA.txt
 
 INSTALACAO
-1. Substitua os arquivos correspondentes do projeto pelos deste pacote. Preserve os demais arquivos e configuracoes locais.
-2. Publique/deploy o projeto e reinicie o processo do bot/servidor para carregar bot.py e os arquivos do site.
+1. Substitua os arquivos correspondentes no projeto pelos deste pacote. Preserve configuracoes locais e arquivos que nao fazem parte desta atualizacao.
+2. Publique/deploy o projeto. Nao ha alteracao de backend ou de regras de partida nesta revisao.
 3. Abra a Arena e faca uma recarga forcada do navegador (Ctrl+Shift+R ou Ctrl+F5).
 
-A versao dos arquivos no HTML foi alterada para forcar novas requisicoes de app.js e style.css. O servidor tambem passa a impedir o uso silencioso de copias antigas em cache.
+VALIDACAO
+- Estrutura de CSS analisada sem erros de parser.
+- JavaScript existente passou em node --check.
+- O pacote ZIP foi verificado apos a criacao.

@@ -1967,6 +1967,30 @@ function dockGwentLeaderCard(arena) {
   if (!dock.isConnected) document.body.appendChild(dock);
 }
 
+function gwentCrystalMeterMarkup(count, side, playerLabel) {
+  // O contador `crowns` é atualizado pelo backend quando uma rodada é vencida.
+  // A partida termina ao conquistar dois cristais; a interface apenas espelha esse estado.
+  const won = Math.max(0, Math.min(2, Math.trunc(Number(count) || 0)));
+  const crystals = [0, 1].map(index => {
+    const lit = index < won;
+    const state = lit ? 'conquistado' : 'não conquistado';
+    return `<span class="gwent-crystal ${lit ? 'is-lit' : 'is-dormant'}" aria-hidden="true" title="Cristal ${index + 1} ${state}">
+      <svg viewBox="0 0 36 44" focusable="false" aria-hidden="true">
+        <path class="gwent-crystal-base" d="M18 1 31.5 11.8 27.5 33.2 18 43 8.5 33.2 4.5 11.8Z"/>
+        <path class="gwent-crystal-facet gwent-crystal-facet-top" d="M18 1 31.5 11.8 18 17 4.5 11.8Z"/>
+        <path class="gwent-crystal-facet gwent-crystal-facet-left" d="M4.5 11.8 18 17 13 37 8.5 33.2Z"/>
+        <path class="gwent-crystal-facet gwent-crystal-facet-right" d="M31.5 11.8 18 17 23 37 27.5 33.2Z"/>
+        <path class="gwent-crystal-facet gwent-crystal-facet-core" d="M18 17 23 37 18 43 13 37Z"/>
+        <path class="gwent-crystal-shine" d="M13.2 7.1 17 4.4 15.3 13.3 10.2 11.5Z"/>
+      </svg>
+    </span>`;
+  }).join('');
+  return `<div class="gwent-crystal-meter" data-side="${side}" role="img" aria-label="${escapeHTML(playerLabel)}: ${won} de 2 cristais conquistados">
+    <small>CRISTAIS</small>
+    <div class="gwent-crystal-pair">${crystals}</div>
+  </div>`;
+}
+
 function renderGwentArena(data) {
   if (gwentLastRenderedMatch !== null && gwentLastRenderedMatch !== String(data.match_id)) {
     gwentPreviousPowerSnapshot = new Map();
@@ -2157,7 +2181,8 @@ function renderGwentArena(data) {
     </div>
     <div class="gwent-actions ${prep ? 'is-prep' : ''}">
       <div class="gwent-score gwent-score-you">
-        <article><small>VOCÊ</small><strong>${number(mine.score)}</strong><span>${number(mine.crowns)} coroas · ${number(mine.hand)} na mão${mine.passed ? ' · passou' : ''}</span></article>
+        ${gwentCrystalMeterMarkup(mine.crowns, 'you', 'Você')}
+        <article><small>VOCÊ</small><strong>${number(mine.score)}</strong><span>${number(mine.hand)} cartas na mão${mine.passed ? ' · passou' : ''}</span></article>
       </div>
       <div class="gwent-action-center">
         ${prepPanel}
@@ -2172,7 +2197,8 @@ function renderGwentArena(data) {
         </div>
       </div>
       <div class="gwent-score gwent-score-opponent">
-        <article><small>${escapeHTML(opponentName)}</small><strong>${number(theirs.score)}</strong><span>${number(theirs.crowns)} coroas · ${number(theirs.hand)} na mão${theirs.passed ? ' · passou' : ''}</span></article>
+        <article><small>${escapeHTML(opponentName)}</small><strong>${number(theirs.score)}</strong><span>${number(theirs.hand)} cartas na mão${theirs.passed ? ' · passou' : ''}</span></article>
+        ${gwentCrystalMeterMarkup(theirs.crowns, 'opponent', opponentName)}
       </div>
     </div>
     <section class="gwent-hand-zone ${handIsOpen ? 'is-open' : ''} ${myTurn ? 'is-my-turn' : enemyTurn ? 'is-enemy-turn' : ''}">
