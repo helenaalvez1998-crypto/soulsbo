@@ -812,7 +812,7 @@ class NaraBot(commands.Bot):
                 "database": "connected",
             })
 
-        app = web.Application(client_max_size=42 * 1024 * 1024)
+        app = web.Application(client_max_size=42 * 1024 * 1024, handler_args={"max_field_size": 32768})
         app.router.add_get("/", pagina_inicial)
         app.router.add_get("/style.css", estilo_site)
         app.router.add_get("/elden-ui.css", elden_ui_css)
@@ -1761,12 +1761,35 @@ class NaraBot(commands.Bot):
                 score_by_player[player_order[0]] = int(item.get("score_a", 0))
                 score_by_player[player_order[1]] = int(item.get("score_b", 0))
             round_winner = str(item.get("winner_id")) if item.get("winner_id") is not None else None
+            raw_highlights = item.get("highlights") if isinstance(item.get("highlights"), dict) else {}
+            def clean_highlights(player_key: str) -> list[dict]:
+                values = raw_highlights.get(player_key, [])
+                cleaned = []
+                if not isinstance(values, list):
+                    return cleaned
+                for unit in values[:3]:
+                    if not isinstance(unit, dict):
+                        continue
+                    try:
+                        power = max(1, int(unit.get("power", 1) or 1))
+                    except (TypeError, ValueError):
+                        power = 1
+                    cleaned.append({
+                        "name": str(unit.get("name") or "Unidade")[:80],
+                        "row": str(unit.get("row") or "")[:16],
+                        "power": power,
+                    })
+                return cleaned
             round_history.append({
                 "round": int(item.get("round", 0)),
                 "your_score": score_by_player.get(str(user_id), 0),
                 "opponent_score": score_by_player.get(opponent_id, 0),
                 "winner_id": round_winner,
                 "result": "draw" if round_winner is None else ("win" if round_winner == str(user_id) else "loss"),
+                "highlights": {
+                    "you": clean_highlights(str(user_id)),
+                    "opponent": clean_highlights(opponent_id),
+                },
             })
         raw_weather = state.get("weather") if isinstance(state.get("weather"), dict) else {}
         weather_snapshot = {}

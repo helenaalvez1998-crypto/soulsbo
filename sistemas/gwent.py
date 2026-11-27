@@ -600,12 +600,12 @@ def preparar_carta(card: dict) -> dict:
     # Isso evita que frases narrativas sejam exibidas como se fossem efeitos de combate.
     textos_habilidade = []
     if identity.get("text"):
+        # Uma habilidade de identidade substitui a habilidade genérica do ID.
+        # Não mostrar uma segunda regra que o motor não executa nesta carta.
         textos_habilidade.append(str(identity["text"]))
-    if skill_data.get("texto") and identity:
-        textos_habilidade.append(f"Habilidade adicional: {skill_data['texto']}")
-    elif not identity and card.get("habilidade_texto"):
+    elif card.get("habilidade_texto"):
         textos_habilidade.append(str(card["habilidade_texto"]))
-    elif not identity and skill_data.get("texto"):
+    elif skill_data.get("texto"):
         textos_habilidade.append(str(skill_data["texto"]))
     texto_habilidade = str(" ".join(textos_habilidade) or "Sem habilidade especial.")[:420]
     if budget:
@@ -669,8 +669,8 @@ def preparar_carta(card: dict) -> dict:
         "fileira": row,
         "row": row, "row_label": ROW_LABELS[row], "habilidade": skill,
         "habilidade_nome": str(
-            f"{identity['name']} + {skill_data['nome']}" if identity and skill_data.get("nome")
-            else identity.get("name", card.get("habilidade_nome", skill_data.get("nome", skill.replace("_", " ").title())))
+            identity.get("name") if identity
+            else card.get("habilidade_nome", skill_data.get("nome", skill.replace("_", " ").title()))
         ),
         "habilidade_texto": texto_habilidade,
         "habilidade_identidade": bool(identity),
@@ -959,12 +959,33 @@ def _resolve_round(state: dict) -> None:
     sa = pontuacao(state["players"][a], state.get("weather"))
     sb = pontuacao(state["players"][b], state.get("weather"))
     winner = a if sa > sb else b if sb > sa else None
+    weather_at_resolution = state.get("weather", {})
+    # Guarda os três maiores poderes efetivos de cada campo antes de limpar a rodada.
+    # O registro é apenas informativo para a tela de resultado; não interfere na pontuação.
+    round_highlights = {}
+    for player_id, player in state["players"].items():
+        ranked_units = sorted(
+            player.get("board", []),
+            key=lambda unit: _poder_efetivo(unit, weather_at_resolution),
+            reverse=True,
+        )[:3]
+        round_highlights[str(player_id)] = [
+            {
+                "name": str(unit.get("nome") or "Unidade")[:80],
+                "row": str(unit.get("row") or ""),
+                "power": _poder_efetivo(unit, weather_at_resolution),
+            }
+            for unit in ranked_units
+        ]
     if winner:
         state["crowns"][winner] += 1
         state["last_event"] = f"Rodada {state['round']} vencida por {winner} ({sa} × {sb})."
     else:
         state["last_event"] = f"Rodada {state['round']} empatada ({sa} × {sb})."
-    state["rounds"].append({"round": state["round"], "score_a": sa, "score_b": sb, "winner_id": winner})
+    state["rounds"].append({
+        "round": state["round"], "score_a": sa, "score_b": sb,
+        "winner_id": winner, "highlights": round_highlights,
+    })
     if max(state["crowns"].values()) >= 2 or state["round"] >= 3:
         ca, cb = state["crowns"][a], state["crowns"][b]
         state["status"] = "finished"
@@ -984,7 +1005,9 @@ def _resolve_round(state: dict) -> None:
         # Glória: a mais forte permanece no campo se a rodada for vencida.
         # Se o jogador venceu a rodada, a unidade mais forte fica em campo pro início da próxima.
         # Se perdeu, todas vão para o descarte normalmente.
-        rodagem_vencida = state.get("rodada_vencida", {}).get(pid, False)
+        rodagem_vencida = pid == winner
+        # Legado verifica diretamente o resultado da rodada imediatamente anterior.
+        player["legado_vitoria"] = rodagem_vencida
         keepers_gloria = [u for u in board if u.get("habilidade") == "gloria"]
         keeper_gloria = max(keepers_gloria, key=lambda u: _poder_efetivo(u, previous_weather), default=None) if rodagem_vencida else None
 

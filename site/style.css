@@ -4104,23 +4104,28 @@ body.gwent-match-active .gwent-hand-zone { backdrop-filter: blur(8px); }
     outline-offset: 4px;
     filter: drop-shadow(0 0 10px rgba(238,190,103,.65));
   }
-  /* Inspeção em camada fixa: não altera o layout nem empurra as cartas vizinhas. */
+
+
+  /* Hover mantém a arte dentro da própria carta.
+     A ampliação é aplicada ao cartão inteiro, sem deslocar o IMG para o viewport. */
   body.gwent-match-active .gwent-hand-card:hover > img,
   body.gwent-match-active .gwent-hand-card:focus-visible > img {
-    position: fixed !important;
-    z-index: 10000 !important;
-    left: 50vw !important;
-    top: 47vh !important;
-    width: min(25vw, 300px) !important;
-    height: min(72vh, 445px) !important;
-    max-width: none !important;
-    max-height: none !important;
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+    display: block !important;
+    width: 100% !important;
+    height: clamp(100px,14dvh,150px) !important;
+    max-width: 100% !important;
+    max-height: 150px !important;
     object-fit: contain !important;
-    transform: translate(-50%,-50%) scale(1.02);
-    border: 2px solid rgba(235,196,124,.9);
-    border-radius: 9px;
-    background: #080c16;
-    box-shadow: 0 20px 80px rgba(0,0,0,.85), 0 0 35px rgba(190,139,230,.35);
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   body.gwent-match-active .gwent-hand-card.is-swap-marked {
     outline: 2px solid #e4a95c;
@@ -6115,8 +6120,14 @@ body.gwent-match-active .gwent-board-card:focus-visible { z-index:80; transform:
 body.gwent-match-active .gwent-hand { position:relative; z-index:5; display:flex; flex-wrap:nowrap; align-items:flex-end; overflow:visible !important; width:100%; max-width:100%; }
 body.gwent-match-active .gwent-hand > .gwent-hand-card { position:relative; z-index:1; flex:0 1 128px; min-width:76px; transform-origin:center bottom; }
 body.gwent-match-active .gwent-hand > .gwent-hand-card:hover,
-body.gwent-match-active .gwent-hand > .gwent-hand-card:focus-visible { z-index:100; transform:translateY(-12px) scale(1.14); box-shadow:0 14px 34px #000f,0 0 19px rgba(232,190,111,.34); }
-#gwent-hand-hover-preview { display:none !important; }
+body.gwent-match-active .gwent-hand > .gwent-hand-card:focus-visible {
+  z-index:1000 !important;
+  transform:translateY(-14px) scale(1.18) !important;
+  transform-origin:center bottom !important;
+  overflow:visible !important;
+  box-shadow:0 16px 38px #000f,0 0 22px rgba(232,190,111,.38) !important;
+}
+/* O preview HD permanece visível; a regra final define dimensões e centralização. */
 body.gwent-match-active .gwent-hand[hidden] { display:none !important; }
 
 body.gwent-match-active .gwent-arena-title h2 { font-size:clamp(23px,2vw,31px); letter-spacing:.06em; }
@@ -6282,3 +6293,894 @@ body.gwent-match-active .gwent-row:has(.gwent-board-card:hover),
 body.gwent-match-active .gwent-row:has(.gwent-board-card:focus-visible) { position:relative !important; z-index:125 !important; overflow:visible !important; }
 body.gwent-match-active .gwent-row.has-weather:has(.gwent-board-card:hover),
 body.gwent-match-active .gwent-row.has-weather:has(.gwent-board-card:focus-visible) { overflow:visible !important; }
+
+
+/* ================================================================
+   ARENA HUD — turno centralizado + placares espelhados junto às ações
+   ================================================================ */
+body.gwent-match-active .gwent-arena-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) minmax(260px, min(520px, 55vw)) minmax(0,1fr) !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  gap: 12px !important;
+  min-height: 54px !important;
+  margin: 0 0 7px !important;
+  overflow: visible !important;
+}
+body.gwent-match-active .gwent-arena-toolbar > .gwent-turn-indicator {
+  grid-column: 2 !important;
+  justify-self: center !important;
+  width: 100% !important;
+  max-width: 520px !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+body.gwent-match-active .gwent-arena-toolbar > .gwent-reward-panel {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  max-width: 100% !important;
+}
+body.gwent-match-active .gwent-actions {
+  display: grid !important;
+  grid-template-columns: minmax(175px,1fr) minmax(400px,auto) minmax(175px,1fr) !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: clamp(8px,1.1vw,18px) !important;
+  min-height: 88px !important;
+  margin: 0 !important;
+  padding: 9px 12px !important;
+  overflow: visible !important;
+  border: 1px solid rgba(207,171,107,.48) !important;
+  border-radius: 9px !important;
+  background: linear-gradient(100deg,rgba(25,32,49,.98),rgba(8,13,22,.98)) !important;
+  box-shadow: inset 0 0 15px #0008,0 4px 12px #0006 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  flex: initial !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article {
+  display: grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  grid-template-rows:auto auto !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 3px 9px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 66px !important;
+  margin: 0 !important;
+  padding: 9px 13px !important;
+  border: 1px solid rgba(129,171,218,.42) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(145deg,rgba(17,29,47,.97),rgba(8,14,24,.98)) !important;
+  box-shadow: inset 0 0 14px #0008,0 4px 12px #0005 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score-you {
+  margin-left: clamp(126px, 11vw, 164px) !important;
+  width: calc(100% - clamp(126px, 11vw, 164px)) !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score-you article {
+  border-left: 3px solid #57d8a2 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score-opponent article {
+  grid-template-columns:auto minmax(0,1fr) !important;
+  text-align: right !important;
+  border-right: 3px solid #d7a64f !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article small {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  overflow: hidden;
+  color: #c8d4e6 !important;
+  font: 800 10px/1.2 Inter,sans-serif !important;
+  letter-spacing: .09em !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.gwent-match-active .gwent-actions > .gwent-score-opponent article small {
+  grid-column: 2 !important;
+  text-align: right !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article strong {
+  grid-column: 2 !important;
+  grid-row: 1 / 3 !important;
+  align-self: center !important;
+  color: #f2d89f !important;
+  font: 900 clamp(25px,2vw,34px)/1 Cinzel,Georgia,serif !important;
+  text-shadow: 0 0 14px rgba(226,185,109,.22);
+}
+body.gwent-match-active .gwent-actions > .gwent-score-opponent article strong {
+  grid-column: 1 !important;
+  grid-row: 1 / 3 !important;
+}
+body.gwent-match-active .gwent-actions > .gwent-score article span {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  overflow: hidden;
+  color: #9eacc3 !important;
+  font: 600 9px/1.25 Inter,sans-serif !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.gwent-match-active .gwent-actions > .gwent-score-opponent article span {
+  grid-column: 2 !important;
+  text-align: right !important;
+}
+body.gwent-match-active .gwent-action-center {
+  display: grid !important;
+  justify-items: center !important;
+  align-content: center !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+body.gwent-match-active .gwent-action-buttons {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+  width: 100% !important;
+}
+body.gwent-match-active .gwent-action-main,
+body.gwent-match-active .gwent-action-tools {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+body.gwent-match-active .gwent-actions.is-prep .gwent-action-buttons {
+  display: none !important;
+}
+body.gwent-match-active .gwent-actions.is-prep .gwent-prep {
+  display: flex !important;
+  flex: 0 1 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 7px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+body.gwent-match-active .gwent-action-tools > button,
+body.gwent-match-active .gwent-pass-button {
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1050px) {
+  body.gwent-match-active .gwent-actions {
+    grid-template-columns:minmax(145px,1fr) minmax(300px,auto) minmax(145px,1fr) !important;
+    gap:8px !important;
+    padding:8px !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score article {
+    padding:8px !important;
+  }
+  body.gwent-match-active .gwent-pass-button {
+    min-width:135px !important;
+  }
+  body.gwent-match-active .gwent-action-buttons {
+    gap:6px !important;
+  }
+}
+@media (max-width: 760px) {
+  body.gwent-match-active .gwent-arena-toolbar {
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:6px !important;
+  }
+  body.gwent-match-active .gwent-arena-toolbar > .gwent-turn-indicator,
+  body.gwent-match-active .gwent-arena-toolbar > .gwent-reward-panel {
+    grid-column:1 !important;
+    justify-self:stretch !important;
+    width:100% !important;
+  }
+  body.gwent-match-active .gwent-actions {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    grid-template-areas:
+      "mine opponent"
+      "center center" !important;
+    align-items:stretch !important;
+    gap:8px !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score-you { grid-area:mine !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score-opponent { grid-area:opponent !important; }
+  body.gwent-match-active .gwent-actions > .gwent-action-center { grid-area:center !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score article {
+    min-height:58px !important;
+    padding:7px !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score article small { font-size:8px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score article span { font-size:7px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score article strong { font-size:22px !important; }
+  body.gwent-match-active .gwent-action-buttons { flex-wrap:wrap !important; }
+  body.gwent-match-active .gwent-action-tools { flex-wrap:wrap !important; }
+}
+@media (max-width: 430px) {
+  body.gwent-match-active .gwent-actions {
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-areas:
+      "mine"
+      "opponent"
+      "center" !important;
+  }
+}
+
+
+/* ================================================================
+   TEMA OPCIONAL — ELDEN RING / FANTASIA SOMBRIA
+   Escopo limitado à arena de Gwent. Não altera cartas nem regras.
+   ================================================================ */
+body.gwent-match-active.gwent-theme-eldenring #gwent-arena:not([hidden]) {
+  --er-gold: #d9b66e;
+  --er-gold-bright: #f0d99d;
+  --er-gold-muted: #8c6b36;
+  --er-stone: #171512;
+  --er-ash: #0b0c10;
+  --er-parchment: #c9bd9c;
+  position: relative;
+  isolation: isolate;
+  border-color: #9d793e !important;
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(181,139,61,.17), transparent 42%),
+    radial-gradient(ellipse at 50% 80%, rgba(90,65,31,.13), transparent 55%),
+    linear-gradient(145deg, #171713 0%, #0c0d10 48%, #17130e 100%) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(233,198,126,.2),
+    inset 0 0 38px rgba(0,0,0,.82),
+    0 10px 32px rgba(0,0,0,.68) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-head {
+  border-bottom: 1px solid rgba(217,182,110,.72) !important;
+  box-shadow: 0 5px 14px -12px rgba(232,194,119,.75);
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-title .eyebrow {
+  color: #b89a60 !important;
+  letter-spacing: .22em !important;
+  text-shadow: 0 0 12px rgba(203,161,83,.25);
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-title h2 {
+  color: #e4c987 !important;
+  text-shadow: 0 2px 0 #382a17, 0 0 18px rgba(193,149,65,.22);
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-title h2 span,
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-title .gwent-log {
+  color: #bfb08b !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-head-actions {
+  gap: 8px !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-exit,
+body.gwent-match-active.gwent-theme-eldenring .gwent-history summary,
+body.gwent-match-active.gwent-theme-eldenring .gwent-theme-toggle {
+  border: 1px solid rgba(190,151,82,.72) !important;
+  border-radius: 4px !important;
+  background: linear-gradient(180deg, rgba(48,39,25,.96), rgba(18,17,15,.98)) !important;
+  color: #e7d4a6 !important;
+  box-shadow: inset 0 1px rgba(255,239,194,.08), 0 3px 10px rgba(0,0,0,.32) !important;
+  font: 800 9px/1.2 Cinzel, Georgia, serif !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-theme-toggle {
+  padding: 7px 10px !important;
+  cursor: pointer;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-theme-toggle.is-active {
+  border-color: #f0d18d !important;
+  background: linear-gradient(180deg, #80602d, #3b2a16) !important;
+  color: #fff0c9 !important;
+  box-shadow: inset 0 0 12px rgba(255,222,151,.18), 0 0 12px rgba(218,171,81,.2) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-theme-toggle:hover,
+body.gwent-match-active.gwent-theme-eldenring .gwent-exit:hover,
+body.gwent-match-active.gwent-theme-eldenring .gwent-history summary:hover {
+  filter: brightness(1.18);
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-arena-toolbar > .gwent-turn-indicator {
+  border-color: rgba(191,151,75,.85) !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(195,150,66,.16), transparent 68%),
+    linear-gradient(110deg, rgba(25,22,16,.98), rgba(10,12,13,.98)) !important;
+  color: #f0d99d !important;
+  box-shadow: inset 0 0 18px rgba(0,0,0,.7), 0 0 15px rgba(174,132,58,.1) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-turn-indicator strong {
+  color: #f2d99a !important;
+  text-shadow: 0 0 12px rgba(226,186,102,.25);
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-turn-dot {
+  background: #d8b56d !important;
+  box-shadow: 0 0 8px #d8b56d, 0 0 16px rgba(216,181,109,.5) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-battlefield {
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(171,130,59,.08), transparent 58%),
+    linear-gradient(180deg, rgba(28,25,19,.22), rgba(5,7,9,.3)) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side {
+  border-color: rgba(170,132,67,.76) !important;
+  border-radius: 5px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(177,137,65,.1), transparent 55%),
+    linear-gradient(150deg, rgba(28,27,22,.98), rgba(9,11,13,.97)) !important;
+  box-shadow: inset 0 0 24px rgba(0,0,0,.88), inset 0 0 0 1px rgba(238,204,133,.08) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side > h3 {
+  color: #d8ba7b !important;
+  text-shadow: 0 1px 3px #000;
+  letter-spacing: .15em !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side > h3 b {
+  color: #dfc17c !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side .gwent-row {
+  border-color: rgba(143,112,58,.68) !important;
+  border-radius: 3px !important;
+  background:
+    linear-gradient(90deg, rgba(48,39,25,.92), rgba(17,17,15,.86) 22%, rgba(7,9,11,.93)) !important;
+  box-shadow: inset 0 0 16px rgba(0,0,0,.76), 0 1px rgba(241,214,157,.04) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side .gwent-row h4 {
+  border-right-color: #9b783f !important;
+  background: linear-gradient(180deg, #302719, #15130f) !important;
+  color: #d7b873 !important;
+  text-shadow: 0 1px 3px #000;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side .gwent-row h4 b {
+  color: #f0d99d !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-side .gwent-row.has-weather {
+  border-color: rgba(205,165,91,.95) !important;
+  box-shadow: inset 0 0 22px rgba(0,0,0,.72), 0 0 12px rgba(186,146,70,.13) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-battle-line {
+  color: rgba(207,174,112,.72) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions {
+  border-color: rgba(163,126,63,.82) !important;
+  border-radius: 5px !important;
+  background:
+    linear-gradient(90deg, rgba(41,32,20,.96), rgba(13,14,14,.98) 45%, rgba(41,32,20,.96)) !important;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.8), 0 4px 14px rgba(0,0,0,.58) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions > .gwent-score article {
+  border-color: rgba(155,121,63,.72) !important;
+  border-radius: 4px !important;
+  background: linear-gradient(145deg, rgba(38,32,23,.98), rgba(12,13,13,.98)) !important;
+  box-shadow: inset 0 0 14px rgba(0,0,0,.75), 0 3px 10px rgba(0,0,0,.32) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions > .gwent-score-you article {
+  border-left-color: #8baf79 !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions > .gwent-score-opponent article {
+  border-right-color: #bc765c !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions > .gwent-score article small {
+  color: #d9c79d !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions > .gwent-score article strong {
+  color: #f0d89a !important;
+  text-shadow: 0 0 16px rgba(224,184,101,.25) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-actions > .gwent-score article span {
+  color: #b9ad92 !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-pass-button {
+  border-color: #e0bb72 !important;
+  background: linear-gradient(145deg, #d8b66f, #80602f) !important;
+  color: #1b160d !important;
+  box-shadow: 0 4px 0 #4e371b, 0 7px 15px rgba(177,132,57,.22) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-action-tools > button:not(.gwent-surrender-button) {
+  border-color: rgba(180,143,78,.78) !important;
+  background: linear-gradient(145deg, #3d3321, #171511) !important;
+  color: #e7d4a6 !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-surrender-button {
+  border-color: rgba(160,87,68,.85) !important;
+  background: linear-gradient(145deg, #633329, #271715) !important;
+  color: #f1d9c8 !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-hand-zone {
+  border-color: rgba(176,137,69,.72) !important;
+  border-radius: 5px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(167,126,51,.12), transparent 60%),
+    linear-gradient(110deg, rgba(31,27,20,.98), rgba(8,10,12,.99)) !important;
+  box-shadow: inset 0 0 22px rgba(0,0,0,.86), 0 3px 12px rgba(0,0,0,.42) !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-hand-head {
+  color: #e0c589 !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-hand-head strong,
+body.gwent-match-active.gwent-theme-eldenring .gwent-hand-head span {
+  color: #d7c49b !important;
+}
+body.gwent-match-active.gwent-theme-eldenring .gwent-hand-card:hover,
+body.gwent-match-active.gwent-theme-eldenring .gwent-board-card:hover {
+  box-shadow: 0 15px 34px rgba(0,0,0,.9), 0 0 22px rgba(216,177,98,.42) !important;
+}
+/* Foco de acessibilidade e leitura preservados no tema alternativo. */
+body.gwent-match-active.gwent-theme-eldenring :is(button,[role="button"],a):focus-visible {
+  outline: 2px solid #f0d99d !important;
+  outline-offset: 3px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active.gwent-theme-eldenring *,
+  body.gwent-match-active.gwent-theme-eldenring *::before,
+  body.gwent-match-active.gwent-theme-eldenring *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/* ================================================================
+   CONSOLIDAÇÃO FINAL — projeção HD, carta de líder, arena espelhada
+   ================================================================ */
+/* Projeção grande de verdade: a arte original continua na carta e esta camada
+   independente fica sempre centralizada, sem alterar a posição dos vizinhos. */
+body.gwent-match-active #gwent-hand-hover-preview {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 30000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 2vh 2vw !important;
+  pointer-events: none !important;
+  background: radial-gradient(ellipse at center, rgba(3,6,12,.28), rgba(3,6,12,.08) 48%, transparent 76%) !important;
+}
+body.gwent-match-active #gwent-hand-hover-preview img {
+  display: block !important;
+  width: min(34vw, 470px) !important;
+  height: min(88vh, 690px) !important;
+  max-width: min(470px, 94vw) !important;
+  max-height: 88vh !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  border: 3px solid rgba(236,194,120,.96) !important;
+  border-radius: 12px !important;
+  background: #080d18 !important;
+  box-shadow: 0 28px 110px rgba(0,0,0,.94), 0 0 48px rgba(201,151,229,.45) !important;
+}
+body.gwent-match-active .gwent-hand-card > img,
+body.gwent-match-active .gwent-board-card > img {
+  display: block !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+/* A prévia substitui o zoom de escala do cartão; o cartão físico não some nem sai do eixo. */
+body.gwent-match-active .gwent-hand > .gwent-hand-card:hover,
+body.gwent-match-active .gwent-hand > .gwent-hand-card:focus-visible {
+  z-index: 35 !important;
+  transform: translateY(-5px) !important;
+  outline: 2px solid #f0c77d !important;
+  outline-offset: 3px !important;
+  filter: brightness(1.1) drop-shadow(0 0 9px rgba(237,190,105,.42)) !important;
+}
+body.gwent-match-active .gwent-board-card:hover,
+body.gwent-match-active .gwent-board-card:focus-visible {
+  z-index: 90 !important;
+  transform: translateY(-4px) scale(1.025) !important;
+}
+
+/* Líder como carta vertical completa, fixa no canto inferior esquerdo da arena. */
+body.gwent-match-active .gwent-leader-card-dock {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9400 !important;
+  pointer-events: none !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
+  position: absolute !important;
+  left: clamp(8px, 1vw, 18px) !important;
+  bottom: clamp(10px, 1.5vh, 20px) !important;
+  pointer-events: auto !important;
+  z-index: 9400 !important;
+  display: block !important;
+  width: clamp(112px, 10.5vw, 148px) !important;
+  height: clamp(176px, 25vh, 226px) !important;
+  min-width: 0 !important;
+  max-width: 148px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 2px solid rgba(220,181,107,.9) !important;
+  border-radius: 8px !important;
+  background: #080d18 !important;
+  color: #f1dfba !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 38px rgba(0,0,0,.88), 0 0 22px rgba(215,174,96,.27), inset 0 0 0 1px rgba(255,235,186,.12) !important;
+  transform: none !important;
+  transition: border-color .18s ease, box-shadow .18s ease, filter .18s ease !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card:hover,
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card:focus-visible {
+  border-color: #ffe2a2 !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.94), 0 0 27px rgba(238,193,108,.45) !important;
+  filter: brightness(1.1) !important;
+  outline: 2px solid #f3d69c !important;
+  outline-offset: 3px !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-art {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: radial-gradient(circle at 50% 25%, #76572c, #0c1018 72%) !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-art img {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+  opacity: .88 !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-art i[hidden] { display: none !important; }
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta {
+  position: absolute !important;
+  inset: auto 0 0 0 !important;
+  z-index: 1 !important;
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  padding: 24px 8px 8px !important;
+  background: linear-gradient(180deg, transparent 0%, rgba(5,7,12,.78) 23%, rgba(5,7,12,.98) 100%) !important;
+  text-shadow: 0 1px 4px #000 !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta .gwent-leader-eyebrow {
+  color: #dfbd7e !important;
+  font: 800 7px/1.15 Cinzel, Georgia, serif !important;
+  letter-spacing: .15em !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta b {
+  display: block !important;
+  color: #ffe6b4 !important;
+  font: 900 clamp(9px, .8vw, 12px)/1.15 Cinzel, Georgia, serif !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta small {
+  color: #c8b58d !important;
+  font: 700 8px/1.15 Inter, sans-serif !important;
+  white-space: normal !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-ability {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  color: #e7dfce !important;
+  font: 500 7px/1.3 Inter, sans-serif !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 3 !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta em {
+  color: #91e7ba !important;
+  font: 900 7px/1.15 Inter, sans-serif !important;
+  font-style: normal !important;
+  letter-spacing: .07em !important;
+}
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card.is-spent {
+  filter: saturate(.48) brightness(.83) !important;
+}
+/* Reserva o canto da carta de líder para que ela não cubra o cabeçalho nem a mão. */
+body.gwent-match-active .gwent-hand-zone {
+  padding-left: clamp(126px, 11vw, 164px) !important;
+}
+body.gwent-match-active .gwent-hand-head {
+  padding-left: 2px !important;
+  min-width: 0 !important;
+}
+body.gwent-match-active .gwent-hand {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  justify-content: flex-start !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scrollbar-width: thin;
+}
+
+/* Controles superiores maiores e fáceis de acionar. */
+body.gwent-match-active .gwent-arena-head-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+}
+body.gwent-match-active .gwent-arena-head-actions .gwent-history summary,
+body.gwent-match-active .gwent-arena-head-actions .gwent-exit,
+body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle {
+  min-height: 42px !important;
+  padding: 10px 15px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  letter-spacing: .04em !important;
+}
+body.gwent-match-active .gwent-arena-head-actions .gwent-exit { min-width: 126px !important; }
+body.gwent-match-active .gwent-arena-head-actions .gwent-history summary { min-width: 112px !important; }
+
+/* Espelhamento real: fileiras inimigas apontam para o centro a partir da esquerda;
+   fileiras aliadas apontam para o centro a partir da direita. */
+@media (min-width: 901px) {
+  body.gwent-match-active .gwent-board-enemy .gwent-row {
+    grid-template-columns: clamp(88px,7.3vw,116px) minmax(0,1fr) !important;
+    padding: 4px 7px 4px 0 !important;
+  }
+  body.gwent-match-active .gwent-board-enemy .gwent-row h4 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    text-align: left !important;
+  }
+  body.gwent-match-active .gwent-board-enemy .gwent-row .gwent-board-cards {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-content: flex-end !important;
+  }
+  body.gwent-match-active .gwent-board-mine .gwent-row {
+    grid-template-columns: minmax(0,1fr) clamp(88px,7.3vw,116px) !important;
+    padding: 4px 0 4px 7px !important;
+  }
+  body.gwent-match-active .gwent-board-mine .gwent-row h4 {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    border-right: 0 !important;
+    border-left: 1px solid rgba(134,159,199,.3) !important;
+    text-align: right !important;
+  }
+  body.gwent-match-active .gwent-board-mine .gwent-row .gwent-board-cards {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-content: flex-start !important;
+  }
+  body.gwent-match-active .gwent-board-card {
+    width: clamp(54px,4.35vw,78px) !important;
+    max-height: min(100%,126px) !important;
+  }
+}
+
+/* Melhor feedback para os resultados e contribuições das unidades. */
+.gwent-result-highlights {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 4px;
+  padding: 12px;
+  border: 1px solid rgba(202,166,99,.48);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(36,31,22,.8), rgba(9,13,20,.88));
+}
+.gwent-result-highlights h3 {
+  margin: 0;
+  color: #e7c887;
+  font: 900 10px Cinzel, Georgia, serif;
+  letter-spacing: .14em;
+}
+.gwent-result-highlights > p {
+  margin: 0;
+  color: #aeb9c9;
+  font: 500 10px/1.4 Inter, sans-serif;
+}
+.gwent-result-highlights > div {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
+.gwent-result-highlight-side {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(122,146,176,.26);
+  background: rgba(5,10,18,.56);
+}
+.gwent-result-highlight-side > b {
+  display: block;
+  color: #c8d7e8;
+  font: 800 9px Cinzel, Georgia, serif;
+  letter-spacing: .1em;
+}
+.gwent-result-highlight-side ol {
+  display: grid;
+  gap: 5px;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.gwent-result-highlight-side li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  color: #d9e0eb;
+  font: 500 10px/1.25 Inter, sans-serif;
+}
+.gwent-result-highlight-side li span { overflow: hidden; text-overflow: ellipsis; }
+.gwent-result-highlight-side li strong { flex: 0 0 auto; color: #e9c77d; font-size: 9px; }
+
+@media (max-width: 900px) {
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
+    left: 7px !important;
+    bottom: 8px !important;
+    width: 92px !important;
+    height: 146px !important;
+    max-width: 92px !important;
+  }
+  body.gwent-match-active .gwent-hand-zone { padding-left: 106px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score-you { margin-left: 106px !important; width: calc(100% - 106px) !important; }
+  body.gwent-match-active .gwent-hand-head { flex-wrap: wrap !important; }
+  body.gwent-match-active .gwent-hand { display:flex !important; flex-wrap: nowrap !important; justify-content:flex-start !important; overflow-x:auto !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta { gap: 3px !important; padding: 18px 5px 6px !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta .gwent-leader-eyebrow { font-size: 5px !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta b { font-size: 8px !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta small { font-size: 6px !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-ability { font-size: 6px !important; -webkit-line-clamp: 2 !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta em { font-size: 5px !important; }
+  body.gwent-match-active #gwent-hand-hover-preview img {
+    width: min(58vw, 330px) !important;
+    height: min(76vh, 530px) !important;
+    max-width: 94vw !important;
+  }
+  body.gwent-match-active .gwent-arena-head-actions .gwent-history summary,
+  body.gwent-match-active .gwent-arena-head-actions .gwent-exit,
+  body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle {
+    min-height: 38px !important;
+    padding: 8px 10px !important;
+    font-size: 9px !important;
+  }
+  .gwent-result-highlights > div { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 430px) {
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
+    width: 78px !important;
+    height: 122px !important;
+  }
+  body.gwent-match-active .gwent-hand-zone { padding-left: 88px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score-you { margin-left: 88px !important; width: calc(100% - 88px) !important; }
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta .gwent-leader-eyebrow,
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card-meta em { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active #gwent-arena .gwent-leader-card,
+  body.gwent-match-active #gwent-hand-hover-preview img { transition: none !important; }
+}
+
+
+/* Ajuste final da carta fixa de líder e dos controles superiores. */
+@media (min-width: 1051px) {
+  body.gwent-match-active .gwent-actions > .gwent-score-you {
+    margin-left: clamp(126px, 11vw, 164px) !important;
+    width: calc(100% - clamp(126px, 11vw, 164px)) !important;
+    box-sizing: border-box !important;
+  }
+}
+@media (min-width: 901px) and (max-width: 1050px) {
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
+    width: 108px !important;
+    height: 168px !important;
+    max-width: 108px !important;
+  }
+  body.gwent-match-active .gwent-hand-zone { padding-left: 120px !important; }
+  body.gwent-match-active .gwent-actions > .gwent-score-you {
+    margin-left: 120px !important;
+    width: calc(100% - 120px) !important;
+    box-sizing: border-box !important;
+  }
+}
+body.gwent-match-active .gwent-arena-head-actions .gwent-history summary,
+body.gwent-match-active .gwent-arena-head-actions .gwent-exit,
+body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle {
+  min-height: 50px !important;
+  padding: 12px 18px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+body.gwent-match-active .gwent-arena-head-actions .gwent-history summary { min-width: 126px !important; }
+body.gwent-match-active .gwent-arena-head-actions .gwent-exit { min-width: 154px !important; }
+body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle { min-width: 150px !important; }
+@media (max-width: 900px) {
+  body.gwent-match-active .gwent-arena-head-actions .gwent-history summary,
+  body.gwent-match-active .gwent-arena-head-actions .gwent-exit,
+  body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle {
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    font-size: 10px !important;
+  }
+}
+@media (max-width: 430px) {
+  body.gwent-match-active .gwent-arena-head-actions .gwent-history summary,
+  body.gwent-match-active .gwent-arena-head-actions .gwent-exit,
+  body.gwent-match-active .gwent-arena-head-actions .gwent-theme-toggle {
+    min-height: 42px !important;
+    padding: 9px 10px !important;
+    font-size: 9px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card,
+  body.gwent-match-active #gwent-hand-hover-preview img { transition: none !important; }
+}
+
+/* Correção responsiva: neutraliza a regra legada que fazia cada placar
+   ocupar todas as colunas em tablets, quebrando o novo HUD em três áreas. */
+@media (min-width: 761px) and (max-width: 900px) {
+  body.gwent-match-active .gwent-actions {
+    grid-template-columns: minmax(220px,1.1fr) minmax(260px,1.3fr) minmax(160px,.85fr) !important;
+    align-items: center !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score-you {
+    grid-area: 1 / 1 / 2 / 2 !important;
+    grid-column: 1 !important;
+    margin-left: 106px !important;
+    width: calc(100% - 106px) !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-action-center {
+    grid-area: 1 / 2 / 2 / 3 !important;
+    grid-column: 2 !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score-opponent {
+    grid-area: 1 / 3 / 2 / 4 !important;
+    grid-column: 3 !important;
+  }
+}
+@media (max-width: 760px) {
+  body.gwent-match-active .gwent-actions > .gwent-score-you {
+    grid-area: mine !important;
+    grid-column: 1 !important;
+    margin-left: 88px !important;
+    width: calc(100% - 88px) !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score-opponent {
+    grid-area: opponent !important;
+    grid-column: 2 !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-action-center {
+    grid-area: center !important;
+    grid-column: 1 / -1 !important;
+  }
+}
+@media (max-width: 430px) {
+  body.gwent-match-active .gwent-actions > .gwent-score-you {
+    grid-area: mine !important;
+    grid-column: 1 !important;
+    margin-left: 88px !important;
+    width: calc(100% - 88px) !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-score-opponent {
+    grid-area: opponent !important;
+    grid-column: 1 !important;
+  }
+  body.gwent-match-active .gwent-actions > .gwent-action-center {
+    grid-area: center !important;
+    grid-column: 1 !important;
+  }
+}

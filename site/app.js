@@ -1,4 +1,24 @@
 const $ = (selector) => document.querySelector(selector);
+const GWENT_ARENA_THEME_KEY = 'soulsbot.gwent.arena-theme';
+function gwentEldenRingThemeEnabled() {
+  try {
+    return window.localStorage.getItem(GWENT_ARENA_THEME_KEY) === 'elden-ring';
+  } catch (_) {
+    return false;
+  }
+}
+function applyGwentArenaTheme(enabled = gwentEldenRingThemeEnabled()) {
+  const active = Boolean(enabled);
+  document.body?.classList.toggle('gwent-theme-eldenring', active);
+  document.documentElement?.classList.toggle('gwent-theme-eldenring', active);
+  return active;
+}
+function updateGwentArenaThemeButton(button, enabled = gwentEldenRingThemeEnabled()) {
+  if (!button) return;
+  button.setAttribute('aria-pressed', String(Boolean(enabled)));
+  button.textContent = enabled ? '✧ ELDEN RING · ATIVO' : '✧ TEMA ELDEN RING';
+  button.classList.toggle('is-active', Boolean(enabled));
+}
 let collection = [];
 let cardCatalog = [];
 let currentUser = null;
@@ -1281,9 +1301,106 @@ function openGwentLeaderModal() {
   modal.querySelector('[data-leader-close]')?.focus();
 }
 
+const GWENT_IDENTITY_GUIDE = {
+  chefe_guardiao_cinzas: {
+    simple: 'Quando entra, fortalece em +1 um aliado que já esteja na mesma fileira. Se houver esse aliado, esta própria carta também ganha +1.',
+    example: 'Exemplo: já existe um aliado em Corpo a Corpo. Ao jogar esta carta nessa fileira, o aliado ganha +1 e a nova carta também ganha +1. Se a fileira estiver vazia, nenhum desses bônus é aplicado.'
+  },
+  chefe_dama_vazio: {
+    simple: 'A unidade inimiga mais forte perde 2 pontos de bônus. Ela não pode ficar com menos de -2 de bônus.',
+    example: 'Exemplo: o inimigo mais forte tem +3 de bônus. Ele passa a ter +1. Se já tinha -2, não perde mais nada.'
+  },
+  chefe_rei_afogado: {
+    simple: 'Esta carta ganha +2 se você já tiver alguma unidade no descarte. Se não tiver, ganha +1 quando o adversário tiver mais unidades em campo que você.',
+    example: 'Exemplo: há uma unidade no seu descarte, então a carta recebe +2. Se seu descarte estiver vazio, ela só ganha +1 caso o adversário tenha mais unidades no campo.'
+  },
+  chefe_oraculo_ruina: {
+    simple: 'A unidade inimiga mais forte perde 1 ponto de bônus. Esta carta também ganha +1 se o adversário estiver vencendo em pontos.',
+    example: 'Exemplo: o inimigo mais forte tem +2 de bônus e cai para +1. Se o adversário ainda estiver na frente no placar, esta carta também recebe +1.'
+  },
+  arma_duas_luas: {
+    simple: 'Esta carta ganha +1 se você tiver pelo menos outro aliado em uma fileira diferente da escolhida para ela.',
+    example: 'Exemplo: você já tem uma unidade em Corpo a Corpo e joga esta carta em Cerco. Como há um aliado em outra fileira, ela recebe +1.'
+  },
+  arma_grande_sino: {
+    simple: 'Esta carta ganha +2 quando sua pontuação total está menor que a do adversário.',
+    example: 'Exemplo: você tem 12 pontos e o adversário tem 16. A carta recebe +2. Se você empatar ou ficar na frente, não recebe esse bônus.'
+  },
+  magia_selo_vigilia: {
+    simple: 'Esta carta sofre 1 ponto a menos da penalidade do clima. Além disso, fortalece em +1 o primeiro aliado que já estiver na mesma fileira.',
+    example: 'Exemplo: a fileira está sob chuva que tira 1 ponto. Esta carta ignora essa perda. Se já houver um aliado na fileira, ele recebe +1 de bônus.'
+  },
+  magia_trovao_oco: {
+    simple: 'Todas as unidades inimigas na mesma fileira perdem 1 ponto de bônus. O bônus de cada uma não pode ficar abaixo de -2.',
+    example: 'Exemplo: há três inimigos na fileira. Um tem +2 e cai para +1; outro tem +1 e fica com 0; o terceiro já está em -2 e não muda.'
+  },
+  magia_nevoa_antiga: {
+    simple: 'Esta carta ganha +2 se houver chuva ou outro efeito climático ativo em qualquer fileira.',
+    example: 'Exemplo: existe chuva em Cerco. Mesmo que esta carta seja jogada em Corpo a Corpo, ela recebe +2.'
+  },
+  magia_sol_negro: {
+    simple: 'Esta carta ganha +2 se pelo menos uma unidade inimiga tiver bônus positivo.',
+    example: 'Exemplo: uma unidade inimiga tem +1 de bônus. A condição já foi cumprida e esta carta recebe +2.'
+  },
+  covenant_lua_velada: {
+    simple: 'Esta carta ganha +1. Depois, o aliado mais fraco que estiver em outra fileira também recebe +1 de bônus.',
+    example: 'Exemplo: você joga esta carta em Longa Distância. Um aliado mais fraco está em Corpo a Corpo; ele recebe +1 e esta carta também recebe +1.'
+  },
+  chefe_malenia_lamina_miquella: {
+    simple: 'Todos os inimigos da fileira escolhida recebem Podridão Escarlate. Quem já tinha uma marca recebe a segunda, que também corrói 1 ponto de bônus positivo.',
+    example: 'Exemplo: há três inimigos em Cerco. Todos recebem Podridão. Um deles já estava marcado, então completa a segunda marca e perde 1 de bônus positivo, se tiver.'
+  },
+  chefe_radahn_flagelo_estrelas: {
+    simple: 'O inimigo mais forte do campo é puxado para a fileira escolhida e perde 2 pontos de bônus.',
+    example: 'Exemplo: a unidade inimiga mais forte está em Longa Distância. Você joga Radahn em Cerco: essa unidade é movida para Cerco e perde 2 de bônus.'
+  },
+  chefe_maliketh_morte_destinada: {
+    simple: 'A unidade inimiga mais forte perde até 2 pontos de bônus. O bônus dela não pode ficar abaixo de -2.',
+    example: 'Exemplo: o inimigo mais forte tem +3 de bônus e passa a ter +1. Se tinha +1, passa a -1.'
+  },
+  chefe_messmer_impalador: {
+    simple: 'Todos os inimigos da fileira escolhida recebem Sangramento. Se alguém já tinha uma marca, a segunda causa Hemorragia e tira 2 pontos de bônus.',
+    example: 'Exemplo: dois inimigos estão em Corpo a Corpo. Os dois recebem Sangramento. Se um já estava marcado, sofre Hemorragia e perde 2 de bônus.'
+  },
+  chefe_placidusax_lorde_dragao: {
+    simple: 'Todos os inimigos da fileira escolhida recebem Geada. Esta carta ganha +1 para cada inimigo atingido, até no máximo +3.',
+    example: 'Exemplo: há dois inimigos em Cerco. Os dois recebem Geada e Placidusax ganha +2. Com quatro inimigos, o bônus continua limitado a +3.'
+  },
+  gwent_v75_ordem_veterano_juramento: {
+    simple: 'Esta carta entra com +1 de bônus. Se já houver um aliado na mesma fileira, o aliado mais fraco também recebe +1.',
+    example: 'Exemplo: há dois aliados em Corpo a Corpo. Ao jogar o Veterano nessa fileira, ele ganha +1 e o aliado mais fraco também ganha +1.'
+  },
+  gwent_v75_ordem_confessora_graca: {
+    simple: 'Limpa efeitos negativos de até dois aliados da mesma fileira e dá +1 de bônus a cada um. Se ninguém precisar ser limpo, fortalece o aliado mais fraco em +1. Se não houver aliado, esta carta ganha +1.',
+    example: 'Exemplo: dois aliados em Cerco estão com Geada e Sangramento. A Confessora remove esses efeitos e cada um recebe +1. Se ninguém estiver afetado, ela fortalece o aliado mais fraco.'
+  },
+  gwent_v75_veu_acolito_sangue: {
+    simple: 'O inimigo mais forte da fileira escolhida recebe Sangramento. Se já tinha uma marca, sofre Hemorragia, perde 2 de bônus e esta carta ganha +1.',
+    example: 'Exemplo: o inimigo mais forte em Longa Distância já tem Sangramento. O Acólito completa a segunda marca, tira 2 de bônus desse inimigo e ganha +1.'
+  },
+  gwent_v75_veu_carrasco_preco: {
+    simple: 'Sacrifica seu aliado mais fraco da mesma fileira e recebe bônus igual ao poder efetivo dele, até +3. Se não houver aliado, recebe +1.',
+    example: 'Exemplo: há um aliado com 2 de poder efetivo na fileira. Ele é sacrificado e o Carrasco ganha +2 de bônus. O ganho nunca passa de +3.'
+  },
+  gwent_v75_lua_oraculo_geada: {
+    simple: 'O inimigo mais forte da fileira escolhida recebe Geada. Se ele já tinha uma marca de Geada, esta carta também ganha +1.',
+    example: 'Exemplo: o inimigo mais forte em Cerco já tem uma marca de Geada. O Oráculo completa a segunda e recebe +1.'
+  },
+  gwent_v75_lua_graviturgista: {
+    simple: 'Até dois inimigos da fileira escolhida que tenham bônus positivo perdem 1 ponto de bônus. Se atingir dois, esta carta ganha +1.',
+    example: 'Exemplo: dois inimigos em Cerco têm +2 e +1 de bônus. Os dois perdem 1; como foram atingidos dois inimigos, o Graviturgista recebe +1.'
+  }
+};
+
 function gwentSimpleExplanation(card) {
+  const identityGuide = card?.habilidade_identidade ? GWENT_IDENTITY_GUIDE[String(card.id || '')] : null;
+  if (identityGuide?.simple) return identityGuide.simple;
   const skill = String(card?.habilidade || '');
   const explanations = {
+    devoto: 'Quando esta carta entra, ela ganha +1 de poder se você já tiver pelo menos duas unidades da mesma facção no campo.',
+    gloria: 'Se você vencer a rodada com esta unidade no campo, ela permanece para a próxima rodada. Se perder, ela vai para o descarte normalmente.',
+    legado: 'Se você venceu a rodada anterior, esta unidade entra na próxima rodada com +2 de poder.',
+    sinergia_faccao: 'Quando esta carta entra, ela ganha +1 de poder para cada unidade aliada da mesma facção que já estiver no campo.',
     primeira_luz: 'Se esta unidade entrar na primeira rodada, ela ganha +1 de poder.',
     retaliacao: 'Se sua pontuação estiver menor que a do adversário, esta unidade ganha +1 de poder.',
     impeto: 'Se sua pontuação estiver maior que a do adversário, esta unidade ganha +1 de poder.',
@@ -1365,6 +1482,12 @@ function updateGwentCardPreview(card, row, previewNode) {
   let affectedSides = [];
   let allRows = false;
   let message = '';
+  const identityExtraRows = new Map();
+  const markIdentityRow = (side, rowName) => {
+    if (!rowName) return;
+    if (!identityExtraRows.has(side)) identityExtraRows.set(side, new Set());
+    identityExtraRows.get(side).add(rowName);
+  };
   const ownRows = new Set(['gwent_chifre','gwent_vinculo','gwent_muralha','gwent_invocacao']);
   const enemyAll = new Set(['gwent_geada','drenagem','decreto_soberano']);
   const enemyPicked = new Set(['gwent_nevoa','gwent_geada_cariana','gwent_podrida','gwent_loucura','gwent_sangramento']);
@@ -1381,6 +1504,74 @@ function updateGwentCardPreview(card, row, previewNode) {
     if (skill === 'gwent_execucao') message = `Prévia: ${targets.length} unidade(s) inimiga(s) elegíveis em ${gwentRowLabel(rowKey)} podem ser atingidas. O Escudo ainda pode bloquear a remoção.`;
     else if (skill === 'gwent_passo') message = `Prévia: ${targets.length} unidade(s) sua(s) podem ser movidas para ${gwentRowLabel(rowKey)}.`;
     else message = `Prévia: ${targets.length} unidade(s) sua(s) podem receber Escudo.`;
+  } else if (card?.habilidade_identidade) {
+    // Habilidades individuais são identificadas pelo ID real da carta no motor.
+    // A prévia usa o mesmo conjunto de alvos do efeito correspondente.
+    const id = String(card.id || '');
+    const ownBoard = Array.isArray(mine.board) ? mine.board : [];
+    const enemyBoard = Array.isArray(enemy.board) ? enemy.board : [];
+    const powerOf = unit => gwentEffectivePower(unit, gwentWeatherSnapshot(currentGwentData)[unit.row] || 0);
+    const weakest = units => units.slice().sort((a,b) => powerOf(a) - powerOf(b))[0] || null;
+    const strongest = units => units.slice().sort((a,b) => powerOf(b) - powerOf(a))[0] || null;
+    const ownRow = ownBoard.filter(unit => unit.row === rowKey);
+    const enemyRow = enemyBoard.filter(unit => unit.row === rowKey);
+    if (['chefe_dama_vazio','chefe_oraculo_ruina','chefe_maliketh_morte_destinada'].includes(id)) {
+      targets = [strongest(enemyBoard)].filter(Boolean); affectedSides = [['enemy', enemy]];
+      message = `Prévia: a unidade inimiga mais forte no campo será afetada fora da fileira escolhida.`;
+    } else if (id === 'chefe_guardiao_cinzas') {
+      targets = [ownRow[0]].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
+      message = targets.length ? `Prévia: o primeiro aliado seu em ${gwentRowLabel(rowKey)} recebe +1; a carta também recebe +1.` : 'Prévia: sem aliado na fileira escolhida, o bônus desta habilidade não será ativado.';
+    } else if (id === 'chefe_rei_afogado') {
+      message = 'Prévia: a carta ganha +2 se você tiver carta no descarte; sem descarte, ganha +1 se o adversário tiver mais unidades em campo.';
+    } else if (id === 'arma_duas_luas') {
+      message = 'Prévia: a carta ganha +1 se você já tiver um aliado em outra fileira.';
+    } else if (id === 'arma_grande_sino') {
+      message = 'Prévia: a carta ganha +2 se sua pontuação total estiver abaixo da pontuação adversária.';
+    } else if (id === 'magia_selo_vigilia') {
+      targets = [ownRow[0]].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
+      message = 'Prévia: a carta reduz em 1 a penalidade de clima que sofre; o primeiro aliado já presente na fileira recebe +1.';
+    } else if (id === 'magia_trovao_oco') {
+      targets = enemyRow; affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
+      message = `Prévia: ${targets.length} inimigo(s) em ${gwentRowLabel(rowKey)} perde(m) 1 de bônus.`;
+    } else if (id === 'magia_nevoa_antiga') {
+      message = 'Prévia: a carta ganha +2 se houver clima ativo em qualquer fileira.';
+    } else if (id === 'magia_sol_negro') {
+      message = 'Prévia: a carta ganha +2 se algum inimigo tiver bônus positivo.';
+    } else if (id === 'covenant_lua_velada') {
+      targets = [weakest(ownBoard.filter(unit => unit.row !== rowKey))].filter(Boolean); affectedSides = [['mine', mine]];
+      message = targets.length ? 'Prévia: a carta ganha +1 e o aliado mais fraco em outra fileira recebe +1.' : 'Prévia: a carta ganha +1; não há aliado em outra fileira para receber o segundo bônus.';
+    } else if (['chefe_malenia_lamina_miquella','chefe_messmer_impalador','chefe_placidusax_lorde_dragao'].includes(id)) {
+      targets = enemyRow; affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
+      const effectLabel = id === 'chefe_malenia_lamina_miquella' ? 'Podridão Escarlate' : id === 'chefe_messmer_impalador' ? 'Sangramento' : 'Geada';
+      message = `Prévia: ${targets.length} inimigo(s) em ${gwentRowLabel(rowKey)} receberá(ão) ${effectLabel}.`;
+    } else if (id === 'chefe_radahn_flagelo_estrelas') {
+      targets = [strongest(enemyBoard)].filter(Boolean); affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
+      message = 'Prévia: o inimigo mais forte será movido para a fileira escolhida e perderá 2 de bônus.';
+    } else if (id === 'gwent_v75_ordem_veterano_juramento') {
+      targets = [weakest(ownRow)].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
+      message = 'Prévia: a carta ganha +1; se houver aliado na fileira, o mais fraco também ganha +1.';
+    } else if (id === 'gwent_v75_ordem_confessora_graca') {
+      const statusKeys = ['sangramento','geada','podrida','loucura'];
+      const marked = ownRow.filter(unit => statusKeys.some(key => Number(unit[key] || 0) > 0));
+      targets = marked.length ? marked.slice().sort((a,b) => powerOf(a)-powerOf(b)).slice(0,2) : [weakest(ownRow)].filter(Boolean);
+      affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
+      message = marked.length ? `Prévia: até ${targets.length} aliado(s) em ${gwentRowLabel(rowKey)} serão purificados e receberão +1.` : (targets.length ? 'Prévia: nenhum aliado precisa de purificação; o aliado mais fraco recebe +1.' : 'Prévia: sem aliados nessa fileira, a própria carta recebe +1.');
+    } else if (id === 'gwent_v75_veu_acolito_sangue') {
+      targets = [strongest(enemyRow)].filter(Boolean); affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
+      message = targets.length ? 'Prévia: o inimigo mais forte da fileira recebe Sangramento; a segunda marca causa Hemorragia.' : 'Prévia: não há inimigo nessa fileira para receber Sangramento.';
+    } else if (id === 'gwent_v75_veu_carrasco_preco') {
+      targets = [weakest(ownRow)].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
+      message = targets.length ? 'Prévia: o aliado mais fraco da fileira será sacrificado para fortalecer esta carta (até +3).' : 'Prévia: sem aliado nessa fileira, esta carta recebe +1.';
+    } else if (id === 'gwent_v75_lua_oraculo_geada') {
+      targets = [strongest(enemyRow)].filter(Boolean); affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
+      message = targets.length ? 'Prévia: o inimigo mais forte recebe Geada; se já estiver marcado, esta carta ganha +1.' : 'Prévia: não há inimigo nessa fileira para receber Geada.';
+    } else if (id === 'gwent_v75_lua_graviturgista') {
+      targets = enemyRow.filter(unit => Number(unit.bonus || 0) > 0).sort((a,b) => Number(b.bonus || 0) - Number(a.bonus || 0)).slice(0,2);
+      affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
+      message = `Prévia: ${targets.length} inimigo(s) com bônus positivo em ${gwentRowLabel(rowKey)} perderá(ão) 1 de bônus.`;
+    } else {
+      message = 'Prévia: esta unidade tem uma habilidade exclusiva; consulte a explicação detalhada antes de jogar.';
+    }
   } else {
     if (enemyAll.has(skill)) {
       affectedSides = [['enemy', enemy]];
@@ -1432,6 +1623,10 @@ function updateGwentCardPreview(card, row, previewNode) {
     if (skill === 'gwent_passo') rows.add(rowKey);
     rowsToHighlight.set(side, [...rows].filter(Boolean));
   }
+  for (const [side, extraRows] of identityExtraRows) {
+    const rows = rowsToHighlight.get(side) || [];
+    rowsToHighlight.set(side, [...new Set([...rows, ...extraRows])]);
+  }
   for (const [side, rows] of rowsToHighlight) {
     const sideSelector = side === 'mine' ? '.gwent-board-mine' : '.gwent-board-enemy';
     const sideNode = document.querySelector(`#gwent-arena ${sideSelector}`);
@@ -1454,8 +1649,14 @@ function updateGwentCardPreview(card, row, previewNode) {
   else previewNode.textContent = `Prévia: ${targets.length} unidade(s) em ${rowName} no ${affectedSides.map(([side]) => side === 'mine' ? 'seu campo' : 'campo inimigo').join(' e ')} serão afetadas.`;
 }
 function gwentSimpleExample(card) {
+  const identityGuide = card?.habilidade_identidade ? GWENT_IDENTITY_GUIDE[String(card.id || '')] : null;
+  if (identityGuide?.example) return identityGuide.example;
   const skill = String(card?.habilidade || '');
   const examples = {
+    devoto: 'Exemplo: você já tem duas unidades dos Esquecidos no campo e joga outra carta dos Esquecidos com Devoto. Ela recebe +1. Com apenas uma aliada da mesma facção, não recebe o bônus.',
+    gloria: 'Exemplo: o Anjo Esquecido está no campo e você vence a rodada. Ele permanece para a próxima. Se a NARA vencer, ele vai para o descarte.',
+    legado: 'Exemplo: você vence a primeira rodada. Ao jogar o Missionário Esquecido na segunda, ele entra com +2 de poder. Se você perdeu a rodada anterior, esse bônus não ativa.',
+    sinergia_faccao: 'Exemplo: você tem três unidades dos Esquecidos no campo e joga o Cruzado Esquecido. Ele ganha +3 de poder, porque já havia três aliados da mesma facção.',
     lei_primeva: 'Exemplo: se jogar esta unidade na primeira rodada, ela recebe +2. Se jogar nas rodadas seguintes, esse bônus especial não acontece.',
     decreto_soberano: 'Exemplo: um inimigo com +3 de bônus passa a ter +1; outro com +1 passa a ter -1. A habilidade não reduz ninguém abaixo de -2 de bônus.',
     olho_tempestade: 'Exemplo: se a fileira onde esta unidade está tiver chuva, ela recebe +2. Sem clima naquela fileira, não recebe esse bônus.',
@@ -1751,6 +1952,21 @@ function gwentWeatherSnapshot(data) {
   return levels;
 }
 
+function dockGwentLeaderCard(arena) {
+  const card = arena?.querySelector('[data-gwent-leader-card]');
+  const existing = document.getElementById('gwent-leader-card-dock');
+  if (!card) {
+    existing?.remove();
+    return;
+  }
+  const dock = existing || document.createElement('div');
+  dock.id = 'gwent-leader-card-dock';
+  dock.className = 'gwent-leader-card-dock';
+  dock.setAttribute('aria-label', 'Carta de líder fixa');
+  dock.replaceChildren(card);
+  if (!dock.isConnected) document.body.appendChild(dock);
+}
+
 function renderGwentArena(data) {
   if (gwentLastRenderedMatch !== null && gwentLastRenderedMatch !== String(data.match_id)) {
     gwentPreviousPowerSnapshot = new Map();
@@ -1766,6 +1982,7 @@ function renderGwentArena(data) {
   // fluxos que abrem uma partida sem passar pelo botão padrão de entrada.
   document.body.classList.add('gwent-match-active');
   document.documentElement.classList.add('gwent-match-active');
+  applyGwentArenaTheme();
   arena.hidden = false;
   gwentAlvos = data.alvos || {};
   if (!data.is_your_turn) closeGwentTargetPicker();
@@ -1889,12 +2106,11 @@ function renderGwentArena(data) {
   }).join('') || '<div class="gwent-empty-hand">Sua mão está vazia.</div>';
 
   const factionName = data.faction || mine.faction || '—';
-  const factionInfo = (gwentFactionInfo[factionName] || {}).description || 'Sinergias de facção ativas.';
-  const leaderDescription = data.leader_description || factionInfo;
   const leaderIdForCard = String(data.leader_id || '');
-  const leaderCardMarkup = `<button type="button" class="gwent-leader-card ${data.leader_used ? 'is-spent' : ''}" data-gwent-leader-card title="Consultar a habilidade de ${escapeHTML(data.leader_name || 'líder')}" aria-label="Consultar líder ${escapeHTML(data.leader_name || 'líder')}">
-      <span class="gwent-leader-card-art">${gwentLeaderArtMarkup(leaderIdForCard, 'gwent-leader-mini-image')}<i hidden>${gwentLeaderIcon(leaderIdForCard)}</i></span>
-      <span class="gwent-leader-card-meta"><b>${escapeHTML(data.leader_name || 'Líder')}</b><small>${escapeHTML(factionName)}</small><em>${data.leader_used ? 'HABILIDADE USADA' : 'VER HABILIDADE'}</em></span>
+  const leaderSimpleText = gwentLeaderSimpleExplanation(leaderIdForCard, data.leader_description || 'Habilidade especial do líder.');
+  const leaderCardMarkup = `<button type="button" class="gwent-leader-card ${data.leader_used ? 'is-spent' : ''}" data-gwent-leader-card title="Consultar e ativar a habilidade de ${escapeHTML(data.leader_name || 'líder')}" aria-label="Carta do líder ${escapeHTML(data.leader_name || 'líder')}. ${escapeHTML(leaderSimpleText)}">
+      <span class="gwent-leader-card-art">${gwentLeaderArtMarkup(leaderIdForCard, 'gwent-leader-full-image')}<i hidden>${gwentLeaderIcon(leaderIdForCard)}</i></span>
+      <span class="gwent-leader-card-meta"><small class="gwent-leader-eyebrow">CARTA DE LÍDER</small><b>${escapeHTML(data.leader_name || 'Líder')}</b><small>${escapeHTML(factionName)}</small><span class="gwent-leader-card-ability">${escapeHTML(leaderSimpleText)}</span><em>${data.leader_used ? 'HABILIDADE USADA' : 'CLIQUE PARA VER / ATIVAR'}</em></span>
     </button>`;
   const actionDisabled = !data.is_your_turn || data.status !== 'active' || prep;
   const myTurn = myTurnNow;
@@ -1926,15 +2142,10 @@ function renderGwentArena(data) {
 
   replaceGwentArenaMarkup(arena, `<div class="gwent-arena-head">
       <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${activeWeatherRows.length ? `⛈ CLIMA ATIVO · ${escapeHTML(activeWeatherLabel)}` : escapeHTML(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`)}</p></div>
-      <div class="gwent-arena-head-actions">${eventPanel}<button type="button" class="gwent-exit" data-gwent-exit>Voltar ao lobby</button></div>
+      <div class="gwent-arena-head-actions">${eventPanel}<button type="button" class="gwent-theme-toggle${gwentEldenRingThemeEnabled() ? ' is-active' : ''}" data-gwent-theme-toggle aria-pressed="${gwentEldenRingThemeEnabled()}">${gwentEldenRingThemeEnabled() ? '✧ ELDEN RING · ATIVO' : '✧ TEMA ELDEN RING'}</button><button type="button" class="gwent-exit" data-gwent-exit>Voltar ao lobby</button></div>
     </div>
     <div class="gwent-arena-toolbar">
-      <div class="gwent-score">
-        <article><small>VOCÊ</small><strong>${number(mine.score)}</strong><span>${number(mine.crowns)} coroas · ${number(mine.hand)} na mão${mine.passed ? ' · passou' : ''}</span></article>
-        <article><small>${escapeHTML(opponentName)}</small><strong>${number(theirs.score)}</strong><span>${number(theirs.crowns)} coroas · ${number(theirs.hand)} na mão${theirs.passed ? ' · passou' : ''}</span></article>
-      </div>
       <div class="gwent-turn-indicator ${turnClass}" role="status" aria-live="polite"><span class="gwent-turn-dot" aria-hidden="true"></span><strong>${turnHeadline}</strong>${prep || data.status === 'finished' || mine.passed ? `<small>${turnSubline}</small>` : ''}</div>
-      <div class="gwent-faction" title="${escapeHTML(leaderDescription)}"><b>${escapeHTML(factionName)}</b><span>Líder: ${escapeHTML(data.leader_name || 'Líder')}</span></div>
       ${rewardPanel}
     </div>
     <div class="gwent-battlefield" aria-label="Campo de batalha">
@@ -1943,23 +2154,34 @@ function renderGwentArena(data) {
       <section class="gwent-board-side gwent-board-mine ${myTurn ? 'is-active' : ''} ${mine.passed ? 'is-passed' : ''}"><h3><span>SEU CAMPO</span>${myTurn ? '<b>SUA VEZ</b>' : mine.passed ? '<b>PASSOU</b>' : ''}</h3>${myBoardMarkup}</section>
     </div>
     <div class="gwent-actions ${prep ? 'is-prep' : ''}">
-      ${prepPanel}
-      <div class="gwent-action-main">
-        <button class="gwent-pass-button" data-gwent-pass ${actionDisabled || mine.passed ? 'disabled' : ''}>PASSAR RODADA</button>
+      <div class="gwent-score gwent-score-you">
+        <article><small>VOCÊ</small><strong>${number(mine.score)}</strong><span>${number(mine.crowns)} coroas · ${number(mine.hand)} na mão${mine.passed ? ' · passou' : ''}</span></article>
       </div>
-      <div class="gwent-action-tools">
-        <button class="gwent-leader-button" data-gwent-relic ${actionDisabled || !mine.equipped_relic_id || mine.relic_used ? 'disabled' : ''}>ATIVAR RELÍQUIA</button>
-        <button class="gwent-surrender-button" data-gwent-surrender ${data.status !== 'active' ? 'disabled' : ''}>DESISTIR</button>
+      <div class="gwent-action-center">
+        ${prepPanel}
+        <div class="gwent-action-buttons">
+          <div class="gwent-action-main">
+            <button class="gwent-pass-button" data-gwent-pass ${actionDisabled || mine.passed ? 'disabled' : ''}>PASSAR RODADA</button>
+          </div>
+          <div class="gwent-action-tools">
+            <button class="gwent-leader-button" data-gwent-relic ${actionDisabled || !mine.equipped_relic_id || mine.relic_used ? 'disabled' : ''}>ATIVAR RELÍQUIA</button>
+            <button class="gwent-surrender-button" data-gwent-surrender ${data.status !== 'active' ? 'disabled' : ''}>DESISTIR</button>
+          </div>
+        </div>
+      </div>
+      <div class="gwent-score gwent-score-opponent">
+        <article><small>${escapeHTML(opponentName)}</small><strong>${number(theirs.score)}</strong><span>${number(theirs.crowns)} coroas · ${number(theirs.hand)} na mão${theirs.passed ? ' · passou' : ''}</span></article>
       </div>
     </div>
     <section class="gwent-hand-zone ${handIsOpen ? 'is-open' : ''} ${myTurn ? 'is-my-turn' : enemyTurn ? 'is-enemy-turn' : ''}">
+      ${leaderCardMarkup}
       <div class="gwent-hand-head">
-        ${leaderCardMarkup}
         <div class="gwent-hand-info"><h3>SUA MÃO <span>${number(hand.length)} CARTAS</span></h3><small>${myTurn ? 'Sua vez: escolha uma carta para jogar' : prep ? 'Marque até duas cartas para trocar' : data.status === 'finished' ? 'Partida encerrada' : 'Sua mão reaparecerá automaticamente na sua vez'}</small></div>
         ${(prep || myTurn) ? `<button type="button" class="gwent-hand-toggle ${handIsOpen ? 'is-open' : ''}" data-gwent-hand-toggle data-count="${number(hand.length)}" aria-expanded="${handIsOpen ? 'true' : 'false'}" aria-controls="gwent-hand-cards">${handIsOpen ? 'OCULTAR CARTAS' : `MOSTRAR MINHA MÃO · ${number(hand.length)}`}</button>` : `<span class="gwent-hand-turn-tag ${enemyTurn ? 'is-enemy' : ''}">${enemyTurn ? 'MÃO PROTEGIDA' : data.status === 'finished' ? 'FIM DE PARTIDA' : 'AGUARDANDO'}</span>`}
       </div>
       <div class="gwent-hand" id="gwent-hand-cards" data-can-play="${canPlayFromHand ? 'true' : 'false'}" style="${handLayoutStyle}" ${handIsOpen ? '' : 'hidden'}>${handMarkup}</div>
     </section>`);
+  dockGwentLeaderCard(arena);
   bindGwentHistoryPopover(arena);
   gwentSelectedHandCard = gwentHandCardsById.has(String(gwentSelectedHandCard)) ? gwentSelectedHandCard : '';
 }
@@ -1987,13 +2209,21 @@ function showGwentResultOverlay(data, roundResult = null) {
     : `<div class="gwent-result-crowns"><span>SUAS COROAS <b>${number(data.crowns?.[myId] || 0)}</b></span><span>COROAS DO ADVERSÁRIO <b>${number(data.crowns?.[String(data.opponent?.id || '')] || 0)}</b></span></div>`;
   const reward = final && data.reward
     ? `<div class="gwent-result-rewards">Recompensas: +${number(data.reward.reward_xp)} XP · +${number(data.reward.reward_denarios)} Denários · ${number(data.reward.mmr_delta)} MMR</div>` : '';
+  const roundHighlights = roundResult?.highlights || {};
+  const renderHighlights = (items, heading) => {
+    const safeItems = Array.isArray(items) ? items.slice(0, 3) : [];
+    if (!safeItems.length) return '';
+    return `<div class="gwent-result-highlight-side"><b>${heading}</b><ol>${safeItems.map(item => `<li><span>${escapeHTML(item.name || 'Unidade')} · ${escapeHTML(gwentRowLabel(item.row || ''))}</span><strong>${number(item.power)} P</strong></li>`).join('')}</ol></div>`;
+  };
+  const highlightsMarkup = renderHighlights(roundHighlights.you, 'SEU CAMPO') + renderHighlights(roundHighlights.opponent, 'CAMPO ADVERSÁRIO');
+  const highlightPanel = highlightsMarkup ? `<section class="gwent-result-highlights"><h3>DESTAQUES DA RODADA</h3><p>Unidades com maior poder efetivo no momento do encerramento.</p><div>${highlightsMarkup}</div></section>` : '';
   const overlay = document.createElement('div');
   overlay.id = 'gwent-round-result';
   overlay.className = `gwent-result-overlay ${outcome}`;
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-labelledby', 'gwent-result-title');
-  overlay.innerHTML = `<section class="gwent-result-card"><small class="eyebrow">${final ? 'RESULTADO FINAL' : 'FIM DA RODADA'}</small><h2 id="gwent-result-title">${headline}</h2><p>${subline}</p>${scoreLine}${reward}<div class="gwent-result-actions">${final ? '<button type="button" class="primary" data-gwent-exit>VOLTAR AO LOBBY</button>' : '<button type="button" class="primary" data-gwent-result-close>CONTINUAR</button>'}</div></section>`;
+  overlay.innerHTML = `<section class="gwent-result-card"><small class="eyebrow">${final ? 'RESULTADO FINAL' : 'FIM DA RODADA'}</small><h2 id="gwent-result-title">${headline}</h2><p>${subline}</p>${scoreLine}${highlightPanel}${reward}<div class="gwent-result-actions">${final ? '<button type="button" class="primary" data-gwent-exit>VOLTAR AO LOBBY</button>' : '<button type="button" class="primary" data-gwent-result-close>CONTINUAR</button>'}</div></section>`;
   document.body.appendChild(overlay);
   overlay.querySelector('button')?.focus({preventScroll:true});
 }
@@ -2095,7 +2325,7 @@ async function openGwentMatch(id) {
   gwentPreviouslyFinished = false;
   document.getElementById('gwent-round-result')?.remove();
   const canOpen = await refreshGwentMatch();
-  if (!canOpen) { currentGwentMatch = null; document.body.classList.remove('gwent-match-active'); document.documentElement.classList.remove('gwent-match-active'); return; }
+  if (!canOpen) { currentGwentMatch = null; document.getElementById('gwent-leader-card-dock')?.remove(); document.body.classList.remove('gwent-match-active'); document.documentElement.classList.remove('gwent-match-active'); return; }
   if (!gwentMatchFinished) {
     gwentPoll = setInterval(() => {
       if (!document.hidden) refreshGwentMatch();
@@ -2526,8 +2756,37 @@ function openGwentPlayCardModal(cardId) {
   });
   modal.querySelector('[data-gwent-modal-close]')?.focus();
 }
-// O hover agora amplia a própria carta. Não há overlay central que esconda as demais artes.
+// A carta original permanece na mão/campo; o preview HD é uma projeção separada,
+// centralizada na viewport, sem retirar a imagem do cartão nem empurrar vizinhas.
+document.addEventListener('mouseover', event => {
+  const handCard = event.target.closest('[data-gwent-hand-card]');
+  if (handCard && !handCard.contains(event.relatedTarget)) {
+    showGwentHandHoverPreview(handCard.dataset.gwentHandCard);
+    return;
+  }
+  const boardCard = event.target.closest('.gwent-board-card');
+  if (boardCard && !boardCard.contains(event.relatedTarget)) {
+    const image = boardCard.querySelector('img[data-card-src]');
+    if (image) showGwentImageHoverPreview(image.dataset.cardSrc || image.currentSrc || image.src, image.alt);
+  }
+});
+document.addEventListener('mouseout', event => {
+  const handCard = event.target.closest('[data-gwent-hand-card]');
+  if (handCard && !handCard.contains(event.relatedTarget)) {
+    closeGwentHandHoverPreview();
+    return;
+  }
+  const boardCard = event.target.closest('.gwent-board-card');
+  if (boardCard && !boardCard.contains(event.relatedTarget)) closeGwentHandHoverPreview();
+});
 document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closeGwentPlayCardModal();
+    closeGwentBoardCardModal();
+    closeGwentLeaderModal();
+    closeGwentHandHoverPreview();
+    return;
+  }
   const handCard = event.target.closest('[data-gwent-hand-card]');
   if (!handCard || (event.key !== 'Enter' && event.key !== ' ')) return;
   event.preventDefault();
@@ -2535,6 +2794,19 @@ document.addEventListener('keydown', event => {
 });
 
 document.addEventListener('click', async event => {
+  const themeToggle = event.target.closest('[data-gwent-theme-toggle]');
+  if (themeToggle) {
+    const enabled = !gwentEldenRingThemeEnabled();
+    try {
+      if (enabled) window.localStorage.setItem(GWENT_ARENA_THEME_KEY, 'elden-ring');
+      else window.localStorage.removeItem(GWENT_ARENA_THEME_KEY);
+    } catch (_) {
+      // A alternância desta sessão continua funcionando mesmo sem armazenamento local.
+    }
+    applyGwentArenaTheme(enabled);
+    updateGwentArenaThemeButton(themeToggle, enabled);
+    return;
+  }
   const boardCard = event.target.closest('.gwent-board-card[data-card-id]');
   if (boardCard) {
     openGwentBoardCardModal(boardCard.dataset.cardId);
@@ -2596,8 +2868,9 @@ document.addEventListener('click', async event => {
   const exitArena = event.target.closest('[data-gwent-exit]');
   if (exitArena) {
     document.getElementById('gwent-round-result')?.remove();
-    document.body.classList.remove('gwent-match-active');
-    document.documentElement.classList.remove('gwent-match-active');
+    document.getElementById('gwent-leader-card-dock')?.remove();
+    document.body.classList.remove('gwent-match-active', 'gwent-theme-eldenring');
+    document.documentElement.classList.remove('gwent-match-active', 'gwent-theme-eldenring');
     currentGwentMatch = null;
     gwentHandOpen = null;
     gwentHandLastPhase = null;
