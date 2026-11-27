@@ -3674,9 +3674,10 @@ body.gwent-match-active .gwent-board-card:not(.is-entering) { animation: none; }
     overflow: hidden;
     perspective: 1100px;
   }
-  body.gwent-match-active .gwent-board-enemy { grid-column: 1; grid-row: 1; }
+  /* Jogador humano à esquerda; adversário à direita. */
+  body.gwent-match-active .gwent-board-mine { grid-column: 1; grid-row: 1; }
   body.gwent-match-active .gwent-battle-line { grid-column: 2; grid-row: 1; }
-  body.gwent-match-active .gwent-board-mine { grid-column: 3; grid-row: 1; }
+  body.gwent-match-active .gwent-board-enemy { grid-column: 3; grid-row: 1; }
 
   body.gwent-match-active .gwent-board-side {
     grid-template-rows: 22px repeat(3,minmax(0,1fr));

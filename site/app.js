@@ -2151,9 +2151,9 @@ function renderGwentArena(data) {
       ${rewardPanel}
     </div>
     <div class="gwent-battlefield" aria-label="Campo de batalha">
-      <section class="gwent-board-side gwent-board-enemy ${enemyTurn ? 'is-active' : ''} ${theirs.passed ? 'is-passed' : ''}"><h3><span>CAMPO DE ${escapeHTML(opponentName)}${data.is_ai_match ? ' · NARA IA' : ''}</span>${enemyTurn ? '<b>JOGANDO AGORA</b>' : theirs.passed ? '<b>PASSOU</b>' : ''}</h3>${enemyBoardMarkup}</section>
-      <div class="gwent-battle-line" aria-hidden="true"><span>LINHA DE CONFRONTO</span></div>
       <section class="gwent-board-side gwent-board-mine ${myTurn ? 'is-active' : ''} ${mine.passed ? 'is-passed' : ''}"><h3><span>SEU CAMPO</span>${myTurn ? '<b>SUA VEZ</b>' : mine.passed ? '<b>PASSOU</b>' : ''}</h3>${myBoardMarkup}</section>
+      <div class="gwent-battle-line" aria-hidden="true"><span>LINHA DE CONFRONTO</span></div>
+      <section class="gwent-board-side gwent-board-enemy ${enemyTurn ? 'is-active' : ''} ${theirs.passed ? 'is-passed' : ''}"><h3><span>CAMPO DE ${escapeHTML(opponentName)}${data.is_ai_match ? ' · NARA IA' : ''}</span>${enemyTurn ? '<b>JOGANDO AGORA</b>' : theirs.passed ? '<b>PASSOU</b>' : ''}</h3>${enemyBoardMarkup}</section>
     </div>
     <div class="gwent-actions ${prep ? 'is-prep' : ''}">
       <div class="gwent-score gwent-score-you">
