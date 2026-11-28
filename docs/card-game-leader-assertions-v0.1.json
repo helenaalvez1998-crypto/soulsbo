@@ -1,0 +1,179 @@
+{
+  "metadata": {
+    "document": "Leader effect behavioral assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; ALL TEN LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
+    "baseline": "soulsbo-main(1).zip",
+    "engine": "sistemas.gwent.aplicar_jogada(..., action='leader')",
+    "scope": "Synthetic controlled states; no database/API/site/Discord/R2/production match"
+  },
+  "counts": {
+    "assertions": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "leader_godfrey_buffs_all_melee_only",
+      "status": "passed",
+      "leader": "Godfrey",
+      "bonuses": [
+        2,
+        2,
+        0
+      ],
+      "only_melee": true
+    },
+    {
+      "case": "leader_morgott_shields_and_buffs_two_strongest_selected_row",
+      "status": "passed",
+      "leader": "Morgott",
+      "selected_two_strongest": [
+        "m_best",
+        "m_second"
+      ],
+      "unselected_unchanged": true
+    },
+    {
+      "case": "leader_radagon_purifies_all_four_status_types",
+      "status": "passed",
+      "leader": "Radagon",
+      "four_negative_status_types_removed": true,
+      "purified_units": 4
+    },
+    {
+      "case": "leader_mohg_marks_two_and_triggers_second_mark_hemorrhage",
+      "status": "passed",
+      "leader": "Mohg",
+      "top_two_marked": true,
+      "second_mark_triggers_minus_two": true
+    },
+    {
+      "case": "leader_rykard_sacrifices_weakest_and_buffs_remaining_row_allies",
+      "status": "passed",
+      "leader": "Rykard",
+      "weakest_sacrificed_even_with_shield": true,
+      "remaining_row_allies_bonus": 2
+    },
+    {
+      "case": "leader_esgar_revives_strongest_eligible_discard_unit",
+      "status": "passed",
+      "leader": "Esgar",
+      "strongest_eligible_revived": "e_power5",
+      "row": "siege"
+    },
+    {
+      "case": "leader_papa_buffs_only_forgotten_in_selected_row",
+      "status": "passed",
+      "leader": "Papa Esquecido",
+      "only_forgotten_selected_row": true
+    },
+    {
+      "case": "leader_rennala_purifies_and_buffs_only_siege",
+      "status": "passed",
+      "leader": "Rennala",
+      "purified": 3,
+      "only_siege_purified_buffed": true
+    },
+    {
+      "case": "leader_astel_marks_top_three_selected_row_with_stack_cap",
+      "status": "passed",
+      "leader": "Astel",
+      "top_three_marked_with_cap": true
+    },
+    {
+      "case": "leader_loretta_buffs_top_two_ranged",
+      "status": "passed",
+      "leader": "Loretta",
+      "top_two_ranged_allies_buffed": true
+    },
+    {
+      "case": "negative_godfrey_requires_melee_ally",
+      "status": "passed",
+      "leader": "godfrey",
+      "rejected": true,
+      "error": "Godfrey precisa de ao menos um aliado em Corpo a Corpo."
+    },
+    {
+      "case": "negative_morgott_rejects_if_all_selected_allies_shielded",
+      "status": "passed",
+      "leader": "morgott",
+      "rejected": true,
+      "error": "Não há aliados sem Escudo na fileira escolhida."
+    },
+    {
+      "case": "negative_radagon_requires_negative_status",
+      "status": "passed",
+      "leader": "radagon",
+      "rejected": true,
+      "error": "Nenhum aliado possui um efeito negativo para Radagon purificar."
+    },
+    {
+      "case": "negative_mohg_requires_enemy_in_selected_row",
+      "status": "passed",
+      "leader": "mohg",
+      "rejected": true,
+      "error": "Não há inimigos na fileira escolhida para o ritual de sangue."
+    },
+    {
+      "case": "negative_rykard_requires_two_allies",
+      "status": "passed",
+      "leader": "rykard",
+      "rejected": true,
+      "error": "Rykard precisa de ao menos 2 aliados na fileira para realizar o sacrifício."
+    },
+    {
+      "case": "negative_esgar_requires_eligible_discard_unit",
+      "status": "passed",
+      "leader": "esgar",
+      "rejected": true,
+      "error": "Não há unidade de poder 5 ou menos no descarte para Esgar ressuscitar."
+    },
+    {
+      "case": "negative_papa_requires_forgotten_in_selected_row",
+      "status": "passed",
+      "leader": "papa",
+      "rejected": true,
+      "error": "O Papa Esquecido precisa de ao menos uma unidade dos Esquecidos na fileira escolhida."
+    },
+    {
+      "case": "negative_rennala_requires_frost_or_rot",
+      "status": "passed",
+      "leader": "rennala",
+      "rejected": true,
+      "error": "Rennala precisa de aliados afetados por Geada ou Podridão."
+    },
+    {
+      "case": "negative_astel_requires_enemy_in_selected_row",
+      "status": "passed",
+      "leader": "astel",
+      "rejected": true,
+      "error": "Não há inimigos na fileira escolhida para Astel atingir."
+    },
+    {
+      "case": "negative_loretta_rejects_non_ranged_row",
+      "status": "passed",
+      "leader": "loretta",
+      "rejected": true,
+      "error": "Loretta só pode ser ativada escolhendo a fileira de Longa Distância."
+    },
+    {
+      "case": "negative_loretta_requires_ranged_ally",
+      "status": "passed",
+      "leader": "loretta",
+      "rejected": true,
+      "error": "Loretta precisa de ao menos uma unidade aliada em Longa Distância."
+    },
+    {
+      "case": "negative_leader_cannot_be_reused",
+      "status": "passed",
+      "leader": "Godfrey",
+      "second_activation_rejected": true
+    }
+  ],
+  "limitations": [
+    "All ten leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
+    "The tests use rarity-independent synthetic unit records; leadership upgrades or external campaign modifiers are not represented.",
+    "The action flow is exercised in memory; persistent match serialization, HTTP API, frontend target choices, Discord command flow and production database are not tested.",
+    "Passing behavior assertions do not measure strategic strength, balance or win rate."
+  ]
+}

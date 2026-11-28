@@ -1,0 +1,226 @@
+{
+  "metadata": {
+    "document": "Card game behavioral validation aggregate v0.3",
+    "status": "POST-POLICY DIAGNOSTIC; SYNTHETIC CONTROLLED STATES; NOT BALANCE OR PRODUCTION INTEGRATION",
+    "baseline": "current source tree after approved combo policy v0.1",
+    "date": "2026-11-27",
+    "runtime_modified": true,
+    "runner": "docs/scripts/summarize-card-game-behavior-v0.3.py"
+  },
+  "counts": {
+    "suites": 8,
+    "assertions": 251,
+    "passed": 251,
+    "failed": 0
+  },
+  "suites": [
+    {
+      "suite": "generic_initial",
+      "label": "Initial representative effect cases",
+      "source": "docs/card-game-effect-behavior-assertions-v0.1.json",
+      "assertions": 13,
+      "passed": 13,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; SELECTED EFFECTS, NOT FULL COVERAGE",
+      "limitations": []
+    },
+    {
+      "suite": "active_identities",
+      "label": "22 active identity effects plus negative/limit cases",
+      "source": "docs/card-game-identity-behavior-assertions-v0.1.json",
+      "assertions": 33,
+      "passed": 33,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; ALL ACTIVE IDENTITY EFFECTS EXERCISED IN SELECTED CONTROLLED STATES",
+      "limitations": [
+        "One controlled positive scenario per active identity is not exhaustive branch coverage; multi-target caps, empty/blocked/duplicate targets and all status thresholds still require more cases.",
+        "All cards use Common rarity to isolate base identity effects; interaction with RARITY_EFFECT_BUDGET is not tested here.",
+        "Synthetic boards do not estimate activation frequency, expected value, deck synergy, or match win rate.",
+        "No database, Discord, web API, frontend, image pipeline, or production game session is involved."
+      ]
+    },
+    {
+      "suite": "generic_units",
+      "label": "Generic unit effects, selected positive and negative cases",
+      "source": "docs/card-game-generic-unit-assertions-v0.1.json",
+      "assertions": 39,
+      "passed": 39,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; SELECTED UNIT SKILL BRANCHES",
+      "limitations": [
+        "This suite covers generic unit effects, not all 56 direct handler IDs; special cards and relics remain partly covered by the original 13 behavior assertions and smoke tests.",
+        "Conditional unit effects are checked in selected positive and negative states only; multi-state thresholds and all rarity interactions remain open.",
+        "Synthetic fixtures do not estimate condition frequency, effect EV, faction win rate, or real deck behavior.",
+        "No production database, server, Discord action, web frontend, or image pipeline is involved."
+      ]
+    },
+    {
+      "suite": "lifecycle",
+      "label": "Removal and round-end lifecycle effects",
+      "source": "docs/card-game-lifecycle-assertions-v0.1.json",
+      "assertions": 7,
+      "passed": 7,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; CONTROLLED ROUND-END/REMOVAL CASES",
+      "limitations": [
+        "Synthetic boards only; does not model player decision-making or full match win rate.",
+        "The suite tests the current hidden Gloria behavior as observed, not whether that behavior is approved design.",
+        "Sobrevivente's failure is evidence of a missing hook in the current source; it is not a claim that the card exists in the 137-card catalogue."
+      ]
+    },
+    {
+      "suite": "specials_relics",
+      "label": "Selected special effects and all six relic handlers",
+      "source": "docs/card-game-special-relic-assertions-v0.1.json",
+      "assertions": 18,
+      "passed": 18,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; SELECTED SPECIAL/RELIC BRANCHES",
+      "limitations": [
+        "These tests cover the additional special handlers and all six relics in selected Common/specific states; rarity scaling is not tested.",
+        "Multiple-target caps, shield/target edge cases for every special, and full UI target-option parity remain open.",
+        "Leader abilities are not included in this suite and need their own action tests.",
+        "Synthetic boards do not estimate the frequency or competitive value of the effects.",
+        "No persistent database, API, site, Discord, R2, or production match is involved."
+      ]
+    },
+    {
+      "suite": "leaders",
+      "label": "All ten leader handlers plus negative/limit cases",
+      "source": "docs/card-game-leader-assertions-v0.1.json",
+      "assertions": 22,
+      "passed": 22,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; ALL TEN LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
+      "limitations": [
+        "All ten leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
+        "The tests use rarity-independent synthetic unit records; leadership upgrades or external campaign modifiers are not represented.",
+        "The action flow is exercised in memory; persistent match serialization, HTTP API, frontend target choices, Discord command flow and production database are not tested.",
+        "Passing behavior assertions do not measure strategic strength, balance or win rate."
+      ]
+    },
+    {
+      "suite": "combos_faction_passive",
+      "label": "All 27 combos plus four faction passives and special exclusion",
+      "source": "docs/card-game-combo-faction-assertions-v0.1.json",
+      "assertions": 87,
+      "passed": 87,
+      "failed": 0,
+      "metadata_status": "DIAGNOSTIC ONLY; ALL DECLARED COMBOS AND FOUR FACTION PASSIVES IN SYNTHETIC STATES",
+      "limitations": [
+        "Each combo has one concrete activating card pair discovered from the current tag map and verified against the actual resolver; alternate card combinations and all tag permutations are not exhausted.",
+        "The negative combo cases isolate the tested combo by marking other combos used; they verify missing partner/participant behavior, not all overlapping-combo precedence permutations.",
+        "Faction passive tests cover each faction's foreign-card, first matching unit, second matching unit and round-reset behavior; they do not test every faction-specific card identity or rarity modifier.",
+        "The special-card test confirms the separate special branch does not consume the unit-only faction passive in the tested catalog card.",
+        "Synthetic fixtures are not complete matches and do not measure win rate, effect EV or competitive balance; no DB/API/frontend/Discord/R2 integration is exercised."
+      ]
+    },
+    {
+      "suite": "approved_combo_policy",
+      "label": "Approved combo policy: explicit priority, tag contribution, two participants, pending combo targeting, public play entrypoint",
+      "source": "docs/card-game-combo-policy-assertions-v0.1.json",
+      "assertions": 32,
+      "passed": 32,
+      "failed": 0,
+      "metadata_status": "APPROVED POLICY REGRESSION TESTS; SYNTHETIC IN-MEMORY STATES; NOT A FULL MATCH OR BALANCE SIMULATION",
+      "limitations": [
+        "Tests call the in-memory combo resolver with controlled fixtures; they are not full 12-card matches or production DB/API/frontend/Discord/R2 integration tests.",
+        "One representative tag provider per combo is checked for a solo activation attempt; this does not exhaust every possible board sequence or alternate provider permutation.",
+        "The pending-combo scenario covers one known overlap (`cinzas_fornalha` and `juramento_erdtree`); all 154 overlapping ordered pairs are not replayed as full stateful sequences here.",
+        "The tests do not measure EFP, win rate, faction parity or competitive balance."
+      ]
+    }
+  ],
+  "static_handler_coverage": {
+    "generic_catalog_ids": 59,
+    "generic_direct_handler_values": 56,
+    "generic_lifecycle_hooks": [
+      "espolios",
+      "vinganca"
+    ],
+    "generic_declared_ids_without_handler": [
+      "sobrevivente"
+    ],
+    "hidden_lifecycle_hooks_not_in_catalog": [
+      "gloria"
+    ],
+    "active_identities": 22,
+    "inactive_identity_branches": [
+      "astral_thread",
+      "conductive_spark",
+      "counterflame",
+      "covering_shot",
+      "devoto",
+      "echo_orb",
+      "ember_kin",
+      "escolha_ritmo",
+      "faceless_hunt",
+      "forge_rhythm",
+      "furnace_charge",
+      "grey_watch",
+      "last_oath",
+      "legado",
+      "mist_trail",
+      "pilgrim_duel",
+      "shadow_paths",
+      "shared_sentinel",
+      "sinergia_faccao",
+      "tide_resonance",
+      "v75_blood_feast",
+      "v75_blood_pursuit",
+      "v75_crucible_guard",
+      "v75_golden_standard",
+      "v75_lunar_cartography",
+      "v75_moon_ward",
+      "veil_shift",
+      "wandering_ember"
+    ],
+    "combos": 27,
+    "orphan_tag_card_ids": [
+      "gwent_unidade_cruzado",
+      "gwent_unidade_evangelista",
+      "gwent_unidade_missionario",
+      "gwent_unidade_protetor",
+      "gwent_unidade_sacerdote"
+    ]
+  },
+  "post_policy_combo_diagnostic": {
+    "combo_count": 27,
+    "unit_models_with_tags": 67,
+    "solo_activations": 0,
+    "ordered_pairs_examined": 4422,
+    "overlapping_pairs": 152,
+    "ordered_triples_examined": 287430,
+    "multi_combo_triples": 2582,
+    "later_events": 2582,
+    "later_events_with_required_tag": 2582
+  },
+  "stale_identity_disposition": {
+    "inactive_branches": 28,
+    "v18_filtered_identity_cards": 18,
+    "unmapped_legacy_field_effects": 4,
+    "stale_v75_effects": 6,
+    "hidden_gloria_cards": 3
+  },
+  "limitations": [
+    "The assertions are distributed across eight suites and are not distinct abilities; some functional areas are intentionally exercised by more than one suite. The current total is 251 scenarios, including 32 assertions for the approved combo policy, one of which exercises the real aplicar_jogada play entrypoint.",
+    "All tests invoke the current in-memory engine with synthetic fixtures. They do not validate the production database, HTTP APIs, browser frontend, Discord command handlers, Cloudflare R2 or published image assets.",
+    "The suites cover selected positive, negative and limit cases; they do not enumerate every branch combination, rarity modifier, state interaction or AI decision.",
+    "The pre-existing combo suite tests one concrete activating pair per combo; the new policy suite adds one solo attempt per combo plus explicit priority and pending-combo scenarios. Alternate card combinations and all full-match sequences are not exhaustive.",
+    "Faction passives are tested for each of the four factions with foreign/first/second unit and round-reset scenarios; faction-specific card identities and all rarity modifiers are not exhausted.",
+    "Passing assertions do not measure effect value, deck strength, win rate, faction parity or competitive balance.",
+    "The `sobrevivente` ability remains without a corresponding lifecycle handler in the current source audit; `gloria` remains a hidden round-end hook outside HABILIDADES.",
+    "The 28 inactive identity branches are inventoried but not deleted; all require an explicit keep/merge/redesign/remove decision and tag/combo review.",
+    "The approved combo policy changed the runtime. Persisted active-match snapshots retain combo bonuses already awarded before the deployment; no production database was supplied to inspect or migrate them.",
+    "EFP v0.2 and balance spec v0.1 remain proposals, not approved rules; no cost, rarity, deck budget or card distribution has been implemented."
+  ],
+  "next_steps": [
+    "Extend combo-policy regression to additional overlapping pairs and stateful sequences of 12 cards; current post-policy enumeration covers all 4,422 pairs and 287,430 triples, not full matches.",
+    "Add integration tests for serialized match snapshots and the /api/gwent/cards description payload; decide operational handling of matches already active at deployment.",
+    "Cover climate interactions, round transitions, AI actions and cross-effect interactions with positive and negative assertions.",
+    "Create explicit behavior contracts for uncovered generic/special/identity interactions and remaining branches.",
+    "Review and decide the disposition of all 28 inactive identity branches and the separate `gloria`/`sobrevivente` lifecycle issues before deleting or reactivating code.",
+    "Build a deterministic full-match simulator with documented policies and matchup coverage across all four factions.",
+    "Only then calibrate EFP and propose costs, rarities and the deck budget for user approval."
+  ]
+}

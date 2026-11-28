@@ -32,7 +32,8 @@ def _dados_habilidade_visual(card: dict[str, Any]) -> tuple[str, str]:
         # Usa exatamente o mesmo texto preparado para a partida, inclusive os ajustes de raridade.
         from .gwent import preparar_carta
         prepared = preparar_carta(card)
-        return str(prepared.get("habilidade_nome") or "Habilidade"), str(prepared.get("habilidade_texto") or "Sem habilidade especial.")
+        tem_efeito = bool(prepared.get("habilidade") or prepared.get("habilidade_identidade"))
+        return (str(prepared.get("habilidade_nome") or "Habilidade") if tem_efeito else "Sem habilidade"), str(prepared.get("habilidade_texto") or "Sem habilidade especial.")
     except Exception:
         ability = HABILIDADES.get(str(card.get("habilidade", "")), {})
         return str(ability.get("nome") or "Tática"), str(ability.get("texto") or "Sem habilidade especial.")

@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "document": "Targeted behavioral assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; SELECTED EFFECTS, NOT FULL COVERAGE",
+    "baseline": "soulsbo-main(1).zip",
+    "method": "Controlled fixtures and assertions against sistemas.gwent.aplicar_jogada; no production DB, full match simulation, or strategy optimization."
+  },
+  "counts": {
+    "assertions": 13,
+    "passed": 13,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "primeira_luz_round1_buff",
+      "status": "passed",
+      "expected": "played unit bonus +1 on round 1",
+      "observed_bonus": 1
+    },
+    {
+      "case": "drenagem_reduces_enemy_bonus",
+      "status": "passed",
+      "expected_enemy_bonuses": [
+        1,
+        0,
+        1,
+        1
+      ],
+      "observed_enemy_bonuses": [
+        1,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "gwent_batedor_draws_one_card",
+      "status": "passed",
+      "expected": "one card drawn at common rarity",
+      "drawn_card": "assert_draw_a",
+      "draw_pile_remaining": 1
+    },
+    {
+      "case": "gwent_egide_adds_one_shield",
+      "status": "passed",
+      "expected_shielded_units": 1,
+      "observed_shielded_units": [
+        "ally_ranged"
+      ]
+    },
+    {
+      "case": "gwent_requiem_revives_best_eligible",
+      "status": "passed",
+      "expected": "highest eligible discarded unit returned to board",
+      "revived": "discard_unit_4",
+      "revived_power": 4
+    },
+    {
+      "case": "gwent_passo_moves_one_unit",
+      "status": "passed",
+      "expected": "one unit moved into selected row at common rarity",
+      "moved": [
+        "ally_ranged"
+      ]
+    },
+    {
+      "case": "gwent_invocacao_creates_token",
+      "status": "passed",
+      "expected": "3-power token in ranged row at common rarity",
+      "token_id": "espiritos_lobos_1_1_4",
+      "power": 3,
+      "row": "ranged"
+    },
+    {
+      "case": "gwent_queima_removes_strongest_each_side",
+      "status": "passed",
+      "expected_board_counts": [
+        3,
+        3
+      ],
+      "observed_board_counts": [
+        3,
+        3
+      ]
+    },
+    {
+      "case": "gwent_purificar_clears_weather",
+      "status": "passed",
+      "expected_weather": {
+        "melee": 0,
+        "ranged": 0,
+        "siege": 0
+      },
+      "observed_weather": {
+        "melee": 0,
+        "ranged": 0,
+        "siege": 0
+      }
+    },
+    {
+      "case": "gwent_sangramento_marks_selected_row",
+      "status": "passed",
+      "expected_marks_on_melee": [
+        1,
+        1
+      ],
+      "observed_marks_on_melee": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "gwent_execucao_removes_eligible_target",
+      "status": "passed",
+      "expected_enemy_melee_remaining": 1,
+      "observed_enemy_melee_remaining": 1
+    },
+    {
+      "case": "gwent_chifre_buffs_selected_row",
+      "status": "passed",
+      "expected_melee_ally_bonuses": [
+        2,
+        2
+      ],
+      "observed_melee_ally_bonuses": [
+        2,
+        2
+      ]
+    },
+    {
+      "case": "identity_last_bell_gets_plus_two_while_behind",
+      "status": "passed",
+      "expected_identity_bonus": 2,
+      "observed_identity_bonus": 2,
+      "observed_field_swing_delta_excluding_base_power": 2
+    }
+  ],
+  "limits": [
+    "Only representative effects are asserted; other generic handlers, all conditions, all rarity levels, leader actions, relic targeting, status ticks, and round-end interactions remain to be covered.",
+    "The fixtures are synthetic and establish local behavior only; they do not estimate condition frequency, expected game value, or win rate.",
+    "All tested cards use Common rarity to isolate effect behavior from RARITY_EFFECT_BUDGET."
+  ]
+}

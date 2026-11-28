@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "document": "Deck cost sampling v0.2",
+    "status": "EXPLORATORY ESTIMATE; BALANCE PROPOSAL NOT APPROVED",
+    "sample_seed": 42,
+    "sample_decks_per_scenario": 100000,
+    "cost_formula": "clamp(ceil((P + 2E) / 3.5), 1, 10); special uses P=0",
+    "leader_load_formula": "clamp(ceil(E_leader / 2), 1, 5)",
+    "combo_scoring": "excluded from card cost; separate random-order activation frequency is measured, but expected board swing and participant-level EFP are not calibrated",
+    "deck_constraints": "12 unique models; 8-12 units; 0-4 specials",
+    "dominant_faction": "choose any faction tied for the highest number of units; matching leader sampled uniformly from that faction"
+  },
+  "scoreable_models": 128,
+  "scoreable_units": 101,
+  "scoreable_specials": 27,
+  "unscored_models_excluded": 9,
+  "unscored_card_ids": [
+    "luterano_cruzado",
+    "luterano_bispo",
+    "luterano_anjo",
+    "luterano_papa",
+    "luterano_pastor",
+    "luterano_mistico",
+    "luterano_profeta",
+    "luterano_vigia",
+    "luterano_anjo2"
+  ],
+  "scoreable_unit_faction_distribution": {
+    "Lua Negra": 34,
+    "Ordem Áurea": 36,
+    "Os Esquecidos": 4,
+    "Véu Carmesim": 27
+  },
+  "scenarios": {
+    "without_equipped_relic": {
+      "mean_cost": 31.14,
+      "median_cost": 31.0,
+      "min_cost": 21,
+      "max_cost": 46,
+      "percentiles": {
+        "0.1": 27,
+        "0.25": 29,
+        "0.5": 31,
+        "0.75": 33,
+        "0.9": 35,
+        "0.95": 36
+      },
+      "acceptance_by_budget_percent": {
+        "28": 19.0,
+        "30": 43.1,
+        "32": 68.8,
+        "34": 86.8,
+        "36": 95.8,
+        "38": 99.0,
+        "40": 99.8,
+        "42": 100.0,
+        "44": 100.0,
+        "46": 100.0,
+        "48": 100.0
+      },
+      "scenario": "12 cards + faction-compatible leader load; no equipped relic",
+      "equipped_relic_assumption": "no equipped relic",
+      "leader_assumption": "uniform random among leaders belonging to a faction tied for the highest unit count in the sampled deck",
+      "leader_load_distribution": {
+        "1": 26456,
+        "2": 73544
+      },
+      "relic_cost_distribution": {
+        "0": 100000
+      },
+      "leader_selection_counts": {
+        "arquimaga_eclipse": 12154,
+        "bastiao_ancestral": 13963,
+        "comandante_fornalha": 14142,
+        "juiz_cerco": 14220,
+        "lider_papa_esquecido": 82,
+        "mestre_eclipse": 12215,
+        "mestre_veu": 7160,
+        "oraculo_tempestade": 12228,
+        "sombra_caminhante": 6915,
+        "voz_caidos": 6921
+      },
+      "dominant_faction_counts": {
+        "Lua Negra": 36597,
+        "Ordem Áurea": 42325,
+        "Os Esquecidos": 82,
+        "Véu Carmesim": 20996
+      }
+    },
+    "with_equipped_relic": {
+      "mean_cost": 32.96,
+      "median_cost": 33.0,
+      "min_cost": 23,
+      "max_cost": 47,
+      "percentiles": {
+        "0.1": 29,
+        "0.25": 31,
+        "0.5": 33,
+        "0.75": 35,
+        "0.9": 37,
+        "0.95": 38
+      },
+      "acceptance_by_budget_percent": {
+        "28": 6.0,
+        "30": 20.9,
+        "32": 45.4,
+        "34": 70.7,
+        "36": 87.9,
+        "38": 96.2,
+        "40": 99.2,
+        "42": 99.8,
+        "44": 100.0,
+        "46": 100.0,
+        "48": 100.0
+      },
+      "scenario": "12 cards + faction-compatible leader load + equipped relic",
+      "equipped_relic_assumption": "uniform random among six relics; that same relic is excluded from the 12 deck slots",
+      "leader_assumption": "uniform random among leaders belonging to a faction tied for the highest unit count in the sampled deck",
+      "leader_load_distribution": {
+        "1": 26349,
+        "2": 73651
+      },
+      "relic_cost_distribution": {
+        "1": 16832,
+        "2": 83168
+      },
+      "leader_selection_counts": {
+        "arquimaga_eclipse": 12196,
+        "bastiao_ancestral": 14069,
+        "comandante_fornalha": 14106,
+        "juiz_cerco": 14078,
+        "lider_papa_esquecido": 75,
+        "mestre_eclipse": 12172,
+        "mestre_veu": 6858,
+        "oraculo_tempestade": 12326,
+        "sombra_caminhante": 7129,
+        "voz_caidos": 6991
+      },
+      "dominant_faction_counts": {
+        "Lua Negra": 36694,
+        "Ordem Áurea": 42253,
+        "Os Esquecidos": 75,
+        "Véu Carmesim": 20978
+      }
+    }
+  },
+  "limitations": [
+    "Random deck-list cost sampling, not matches, combat outcomes, or win-rate simulation.",
+    "EFP values for card effects and leaders remain subjective provisional estimates.",
+    "Combos are excluded from card cost. A separate random-order report measures trigger frequency, but not expected score swing or competitive value; no combo EFP is assigned.",
+    "The model uniformly samples cards and leader choices; actual ownership, rarity/power exemplars, player choice and faction-specific strategy are not modeled.",
+    "Nine unresolved card models are excluded, so this is not a complete 137-model sample.",
+    "The six suspected faction assignments in the Forgotten expansion remain uncorrected in this baseline; faction distribution will change after their approved reassignment.",
+    "The equipped relic is modeled as an extra cost and excluded from the 12 deck slots, matching the current backend validation rule.",
+    "This model does not validate whether a 32-point cap is competitively fair."
+  ],
+  "interpretation": "Use only to compare budget sensitivity under stated assumptions; do not approve or implement a budget based on this sample alone."
+}

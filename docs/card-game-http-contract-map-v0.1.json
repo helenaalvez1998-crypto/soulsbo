@@ -1,0 +1,535 @@
+{
+  "version": "v0.1",
+  "status": "static_source_audit_only",
+  "source_files": {
+    "bot.py": "route registration and async handler bodies parsed with Python AST",
+    "site/app.js": "frontend request literals searched statically",
+    "sistemas/gwent.py": "preparar_carta return dictionary inspected with Python AST"
+  },
+  "runtime_http_executed": false,
+  "dependencies_missing_in_audit_environment": [
+    "discord.py",
+    "aiosqlite"
+  ],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/gwent/cards",
+      "registration_line": 830,
+      "handler": "_api_gwent_cards",
+      "handler_contract": {
+        "handler": "_api_gwent_cards",
+        "handler_lines": [
+          2114,
+          2207
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": false,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "authenticated",
+          "cards",
+          "catalog",
+          "error",
+          "summary"
+        ],
+        "database_calls_detected": [
+          "coliseu_estado_usuario",
+          "coliseu_listar_colecao",
+          "coliseu_listar_exemplares"
+        ],
+        "engine_calls_detected": [
+          "preparar_carta"
+        ],
+        "transaction_execute_detected": false,
+        "frontend_signal_literals_found": [
+          "/api/gwent/cards"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/cards"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/gwent/cards/{card_id}/image",
+      "registration_line": 836,
+      "handler": "_api_gwent_card_image",
+      "handler_contract": {
+        "handler": "_api_gwent_card_image",
+        "handler_lines": [
+          3342,
+          3639
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": false,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [],
+        "database_calls_detected": [
+          "_all",
+          "_one",
+          "coliseu_atelie_obter_arte_oficial",
+          "coliseu_atelie_obter_arte_oficial_metadata",
+          "coliseu_obter_dados_imagem"
+        ],
+        "engine_calls_detected": [
+          "preparar_carta"
+        ],
+        "transaction_execute_detected": false,
+        "frontend_signal_literals_found": [
+          "/api/gwent/cards/",
+          "image"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/cards/",
+          "image"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/gwent/deck",
+      "registration_line": 853,
+      "handler": "_api_gwent_deck",
+      "handler_contract": {
+        "handler": "_api_gwent_deck",
+        "handler_lines": [
+          1093,
+          1232
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": false,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "deck",
+          "error",
+          "faction",
+          "factions",
+          "leader_id",
+          "leaders",
+          "leaders_by_faction",
+          "relic_id",
+          "relics",
+          "rules"
+        ],
+        "database_calls_detected": [
+          "_one",
+          "coliseu_gwent_lideres_artes_listar",
+          "coliseu_listar_colecao",
+          "coliseu_listar_exemplares",
+          "transaction",
+          "tx.conn.execute"
+        ],
+        "engine_calls_detected": [
+          "preparar_carta"
+        ],
+        "transaction_execute_detected": true,
+        "frontend_signal_literals_found": [
+          "/api/gwent/deck"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/deck"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/gwent/deck",
+      "registration_line": 854,
+      "handler": "_api_gwent_deck_save",
+      "handler_contract": {
+        "handler": "_api_gwent_deck_save",
+        "handler_lines": [
+          1234,
+          1349
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": true,
+        "request_body_fields_detected": [
+          "card_ids",
+          "cards",
+          "faction",
+          "leader_id",
+          "relic_id"
+        ],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "card_ids",
+          "error",
+          "exemplar_ids",
+          "faction",
+          "leader_id",
+          "ok",
+          "relic_id"
+        ],
+        "database_calls_detected": [
+          "_one",
+          "coliseu_listar_colecao",
+          "coliseu_listar_exemplares",
+          "transaction",
+          "tx.conn.execute"
+        ],
+        "engine_calls_detected": [],
+        "transaction_execute_detected": true,
+        "frontend_signal_literals_found": [
+          "/api/gwent/deck"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/deck"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/gwent/deck/reset",
+      "registration_line": 855,
+      "handler": "_api_gwent_deck_reset",
+      "handler_contract": {
+        "handler": "_api_gwent_deck_reset",
+        "handler_lines": [
+          1351,
+          1365
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": true,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "error",
+          "message"
+        ],
+        "database_calls_detected": [
+          "coliseu_gwent_zerar_deck"
+        ],
+        "engine_calls_detected": [],
+        "transaction_execute_detected": false,
+        "frontend_signal_literals_found": [
+          "/api/gwent/deck/reset"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/deck/reset"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/gwent/matches",
+      "registration_line": 856,
+      "handler": "_api_gwent_matches",
+      "handler_contract": {
+        "handler": "_api_gwent_matches",
+        "handler_lines": [
+          1414,
+          1429
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": false,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "error",
+          "leaderboard",
+          "matches",
+          "ranking"
+        ],
+        "database_calls_detected": [
+          "_all",
+          "_one"
+        ],
+        "engine_calls_detected": [],
+        "transaction_execute_detected": false,
+        "frontend_signal_literals_found": [
+          "/api/gwent/matches"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/matches"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/gwent/matches",
+      "registration_line": 857,
+      "handler": "_api_gwent_match_create",
+      "handler_contract": {
+        "handler": "_api_gwent_match_create",
+        "handler_lines": [
+          1431,
+          1517
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": true,
+        "request_body_fields_detected": [
+          "opponent_id"
+        ],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "error",
+          "match_id",
+          "ok",
+          "status"
+        ],
+        "database_calls_detected": [
+          "_one",
+          "transaction",
+          "tx._one",
+          "tx.conn.execute"
+        ],
+        "engine_calls_detected": [],
+        "transaction_execute_detected": true,
+        "frontend_signal_literals_found": [
+          "/api/gwent/matches"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/matches"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/gwent/matches/solo",
+      "registration_line": 858,
+      "handler": "_api_gwent_match_create_solo",
+      "handler_contract": {
+        "handler": "_api_gwent_match_create_solo",
+        "handler_lines": [
+          1519,
+          1613
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": true,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [
+          "difficulty",
+          "error",
+          "match_id",
+          "mode",
+          "ok",
+          "opponent",
+          "rewards",
+          "status"
+        ],
+        "database_calls_detected": [
+          "_one",
+          "transaction",
+          "tx._one",
+          "tx.conn.execute"
+        ],
+        "engine_calls_detected": [
+          "aplicar_jogada",
+          "novo_estado"
+        ],
+        "transaction_execute_detected": true,
+        "frontend_signal_literals_found": [
+          "/api/gwent/matches/solo"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/matches/solo"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/gwent/matches/{match_id}",
+      "registration_line": 860,
+      "handler": "_api_gwent_match_detail",
+      "handler_contract": {
+        "handler": "_api_gwent_match_detail",
+        "handler_lines": [
+          1706,
+          1829
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": false,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [
+          "match_id"
+        ],
+        "response_keys_detected": [
+          "error",
+          "match_id",
+          "status"
+        ],
+        "database_calls_detected": [
+          "_one"
+        ],
+        "engine_calls_detected": [],
+        "transaction_execute_detected": false,
+        "frontend_signal_literals_found": [
+          "/api/gwent/matches/${matchId}"
+        ],
+        "frontend_signal_expected": [
+          "/api/gwent/matches/${matchId}"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/gwent/matches/{match_id}/action",
+      "registration_line": 861,
+      "handler": "_api_gwent_match_action",
+      "handler_contract": {
+        "handler": "_api_gwent_match_action",
+        "handler_lines": [
+          1831,
+          1995
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": true,
+        "request_body_fields_detected": [
+          "action",
+          "card_id",
+          "card_ids",
+          "row",
+          "target_id"
+        ],
+        "route_parameters_detected": [
+          "match_id"
+        ],
+        "response_keys_detected": [
+          "error",
+          "ok"
+        ],
+        "database_calls_detected": [
+          "transaction",
+          "tx._one",
+          "tx.conn.execute"
+        ],
+        "engine_calls_detected": [
+          "aplicar_jogada",
+          "executar_turno_ia"
+        ],
+        "transaction_execute_detected": true,
+        "frontend_signal_literals_found": [
+          "/action"
+        ],
+        "frontend_signal_expected": [
+          "/action"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/gwent/matches/{match_id}/respond",
+      "registration_line": 859,
+      "handler": "_api_gwent_match_respond",
+      "handler_contract": {
+        "handler": "_api_gwent_match_respond",
+        "handler_lines": [
+          1615,
+          1704
+        ],
+        "auth_guard_detected": true,
+        "origin_guard_detected": true,
+        "request_body_fields_detected": [
+          "action"
+        ],
+        "route_parameters_detected": [
+          "match_id"
+        ],
+        "response_keys_detected": [
+          "error",
+          "match_id",
+          "ok",
+          "status"
+        ],
+        "database_calls_detected": [
+          "transaction",
+          "tx._one",
+          "tx.conn.execute"
+        ],
+        "engine_calls_detected": [
+          "novo_estado"
+        ],
+        "transaction_execute_detected": true,
+        "frontend_signal_literals_found": [
+          "/respond"
+        ],
+        "frontend_signal_expected": [
+          "/respond"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/gwent/public-cards/{card_id}/image",
+      "registration_line": 835,
+      "handler": "_api_gwent_public_card_image",
+      "handler_contract": {
+        "handler": "_api_gwent_public_card_image",
+        "handler_lines": [
+          3012,
+          3339
+        ],
+        "auth_guard_detected": false,
+        "origin_guard_detected": false,
+        "request_body_fields_detected": [],
+        "route_parameters_detected": [],
+        "response_keys_detected": [],
+        "database_calls_detected": [
+          "_one",
+          "coliseu_atelie_obter_arte_oficial",
+          "coliseu_atelie_obter_arte_oficial_metadata"
+        ],
+        "engine_calls_detected": [],
+        "transaction_execute_detected": false,
+        "frontend_signal_literals_found": [
+          "card.image_url",
+          "/api/gwent/public-cards/"
+        ],
+        "frontend_signal_expected": [
+          "card.image_url",
+          "/api/gwent/public-cards/"
+        ]
+      }
+    }
+  ],
+  "deck_save_validation": {
+    "exactly_12_models": true,
+    "unique_card_models": true,
+    "minimum_8_units": true,
+    "maximum_4_specials": true,
+    "faction_validation": true,
+    "leader_faction_validation": true,
+    "relic_ownership_validation": true,
+    "deck_cost_sum_or_budget": false
+  },
+  "preparar_carta_return_keys": [
+    "arquetipo_descricao",
+    "arquetipo_faccao",
+    "categoria",
+    "combos_compativeis",
+    "descricao",
+    "especial",
+    "faccao",
+    "fileira",
+    "habilidade",
+    "habilidade_identidade",
+    "habilidade_nome",
+    "habilidade_texto",
+    "id",
+    "image_url",
+    "nome",
+    "papel_gwent",
+    "poder",
+    "potencia_raridade",
+    "raridade",
+    "row",
+    "row_label",
+    "sinergias",
+    "tipo_combate"
+  ],
+  "findings": [
+    "The deck-save handler validates 12 unique card models, at least 8 units, at most 4 specials, faction predominance, leader/faction compatibility, and relic ownership; it does not sum deck cost or enforce a budget.",
+    "Deck/catalog API code assigns payload['custo'] before calling preparar_carta(), but preparar_carta() returns an explicit dictionary that does not include 'custo'. The final prepared card payload therefore drops the assigned cost.",
+    "The frontend posts cards as {card_id, exemplar_id} plus faction, leader_id and relic_id. Match actions post action, card_id, row, card_ids and target_id, then refresh the match detail endpoint.",
+    "The action endpoint returns {ok: true}; the frontend refreshes GET /api/gwent/matches/{match_id} to retrieve the updated public state.",
+    "Pending invitations are answered through the separate /respond endpoint; match detail returns status-only for pending rows and full state for active/finished rows.",
+    "Human-vs-human invitation creation stores deck/config snapshots; acceptance revalidates relic ownership, shuffles snapshots and creates the initial game state.",
+    "Solo creation mirrors the player's saved deck/config for NARA; the action handler executes the AI turn server-side and uses a pass fallback if AI execution raises."
+  ]
+}

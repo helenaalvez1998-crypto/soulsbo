@@ -1,0 +1,488 @@
+{
+  "metadata": {
+    "document": "Effect handler coverage audit v0.1",
+    "status": "STATIC SOURCE AUDIT; PAIR WITH RUNTIME SMOKE TESTS",
+    "source": "sistemas/cartas.py and sistemas/gwent.py from supplied baseline ZIP"
+  },
+  "generic_skills": {
+    "catalog_count": 59,
+    "direct_handler_literal_values_count": 56,
+    "lifecycle_hook_ids_found_in_runtime": [
+      "espolios",
+      "vinganca"
+    ],
+    "declared_ids_covered_by_direct_or_lifecycle_hook": 58,
+    "declared_ids_without_matching_handler_reference": [
+      "sobrevivente"
+    ],
+    "additional_hidden_lifecycle_hooks_not_in_catalog": [
+      "gloria"
+    ]
+  },
+  "identity_effects": {
+    "active_identity_card_count": 22,
+    "active_effect_ids": [
+      "abyss_tithe",
+      "ancient_mist",
+      "ash_guardian",
+      "destined_death",
+      "devouring_eclipse",
+      "hollow_thunder",
+      "impaling_spear",
+      "last_bell",
+      "ruin_omen",
+      "scarlet_bloom",
+      "star_gravity",
+      "time_storm",
+      "twin_dance",
+      "v75_blood_mark",
+      "v75_blood_price",
+      "v75_frost_oracle",
+      "v75_golden_vow",
+      "v75_grace_mender",
+      "v75_gravity_shear",
+      "veiled_moon",
+      "vigil_seal",
+      "void_rend"
+    ],
+    "identity_resolver_effect_branches_count": 50,
+    "stale_or_unmapped_identity_handler_effect_ids": [
+      "astral_thread",
+      "conductive_spark",
+      "counterflame",
+      "covering_shot",
+      "devoto",
+      "echo_orb",
+      "ember_kin",
+      "escolha_ritmo",
+      "faceless_hunt",
+      "forge_rhythm",
+      "furnace_charge",
+      "grey_watch",
+      "last_oath",
+      "legado",
+      "mist_trail",
+      "pilgrim_duel",
+      "shadow_paths",
+      "shared_sentinel",
+      "sinergia_faccao",
+      "tide_resonance",
+      "v75_blood_feast",
+      "v75_blood_pursuit",
+      "v75_crucible_guard",
+      "v75_golden_standard",
+      "v75_lunar_cartography",
+      "v75_moon_ward",
+      "veil_shift",
+      "wandering_ember"
+    ],
+    "active_effect_ids_without_resolver_branch": []
+  },
+  "synergies": {
+    "tag_map_card_ids_including_orphans": 72,
+    "current_catalog_card_ids_with_tags": 67,
+    "orphan_tag_card_ids": [
+      "gwent_unidade_cruzado",
+      "gwent_unidade_evangelista",
+      "gwent_unidade_missionario",
+      "gwent_unidade_protetor",
+      "gwent_unidade_sacerdote"
+    ],
+    "total_tag_associations": 108,
+    "combo_count": 27,
+    "combo_required_tag_coverage": [
+      {
+        "id": "cinzas_fornalha",
+        "name": "Aliança da Árvore Áurea",
+        "required_tags": [
+          "cinzas",
+          "fornalha"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "cinzas": 2,
+          "fornalha": 3
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "veu_sombrio",
+        "name": "Caçada da Faca Negra",
+        "required_tags": [
+          "veu_sombrio"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "veu_sombrio": 4
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "vazio_astral",
+        "name": "Alinhamento Astral",
+        "required_tags": [
+          "astral",
+          "vazio"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "astral": 5,
+          "vazio": 1
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "mare_abissal",
+        "name": "Maré Abissal",
+        "required_tags": [
+          "abismo"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "abismo": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "juramento_estandarte",
+        "name": "Juramento de Leyndell",
+        "required_tags": [
+          "estandarte"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "estandarte": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "passos_duas_luas",
+        "name": "Dança da Lua Negra",
+        "required_tags": [
+          "duas_luas"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "duas_luas": 4
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "eco_convergente",
+        "name": "Eco das Pedras Cintilantes",
+        "required_tags": [
+          "astral",
+          "eco"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "astral": 5,
+          "eco": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "chama_dupla",
+        "name": "Chamas do Monte Gelmir",
+        "required_tags": [
+          "chama"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "chama": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "muralha_inabalavel",
+        "name": "Defesa de Leyndell",
+        "required_tags": [
+          "muralha"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "muralha": 3
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "banquete_guerra",
+        "name": "Banquete de Sangue",
+        "required_tags": [
+          "banquete"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "banquete": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "procissao_fantasma",
+        "name": "Procissão dos que Vivem na Morte",
+        "required_tags": [
+          "fantasmas"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "fantasmas": 3
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "caravana_saqueadora",
+        "name": "Saque da Cidade Eterna",
+        "required_tags": [
+          "caravana"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "caravana": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "ritual_runico",
+        "name": "Ritual das Runas",
+        "required_tags": [
+          "runico"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "runico": 3
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "eclipse_voraz",
+        "name": "Eclipse Sanguíneo",
+        "required_tags": [
+          "eclipse_voraz"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "eclipse_voraz": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "rota_peregrina",
+        "name": "Caminho do Maculado",
+        "required_tags": [
+          "peregrino"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "peregrino": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "juramento_erdtree",
+        "name": "Juramento da Árvore Áurea",
+        "required_tags": [
+          "ordem_dourada"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "ordem_dourada": 6
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "convergencia_lunar",
+        "name": "Convergência da Lua Negra",
+        "required_tags": [
+          "lua_cariana"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "lua_cariana": 5
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "ritual_dinastia",
+        "name": "Ritual do Véu Carmesim",
+        "required_tags": [
+          "sangue_mohgwyn"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "sangue_mohgwyn": 4
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "v75_juramento_dois_crisol",
+        "name": "Juramento do Crisol e da Graça",
+        "required_tags": [
+          "v75_crucible_guard",
+          "v75_erdtree_oath"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "v75_crucible_guard": 2,
+          "v75_erdtree_oath": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "v75_banquete_hemorragia",
+        "name": "Banquete da Hemorragia",
+        "required_tags": [
+          "v75_blood_feast",
+          "v75_blood_mark"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "v75_blood_feast": 2,
+          "v75_blood_mark": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "v75_convergencia_gelida",
+        "name": "Convergência da Geada Lunar",
+        "required_tags": [
+          "v75_frost_lore",
+          "v75_lunar_paths"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "v75_frost_lore": 2,
+          "v75_lunar_paths": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "fe_gloria",
+        "name": "Glória Divina",
+        "required_tags": [
+          "fe",
+          "gloria_divina"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "fe": 14,
+          "gloria_divina": 4
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "fe_devocao",
+        "name": "Devoção",
+        "required_tags": [
+          "devocao",
+          "fe"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "devocao": 2,
+          "fe": 14
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "fe_evangelho",
+        "name": "Evangelho",
+        "required_tags": [
+          "evangelho",
+          "fe"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "evangelho": 2,
+          "fe": 14
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "fe_irmandade",
+        "name": "Irmandade Esquecida",
+        "required_tags": [
+          "fe",
+          "irmandade"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "fe": 14,
+          "irmandade": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "fe_soberania",
+        "name": "Soberania Divina",
+        "required_tags": [
+          "fe",
+          "soberania"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "fe": 14,
+          "soberania": 2
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      },
+      {
+        "id": "fe_sacerdos",
+        "name": "Sacerdócio",
+        "required_tags": [
+          "fe",
+          "sacerdos"
+        ],
+        "minimum_participants": 2,
+        "provider_counts": {
+          "fe": 14,
+          "sacerdos": 1
+        },
+        "impossible_due_to_missing_tag_provider": false,
+        "missing_tags": []
+      }
+    ]
+  },
+  "other_catalog_counts": {
+    "leader_count": 10,
+    "relic_ids": [
+      "reliquia_algemas_margit",
+      "reliquia_grande_runa_godrick",
+      "reliquia_lamina_negra",
+      "reliquia_noite_chama",
+      "reliquia_runa_morte",
+      "reliquia_runa_nao_nascidos"
+    ]
+  },
+  "limitations": [
+    "AST literal matching detects source references, not full control-flow reachability.",
+    "A skill may have a handler reference but still fail under some card states or target conditions.",
+    "Combo tag coverage proves at least one provider exists for each required tag, not that every deck can activate the combo.",
+    "Use the runtime smoke report and controlled branch tests for behavior; this static report does not replace them."
+  ]
+}

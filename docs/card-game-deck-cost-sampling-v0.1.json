@@ -1,0 +1,49 @@
+{
+  "sample_seed": 42,
+  "sample_decks": 100000,
+  "scoreable_models": 128,
+  "scoreable_units": 101,
+  "scoreable_specials": 27,
+  "deck_constraints_simulated": "12 unique models; 8–12 units; 0–4 specials",
+  "mean_cost": 32.08,
+  "median_cost": 32.0,
+  "min_cost": 21,
+  "max_cost": 45,
+  "percentiles": {
+    "0.1": 28,
+    "0.25": 30,
+    "0.5": 32,
+    "0.75": 34,
+    "0.9": 36,
+    "0.95": 37
+  },
+  "acceptance_by_budget_percent": {
+    "28": 12.7,
+    "30": 31.8,
+    "32": 56.3,
+    "34": 77.9,
+    "36": 91.6,
+    "38": 97.7,
+    "40": 99.5,
+    "42": 99.9
+  },
+  "limitations": [
+    "This is random deck-list sampling, not a match/gameplay simulation.",
+    "It excludes cards with unresolved or unscored skill IDs.",
+    "It does not model faction restrictions, ownership, leader, relic, draw order, combos actually activating, win rates or player strategy.",
+    "EFP values are provisional design estimates and are not validated combat outcomes."
+  ],
+  "unscored_models_excluded": 9,
+  "unscored_card_ids": [
+    "luterano_cruzado",
+    "luterano_bispo",
+    "luterano_anjo",
+    "luterano_papa",
+    "luterano_pastor",
+    "luterano_mistico",
+    "luterano_profeta",
+    "luterano_vigia",
+    "luterano_anjo2"
+  ],
+  "interpretation": "Exploratory cost-distribution estimate only; does not demonstrate game balance."
+}

@@ -257,7 +257,7 @@ LEADERS = {
     "mestre_eclipse": {"name": "Astel", "faction": "Lua Negra", "description": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes.", "effect": "astel_gravity"},
     "oraculo_tempestade": {"name": "Loretta", "faction": "Lua Negra", "description": "Concede +2 de bônus às 2 unidades aliadas mais fortes de Longa Distância.", "effect": "loretta_knight"},
 }
-# Arquétipos e combos nomeados. Os bônus são aplicados uma vez por combo/rodada.
+# Arquétipos e combos nomeados. `priority` menor resolve primeiro; cada combo pode ser usado uma vez por jogador/rodada; cada jogada ativa no máximo um combo.
 CARD_SYNERGY_TAGS = {
     # Ordem Áurea: resistência, formação e sacrifício.
     "chefe_guardiao_cinzas": {"cinzas", "ordem_dourada"},
@@ -277,11 +277,6 @@ CARD_SYNERGY_TAGS = {
     "luterano_sacerdote": {"fe", "sacerdos"},
     "luterano_irmao": {"fe", "irmandade"},
     "luterano_diacon": {"fe", "diaconia"},
-    "gwent_unidade_sacerdote": {"fe"},
-    "gwent_unidade_cruzado": {"fe", "gloria_divina"},
-    "gwent_unidade_missionario": {"fe", "evangelho"},
-    "gwent_unidade_protetor": {"fe", "protecao"},
-    "gwent_unidade_evangelista": {"fe", "evangelho"},
     # Lua Negra: mobilidade, ataques encadeados e caça.
     "chefe_cervo_sombrio": {"veu_sombrio"},
     "chefe_aparicao_veio": {"veu_sombrio"},
@@ -342,35 +337,35 @@ CARD_SYNERGY_TAGS = {
     "luterano_anjo2": {"fe", "gloria_divina"},
 }
 SYNERGY_COMBOS = {
-    "cinzas_fornalha": {"name": "Aliança da Árvore Áurea", "tags": {"cinzas", "fornalha"}, "bonus": 2, "description": "Cavaleiro da Árvore Áurea ou Cavaleiros de Radahn e uma unidade da Fornalha coordenam a formação (+2)."},
-    "veu_sombrio": {"name": "Caçada da Faca Negra", "tags": {"veu_sombrio"}, "minimum": 2, "bonus": 2, "description": "Duas unidades do Véu Sombrio entram em sintonia (+2)."},
-    "vazio_astral": {"name": "Alinhamento Astral", "tags": {"vazio", "astral"}, "bonus": 2, "description": "Ranni e uma unidade Astral convergem (+2)."},
-    "mare_abissal": {"name": "Maré Abissal", "tags": {"abismo"}, "minimum": 2, "bonus": 2, "description": "Godfrey e Cavaleiro Carmesim despertam a mesma força (+2)."},
-    "juramento_estandarte": {"name": "Juramento de Leyndell", "tags": {"estandarte"}, "minimum": 2, "bonus": 1, "team_bonus": 1, "description": "Porta-estandarte e Guardas da Árvore Áurea fortalecem a formação (+1 para a carta que completa e +1 aos aliados na mesma fileira)."},
-    "passos_duas_luas": {"name": "Dança da Lua Negra", "tags": {"duas_luas"}, "minimum": 2, "bonus": 2, "description": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."},
-    "eco_convergente": {"name": "Eco das Pedras Cintilantes", "tags": {"eco", "astral"}, "bonus": 2, "description": "O Erudito das Pedras Cintilantes e uma unidade Astral amplificam a mesma magia (+2)."},
-    "chama_dupla": {"name": "Chamas do Monte Gelmir", "tags": {"chama"}, "minimum": 2, "bonus": 2, "description": "Piromante e Feiticeira da Lua Gélida equilibram suas chamas (+2)."},
-    "muralha_inabalavel": {"name": "Defesa de Leyndell", "tags": {"muralha"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta que completa e +1 aos aliados na fileira)."},
-    "banquete_guerra": {"name": "Banquete de Sangue", "tags": {"banquete"}, "minimum": 2, "bonus": 3, "description": "Carniceiro da Forja e Intendente dividem o butim (+3)."},
-    "procissao_fantasma": {"name": "Procissão dos que Vivem na Morte", "tags": {"fantasmas"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades fantasmas marcham juntas (+2 para a carta que completa e +1 aos aliados na fileira)."},
-    "caravana_saqueadora": {"name": "Saque da Cidade Eterna", "tags": {"caravana"}, "minimum": 2, "bonus": 2, "description": "Saqueadora e Contrabandista fecham o negócio (+2)."},
-    "ritual_runico": {"name": "Ritual das Runas", "tags": {"runico"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades rúnicas completam o círculo (+2 para a carta que completa e +1 aos aliados na fileira)."},
-    "eclipse_voraz": {"name": "Eclipse Sanguíneo", "tags": {"eclipse_voraz"}, "minimum": 2, "bonus": 3, "description": "Cavaleiro de Sangue de Mohg e Bibliotecária eclipsam a mesma fonte (+3)."},
-    "rota_peregrina": {"name": "Caminho do Maculado", "tags": {"peregrino"}, "minimum": 2, "bonus": 1, "description": "Duelista e Batedor da Mansão Vulcânica coordenam o avanço (+1)."},
-    "juramento_erdtree": {"name": "Juramento da Árvore Áurea", "tags": {"ordem_dourada"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Ordem Áurea reforçam a formação: +2 para quem completa o combo e +1 aos aliados da mesma fileira."},
-    "convergencia_lunar": {"name": "Convergência da Lua Negra", "tags": {"lua_cariana"}, "minimum": 2, "bonus": 2, "description": "Duas unidades ligadas à Lua Negra convergem e recebem +2."},
-    "ritual_dinastia": {"name": "Ritual do Véu Carmesim", "tags": {"sangue_mohgwyn"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades do Véu Carmesim fortalecem a carta que completa o ritual (+2) e os aliados na fileira (+1)."},
+    "cinzas_fornalha": {"priority": 10, "name": "Aliança da Árvore Áurea", "tags": {"cinzas", "fornalha"}, "minimum": 2, "bonus": 2, "description": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."},
+    "veu_sombrio": {"priority": 20, "name": "Caçada da Faca Negra", "tags": {"veu_sombrio"}, "minimum": 2, "bonus": 2, "description": "Duas unidades do Véu Sombrio entram em sintonia (+2)."},
+    "vazio_astral": {"priority": 30, "name": "Alinhamento Astral", "tags": {"vazio", "astral"}, "minimum": 2, "bonus": 2, "description": "Ranni e uma unidade Astral distinta convergem (+2)."},
+    "mare_abissal": {"priority": 40, "name": "Maré Abissal", "tags": {"abismo"}, "minimum": 2, "bonus": 2, "description": "Godfrey e Cavaleiro Carmesim despertam a mesma força (+2)."},
+    "juramento_estandarte": {"priority": 50, "name": "Juramento de Leyndell", "tags": {"estandarte"}, "minimum": 2, "bonus": 1, "team_bonus": 1, "description": "Porta-estandarte e Guardas da Árvore Áurea fortalecem a formação (+1 para a carta participante que ativa o combo e +1 aos aliados na mesma fileira)."},
+    "passos_duas_luas": {"priority": 60, "name": "Dança da Lua Negra", "tags": {"duas_luas"}, "minimum": 2, "bonus": 2, "description": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."},
+    "eco_convergente": {"priority": 70, "name": "Eco das Pedras Cintilantes", "tags": {"eco", "astral"}, "minimum": 2, "bonus": 2, "description": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."},
+    "chama_dupla": {"priority": 80, "name": "Chamas do Monte Gelmir", "tags": {"chama"}, "minimum": 2, "bonus": 2, "description": "Piromante e Feiticeira da Lua Gélida equilibram suas chamas (+2)."},
+    "muralha_inabalavel": {"priority": 90, "name": "Defesa de Leyndell", "tags": {"muralha"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
+    "banquete_guerra": {"priority": 100, "name": "Banquete de Sangue", "tags": {"banquete"}, "minimum": 2, "bonus": 3, "description": "Carniceiro da Forja e Intendente dividem o butim (+3)."},
+    "procissao_fantasma": {"priority": 110, "name": "Procissão dos que Vivem na Morte", "tags": {"fantasmas"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades fantasmas marcham juntas (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
+    "caravana_saqueadora": {"priority": 120, "name": "Saque da Cidade Eterna", "tags": {"caravana"}, "minimum": 2, "bonus": 2, "description": "Saqueadora e Contrabandista fecham o negócio (+2)."},
+    "ritual_runico": {"priority": 130, "name": "Ritual das Runas", "tags": {"runico"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades rúnicas completam o círculo (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
+    "eclipse_voraz": {"priority": 140, "name": "Eclipse Sanguíneo", "tags": {"eclipse_voraz"}, "minimum": 2, "bonus": 3, "description": "Cavaleiro de Sangue de Mohg e Bibliotecária eclipsam a mesma fonte (+3)."},
+    "rota_peregrina": {"priority": 150, "name": "Caminho do Maculado", "tags": {"peregrino"}, "minimum": 2, "bonus": 1, "description": "Duelista e Batedor da Mansão Vulcânica coordenam o avanço (+1)."},
+    "juramento_erdtree": {"priority": 160, "name": "Juramento da Árvore Áurea", "tags": {"ordem_dourada"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."},
+    "convergencia_lunar": {"priority": 170, "name": "Convergência da Lua Negra", "tags": {"lua_cariana"}, "minimum": 2, "bonus": 2, "description": "Duas unidades ligadas à Lua Negra convergem e recebem +2."},
+    "ritual_dinastia": {"priority": 180, "name": "Ritual do Véu Carmesim", "tags": {"sangue_mohgwyn"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."},
     # Novos combos V75: exigem duas cartas e duas tags distintas; uma ativação por rodada.
-    "v75_juramento_dois_crisol": {"name": "Juramento do Crisol e da Graça", "tags": {"v75_erdtree_oath", "v75_crucible_guard"}, "minimum": 2, "bonus": 2, "description": "Formação e proteção convergem: a carta que completa o juramento recebe +2."},
-    "v75_banquete_hemorragia": {"name": "Banquete da Hemorragia", "tags": {"v75_blood_mark", "v75_blood_feast"}, "minimum": 2, "bonus": 2, "description": "Uma marca aberta alimenta o ritual: a carta que completa o combo recebe +2."},
-    "v75_convergencia_gelida": {"name": "Convergência da Geada Lunar", "tags": {"v75_frost_lore", "v75_lunar_paths"}, "minimum": 2, "bonus": 2, "description": "Geada e leitura das fileiras entram em ressonância: a carta que completa o combo recebe +2."},
+    "v75_juramento_dois_crisol": {"priority": 190, "name": "Juramento do Crisol e da Graça", "tags": {"v75_erdtree_oath", "v75_crucible_guard"}, "minimum": 2, "bonus": 2, "description": "Formação e proteção convergem: a carta participante que ativa o juramento recebe +2."},
+    "v75_banquete_hemorragia": {"priority": 200, "name": "Banquete da Hemorragia", "tags": {"v75_blood_mark", "v75_blood_feast"}, "minimum": 2, "bonus": 2, "description": "Uma marca aberta alimenta o ritual: a carta participante que ativa o combo recebe +2."},
+    "v75_convergencia_gelida": {"priority": 210, "name": "Convergência da Geada Lunar", "tags": {"v75_frost_lore", "v75_lunar_paths"}, "minimum": 2, "bonus": 2, "description": "Geada e leitura das fileiras entram em ressonância: a carta participante que ativa o combo recebe +2."},
     # Os Esquecidos (Luteranos): fé e glória divina.
-    "fe_gloria": {"name": "Glória Divina", "tags": {"fe", "gloria_divina"}, "minimum": 2, "bonus": 2, "description": "A fé e a glória convergem: +2 para a carta que completa o combo."},
-    "fe_devocao": {"name": "Devoção", "tags": {"fe", "devocao"}, "minimum": 2, "bonus": 2, "description": "Duas unidades devotas fortalecem a formação: +2."},
-    "fe_evangelho": {"name": "Evangelho", "tags": {"fe", "evangelho"}, "minimum": 2, "bonus": 2, "description": "Missionários espalham a palavra: +2."},
-    "fe_irmandade": {"name": "Irmandade Esquecida", "tags": {"fe", "irmandade"}, "minimum": 2, "bonus": 2, "description": "Irmãos e missionários unem forças: +2."},
-    "fe_soberania": {"name": "Soberania Divina", "tags": {"fe", "soberania"}, "minimum": 2, "bonus": 2, "description": "O Papa e seus seguidores estabelecem soberania: +2."},
-    "fe_sacerdos": {"name": "Sacerdócio", "tags": {"fe", "sacerdos"}, "minimum": 2, "bonus": 2, "description": "Sacerdotes abençoam a formação: +2."},
+    "fe_gloria": {"priority": 220, "name": "Glória Divina", "tags": {"fe", "gloria_divina"}, "minimum": 2, "bonus": 2, "description": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."},
+    "fe_devocao": {"priority": 230, "name": "Devoção", "tags": {"fe", "devocao"}, "minimum": 2, "bonus": 2, "description": "Duas unidades devotas fortalecem a formação: +2."},
+    "fe_evangelho": {"priority": 240, "name": "Evangelho", "tags": {"fe", "evangelho"}, "minimum": 2, "bonus": 2, "description": "Missionários espalham a palavra: +2."},
+    "fe_irmandade": {"priority": 250, "name": "Irmandade Esquecida", "tags": {"fe", "irmandade"}, "minimum": 2, "bonus": 2, "description": "Irmãos e missionários unem forças: +2."},
+    "fe_soberania": {"priority": 260, "name": "Soberania Divina", "tags": {"fe", "soberania"}, "minimum": 2, "bonus": 2, "description": "O Papa e seus seguidores estabelecem soberania: +2."},
+    "fe_sacerdos": {"priority": 270, "name": "Sacerdócio", "tags": {"fe", "sacerdos"}, "minimum": 2, "bonus": 2, "description": "Sacerdotes abençoam a formação: +2."},
 }
 
 
@@ -424,6 +419,16 @@ CARD_IDENTITY_ABILITIES = {
 # Cartas V18 sem habilidade especial não mantêm efeitos de identidade ocultos.
 from sistemas.cartas import CARTAS_SEM_EFEITO_IDS as _CARTAS_SEM_EFEITO_IDS
 CARD_IDENTITY_ABILITIES = {k: v for k, v in CARD_IDENTITY_ABILITIES.items() if k not in _CARTAS_SEM_EFEITO_IDS}
+
+CARD_IDENTITY_ABILITIES.update({
+    "luterano_cruzado": {"name": "Fé Compartilhada", "text": "Ganha +1 de bônus para cada aliado da mesma facção em campo.", "effect": "sinergia_faccao"},
+    "luterano_papa": {"name": "Fé Compartilhada", "text": "Ganha +1 de bônus para cada aliado da mesma facção em campo.", "effect": "sinergia_faccao"},
+    "luterano_profeta": {"name": "Rebanho Unido", "text": "Ganha +1 de bônus para cada aliado da mesma facção em campo.", "effect": "sinergia_faccao"},
+    "luterano_missionario": {"name": "Herança da Vitória", "text": "Se você venceu a rodada anterior, entra com +2 de bônus.", "effect": "legado"},
+    "luterano_pastor": {"name": "Herança da Vitória", "text": "Se você venceu a rodada anterior, entra com +2 de bônus.", "effect": "legado"},
+    "luterano_bispo": {"name": "Devoção", "text": "Ganha +1 de bônus se houver outro aliado da mesma facção em campo.", "effect": "devoto"},
+    "luterano_mistico": {"name": "Devoção", "text": "Ganha +1 de bônus se houver outro aliado da mesma facção em campo.", "effect": "devoto"},
+})
 
 def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state: dict, row: str) -> str | None:
     data = CARD_IDENTITY_ABILITIES.get(str(card.get("id", "")))
@@ -502,10 +507,10 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
         # Legado: se ganhou a rodada anterior, entra com +2 de poder
         card["bonus"] += 2 if player.get("legado_vitoria", False) else 0
     elif effect == "devoto":
-        # Devoto: se aliada de mesma facção em campo, +1 de poder
+        # Devoto: se houver outro aliado da mesma facção em campo, +1 de bônus
         faccao = faction_for_card(card)
         count = sum(1 for u in allies if faction_for_card(u) == faccao)
-        card["bonus"] += 1 if count >= 2 else 0
+        card["bonus"] += 1 if count >= 1 else 0
     elif effect == "escolha_ritmo":
         # Escolha de ritmo: jogador escolhe fileira ao jogar; permanece se ganhar rodada
         card["bonus"] += 1
@@ -692,6 +697,22 @@ def _aplicar_potencia_raridade(card: dict, player: dict, other: dict,
     return applied
 
 
+ORCAMENTO_DECK = 36  # soma do custo das 12 cartas (por raridade do exemplar) + Relíquia equipada
+
+
+def custo_por_raridade(raridade: str) -> int:
+    """Custo oficial de deck: derivado da raridade do exemplar (única fonte de verdade)."""
+    from sistemas.cartas import CUSTO_RARIDADE
+    return int(CUSTO_RARIDADE.get(str(raridade), 1))
+
+
+def custo_total_deck(raridades: list[str], raridade_reliquia: str | None = None) -> int:
+    total = sum(custo_por_raridade(r) for r in raridades)
+    if raridade_reliquia:
+        total += custo_por_raridade(raridade_reliquia)
+    return total
+
+
 def preparar_carta(card: dict) -> dict:
     special = str(card.get("categoria", "")).casefold() == "especial"
     skill = str(card.get("habilidade", ""))
@@ -761,6 +782,20 @@ def preparar_carta(card: dict) -> dict:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: reforça até {budget} bônus já alterados pela habilidade: +1 nos positivos ou -1 nos negativos. Não muda o poder inicial nem os escudos.").strip()
         elif has_synergy:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: ao completar combo compatível, reforça até {budget} bônus já alterados: +1 nos positivos ou -1 nos negativos.").strip()
+    # Combos que a carta realmente pode ativar (tag em comum com o combo; exige 2 cartas distintas).
+    combos_carta = [
+        (combo["name"], combo["bonus"], combo["description"])
+        for combo in sorted(SYNERGY_COMBOS.values(), key=lambda c: c.get("priority", 999))
+        if CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set()) & set(combo["tags"])
+    ]
+    if combos_carta:
+        resumo = "; ".join(f"{nome} (+{bonus})" for nome, bonus, _d in combos_carta[:3])
+        extra_combo = f" Combo de deck: {resumo}."
+        if not (skill or identity):
+            texto_habilidade = "Sem habilidade individual." + extra_combo
+        else:
+            texto_habilidade = texto_habilidade + extra_combo
+    texto_habilidade = texto_habilidade[:520]
     # Monte os parâmetros fora da f-string para manter compatibilidade com Python 3.11.
     image_params = {
         "rarity": raridade,
@@ -782,11 +817,14 @@ def preparar_carta(card: dict) -> dict:
         "especial": special,
         "poder": 0 if special else max(1, min(15, int(card.get("poder", 1)))),
         "raridade": raridade, "potencia_raridade": budget,
+        "custo": custo_por_raridade(raridade),
         "faccao": faction,
         "arquetipo_faccao": FACTION_ARCHETYPES.get(faction, {}).get("name", "Estratégia Geral"),
         "arquetipo_descricao": FACTION_ARCHETYPES.get(faction, {}).get("description", ""),
         "fileira": row,
-        "row": row, "row_label": ROW_LABELS[row], "habilidade": skill,
+        "row": row, "row_label": ROW_LABELS[row],
+        # A identidade substitui a habilidade genérica no motor; o payload reflete o que realmente executa.
+        "habilidade": "" if identity else skill,
         "habilidade_nome": str(
             identity.get("name") if identity
             else card.get("habilidade_nome", skill_data.get("nome", skill.replace("_", " ").title()))
@@ -914,30 +952,68 @@ def _registrar_evento(state: dict) -> dict:
 
 
 def _aplicar_combo_de_cartas(player: dict, card: dict) -> str | None:
-    """Resolve uma combinação temática uma única vez por jogador e rodada."""
+    """Resolve no máximo um combo por jogada, com participação e prioridade explícitas.
+
+    A carta recém-jogada só pode receber o bônus individual de um combo se
+    contribuir com ao menos uma das tags exigidas por ele. O mínimo conta
+    instâncias distintas de unidades participantes; uma unidade que fornece
+    mais de uma tag continua contando como um único participante.
+    """
     tags_novas = set(CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set()))
     if not tags_novas:
         return None
+
     usados = player.setdefault("synergy_used", {})
-    tags_campo = set()
-    for unit in player.get("board", []):
-        tags_campo.update(CARD_SYNERGY_TAGS.get(str(unit.get("id", "")), set()))
-    tags_total = tags_campo | tags_novas
-    for combo_id, combo in SYNERGY_COMBOS.items():
+    board = list(player.get("board", []))
+    tags_total = set(tags_novas)
+    for unit in board:
+        tags_total.update(CARD_SYNERGY_TAGS.get(str(unit.get("id", "")), set()))
+
+    # Do menor para o maior: prioridade de jogo está no catálogo, não na ordem
+    # incidental de inserção do dicionário. O ID desempata apenas para robustez;
+    # o catálogo é validado com prioridades únicas nos testes.
+    combos_ordenados = sorted(
+        SYNERGY_COMBOS.items(),
+        key=lambda item: (int(item[1]["priority"]), str(item[0])),
+    )
+    for combo_id, combo in combos_ordenados:
         if usados.get(combo_id):
             continue
         required = set(combo["tags"])
+
+        # A carta que recebe a recompensa individual precisa participar deste
+        # combo especificamente; qualquer tag de sinergia não é suficiente.
+        if not (tags_novas & required):
+            continue
         if not required.issubset(tags_total):
             continue
-        participantes = [*player.get("board", []), card]
-        if "minimum" in combo:
-            quantidade = sum(bool(CARD_SYNERGY_TAGS.get(str(unit.get("id", "")), set()) & required) for unit in participantes)
-            if quantidade < int(combo["minimum"]):
+
+        # Contar cada instância de unidade uma única vez, inclusive quando uma
+        # carta fornece várias tags exigidas. A chamada normal ocorre antes de
+        # card ser anexada ao board; a deduplicação também protege chamadas
+        # repetidas com a mesma referência em harnesses/estados malformados.
+        participantes = []
+        seen_instances: set[int] = set()
+        for unit in [*board, card]:
+            instance_id = id(unit)
+            if instance_id in seen_instances:
                 continue
+            seen_instances.add(instance_id)
+            unit_tags = set(CARD_SYNERGY_TAGS.get(str(unit.get("id", "")), set()))
+            if unit_tags & required:
+                participantes.append(unit)
+
+        minimum = int(combo.get("minimum", 2))
+        if len(participantes) < minimum:
+            continue
+
+        # Uma ativação por chamada/jogada. Combos que ficaram elegíveis mas
+        # perderam a prioridade permanecem pendentes; só poderão ser recolhidos
+        # por uma carta posterior que também contribua com tag exigida.
         card["bonus"] = int(card.get("bonus", 0)) + int(combo.get("bonus", 0))
         team_bonus = int(combo.get("team_bonus", 0))
         if team_bonus:
-            for ally in player.get("board", []):
+            for ally in board:
                 if ally.get("row") == card.get("row"):
                     ally["bonus"] = int(ally.get("bonus", 0)) + team_bonus
         card["combo_ativado"] = combo_id
@@ -1127,12 +1203,13 @@ def _resolve_round(state: dict) -> None:
         rodagem_vencida = pid == winner
         # Legado verifica diretamente o resultado da rodada imediatamente anterior.
         player["legado_vitoria"] = rodagem_vencida
-        keepers_gloria = [u for u in board if u.get("habilidade") == "gloria"]
-        keeper_gloria = max(keepers_gloria, key=lambda u: _poder_efetivo(u, previous_weather), default=None) if rodagem_vencida else None
+        keepers_gloria = [u for u in board if u.get("habilidade") == "sobrevivente" or (rodagem_vencida and u.get("habilidade") == "gloria")]
+        tem_gloria = any(u.get("habilidade") == "gloria" for u in board)
+        keeper_gloria = max(keepers_gloria, key=lambda u: _poder_efetivo(u, previous_weather), default=None)
 
         # Unidades vão para o descarte
         for fallen in board:
-            if fallen is keeper_gloria and rodagem_vencida:
+            if fallen is keeper_gloria:
                 continue  # Glória: não envia pro descarte
             archived = deepcopy(fallen)
             # Bônus, escudos e estados são temporários: não podem reaparecer ao
@@ -1144,7 +1221,7 @@ def _resolve_round(state: dict) -> None:
             archived.pop("combo_ativado", None)
             player.setdefault("discard", []).append(archived)
         player["board"] = []
-        if keeper_gloria is not None and rodagem_vencida:
+        if keeper_gloria is not None:
             kept = deepcopy(keeper_gloria)
             kept["bonus"] = 0
             kept["escudo"] = 0
@@ -1153,8 +1230,8 @@ def _resolve_round(state: dict) -> None:
                 kept[status_key] = 0
             kept.pop("combo_ativado", None)
             player["board"].append(kept)
-            extras.append(f"{kept['nome']} ficou com Glória!")
-        else:
+            extras.append(f"{kept['nome']} permaneceu em campo!")
+        elif tem_gloria:
             extras.append("Glória não se ativou — rodada perdida.")
         player["passed"] = False
         player["faction_boost_used"] = False

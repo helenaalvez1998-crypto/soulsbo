@@ -1,0 +1,185 @@
+{
+  "version": "v0.1",
+  "status": "passed",
+  "scope": "stateful in-memory engine, card preparation, JSON and SQLite state_json round-trips",
+  "integration_limit": "Discord bot and HTTP handlers not instantiated; production DB/credentials are not part of the handoff ZIP",
+  "environment": {
+    "discord_module_present": false,
+    "aiosqlite_module_present": false,
+    "http_dispatch_executed": false,
+    "database_wrapper_executed": false
+  },
+  "checks": 12,
+  "passed": 12,
+  "failed": 0,
+  "cases": [
+    {
+      "case": "full_three_round_match_1_Ordem Áurea_Véu Carmesim",
+      "status": "passed",
+      "match_id": 501,
+      "p1_faction": "Ordem Áurea",
+      "p2_faction": "Véu Carmesim",
+      "round_winners": [
+        "11502",
+        "22503",
+        "11502"
+      ],
+      "crowns": {
+        "11502": 2,
+        "22503": 1
+      },
+      "winner_id": "11502",
+      "round_count": 3,
+      "snapshots_round_tripped": true
+    },
+    {
+      "case": "full_three_round_match_2_Véu Carmesim_Lua Negra",
+      "status": "passed",
+      "match_id": 502,
+      "p1_faction": "Véu Carmesim",
+      "p2_faction": "Lua Negra",
+      "round_winners": [
+        "11503",
+        "22504",
+        "11503"
+      ],
+      "crowns": {
+        "11503": 2,
+        "22504": 1
+      },
+      "winner_id": "11503",
+      "round_count": 3,
+      "snapshots_round_tripped": true
+    },
+    {
+      "case": "full_three_round_match_3_Lua Negra_Os Esquecidos",
+      "status": "passed",
+      "match_id": 503,
+      "p1_faction": "Lua Negra",
+      "p2_faction": "Os Esquecidos",
+      "round_winners": [
+        "11504",
+        "22505",
+        "11504"
+      ],
+      "crowns": {
+        "11504": 2,
+        "22505": 1
+      },
+      "winner_id": "11504",
+      "round_count": 3,
+      "snapshots_round_tripped": true
+    },
+    {
+      "case": "full_three_round_match_4_Os Esquecidos_Ordem Áurea",
+      "status": "passed",
+      "match_id": 504,
+      "p1_faction": "Os Esquecidos",
+      "p2_faction": "Ordem Áurea",
+      "round_winners": [
+        "11505",
+        "22506",
+        "11505"
+      ],
+      "crowns": {
+        "11505": 2,
+        "22506": 1
+      },
+      "winner_id": "11505",
+      "round_count": 3,
+      "snapshots_round_tripped": true
+    },
+    {
+      "case": "all_catalogue_models_prepare_for_api_and_renderer_contract",
+      "status": "passed",
+      "catalogue_models": 137,
+      "payloads_validated": 137,
+      "categories": {
+        "Unidade": 110,
+        "Especial": 27
+      },
+      "required_payload_fields": [
+        "categoria",
+        "combos_compativeis",
+        "descricao",
+        "especial",
+        "faccao",
+        "fileira",
+        "habilidade",
+        "habilidade_nome",
+        "habilidade_texto",
+        "id",
+        "image_url",
+        "nome",
+        "poder",
+        "raridade",
+        "row",
+        "sinergias"
+      ]
+    },
+    {
+      "case": "combo_activation_via_normal_turn_survives_json_snapshot",
+      "status": "passed",
+      "combo_id": "cinzas_fornalha",
+      "activating_card": "gwent_unidade_baluarte",
+      "combo_bonus_persisted": 3,
+      "synergy_used_persisted": true,
+      "snapshot_round_trip": true
+    },
+    {
+      "case": "leader_special_weather_snapshot_and_round_reset",
+      "status": "passed",
+      "leader": "comandante_fornalha",
+      "special": "gwent_especial_tempestade",
+      "weather_applied_and_reset": true,
+      "leader_use_persists_across_rounds": true,
+      "second_leader_activation_rejected": true,
+      "round_count": 1
+    },
+    {
+      "case": "relic_action_persists_and_rejects_second_use",
+      "status": "passed",
+      "relic_id": "reliquia_grande_runa_godrick",
+      "ally_bonus_delta": 1,
+      "relic_consumed_to_discard": true,
+      "second_activation_rejected": true,
+      "snapshot_round_trip": true
+    },
+    {
+      "case": "manual_weather_action_is_limited_and_snapshotted",
+      "status": "passed",
+      "first_weather_action_applied": true,
+      "weather_used_persisted": true,
+      "second_weather_action_rejected": true
+    },
+    {
+      "case": "http_and_frontend_contract_static",
+      "status": "passed",
+      "routes_checked": 4,
+      "frontend_fields_checked": [
+        "catalog",
+        "cards",
+        "habilidade_texto",
+        "combos_compativeis",
+        "image_url"
+      ],
+      "classification": "static contract only; handler dispatch not executed"
+    },
+    {
+      "case": "legacy_snapshot_compatibility_and_rejected_action_immutability",
+      "status": "passed",
+      "legacy_state_defaults_restored": true,
+      "rejected_action_did_not_mutate_input": true
+    },
+    {
+      "case": "sqlite_state_json_insert_update_read_roundtrip",
+      "status": "passed",
+      "sqlite_table": "cartas_gwent_matches",
+      "schema_source": "database.py: SCHEMA + SCHEMA_CARTAS",
+      "state_json_insert_select_update": true,
+      "foreign_keys_enabled": true,
+      "opening_hand": 10,
+      "reserve": 2
+    }
+  ]
+}

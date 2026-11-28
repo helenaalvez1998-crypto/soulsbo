@@ -1,0 +1,33 @@
+{
+ "summary": {
+  "total": 5,
+  "passed": 5
+ },
+ "results": [
+  {
+   "name": "descrição (lore) sem mecânica",
+   "ok": true,
+   "extra": "[]"
+  },
+  {
+   "name": "imagem == payload == catálogo (texto/custo/identidade)",
+   "ok": true,
+   "extra": "[]"
+  },
+  {
+   "name": "legado vitória +2",
+   "ok": true,
+   "extra": ""
+  },
+  {
+   "name": "devoto +1 com aliado",
+   "ok": true,
+   "extra": ""
+  },
+  {
+   "name": "sinergia +1 por aliado",
+   "ok": true,
+   "extra": ""
+  }
+ ]
+}

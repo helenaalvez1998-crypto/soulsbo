@@ -329,7 +329,9 @@ function renderGwentBuilder() {
   const upgradeCost = {Comum:10, Rara:20, 'Épica':40, 'Lendária':80, 'Mítica':150, 'Primordial':250};
   const specialCount = selected.filter(card => card.categoria === 'Especial').length;
   const unitCount = selected.length - specialCount;
-  $('#gwent-deck-count').textContent = `${selected.length}/12 cartas · ${unitCount} unidades · ${specialCount} especiais`;
+  const GWENT_BUDGET = 36;
+  const deckCost = selected.reduce((sum, card) => sum + Number(card.custo || 0), 0);
+  $('#gwent-deck-count').textContent = `${selected.length}/12 cartas · ${unitCount} unidades · ${specialCount} especiais · custo ${deckCost}/${GWENT_BUDGET}`;
   const cardTile = (card, inDeck = false) => inDeck
     ? `<button type="button" class="gwent-card-tile gwent-deck-mini is-selected" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-deck-mini-name">${escapeHTML(card.nome || 'Carta')}</span></button>`
     : `<button type="button" class="gwent-card-tile" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-card-tile-hint">VER CARTA</span></button>`;
@@ -361,7 +363,9 @@ function renderGwentBuilder() {
     || (JSON.stringify(gwentDeckIds) === JSON.stringify(gwentSavedIds) && !configChanged);
   const resetButton = $('#gwent-reset-deck');
   if (resetButton) resetButton.disabled = selected.length === 0 && gwentSavedIds.length === 0;
-  $('#gwent-deck-status').textContent = selected.length === 12 && unitCount < 8
+  $('#gwent-deck-status').textContent = deckCost > GWENT_BUDGET
+    ? `Custo do deck acima do limite (${deckCost}/${GWENT_BUDGET}). A Relíquia equipada também conta.`
+    : selected.length === 12 && unitCount < 8
     ? 'Inclua pelo menos 8 unidades no deck.'
     : specialCount > 4 ? 'O limite é de 4 cartas especiais por deck.'
     : selected.length === 12 && !factionMatches

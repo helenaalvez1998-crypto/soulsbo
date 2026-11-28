@@ -1,0 +1,519 @@
+{
+  "metadata": {
+    "document": "Combo activation sampling v0.1",
+    "status": "EXPLORATORY RANDOM-ORDER ESTIMATE; NOT GAME BALANCE APPROVAL",
+    "sample_seed": 42,
+    "sample_decks": 100000,
+    "deck_constraint": "12 unique models; 8-12 units; 0-4 specials",
+    "initial_hand": 10,
+    "play_order": "uniform random order; all 10 opening-hand cards assumed played in the same round",
+    "resolver": "sistemas.gwent._aplicar_combo_de_cartas",
+    "note": "The actual resolver's once-per-round rule and first-eligible-combo behavior are used. The card selection is random only for estimating current trigger frequency; it does not assign or generate new card mechanics."
+  },
+  "catalog_coverage": {
+    "units": 110,
+    "specials": 27,
+    "combos": 27,
+    "cards_with_synergy_tags_in_catalog": 67,
+    "orphan_tag_card_ids": [
+      "gwent_unidade_cruzado",
+      "gwent_unidade_evangelista",
+      "gwent_unidade_missionario",
+      "gwent_unidade_protetor",
+      "gwent_unidade_sacerdote"
+    ]
+  },
+  "deck_level": {
+    "decks_with_at_least_one_actual_combo_percent": 57.19,
+    "mean_potential_combos_per_opening_hand": 1.052,
+    "mean_actual_combos_per_opening_hand": 0.956,
+    "actual_combos_per_deck_percentiles": {
+      "p50": 1,
+      "p90": 2,
+      "p95": 3,
+      "max": 6
+    },
+    "most_frequent_triggering_cards": [
+      {
+        "card_id": "gwent_unidade_eco",
+        "combo_completion_count": 7610
+      },
+      {
+        "card_id": "luterano_missionario",
+        "combo_completion_count": 2712
+      },
+      {
+        "card_id": "luterano_pastor",
+        "combo_completion_count": 2699
+      },
+      {
+        "card_id": "luterano_profeta",
+        "combo_completion_count": 2682
+      },
+      {
+        "card_id": "luterano_mistico",
+        "combo_completion_count": 2681
+      },
+      {
+        "card_id": "luterano_papa",
+        "combo_completion_count": 2674
+      },
+      {
+        "card_id": "luterano_bispo",
+        "combo_completion_count": 2653
+      },
+      {
+        "card_id": "luterano_sacerdote",
+        "combo_completion_count": 2653
+      },
+      {
+        "card_id": "luterano_irmao",
+        "combo_completion_count": 2622
+      },
+      {
+        "card_id": "luterano_vigia",
+        "combo_completion_count": 2596
+      },
+      {
+        "card_id": "luterano_apostolo",
+        "combo_completion_count": 2583
+      },
+      {
+        "card_id": "luterano_cruzado",
+        "combo_completion_count": 2539
+      },
+      {
+        "card_id": "luterano_anjo",
+        "combo_completion_count": 2534
+      },
+      {
+        "card_id": "luterano_anjo2",
+        "combo_completion_count": 2509
+      },
+      {
+        "card_id": "luterano_diacon",
+        "combo_completion_count": 2317
+      },
+      {
+        "card_id": "chefe_dama_vazio",
+        "combo_completion_count": 1883
+      },
+      {
+        "card_id": "gwent_unidade_portaestandarte",
+        "combo_completion_count": 1785
+      },
+      {
+        "card_id": "covenant_lua_velada",
+        "combo_completion_count": 1707
+      },
+      {
+        "card_id": "gwent_unidade_sentinela_rubra",
+        "combo_completion_count": 1665
+      },
+      {
+        "card_id": "arma_duas_luas",
+        "combo_completion_count": 1656
+      }
+    ]
+  },
+  "by_combo": [
+    {
+      "id": "cinzas_fornalha",
+      "name": "Aliança da Árvore Áurea",
+      "potential_in_opening_hand_percent": 2.84,
+      "actual_activation_random_order_percent": 2.84,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": null,
+      "required_tags": [
+        "cinzas",
+        "fornalha"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "veu_sombrio",
+      "name": "Caçada da Faca Negra",
+      "potential_in_opening_hand_percent": 2.9,
+      "actual_activation_random_order_percent": 2.9,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "veu_sombrio"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "vazio_astral",
+      "name": "Alinhamento Astral",
+      "potential_in_opening_hand_percent": 2.35,
+      "actual_activation_random_order_percent": 2.35,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": null,
+      "required_tags": [
+        "astral",
+        "vazio"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "mare_abissal",
+      "name": "Maré Abissal",
+      "potential_in_opening_hand_percent": 0.46,
+      "actual_activation_random_order_percent": 0.46,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "abismo"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "juramento_estandarte",
+      "name": "Juramento de Leyndell",
+      "potential_in_opening_hand_percent": 0.5,
+      "actual_activation_random_order_percent": 0.49,
+      "potential_but_not_activated_percent": 0.01,
+      "actual_activation_given_potential_percent": 97.6,
+      "minimum_participants": 2,
+      "required_tags": [
+        "estandarte"
+      ],
+      "bonus": 1,
+      "team_bonus": 1
+    },
+    {
+      "id": "passos_duas_luas",
+      "name": "Dança da Lua Negra",
+      "potential_in_opening_hand_percent": 3.01,
+      "actual_activation_random_order_percent": 2.98,
+      "potential_but_not_activated_percent": 0.03,
+      "actual_activation_given_potential_percent": 98.94,
+      "minimum_participants": 2,
+      "required_tags": [
+        "duas_luas"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "eco_convergente",
+      "name": "Eco das Pedras Cintilantes",
+      "potential_in_opening_hand_percent": 9.41,
+      "actual_activation_random_order_percent": 9.31,
+      "potential_but_not_activated_percent": 0.1,
+      "actual_activation_given_potential_percent": 98.94,
+      "minimum_participants": null,
+      "required_tags": [
+        "astral",
+        "eco"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "chama_dupla",
+      "name": "Chamas do Monte Gelmir",
+      "potential_in_opening_hand_percent": 0.51,
+      "actual_activation_random_order_percent": 0.51,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "chama"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "muralha_inabalavel",
+      "name": "Defesa de Leyndell",
+      "potential_in_opening_hand_percent": 1.58,
+      "actual_activation_random_order_percent": 1.58,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "muralha"
+      ],
+      "bonus": 2,
+      "team_bonus": 1
+    },
+    {
+      "id": "banquete_guerra",
+      "name": "Banquete de Sangue",
+      "potential_in_opening_hand_percent": 0.53,
+      "actual_activation_random_order_percent": 0.53,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "banquete"
+      ],
+      "bonus": 3,
+      "team_bonus": 0
+    },
+    {
+      "id": "procissao_fantasma",
+      "name": "Procissão dos que Vivem na Morte",
+      "potential_in_opening_hand_percent": 1.53,
+      "actual_activation_random_order_percent": 1.52,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 99.93,
+      "minimum_participants": 2,
+      "required_tags": [
+        "fantasmas"
+      ],
+      "bonus": 2,
+      "team_bonus": 1
+    },
+    {
+      "id": "caravana_saqueadora",
+      "name": "Saque da Cidade Eterna",
+      "potential_in_opening_hand_percent": 0.56,
+      "actual_activation_random_order_percent": 0.56,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "caravana"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "ritual_runico",
+      "name": "Ritual das Runas",
+      "potential_in_opening_hand_percent": 1.48,
+      "actual_activation_random_order_percent": 1.48,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 99.93,
+      "minimum_participants": 2,
+      "required_tags": [
+        "runico"
+      ],
+      "bonus": 2,
+      "team_bonus": 1
+    },
+    {
+      "id": "eclipse_voraz",
+      "name": "Eclipse Sanguíneo",
+      "potential_in_opening_hand_percent": 0.56,
+      "actual_activation_random_order_percent": 0.56,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "eclipse_voraz"
+      ],
+      "bonus": 3,
+      "team_bonus": 0
+    },
+    {
+      "id": "rota_peregrina",
+      "name": "Caminho do Maculado",
+      "potential_in_opening_hand_percent": 0.55,
+      "actual_activation_random_order_percent": 0.55,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 100.0,
+      "minimum_participants": 2,
+      "required_tags": [
+        "peregrino"
+      ],
+      "bonus": 1,
+      "team_bonus": 0
+    },
+    {
+      "id": "juramento_erdtree",
+      "name": "Juramento da Árvore Áurea",
+      "potential_in_opening_hand_percent": 6.56,
+      "actual_activation_random_order_percent": 5.88,
+      "potential_but_not_activated_percent": 0.68,
+      "actual_activation_given_potential_percent": 89.71,
+      "minimum_participants": 2,
+      "required_tags": [
+        "ordem_dourada"
+      ],
+      "bonus": 2,
+      "team_bonus": 1
+    },
+    {
+      "id": "convergencia_lunar",
+      "name": "Convergência da Lua Negra",
+      "potential_in_opening_hand_percent": 4.64,
+      "actual_activation_random_order_percent": 4.07,
+      "potential_but_not_activated_percent": 0.57,
+      "actual_activation_given_potential_percent": 87.61,
+      "minimum_participants": 2,
+      "required_tags": [
+        "lua_cariana"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "ritual_dinastia",
+      "name": "Ritual do Véu Carmesim",
+      "potential_in_opening_hand_percent": 2.91,
+      "actual_activation_random_order_percent": 2.7,
+      "potential_but_not_activated_percent": 0.21,
+      "actual_activation_given_potential_percent": 92.91,
+      "minimum_participants": 2,
+      "required_tags": [
+        "sangue_mohgwyn"
+      ],
+      "bonus": 2,
+      "team_bonus": 1
+    },
+    {
+      "id": "v75_juramento_dois_crisol",
+      "name": "Juramento do Crisol e da Graça",
+      "potential_in_opening_hand_percent": 1.94,
+      "actual_activation_random_order_percent": 1.93,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 99.79,
+      "minimum_participants": 2,
+      "required_tags": [
+        "v75_crucible_guard",
+        "v75_erdtree_oath"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "v75_banquete_hemorragia",
+      "name": "Banquete da Hemorragia",
+      "potential_in_opening_hand_percent": 2.03,
+      "actual_activation_random_order_percent": 2.02,
+      "potential_but_not_activated_percent": 0.01,
+      "actual_activation_given_potential_percent": 99.65,
+      "minimum_participants": 2,
+      "required_tags": [
+        "v75_blood_feast",
+        "v75_blood_mark"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "v75_convergencia_gelida",
+      "name": "Convergência da Geada Lunar",
+      "potential_in_opening_hand_percent": 1.88,
+      "actual_activation_random_order_percent": 1.88,
+      "potential_but_not_activated_percent": 0.0,
+      "actual_activation_given_potential_percent": 99.84,
+      "minimum_participants": 2,
+      "required_tags": [
+        "v75_frost_lore",
+        "v75_lunar_paths"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "fe_gloria",
+      "name": "Glória Divina",
+      "potential_in_opening_hand_percent": 15.91,
+      "actual_activation_random_order_percent": 15.87,
+      "potential_but_not_activated_percent": 0.04,
+      "actual_activation_given_potential_percent": 99.72,
+      "minimum_participants": 2,
+      "required_tags": [
+        "fe",
+        "gloria_divina"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "fe_devocao",
+      "name": "Devoção",
+      "potential_in_opening_hand_percent": 8.98,
+      "actual_activation_random_order_percent": 8.12,
+      "potential_but_not_activated_percent": 0.85,
+      "actual_activation_given_potential_percent": 90.5,
+      "minimum_participants": 2,
+      "required_tags": [
+        "devocao",
+        "fe"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "fe_evangelho",
+      "name": "Evangelho",
+      "potential_in_opening_hand_percent": 8.95,
+      "actual_activation_random_order_percent": 7.68,
+      "potential_but_not_activated_percent": 1.27,
+      "actual_activation_given_potential_percent": 85.79,
+      "minimum_participants": 2,
+      "required_tags": [
+        "evangelho",
+        "fe"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "fe_irmandade",
+      "name": "Irmandade Esquecida",
+      "potential_in_opening_hand_percent": 9.02,
+      "actual_activation_random_order_percent": 7.16,
+      "potential_but_not_activated_percent": 1.85,
+      "actual_activation_given_potential_percent": 79.43,
+      "minimum_participants": 2,
+      "required_tags": [
+        "fe",
+        "irmandade"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "fe_soberania",
+      "name": "Soberania Divina",
+      "potential_in_opening_hand_percent": 8.92,
+      "actual_activation_random_order_percent": 6.45,
+      "potential_but_not_activated_percent": 2.47,
+      "actual_activation_given_potential_percent": 72.27,
+      "minimum_participants": 2,
+      "required_tags": [
+        "fe",
+        "soberania"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    },
+    {
+      "id": "fe_sacerdos",
+      "name": "Sacerdócio",
+      "potential_in_opening_hand_percent": 4.65,
+      "actual_activation_random_order_percent": 3.19,
+      "potential_but_not_activated_percent": 1.46,
+      "actual_activation_given_potential_percent": 68.56,
+      "minimum_participants": 2,
+      "required_tags": [
+        "fe",
+        "sacerdos"
+      ],
+      "bonus": 2,
+      "team_bonus": 0
+    }
+  ],
+  "limitations": [
+    "Randomly selected decks are not filtered by ownership, chosen leader strategy, exemplar rarity/power, or actual faction distribution preferences.",
+    "Assumes every one of the 10 opening-hand cards is played in one round; real players may pass early, change sequence, or draw more cards.",
+    "A random play order is not an optimal play policy; activation frequencies are order-sensitive because only the first eligible combo can trigger per card play.",
+    "Does not measure how often the combo changes match outcomes or the value of its buff at the final score.",
+    "This is not a simulation of opposing effects, board removal, weather, or status conditions."
+  ],
+  "interpretation": "Use the per-combo rates as a first calibration input for E_combo; do not treat them as competitive win-rate evidence."
+}

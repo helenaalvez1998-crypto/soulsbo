@@ -1081,6 +1081,8 @@ def registrar_rotas(bot, app: web.Application) -> None:
             for carta in CARTAS_POR_ID.values():
                 data = carta.para_dict()
                 public_image_version = etag_carta_base(preparar_payload_carta_base(carta))
+                from sistemas.gwent import preparar_carta as _prep_gwent
+                prep = _prep_gwent(data)
                 habilidade_id = str(data.get("habilidade") or "")
                 habilidade = HABILIDADES.get(habilidade_id, {})
                 fileira_raw = str(data.get("fileira") or carta.fileira)
@@ -1104,10 +1106,11 @@ def registrar_rotas(bot, app: web.Application) -> None:
                     "fileira": fileira_labels.get(fileira_raw.casefold(), fileira_raw),
                     "raridade": str(carta.raridade),
                     "poder": int(carta.poder),
-                    "custo": int(carta.custo),
-                    "habilidade": str(habilidade.get("nome") or habilidade_id or "Sem habilidade"),
-                    "habilidade_texto": str(habilidade.get("texto") or carta.descricao or ""),
+                    "custo": int(prep["custo"]),
+                    "habilidade": str(prep["habilidade_nome"] if (prep["habilidade"] or prep["habilidade_identidade"]) else "Sem habilidade"),
+                    "habilidade_texto": str(prep["habilidade_texto"]),
                     "descricao": str(carta.descricao or ""),
+                    "combos": [{"nome": x["nome"], "descricao": x["descricao"]} for x in prep["combos_compativeis"]],
                     "no_pacote": str(carta.id) in ids_pacote,
                     "expansao_v75": str(carta.id) in ids_expansao_v75,
                 })

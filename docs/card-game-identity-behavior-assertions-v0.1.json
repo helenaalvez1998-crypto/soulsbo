@@ -1,0 +1,248 @@
+{
+  "metadata": {
+    "document": "Card identity behavioral assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; ALL ACTIVE IDENTITY EFFECTS EXERCISED IN SELECTED CONTROLLED STATES",
+    "baseline": "soulsbo-main(1).zip",
+    "engine": "sistemas.gwent.aplicar_jogada / _aplicar_habilidade_identidade",
+    "method": "One positive assertion for each active mapping plus selected negative/limit cases; Common rarity isolates identity behavior from rarity amplification."
+  },
+  "counts": {
+    "active_identity_effects": 29,
+    "positive_assertions": 22,
+    "negative_or_limit_assertions": 11,
+    "total_assertions": 33,
+    "passed": 33,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "identity_ash_guardian",
+      "status": "passed",
+      "effect": "ash_guardian",
+      "card_bonus": 1,
+      "ally_bonus": 1
+    },
+    {
+      "case": "identity_void_rend",
+      "status": "passed",
+      "effect": "void_rend",
+      "target_bonus_after": 0
+    },
+    {
+      "case": "identity_abyss_tithe",
+      "status": "passed",
+      "effect": "abyss_tithe",
+      "card_bonus": 2
+    },
+    {
+      "case": "identity_ruin_omen",
+      "status": "passed",
+      "effect": "ruin_omen",
+      "card_bonus": 1,
+      "target_bonus": 1
+    },
+    {
+      "case": "identity_twin_dance",
+      "status": "passed",
+      "effect": "twin_dance",
+      "card_bonus": 1
+    },
+    {
+      "case": "identity_last_bell",
+      "status": "passed",
+      "effect": "last_bell",
+      "card_bonus": 2
+    },
+    {
+      "case": "identity_vigil_seal",
+      "status": "passed",
+      "effect": "vigil_seal",
+      "weather_resist": 1,
+      "ally_bonus": 1
+    },
+    {
+      "case": "identity_hollow_thunder",
+      "status": "passed",
+      "effect": "hollow_thunder",
+      "target_bonus_after": 1
+    },
+    {
+      "case": "identity_ancient_mist",
+      "status": "passed",
+      "effect": "ancient_mist",
+      "card_bonus": 2
+    },
+    {
+      "case": "identity_devouring_eclipse",
+      "status": "passed",
+      "effect": "devouring_eclipse",
+      "card_bonus": 2
+    },
+    {
+      "case": "identity_veiled_moon",
+      "status": "passed",
+      "effect": "veiled_moon",
+      "card_bonus": 1,
+      "ally_bonus": 1
+    },
+    {
+      "case": "identity_scarlet_bloom",
+      "status": "passed",
+      "effect": "scarlet_bloom",
+      "old_mark": 2,
+      "old_target_bonus": 1,
+      "new_mark": 1
+    },
+    {
+      "case": "identity_star_gravity",
+      "status": "passed",
+      "effect": "star_gravity",
+      "target_row_after": "siege",
+      "target_bonus_after": 1
+    },
+    {
+      "case": "identity_destined_death",
+      "status": "passed",
+      "effect": "destined_death",
+      "target_bonus_after": 1
+    },
+    {
+      "case": "identity_impaling_spear",
+      "status": "passed",
+      "effect": "impaling_spear",
+      "second_mark_target_bonus": 1,
+      "new_target_mark": 1
+    },
+    {
+      "case": "identity_time_storm",
+      "status": "passed",
+      "effect": "time_storm",
+      "card_bonus": 2,
+      "enemy_marks": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "identity_v75_golden_vow",
+      "status": "passed",
+      "effect": "v75_golden_vow",
+      "card_bonus": 1,
+      "weakest_ally_bonus": 1
+    },
+    {
+      "case": "identity_v75_grace_mender",
+      "status": "passed",
+      "effect": "v75_grace_mender",
+      "purified": 2,
+      "bonuses": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "identity_v75_blood_mark",
+      "status": "passed",
+      "effect": "v75_blood_mark",
+      "target_bonus": 1,
+      "card_bonus": 1
+    },
+    {
+      "case": "identity_v75_blood_price",
+      "status": "passed",
+      "effect": "v75_blood_price",
+      "sacrificed": "blood_price_victim",
+      "card_bonus": 2
+    },
+    {
+      "case": "identity_v75_frost_oracle",
+      "status": "passed",
+      "effect": "v75_frost_oracle",
+      "target_geada": 2,
+      "card_bonus": 1
+    },
+    {
+      "case": "identity_v75_gravity_shear",
+      "status": "passed",
+      "effect": "v75_gravity_shear",
+      "card_bonus": 1,
+      "enemy_bonuses": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "negative_ash_guardian_no_same_row_ally",
+      "status": "passed",
+      "effect": "ash_guardian",
+      "without_same_row_ally_card_bonus": 0
+    },
+    {
+      "case": "negative_last_bell_not_behind",
+      "status": "passed",
+      "effect": "last_bell",
+      "not_behind_card_bonus": 0
+    },
+    {
+      "case": "negative_ancient_mist_no_weather",
+      "status": "passed",
+      "effect": "ancient_mist",
+      "no_weather_card_bonus": 0
+    },
+    {
+      "case": "negative_devouring_eclipse_no_positive_enemy",
+      "status": "passed",
+      "effect": "devouring_eclipse",
+      "no_positive_enemy_bonus": 0
+    },
+    {
+      "case": "negative_twin_dance_no_other_row_ally",
+      "status": "passed",
+      "effect": "twin_dance",
+      "no_other_row_ally": 0
+    },
+    {
+      "case": "negative_void_rend_no_enemy_target",
+      "status": "passed",
+      "effect": "void_rend",
+      "empty_enemy_board": "no-op without error"
+    },
+    {
+      "case": "negative_time_storm_no_enemy_target",
+      "status": "passed",
+      "effect": "time_storm",
+      "empty_enemy_board_card_bonus": 0
+    },
+    {
+      "case": "negative_gravity_shear_only_one_target",
+      "status": "passed",
+      "effect": "v75_gravity_shear",
+      "one_eligible_target_no_self_bonus": 0
+    },
+    {
+      "case": "negative_frost_oracle_no_enemy_target",
+      "status": "passed",
+      "effect": "v75_frost_oracle",
+      "empty_enemy_row_card_bonus": 0
+    },
+    {
+      "case": "negative_blood_price_no_victim",
+      "status": "passed",
+      "effect": "v75_blood_price",
+      "no_victim_fallback_bonus": 1
+    },
+    {
+      "case": "negative_grace_mender_empty_row",
+      "status": "passed",
+      "effect": "v75_grace_mender",
+      "no_allies_fallback_bonus": 1
+    }
+  ],
+  "limitations": [
+    "One controlled positive scenario per active identity is not exhaustive branch coverage; multi-target caps, empty/blocked/duplicate targets and all status thresholds still require more cases.",
+    "All cards use Common rarity to isolate base identity effects; interaction with RARITY_EFFECT_BUDGET is not tested here.",
+    "Synthetic boards do not estimate activation frequency, expected value, deck synergy, or match win rate.",
+    "No database, Discord, web API, frontend, image pipeline, or production game session is involved."
+  ]
+}

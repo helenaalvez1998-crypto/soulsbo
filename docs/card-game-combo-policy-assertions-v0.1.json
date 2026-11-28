@@ -1,0 +1,323 @@
+{
+  "metadata": {
+    "document": "Approved combo policy assertions v0.1",
+    "status": "APPROVED POLICY REGRESSION TESTS; SYNTHETIC IN-MEMORY STATES; NOT A FULL MATCH OR BALANCE SIMULATION",
+    "baseline": "soulsbo-main-handoff.zip at user approval on 2026-11-27",
+    "engine": "sistemas.gwent._aplicar_combo_de_cartas",
+    "policy": {
+      "current_card_must_contribute_required_tag": true,
+      "minimum_distinct_participants": 2,
+      "one_combo_per_play": true,
+      "explicit_priority_lower_number_first": true,
+      "pending_combo_requires_later_contributing_participant": true,
+      "individual_bonus_to_current_contributing_card": true
+    }
+  },
+  "counts": {
+    "assertions": 32,
+    "passed": 32,
+    "failed": 0
+  },
+  "combo_count": 27,
+  "cases": [
+    {
+      "case": "catalog_has_explicit_unique_priorities_and_two_participants",
+      "status": "passed",
+      "combo_count": 27,
+      "explicit_minimum": 2,
+      "unique_priorities": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210,
+        220,
+        230,
+        240,
+        250,
+        260,
+        270
+      ],
+      "lower_priority_number_resolves_first": true
+    },
+    {
+      "case": "single_card_blocked_cinzas_fornalha",
+      "status": "passed",
+      "combo_id": "cinzas_fornalha",
+      "single_card_id": "chefe_guardiao_cinzas",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_veu_sombrio",
+      "status": "passed",
+      "combo_id": "veu_sombrio",
+      "single_card_id": "chefe_cervo_sombrio",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_vazio_astral",
+      "status": "passed",
+      "combo_id": "vazio_astral",
+      "single_card_id": "magia_nevoa_antiga",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_mare_abissal",
+      "status": "passed",
+      "combo_id": "mare_abissal",
+      "single_card_id": "chefe_rei_afogado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_juramento_estandarte",
+      "status": "passed",
+      "combo_id": "juramento_estandarte",
+      "single_card_id": "gwent_unidade_portaestandarte",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_passos_duas_luas",
+      "status": "passed",
+      "combo_id": "passos_duas_luas",
+      "single_card_id": "gwent_unidade_dupla_veu",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_eco_convergente",
+      "status": "passed",
+      "combo_id": "eco_convergente",
+      "single_card_id": "magia_nevoa_antiga",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_chama_dupla",
+      "status": "passed",
+      "combo_id": "chama_dupla",
+      "single_card_id": "magia_brasa_errante",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_muralha_inabalavel",
+      "status": "passed",
+      "combo_id": "muralha_inabalavel",
+      "single_card_id": "gwent_unidade_sentinela_rubra",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_banquete_guerra",
+      "status": "passed",
+      "combo_id": "banquete_guerra",
+      "single_card_id": "gwent_unidade_carniceiro_forja",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_procissao_fantasma",
+      "status": "passed",
+      "combo_id": "procissao_fantasma",
+      "single_card_id": "gwent_unidade_cacadora_fantasma",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_caravana_saqueadora",
+      "status": "passed",
+      "combo_id": "caravana_saqueadora",
+      "single_card_id": "gwent_unidade_saqueadora_veu",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_ritual_runico",
+      "status": "passed",
+      "combo_id": "ritual_runico",
+      "single_card_id": "gwent_unidade_guardiao_runas",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_eclipse_voraz",
+      "status": "passed",
+      "combo_id": "eclipse_voraz",
+      "single_card_id": "gwent_unidade_devorador_mana",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_rota_peregrina",
+      "status": "passed",
+      "combo_id": "rota_peregrina",
+      "single_card_id": "arma_lamina_peregrino",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_juramento_erdtree",
+      "status": "passed",
+      "combo_id": "juramento_erdtree",
+      "single_card_id": "chefe_guardiao_cinzas",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_convergencia_lunar",
+      "status": "passed",
+      "combo_id": "convergencia_lunar",
+      "single_card_id": "arma_duas_luas",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_ritual_dinastia",
+      "status": "passed",
+      "combo_id": "ritual_dinastia",
+      "single_card_id": "chefe_rei_afogado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_v75_juramento_dois_crisol",
+      "status": "passed",
+      "combo_id": "v75_juramento_dois_crisol",
+      "single_card_id": "gwent_v75_ordem_veterano_juramento",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_v75_banquete_hemorragia",
+      "status": "passed",
+      "combo_id": "v75_banquete_hemorragia",
+      "single_card_id": "gwent_v75_veu_acolito_sangue",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_v75_convergencia_gelida",
+      "status": "passed",
+      "combo_id": "v75_convergencia_gelida",
+      "single_card_id": "gwent_v75_lua_oraculo_geada",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_fe_gloria",
+      "status": "passed",
+      "combo_id": "fe_gloria",
+      "single_card_id": "luterano_cruzado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_fe_devocao",
+      "status": "passed",
+      "combo_id": "fe_devocao",
+      "single_card_id": "luterano_cruzado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_fe_evangelho",
+      "status": "passed",
+      "combo_id": "fe_evangelho",
+      "single_card_id": "luterano_cruzado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_fe_irmandade",
+      "status": "passed",
+      "combo_id": "fe_irmandade",
+      "single_card_id": "luterano_cruzado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_fe_soberania",
+      "status": "passed",
+      "combo_id": "fe_soberania",
+      "single_card_id": "luterano_cruzado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "single_card_blocked_fe_sacerdos",
+      "status": "passed",
+      "combo_id": "fe_sacerdos",
+      "single_card_id": "luterano_cruzado",
+      "minimum": 2,
+      "solo_activation_blocked": true
+    },
+    {
+      "case": "overlap_uses_explicit_priority_and_one_combo_per_play",
+      "status": "passed",
+      "eligible_overlap": [
+        "cinzas_fornalha",
+        "juramento_erdtree"
+      ],
+      "activated": "cinzas_fornalha",
+      "priority": 10,
+      "reverse_insertion_order_tested": true,
+      "one_combo_only": true
+    },
+    {
+      "case": "pending_combo_requires_contribution_and_rewards_participant",
+      "status": "passed",
+      "first_combo": "cinzas_fornalha",
+      "pending_combo": "juramento_erdtree",
+      "unrelated_tag_card": "covenant_irmandade_ferro",
+      "unrelated_card_did_not_collect_pending_combo": true,
+      "later_participant": "gwent_unidade_mestre_forja",
+      "individual_bonus_awarded_to_participant": 2,
+      "team_bonus_same_row_only": true
+    },
+    {
+      "case": "actual_play_path_uses_the_approved_combo_policy",
+      "status": "passed",
+      "entrypoint": "aplicar_jogada(action='play')",
+      "first_card_id": "chefe_guardiao_cinzas",
+      "played_card_id": "gwent_unidade_baluarte",
+      "activated_combo": "cinzas_fornalha",
+      "individual_bonus": 2,
+      "one_combo_only": true
+    },
+    {
+      "case": "same_unit_instance_is_not_counted_twice",
+      "status": "passed",
+      "combo_id": "eco_convergente",
+      "same_object_repeated": true,
+      "distinct_participants_counted": 1,
+      "activation_blocked": true
+    }
+  ],
+  "limitations": [
+    "Tests call the in-memory combo resolver with controlled fixtures; they are not full 12-card matches or production DB/API/frontend/Discord/R2 integration tests.",
+    "One representative tag provider per combo is checked for a solo activation attempt; this does not exhaust every possible board sequence or alternate provider permutation.",
+    "The pending-combo scenario covers one known overlap (`cinzas_fornalha` and `juramento_erdtree`); all 154 overlapping ordered pairs are not replayed as full stateful sequences here.",
+    "The tests do not measure EFP, win rate, faction parity or competitive balance."
+  ]
+}

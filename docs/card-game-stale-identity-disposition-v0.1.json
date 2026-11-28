@@ -1,0 +1,446 @@
+{
+  "metadata": {
+    "document": "Stale identity branch disposition audit v0.1",
+    "status": "STATIC SOURCE AUDIT; RECOMMENDATIONS NOT YET APPLIED",
+    "baseline": "soulsbo-main(1).zip",
+    "source_files": [
+      "sistemas/gwent.py",
+      "sistemas/cartas.py"
+    ]
+  },
+  "counts": {
+    "identity_resolver_effect_branches": 50,
+    "active_identity_effect_ids": 22,
+    "stale_branches": 28,
+    "v18_filtered_identity_cards": 18,
+    "unmapped_legacy_field_effects": 4,
+    "stale_v75_effects": 6,
+    "hidden_gloria_cards": 3
+  },
+  "v18_filtered_identity_candidates": [
+    {
+      "card_id": "chefe_cervo_sombrio",
+      "card_name": "Cavaleiro do Cão de Caça",
+      "effect_id": "shadow_paths",
+      "effect_name": "Passagem Sombria",
+      "description": "Ganha +1 para cada outra fileira que tenha um aliado seu, até +2.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "veu_sombrio"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "chefe_cacador_sem_rosto",
+      "card_name": "Assassina da Faca Negra",
+      "effect_id": "faceless_hunt",
+      "effect_name": "Marca da Presa",
+      "description": "Ganha +2 se o adversário tiver uma unidade com poder atual maior que o poder-base desta carta.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "chefe_vigia_cinzento",
+      "card_name": "Cavaleiro de Leyndell",
+      "effect_id": "grey_watch",
+      "effect_name": "Vigília Cinzenta",
+      "description": "Dá +1 de bônus a todos os seus outros aliados na mesma fileira.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "chefe_aparicao_veio",
+      "card_name": "Lâmina Negra Errante",
+      "effect_id": "veil_shift",
+      "effect_name": "Deslocamento Espectral",
+      "description": "Ganha +2 se sua unidade anterior foi jogada em outra fileira.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "veu_sombrio"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "arma_lamina_peregrino",
+      "card_name": "Duelista da Casa Hoslow",
+      "effect_id": "pilgrim_duel",
+      "effect_name": "Duelo do Peregrino",
+      "description": "Ganha +2 se o adversário jogou uma unidade na mesma fileira no turno anterior.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "peregrino"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "arma_martelo_fornalha",
+      "card_name": "Ferreiro de Volcano Manor",
+      "effect_id": "forge_rhythm",
+      "effect_name": "Martelo de Cadência",
+      "description": "Ganha +1 para cada aliado da Ordem Áurea na mesma fileira, até +2.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "arma_cajado_marulho",
+      "card_name": "Feiticeiro Cariano",
+      "effect_id": "tide_resonance",
+      "effect_name": "Ressonância das Marés",
+      "description": "Ganha +2 se o adversário tiver uma unidade do Véu Carmesim. Caso contrário, ganha +1 se ele tiver mais unidades em campo.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "arma_agulha_astro",
+      "card_name": "Leitora de Estrelas de Sellia",
+      "effect_id": "astral_thread",
+      "effect_name": "Fio Astral",
+      "description": "Marca o inimigo mais forte e tira 1 ponto de bônus dele. A próxima unidade Astral que você jogar ganha +1 nesta rodada.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "astral",
+        "lua_cariana"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "arma_lanca_fornalha",
+      "card_name": "Lanceiro da Árvore Áurea",
+      "effect_id": "furnace_charge",
+      "effect_name": "Investida da Fornalha",
+      "description": "Ganha +1 se já houver outra unidade da Ordem Áurea em campo.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "arma_arco_peregrino",
+      "card_name": "Batedor da Mansão Vulcânica",
+      "effect_id": "covering_shot",
+      "effect_name": "Tiro de Cobertura",
+      "description": "Dá +1 de bônus ao seu aliado mais fraco que esteja em outra fileira.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "peregrino"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "magia_brasa_errante",
+      "card_name": "Monge do Fogo",
+      "effect_id": "wandering_ember",
+      "effect_name": "Brasa Persistente",
+      "description": "Ganha +1 para cada fileira que tenha inimigos e esteja sob efeito climático, até +2.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "chama"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "magia_fagulha",
+      "card_name": "Aprendiz de Feitiçaria Cariana",
+      "effect_id": "conductive_spark",
+      "effect_name": "Faísca Condutora",
+      "description": "Ganha +1 se houver outra unidade da Lua Negra do seu lado do campo.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "magia_orbe_eco",
+      "card_name": "Erudito da Academia",
+      "effect_id": "echo_orb",
+      "effect_name": "Orbe Refrator",
+      "description": "Ganha +1 para cada carta especial no seu descarte, até +2.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "eco"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "magia_chama_fria",
+      "card_name": "Feiticeira da Lua Gélida",
+      "effect_id": "counterflame",
+      "effect_name": "Contrafogo",
+      "description": "Tira 1 ponto de bônus de até dois inimigos na mesma fileira.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [
+        "chama"
+      ],
+      "strict_pure_after_v18": false,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "covenant_sentinelas",
+      "card_name": "Guardiões de Sellia",
+      "effect_id": "shared_sentinel",
+      "effect_name": "Sentinela Compartilhada",
+      "description": "Ganha +1 se você tiver pelo menos um aliado em cada uma das outras duas fileiras.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "covenant_ultimos",
+      "card_name": "Cavaleiros de sangue juramentados",
+      "effect_id": "last_oath",
+      "effect_name": "Último Juramento",
+      "description": "Ganha +2 se você tiver menos unidades em campo que o adversário.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "covenant_filhos_brasa",
+      "card_name": "Discípulos do Monge do Fogo",
+      "effect_id": "ember_kin",
+      "effect_name": "Herança da Brasa",
+      "description": "Esta carta ganha +1 e dá +1 de bônus a um aliado da Ordem Áurea na mesma fileira.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    },
+    {
+      "card_id": "covenant_peregrinos_nevoa",
+      "card_name": "Peregrinos da Cidade Eterna",
+      "effect_id": "mist_trail",
+      "effect_name": "Rastro na Névoa",
+      "description": "Ganha +1 se sua unidade anterior foi jogada em outra fileira.",
+      "runtime_habilidade": "",
+      "is_in_v18_no_effect_set": true,
+      "synergy_tags": [],
+      "strict_pure_after_v18": true,
+      "recommendation": "ARCHIVE_THEN_REMOVE_HANDLER_IF_CARD_REMAINS_PURE; otherwise explicitly re-enable through canonical schema",
+      "recommendation_reason": "V18 filters this card out of CARD_IDENTITY_ABILITIES and clears its generic skill; retaining the branch creates unreachable resolver code."
+    }
+  ],
+  "unmapped_legacy_field_effect_candidates": {
+    "devoto": {
+      "recommendation": "REWRITE_AS_CANONICAL_EFFECT_OR_CLEAR_CARD_FIELDS",
+      "reason": "Effect code exists only inside identity resolver; no active card-ID mapping dispatches it.",
+      "meaning": "+1 when at least two allied units of the same faction are already on board.",
+      "current_card_field_references": [
+        {
+          "card_id": "luterano_bispo",
+          "card_name": "Bispo Esquecido",
+          "faction": "Os Esquecidos",
+          "rarity": "Lendária"
+        },
+        {
+          "card_id": "luterano_mistico",
+          "card_name": "Místico Esquecido",
+          "faction": "Lua Negra",
+          "rarity": "Rara"
+        }
+      ]
+    },
+    "legado": {
+      "recommendation": "REWRITE_AS_CANONICAL_EFFECT_OR_CLEAR_CARD_FIELDS",
+      "reason": "Effect code exists only inside identity resolver; no active card-ID mapping dispatches it. It also relies on legado_vitoria being set during round resolution.",
+      "meaning": "+2 if the player won the immediately previous round.",
+      "current_card_field_references": [
+        {
+          "card_id": "luterano_pastor",
+          "card_name": "Pastor Esquecido",
+          "faction": "Véu Carmesim",
+          "rarity": "Rara"
+        }
+      ]
+    },
+    "escolha_ritmo": {
+      "recommendation": "REMOVE_OR_REDESIGN; CURRENT_BRANCH_DOES_NOT_IMPLEMENT_THE_TEXTUAL_CHOICE_OR_RETENTION",
+      "reason": "No active identity mapping or HABILIDADES entry points to this branch; its implementation merely grants +1 and does not model the described row choice/retention.",
+      "meaning": "Current branch grants +1 unconditionally; comment describes a row choice and persistence that are not implemented here.",
+      "current_card_field_references": []
+    },
+    "sinergia_faccao": {
+      "recommendation": "REWRITE_AS_CANONICAL_EFFECT_OR_CLEAR_CARD_FIELDS",
+      "reason": "Effect code exists only inside identity resolver; no active card-ID mapping dispatches it.",
+      "meaning": "+1 for each allied unit of the same faction.",
+      "current_card_field_references": [
+        {
+          "card_id": "luterano_cruzado",
+          "card_name": "Cruzado Esquecido",
+          "faction": "Os Esquecidos",
+          "rarity": "Épica"
+        },
+        {
+          "card_id": "luterano_papa",
+          "card_name": "Papa Esquecido",
+          "faction": "Os Esquecidos",
+          "rarity": "Mítica"
+        },
+        {
+          "card_id": "luterano_profeta",
+          "card_name": "Profeta Esquecido",
+          "faction": "Ordem Áurea",
+          "rarity": "Mítica"
+        }
+      ]
+    }
+  },
+  "stale_v75_effect_candidates": [
+    {
+      "effect_id": "v75_crucible_guard",
+      "associated_current_card_id": "gwent_v75_ordem_guardiao_crisol",
+      "card_name": "Guardião do Crisol Menor",
+      "current_habilidade": "",
+      "current_description": "Não possui habilidade individual. Pode completar combos da Ordem Áurea quando estiver em campo com a unidade compatível.",
+      "synergy_tags": [
+        "v75_crucible_guard"
+      ],
+      "recommendation": "REMOVE_STALE_IDENTITY_BRANCH_AFTER_ARCHIVING",
+      "recommendation_reason": "Current card declares no individual skill and the resolver branch has no active CARD_IDENTITY_ABILITIES mapping."
+    },
+    {
+      "effect_id": "v75_golden_standard",
+      "associated_current_card_id": "gwent_v75_ordem_arauto_estandarte",
+      "card_name": "Arauto do Estandarte Áureo",
+      "current_habilidade": "",
+      "current_description": "Não possui habilidade individual. Pode completar combos de formação da Ordem Áurea com a unidade compatível.",
+      "synergy_tags": [
+        "v75_crucible_guard"
+      ],
+      "recommendation": "REMOVE_STALE_IDENTITY_BRANCH_AFTER_ARCHIVING",
+      "recommendation_reason": "Current card declares no individual skill and the resolver branch has no active CARD_IDENTITY_ABILITIES mapping."
+    },
+    {
+      "effect_id": "v75_blood_feast",
+      "associated_current_card_id": "gwent_v75_veu_devota_hemorragia",
+      "card_name": "Devota da Hemorragia",
+      "current_habilidade": "",
+      "current_description": "Não possui habilidade individual. Pode completar o combo Banquete da Hemorragia com a unidade compatível.",
+      "synergy_tags": [
+        "v75_blood_feast"
+      ],
+      "recommendation": "REMOVE_STALE_IDENTITY_BRANCH_AFTER_ARCHIVING",
+      "recommendation_reason": "Current card declares no individual skill and the resolver branch has no active CARD_IDENTITY_ABILITIES mapping."
+    },
+    {
+      "effect_id": "v75_blood_pursuit",
+      "associated_current_card_id": "gwent_v75_veu_cacador_sangue",
+      "card_name": "Caçador das Catacumbas de Mohgwyn",
+      "current_habilidade": "",
+      "current_description": "Não possui habilidade individual. Pode completar combos de marca de Sangramento com a unidade compatível.",
+      "synergy_tags": [
+        "v75_blood_mark"
+      ],
+      "recommendation": "REMOVE_STALE_IDENTITY_BRANCH_AFTER_ARCHIVING",
+      "recommendation_reason": "Current card declares no individual skill and the resolver branch has no active CARD_IDENTITY_ABILITIES mapping."
+    },
+    {
+      "effect_id": "v75_lunar_cartography",
+      "associated_current_card_id": "gwent_v75_lua_cartografo_lunar",
+      "card_name": "Cartógrafo das Cidades Eternas",
+      "current_habilidade": "",
+      "current_description": "Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.",
+      "synergy_tags": [
+        "v75_lunar_paths"
+      ],
+      "recommendation": "REMOVE_STALE_IDENTITY_BRANCH_AFTER_ARCHIVING",
+      "recommendation_reason": "Current card declares no individual skill and the resolver branch has no active CARD_IDENTITY_ABILITIES mapping."
+    },
+    {
+      "effect_id": "v75_moon_ward",
+      "associated_current_card_id": "gwent_v75_lua_guardia",
+      "card_name": "Guardiã do Juramento Lunar",
+      "current_habilidade": "",
+      "current_description": "Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.",
+      "synergy_tags": [
+        "v75_lunar_paths"
+      ],
+      "recommendation": "REMOVE_STALE_IDENTITY_BRANCH_AFTER_ARCHIVING",
+      "recommendation_reason": "Current card declares no individual skill and the resolver branch has no active CARD_IDENTITY_ABILITIES mapping."
+    }
+  ],
+  "separate_lifecycle_findings": {
+    "gloria": {
+      "status": "EXECUTES_AT_ROUND_END_BUT_ABSENT_FROM_HABILIDADES",
+      "cards": [
+        {
+          "card_id": "luterano_anjo",
+          "card_name": "Anjo Esquecido",
+          "faction": "Os Esquecidos",
+          "rarity": "Épica",
+          "hook": "_resolve_round()"
+        },
+        {
+          "card_id": "luterano_vigia",
+          "card_name": "Vigia da Noite",
+          "faction": "Véu Carmesim",
+          "rarity": "Comum",
+          "hook": "_resolve_round()"
+        },
+        {
+          "card_id": "luterano_anjo2",
+          "card_name": "Anjo de Segunda Ordem",
+          "faction": "Lua Negra",
+          "rarity": "Lendária",
+          "hook": "_resolve_round()"
+        }
+      ],
+      "recommendation": "PROMOTE_TO_CANONICAL_LIFECYCLE_EFFECT_OR_REMOVE_FIELDS_AND_HOOK_AFTER_DESIGN_DECISION"
+    },
+    "sobrevivente": {
+      "status": "DECLARED_IN_HABILIDADES_BUT_NO_HANDLER_REFERENCE_FOUND",
+      "recommendation": "IMPLEMENT_EXPLICIT_ROUND_END_RULE_OR_REMOVE_CATALOG_ENTRY"
+    }
+  },
+  "non_destructive_policy": "No branch or card field is deleted by this audit. Archive the complete inventory and obtain the final keep/merge/redesign/remove decision before runtime cleanup."
+}

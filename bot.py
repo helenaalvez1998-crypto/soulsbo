@@ -1336,6 +1336,19 @@ class NaraBot(commands.Bot):
             }, status=400)
         if unit_count < 8 or special_count > 4:
             return web.json_response({"error": "O deck precisa ter pelo menos 8 unidades e no máximo 4 cartas especiais."}, status=400)
+        # Orçamento autoritativo: o custo vem da raridade do exemplar no servidor, nunca do cliente.
+        from sistemas.gwent import ORCAMENTO_DECK, custo_total_deck
+        rarity_by_id = {int(e["id"]): str(e["rarity"]) for e in exemplars}
+        relic_rarity = None
+        if relic_id:
+            relic_rarity = max((str(e["rarity"]) for e in exemplars if str(e["card_id"]) == relic_id),
+                               key=lambda r: custo_total_deck([r]), default=None)
+        deck_cost = custo_total_deck([rarity_by_id.get(eid, "Comum") for eid in resolved], relic_rarity)
+        if deck_cost > ORCAMENTO_DECK:
+            return web.json_response({
+                "error": f"O deck custa {deck_cost} pontos e o limite é {ORCAMENTO_DECK}. Troque cartas por exemplares de menor raridade.",
+                "custo": deck_cost, "orcamento": ORCAMENTO_DECK,
+            }, status=400)
         import json
         async with self.db.transaction() as tx:
             await tx.conn.execute(
@@ -1346,7 +1359,8 @@ class NaraBot(commands.Bot):
                    leader_id=excluded.leader_id, relic_id=excluded.relic_id, updated_at=CURRENT_TIMESTAMP""",
                 (user_id, json.dumps(ids), json.dumps(resolved), faction, leader_id, relic_id))
         return web.json_response({"ok": True, "card_ids": ids, "exemplar_ids": resolved,
-                                  "faction": faction, "leader_id": leader_id, "relic_id": relic_id})
+                                  "faction": faction, "leader_id": leader_id, "relic_id": relic_id,
+                                  "custo": deck_cost, "orcamento": ORCAMENTO_DECK})
 
     async def _api_gwent_deck_reset(self, request: web.Request) -> web.Response:
         """Zera somente o deck do jogador autenticado; coleção e exemplares são preservados."""

@@ -1,0 +1,950 @@
+{
+  "metadata": {
+    "document": "Runtime smoke audit of card effects v0.1",
+    "status": "DIAGNOSTIC ONLY; DOES NOT CHANGE GAME DATA OR RUNTIME",
+    "engine": "sistemas.gwent.aplicar_jogada / _remover_unidade / _resolve_round",
+    "method": "Controlled synthetic states; no player strategy, match win-rate, or production DB assumptions"
+  },
+  "generic_skill_smoke": [
+    {
+      "id": "primeira_luz",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_primeira_luz entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "retaliacao",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_retaliacao entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "impeto",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_impeto entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "ultimo_folego",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_ultimo_folego entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "contragolpe",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_contragolpe entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "encadeamento",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_encadeamento entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "adaptacao",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_adaptacao entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "sangue_frio",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_sangue_frio entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "instinto",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_instinto entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "precisao",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_precisao entrou na fileira Longa distância."
+    },
+    {
+      "id": "drenagem",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_drenagem entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "cacador_arcano",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_cacador_arcano entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "quebra_ritmo",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_quebra_ritmo entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "lei_primeva",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_lei_primeva entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "decreto_soberano",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 8,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_decreto_soberano entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "olho_tempestade",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_olho_tempestade entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "fome_abismo",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_fome_abismo entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "paradoxo_eterno",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_paradoxo_eterno entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "guardiao_fileira",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_guardiao_fileira entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "cacador_solitario",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_cacador_solitario entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "estandarte",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_estandarte entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "resistencia_climatica",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_resistencia_climatica entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "eco_arcano",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_eco_arcano entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "gwent_clima",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_clima utilizada. Tempestade dos Picos cobriu Corpo a corpo; todas as unidades da fileira sofrem -1 de poder efetivo enquanto o clima durar."
+    },
+    {
+      "id": "gwent_nevoa",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_nevoa utilizada."
+    },
+    {
+      "id": "gwent_geada",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_geada utilizada."
+    },
+    {
+      "id": "gwent_chuva",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_chuva utilizada."
+    },
+    {
+      "id": "gwent_chifre",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_chifre utilizada."
+    },
+    {
+      "id": "gwent_medico",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": 0,
+      "own_discard_delta": 0,
+      "last_event": "Carta especial smoke_gwent_medico utilizada."
+    },
+    {
+      "id": "gwent_queima",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 3,
+      "own_board_count_delta": -1,
+      "enemy_board_count_delta": -1,
+      "own_hand_delta": -1,
+      "own_discard_delta": 2,
+      "last_event": "Carta especial smoke_gwent_queima utilizada. ally_ranged caiu. enemy_melee_a caiu."
+    },
+    {
+      "id": "gwent_purificar",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_purificar utilizada."
+    },
+    {
+      "id": "gwent_execucao",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": -1,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_execucao utilizada. enemy_melee_b caiu."
+    },
+    {
+      "id": "gwent_vinculo",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_vinculo utilizada."
+    },
+    {
+      "id": "gwent_batedor",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": 0,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_batedor utilizada. Passo do Cão de Caça comprou 1 carta(s)."
+    },
+    {
+      "id": "gwent_muralha",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_muralha utilizada."
+    },
+    {
+      "id": "vinganca",
+      "status": "lifecycle_hook_tested_separately",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_vinganca entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "escudo_ferro",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_escudo_ferro entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "ressurgir",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 2,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": -1,
+      "last_event": "smoke_ressurgir entrou na fileira Corpo a corpo. Ressurgiu discard_unit_4 do descarte."
+    },
+    {
+      "id": "devorar",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "smoke_devorar entrou na fileira Corpo a corpo. Devorou ally_melee_a (+2)."
+    },
+    {
+      "id": "sobrevivente",
+      "status": "lifecycle_hook_tested_separately",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_sobrevivente entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "espolios",
+      "status": "lifecycle_hook_tested_separately",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_espolios entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "gwent_egide",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_egide utilizada. 1 unidade(s) receberam escudo."
+    },
+    {
+      "id": "gwent_requiem",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "Carta especial smoke_gwent_requiem utilizada. discard_unit_4 retornou ao campo."
+    },
+    {
+      "id": "gwent_passo",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_passo utilizada. ally_ranged moveram-se para Corpo a corpo."
+    },
+    {
+      "id": "dupla_fornalha",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_dupla_fornalha entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "irmandade_veu",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_irmandade_veu entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "circulo_arcano",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "unit",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 0,
+      "last_event": "smoke_circulo_arcano entrou na fileira Corpo a corpo."
+    },
+    {
+      "id": "gwent_sangramento",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_sangramento utilizada. enemy_melee_a recebeu uma marca de Sangramento. enemy_melee_b recebeu uma marca de Sangramento."
+    },
+    {
+      "id": "gwent_geada_cariana",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_geada_cariana utilizada. Geada aplicada a 2 unidade(s); cada marca reduz 1 de poder efetivo, até duas."
+    },
+    {
+      "id": "gwent_podrida",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_podrida utilizada. Podridão Escarlate aplicada a 2 unidade(s); a segunda marca corrói 1 ponto de bônus positivo."
+    },
+    {
+      "id": "gwent_loucura",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_loucura utilizada. Loucura aplicada a 2 unidade(s); 0 bônus positivo(s) foram anulados pela segunda marca."
+    },
+    {
+      "id": "gwent_chama",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_chama utilizada. Chama removeu Geada de 1 unidade(s) aliada(s); cada uma recebeu +1."
+    },
+    {
+      "id": "gwent_invocacao",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 3,
+      "own_board_count_delta": 1,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_gwent_invocacao utilizada. Lobos Espirituais invocados na fileira Corpo a corpo (3 de poder)."
+    },
+    {
+      "id": "reliquia_godrick",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 4,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_reliquia_godrick utilizada. Grande Runa de Godrick concedeu +1 a todas as unidades aliadas."
+    },
+    {
+      "id": "reliquia_renala",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_reliquia_renala utilizada. Grande Runa dos Não Nascidos purificou 1 aliado(s) e concedeu +1."
+    },
+    {
+      "id": "reliquia_morte",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 6,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_reliquia_morte utilizada. Runa da Morte corroeu bônus de: enemy_melee_a, enemy_ranged, enemy_siege."
+    },
+    {
+      "id": "reliquia_noite_chama",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_reliquia_noite_chama utilizada. A postura da Noite aplicou Geada à fileira."
+    },
+    {
+      "id": "reliquia_lamina_negra",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 3,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_reliquia_lamina_negra utilizada. Lâmina Negra reduziu o bônus de enemy_melee_a em 3."
+    },
+    {
+      "id": "reliquia_algemas",
+      "status": "play_action_completed_not_full_branch_coverage",
+      "category": "special",
+      "played_card_found": true,
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "own_board_count_delta": 0,
+      "enemy_board_count_delta": 0,
+      "own_hand_delta": -1,
+      "own_discard_delta": 1,
+      "last_event": "Carta especial smoke_reliquia_algemas utilizada. Algemas de Margit anularam os bônus de enemy_melee_a."
+    }
+  ],
+  "generic_skill_counts": {
+    "catalog_count": 59,
+    "play_action_completed_not_full_branch_coverage": 56,
+    "lifecycle_hook_tested_separately": 3,
+    "errors": 0,
+    "unexpected_card_location": 0
+  },
+  "identity_smoke": [
+    {
+      "card_id": "chefe_guardiao_cinzas",
+      "effect_id": "ash_guardian",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 1,
+      "last_event": "Cavaleiro da Árvore Áurea entrou na fileira Corpo a corpo. Habilidade ativada: Égide das Cinzas."
+    },
+    {
+      "card_id": "chefe_dama_vazio",
+      "effect_id": "void_rend",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 0,
+      "last_event": "Ranni, Bruxa da Lua entrou na fileira Cerco. Habilidade ativada: Fenda do Vazio."
+    },
+    {
+      "card_id": "chefe_rei_afogado",
+      "effect_id": "abyss_tithe",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 2,
+      "last_event": "Godfrey, Primeiro Lorde Prístino entrou na fileira Corpo a corpo. Habilidade ativada: Dízimo do Abismo."
+    },
+    {
+      "card_id": "chefe_oraculo_ruina",
+      "effect_id": "ruin_omen",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 1,
+      "last_event": "Gurranq, Clérigo Bestial entrou na fileira Corpo a corpo. Habilidade ativada: Presságio da Ruína."
+    },
+    {
+      "card_id": "arma_duas_luas",
+      "effect_id": "twin_dance",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "card_bonus_after": 1,
+      "last_event": "Espadachim da Lua Negra entrou na fileira Corpo a corpo. Habilidade ativada: Dança Espelhada."
+    },
+    {
+      "card_id": "arma_grande_sino",
+      "effect_id": "last_bell",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 2,
+      "last_event": "Sentinela do Portão de Leyndell entrou na fileira Corpo a corpo. Habilidade ativada: Sino do Último Bastião."
+    },
+    {
+      "card_id": "magia_selo_vigilia",
+      "effect_id": "vigil_seal",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "card_bonus_after": 0,
+      "last_event": "Confessora da Ordem Áurea entrou na fileira Corpo a corpo. Habilidade ativada: Selo de Vigília."
+    },
+    {
+      "card_id": "magia_trovao_oco",
+      "effect_id": "hollow_thunder",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "card_bonus_after": 0,
+      "last_event": "Dragoeiro Ancião entrou na fileira Longa distância. Habilidade ativada: Descarga Oca."
+    },
+    {
+      "card_id": "magia_nevoa_antiga",
+      "effect_id": "ancient_mist",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 2,
+      "last_event": "Astróloga de Liurnia entrou na fileira Cerco. Habilidade ativada: Névoa Ancestral."
+    },
+    {
+      "card_id": "magia_sol_negro",
+      "effect_id": "devouring_eclipse",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 2,
+      "last_event": "Apóstolo da Pele Divina entrou na fileira Corpo a corpo. Habilidade ativada: Eclipse Devorador."
+    },
+    {
+      "card_id": "covenant_lua_velada",
+      "effect_id": "veiled_moon",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 1,
+      "last_event": "Juramentada de Ranni entrou na fileira Longa distância. Habilidade ativada: Aliança Lunar."
+    },
+    {
+      "card_id": "chefe_malenia_lamina_miquella",
+      "effect_id": "scarlet_bloom",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 0,
+      "last_event": "Malenia, Lâmina de Miquella entrou na fileira Corpo a corpo. Habilidade ativada: Flor Escarlate."
+    },
+    {
+      "card_id": "chefe_radahn_flagelo_estrelas",
+      "effect_id": "star_gravity",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 0,
+      "last_event": "Radahn, Flagelo das Estrelas entrou na fileira Cerco. Habilidade ativada: Gravidade do Flagelo."
+    },
+    {
+      "card_id": "chefe_maliketh_morte_destinada",
+      "effect_id": "destined_death",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 0,
+      "last_event": "Maliketh, Lâmina Negra entrou na fileira Corpo a corpo. Habilidade ativada: Morte Destinada."
+    },
+    {
+      "card_id": "chefe_messmer_impalador",
+      "effect_id": "impaling_spear",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "card_bonus_after": 0,
+      "last_event": "Messmer, o Empalador entrou na fileira Corpo a corpo. Habilidade ativada: Lança do Impalador."
+    },
+    {
+      "card_id": "chefe_placidusax_lorde_dragao",
+      "effect_id": "time_storm",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 1,
+      "last_event": "Placidusax, Lorde Dragão entrou na fileira Cerco. Habilidade ativada: Tempestade do Tempo."
+    },
+    {
+      "card_id": "gwent_v75_ordem_veterano_juramento",
+      "effect_id": "v75_golden_vow",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 2,
+      "card_bonus_after": 1,
+      "last_event": "Veterano do Juramento Dourado entrou na fileira Corpo a corpo. Habilidade ativada: Juramento Dourado."
+    },
+    {
+      "card_id": "gwent_v75_ordem_confessora_graca",
+      "effect_id": "v75_grace_mender",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "card_bonus_after": 0,
+      "last_event": "Confessora da Graça Serena entrou na fileira Cerco. Habilidade ativada: Regressão Serena."
+    },
+    {
+      "card_id": "gwent_v75_veu_acolito_sangue",
+      "effect_id": "v75_blood_mark",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "card_bonus_after": 0,
+      "last_event": "Acólito da Dinastia Sanguínea entrou na fileira Longa distância. Habilidade ativada: Marca da Dinastia."
+    },
+    {
+      "card_id": "gwent_v75_veu_carrasco_preco",
+      "effect_id": "v75_blood_price",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 0,
+      "card_bonus_after": 2,
+      "last_event": "Carrasco da Procissão Carmesim entrou na fileira Corpo a corpo. Habilidade ativada: Preço em Sangue."
+    },
+    {
+      "card_id": "gwent_v75_lua_oraculo_geada",
+      "effect_id": "v75_frost_oracle",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "card_bonus_after": 0,
+      "last_event": "Oráculo Gélido de Sellia entrou na fileira Cerco. Habilidade ativada: Presságio da Geada."
+    },
+    {
+      "card_id": "gwent_v75_lua_graviturgista",
+      "effect_id": "v75_gravity_shear",
+      "status": "resolved",
+      "immediate_field_swing_delta_excluding_base_power": 1,
+      "card_bonus_after": 0,
+      "last_event": "Graviturgista de Nokron entrou na fileira Cerco. Habilidade ativada: Cisalhamento Gravitacional."
+    }
+  ],
+  "identity_counts": {
+    "active_mapping_count": 22,
+    "resolved": 22,
+    "errors": 0
+  },
+  "lifecycle_cases": [
+    {
+      "id": "vinganca",
+      "status": "resolved",
+      "event": "lifecycle_revenge caiu. Vingança: +1 para 2 aliado(s).",
+      "ally_bonus_before": [
+        0,
+        0
+      ],
+      "ally_bonus_after": [
+        1,
+        1
+      ]
+    },
+    {
+      "id": "espolios",
+      "status": "resolved",
+      "kept_on_board": false,
+      "sent_to_discard": true,
+      "drew_card": true
+    },
+    {
+      "id": "gloria",
+      "status": "hidden_effect_executes",
+      "kept_on_board": true,
+      "sent_to_discard": false,
+      "drew_card": false
+    },
+    {
+      "id": "sobrevivente",
+      "status": "missing_handler_confirmed",
+      "kept_on_board": false,
+      "sent_to_discard": true,
+      "drew_card": false
+    }
+  ],
+  "notes": [
+    "A successful play-action proves the engine accepted the card and completed the action in this fixture; it does not prove every conditional branch was entered.",
+    "The encadeamento fixture now sets last_row equal to the played row; the sangue_frio fixture equalizes both pre-play board scores at 11.",
+    "EFP values are not derived automatically from these observed deltas; effects with delayed/resource outcomes require separate valuation.",
+    "The current rarity effect budget is set to Comum for smoke tests to isolate effect implementations."
+  ]
+}

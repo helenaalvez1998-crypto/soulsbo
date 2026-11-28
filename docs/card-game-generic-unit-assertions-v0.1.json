@@ -1,0 +1,278 @@
+{
+  "metadata": {
+    "document": "Generic unit effect behavioral assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; SELECTED UNIT SKILL BRANCHES",
+    "baseline": "soulsbo-main(1).zip",
+    "engine": "sistemas.gwent.aplicar_jogada",
+    "method": "Positive branch tests for selected generic unit effects plus negative condition tests; synthetic fixtures; Common rarity."
+  },
+  "counts": {
+    "assertions": 39,
+    "passed": 39,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "retaliacao_behind_plus1",
+      "status": "passed",
+      "skill": "retaliacao",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "impeto_ahead_plus1",
+      "status": "passed",
+      "skill": "impeto",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "ultimo_folego_round3_plus1",
+      "status": "passed",
+      "skill": "ultimo_folego",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "contragolpe_behind_plus2",
+      "status": "passed",
+      "skill": "contragolpe",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "encadeamento_same_row_plus2",
+      "status": "passed",
+      "skill": "encadeamento",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "adaptacao_other_row_plus1",
+      "status": "passed",
+      "skill": "adaptacao",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "sangue_frio_tied_plus2",
+      "status": "passed",
+      "skill": "sangue_frio",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "instinto_behind_plus2",
+      "status": "passed",
+      "skill": "instinto",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "precisao_ranged_plus1",
+      "status": "passed",
+      "skill": "precisao",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "cacador_arcano_enemy_moon_plus1",
+      "status": "passed",
+      "skill": "cacador_arcano",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "quebra_ritmo_enemy_last_row_plus1",
+      "status": "passed",
+      "skill": "quebra_ritmo",
+      "expected_bonus": 1,
+      "observed_bonus": 1
+    },
+    {
+      "case": "lei_primeva_round1_plus2",
+      "status": "passed",
+      "skill": "lei_primeva",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "decreto_soberano_reduces_all_enemy_bonuses",
+      "status": "passed",
+      "skill": "decreto_soberano",
+      "target_bonus_after": 0
+    },
+    {
+      "case": "olho_tempestade_weather_plus2",
+      "status": "passed",
+      "skill": "olho_tempestade",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "fome_abismo_behind_plus2",
+      "status": "passed",
+      "skill": "fome_abismo",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "paradoxo_eterno_round3_after_enemy_win_plus2",
+      "status": "passed",
+      "skill": "paradoxo_eterno",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "guardiao_fileira_one_per_ally_capped_three",
+      "status": "passed",
+      "skill": "guardiao_fileira",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "cacador_solitario_empty_row_plus2",
+      "status": "passed",
+      "skill": "cacador_solitario",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "estandarte_buffs_same_row_allies",
+      "status": "passed",
+      "skill": "estandarte",
+      "same_row_allies_buffed": 2
+    },
+    {
+      "case": "resistencia_climatica_weather_resist_two",
+      "status": "passed",
+      "skill": "resistencia_climatica",
+      "weather_resist": 2
+    },
+    {
+      "case": "eco_arcano_special_discard_plus2",
+      "status": "passed",
+      "skill": "eco_arcano",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "escudo_ferro_enters_with_shield",
+      "status": "passed",
+      "skill": "escudo_ferro",
+      "shield": 1
+    },
+    {
+      "case": "devorar_sacrifices_weakest_and_caps_bonus",
+      "status": "passed",
+      "skill": "devorar",
+      "victim": "devour_victim",
+      "card_bonus": 3
+    },
+    {
+      "case": "ressurgir_revives_highest_power_le_five",
+      "status": "passed",
+      "skill": "ressurgir",
+      "revived": "discard_unit_4"
+    },
+    {
+      "case": "dupla_fornalha_same_row_plus2",
+      "status": "passed",
+      "skill": "dupla_fornalha",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "irmandade_veu_other_row_plus2",
+      "status": "passed",
+      "skill": "irmandade_veu",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "circulo_arcano_special_discard_plus2",
+      "status": "passed",
+      "skill": "circulo_arcano",
+      "expected_bonus": 2,
+      "observed_bonus": 2
+    },
+    {
+      "case": "negative_retaliacao_not_behind",
+      "status": "passed",
+      "skill": "retaliacao",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_impeto_not_ahead",
+      "status": "passed",
+      "skill": "impeto",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_primeira_luz_not_round1",
+      "status": "passed",
+      "skill": "primeira_luz",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_ultimo_folego_not_round3",
+      "status": "passed",
+      "skill": "ultimo_folego",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_encadeamento_other_row",
+      "status": "passed",
+      "skill": "encadeamento",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_adaptacao_no_previous_row",
+      "status": "passed",
+      "skill": "adaptacao",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_sangue_frio_not_tied",
+      "status": "passed",
+      "skill": "sangue_frio",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_precisao_not_ranged",
+      "status": "passed",
+      "skill": "precisao",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_quebra_ritmo_different_enemy_row",
+      "status": "passed",
+      "skill": "quebra_ritmo",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_olho_tempestade_no_weather",
+      "status": "passed",
+      "skill": "olho_tempestade",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_cacador_solitario_same_row_ally",
+      "status": "passed",
+      "skill": "cacador_solitario",
+      "without_condition_bonus": 0
+    },
+    {
+      "case": "negative_eco_arcano_no_special_discard",
+      "status": "passed",
+      "skill": "eco_arcano",
+      "without_condition_bonus": 0
+    }
+  ],
+  "limitations": [
+    "This suite covers generic unit effects, not all 56 direct handler IDs; special cards and relics remain partly covered by the original 13 behavior assertions and smoke tests.",
+    "Conditional unit effects are checked in selected positive and negative states only; multi-state thresholds and all rarity interactions remain open.",
+    "Synthetic fixtures do not estimate condition frequency, effect EV, faction win rate, or real deck behavior.",
+    "No production database, server, Discord action, web frontend, or image pipeline is involved."
+  ]
+}

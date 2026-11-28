@@ -1,0 +1,1031 @@
+{
+  "metadata": {
+    "document": "Combo and faction passive behavior assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; ALL DECLARED COMBOS AND FOUR FACTION PASSIVES IN SYNTHETIC STATES",
+    "baseline": "soulsbo-main(1).zip",
+    "engine": "sistemas.gwent._aplicar_combo_de_cartas, aplicar_jogada, _resolve_round"
+  },
+  "counts": {
+    "assertions": 87,
+    "passed": 87,
+    "failed": 0
+  },
+  "combo_count": 27,
+  "combo_ids": [
+    "cinzas_fornalha",
+    "veu_sombrio",
+    "vazio_astral",
+    "mare_abissal",
+    "juramento_estandarte",
+    "passos_duas_luas",
+    "eco_convergente",
+    "chama_dupla",
+    "muralha_inabalavel",
+    "banquete_guerra",
+    "procissao_fantasma",
+    "caravana_saqueadora",
+    "ritual_runico",
+    "eclipse_voraz",
+    "rota_peregrina",
+    "juramento_erdtree",
+    "convergencia_lunar",
+    "ritual_dinastia",
+    "v75_juramento_dois_crisol",
+    "v75_banquete_hemorragia",
+    "v75_convergencia_gelida",
+    "fe_gloria",
+    "fe_devocao",
+    "fe_evangelho",
+    "fe_irmandade",
+    "fe_soberania",
+    "fe_sacerdos"
+  ],
+  "cases": [
+    {
+      "case": "combo_positive_cinzas_fornalha",
+      "status": "passed",
+      "combo_id": "cinzas_fornalha",
+      "combo_name": "Aliança da Árvore Áurea",
+      "current_card_id": "chefe_guardiao_cinzas",
+      "partner_card_ids": [
+        "gwent_unidade_baluarte"
+      ],
+      "required_tags": [
+        "cinzas",
+        "fornalha"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_veu_sombrio",
+      "status": "passed",
+      "combo_id": "veu_sombrio",
+      "combo_name": "Caçada da Faca Negra",
+      "current_card_id": "chefe_cervo_sombrio",
+      "partner_card_ids": [
+        "chefe_aparicao_veio"
+      ],
+      "required_tags": [
+        "veu_sombrio"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_vazio_astral",
+      "status": "passed",
+      "combo_id": "vazio_astral",
+      "combo_name": "Alinhamento Astral",
+      "current_card_id": "magia_nevoa_antiga",
+      "partner_card_ids": [
+        "chefe_dama_vazio"
+      ],
+      "required_tags": [
+        "astral",
+        "vazio"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_mare_abissal",
+      "status": "passed",
+      "combo_id": "mare_abissal",
+      "combo_name": "Maré Abissal",
+      "current_card_id": "chefe_rei_afogado",
+      "partner_card_ids": [
+        "covenant_coroa_abismo"
+      ],
+      "required_tags": [
+        "abismo"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_juramento_estandarte",
+      "status": "passed",
+      "combo_id": "juramento_estandarte",
+      "combo_name": "Juramento de Leyndell",
+      "current_card_id": "gwent_unidade_portaestandarte",
+      "partner_card_ids": [
+        "covenant_irmandade_ferro"
+      ],
+      "required_tags": [
+        "estandarte"
+      ],
+      "bonus_to_completing_card": 1,
+      "team_bonus_to_existing_same_row_ally": 1
+    },
+    {
+      "case": "combo_positive_passos_duas_luas",
+      "status": "passed",
+      "combo_id": "passos_duas_luas",
+      "combo_name": "Dança da Lua Negra",
+      "current_card_id": "gwent_unidade_dupla_veu",
+      "partner_card_ids": [
+        "arma_duas_luas"
+      ],
+      "required_tags": [
+        "duas_luas"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_eco_convergente",
+      "status": "passed",
+      "combo_id": "eco_convergente",
+      "combo_name": "Eco das Pedras Cintilantes",
+      "current_card_id": "magia_nevoa_antiga",
+      "partner_card_ids": [
+        "gwent_unidade_eco"
+      ],
+      "required_tags": [
+        "astral",
+        "eco"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_chama_dupla",
+      "status": "passed",
+      "combo_id": "chama_dupla",
+      "combo_name": "Chamas do Monte Gelmir",
+      "current_card_id": "magia_brasa_errante",
+      "partner_card_ids": [
+        "magia_chama_fria"
+      ],
+      "required_tags": [
+        "chama"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_muralha_inabalavel",
+      "status": "passed",
+      "combo_id": "muralha_inabalavel",
+      "combo_name": "Defesa de Leyndell",
+      "current_card_id": "gwent_unidade_sentinela_rubra",
+      "partner_card_ids": [
+        "gwent_unidade_veterano_cercos"
+      ],
+      "required_tags": [
+        "muralha"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 1
+    },
+    {
+      "case": "combo_positive_banquete_guerra",
+      "status": "passed",
+      "combo_id": "banquete_guerra",
+      "combo_name": "Banquete de Sangue",
+      "current_card_id": "gwent_unidade_carniceiro_forja",
+      "partner_card_ids": [
+        "gwent_unidade_intendente"
+      ],
+      "required_tags": [
+        "banquete"
+      ],
+      "bonus_to_completing_card": 3,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_procissao_fantasma",
+      "status": "passed",
+      "combo_id": "procissao_fantasma",
+      "combo_name": "Procissão dos que Vivem na Morte",
+      "current_card_id": "gwent_unidade_cacadora_fantasma",
+      "partner_card_ids": [
+        "gwent_unidade_cantora_lamentos"
+      ],
+      "required_tags": [
+        "fantasmas"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 1
+    },
+    {
+      "case": "combo_positive_caravana_saqueadora",
+      "status": "passed",
+      "combo_id": "caravana_saqueadora",
+      "combo_name": "Saque da Cidade Eterna",
+      "current_card_id": "gwent_unidade_saqueadora_veu",
+      "partner_card_ids": [
+        "gwent_unidade_contrabandista"
+      ],
+      "required_tags": [
+        "caravana"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_ritual_runico",
+      "status": "passed",
+      "combo_id": "ritual_runico",
+      "combo_name": "Ritual das Runas",
+      "current_card_id": "gwent_unidade_guardiao_runas",
+      "partner_card_ids": [
+        "gwent_unidade_necromante"
+      ],
+      "required_tags": [
+        "runico"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 1
+    },
+    {
+      "case": "combo_positive_eclipse_voraz",
+      "status": "passed",
+      "combo_id": "eclipse_voraz",
+      "combo_name": "Eclipse Sanguíneo",
+      "current_card_id": "gwent_unidade_devorador_mana",
+      "partner_card_ids": [
+        "gwent_unidade_bibliotecaria"
+      ],
+      "required_tags": [
+        "eclipse_voraz"
+      ],
+      "bonus_to_completing_card": 3,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_rota_peregrina",
+      "status": "passed",
+      "combo_id": "rota_peregrina",
+      "combo_name": "Caminho do Maculado",
+      "current_card_id": "arma_lamina_peregrino",
+      "partner_card_ids": [
+        "arma_arco_peregrino"
+      ],
+      "required_tags": [
+        "peregrino"
+      ],
+      "bonus_to_completing_card": 1,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_juramento_erdtree",
+      "status": "passed",
+      "combo_id": "juramento_erdtree",
+      "combo_name": "Juramento da Árvore Áurea",
+      "current_card_id": "chefe_guardiao_cinzas",
+      "partner_card_ids": [
+        "gwent_unidade_sentinela_rubra"
+      ],
+      "required_tags": [
+        "ordem_dourada"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 1
+    },
+    {
+      "case": "combo_positive_convergencia_lunar",
+      "status": "passed",
+      "combo_id": "convergencia_lunar",
+      "combo_name": "Convergência da Lua Negra",
+      "current_card_id": "arma_duas_luas",
+      "partner_card_ids": [
+        "magia_nevoa_antiga"
+      ],
+      "required_tags": [
+        "lua_cariana"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_ritual_dinastia",
+      "status": "passed",
+      "combo_id": "ritual_dinastia",
+      "combo_name": "Ritual do Véu Carmesim",
+      "current_card_id": "chefe_rei_afogado",
+      "partner_card_ids": [
+        "gwent_unidade_carniceiro_forja"
+      ],
+      "required_tags": [
+        "sangue_mohgwyn"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 1
+    },
+    {
+      "case": "combo_positive_v75_juramento_dois_crisol",
+      "status": "passed",
+      "combo_id": "v75_juramento_dois_crisol",
+      "combo_name": "Juramento do Crisol e da Graça",
+      "current_card_id": "gwent_v75_ordem_veterano_juramento",
+      "partner_card_ids": [
+        "gwent_v75_ordem_guardiao_crisol"
+      ],
+      "required_tags": [
+        "v75_crucible_guard",
+        "v75_erdtree_oath"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_v75_banquete_hemorragia",
+      "status": "passed",
+      "combo_id": "v75_banquete_hemorragia",
+      "combo_name": "Banquete da Hemorragia",
+      "current_card_id": "gwent_v75_veu_acolito_sangue",
+      "partner_card_ids": [
+        "gwent_v75_veu_devota_hemorragia"
+      ],
+      "required_tags": [
+        "v75_blood_feast",
+        "v75_blood_mark"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_v75_convergencia_gelida",
+      "status": "passed",
+      "combo_id": "v75_convergencia_gelida",
+      "combo_name": "Convergência da Geada Lunar",
+      "current_card_id": "gwent_v75_lua_oraculo_geada",
+      "partner_card_ids": [
+        "gwent_v75_lua_cartografo_lunar"
+      ],
+      "required_tags": [
+        "v75_frost_lore",
+        "v75_lunar_paths"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_fe_gloria",
+      "status": "passed",
+      "combo_id": "fe_gloria",
+      "combo_name": "Glória Divina",
+      "current_card_id": "luterano_cruzado",
+      "partner_card_ids": [
+        "luterano_missionario"
+      ],
+      "required_tags": [
+        "fe",
+        "gloria_divina"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_fe_devocao",
+      "status": "passed",
+      "combo_id": "fe_devocao",
+      "combo_name": "Devoção",
+      "current_card_id": "luterano_missionario",
+      "partner_card_ids": [
+        "luterano_bispo"
+      ],
+      "required_tags": [
+        "devocao",
+        "fe"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_fe_evangelho",
+      "status": "passed",
+      "combo_id": "fe_evangelho",
+      "combo_name": "Evangelho",
+      "current_card_id": "luterano_missionario",
+      "partner_card_ids": [
+        "luterano_papa"
+      ],
+      "required_tags": [
+        "evangelho",
+        "fe"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_fe_irmandade",
+      "status": "passed",
+      "combo_id": "fe_irmandade",
+      "combo_name": "Irmandade Esquecida",
+      "current_card_id": "luterano_papa",
+      "partner_card_ids": [
+        "luterano_irmao"
+      ],
+      "required_tags": [
+        "fe",
+        "irmandade"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_fe_soberania",
+      "status": "passed",
+      "combo_id": "fe_soberania",
+      "combo_name": "Soberania Divina",
+      "current_card_id": "luterano_papa",
+      "partner_card_ids": [
+        "luterano_sacerdote"
+      ],
+      "required_tags": [
+        "fe",
+        "soberania"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_positive_fe_sacerdos",
+      "status": "passed",
+      "combo_id": "fe_sacerdos",
+      "combo_name": "Sacerdócio",
+      "current_card_id": "luterano_sacerdote",
+      "partner_card_ids": [
+        "luterano_diacon"
+      ],
+      "required_tags": [
+        "fe",
+        "sacerdos"
+      ],
+      "bonus_to_completing_card": 2,
+      "team_bonus_to_existing_same_row_ally": 0
+    },
+    {
+      "case": "combo_negative_incomplete_cinzas_fornalha",
+      "status": "passed",
+      "combo_id": "cinzas_fornalha",
+      "current_card_id": "chefe_guardiao_cinzas",
+      "omitted_partner_ids": [
+        "gwent_unidade_baluarte"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_veu_sombrio",
+      "status": "passed",
+      "combo_id": "veu_sombrio",
+      "current_card_id": "chefe_cervo_sombrio",
+      "omitted_partner_ids": [
+        "chefe_aparicao_veio"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_vazio_astral",
+      "status": "passed",
+      "combo_id": "vazio_astral",
+      "current_card_id": "magia_nevoa_antiga",
+      "omitted_partner_ids": [
+        "chefe_dama_vazio"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_mare_abissal",
+      "status": "passed",
+      "combo_id": "mare_abissal",
+      "current_card_id": "chefe_rei_afogado",
+      "omitted_partner_ids": [
+        "covenant_coroa_abismo"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_juramento_estandarte",
+      "status": "passed",
+      "combo_id": "juramento_estandarte",
+      "current_card_id": "gwent_unidade_portaestandarte",
+      "omitted_partner_ids": [
+        "covenant_irmandade_ferro"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_passos_duas_luas",
+      "status": "passed",
+      "combo_id": "passos_duas_luas",
+      "current_card_id": "gwent_unidade_dupla_veu",
+      "omitted_partner_ids": [
+        "arma_duas_luas"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_eco_convergente",
+      "status": "passed",
+      "combo_id": "eco_convergente",
+      "current_card_id": "magia_nevoa_antiga",
+      "omitted_partner_ids": [
+        "gwent_unidade_eco"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_chama_dupla",
+      "status": "passed",
+      "combo_id": "chama_dupla",
+      "current_card_id": "magia_brasa_errante",
+      "omitted_partner_ids": [
+        "magia_chama_fria"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_muralha_inabalavel",
+      "status": "passed",
+      "combo_id": "muralha_inabalavel",
+      "current_card_id": "gwent_unidade_sentinela_rubra",
+      "omitted_partner_ids": [
+        "gwent_unidade_veterano_cercos"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_banquete_guerra",
+      "status": "passed",
+      "combo_id": "banquete_guerra",
+      "current_card_id": "gwent_unidade_carniceiro_forja",
+      "omitted_partner_ids": [
+        "gwent_unidade_intendente"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_procissao_fantasma",
+      "status": "passed",
+      "combo_id": "procissao_fantasma",
+      "current_card_id": "gwent_unidade_cacadora_fantasma",
+      "omitted_partner_ids": [
+        "gwent_unidade_cantora_lamentos"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_caravana_saqueadora",
+      "status": "passed",
+      "combo_id": "caravana_saqueadora",
+      "current_card_id": "gwent_unidade_saqueadora_veu",
+      "omitted_partner_ids": [
+        "gwent_unidade_contrabandista"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_ritual_runico",
+      "status": "passed",
+      "combo_id": "ritual_runico",
+      "current_card_id": "gwent_unidade_guardiao_runas",
+      "omitted_partner_ids": [
+        "gwent_unidade_necromante"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_eclipse_voraz",
+      "status": "passed",
+      "combo_id": "eclipse_voraz",
+      "current_card_id": "gwent_unidade_devorador_mana",
+      "omitted_partner_ids": [
+        "gwent_unidade_bibliotecaria"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_rota_peregrina",
+      "status": "passed",
+      "combo_id": "rota_peregrina",
+      "current_card_id": "arma_lamina_peregrino",
+      "omitted_partner_ids": [
+        "arma_arco_peregrino"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_juramento_erdtree",
+      "status": "passed",
+      "combo_id": "juramento_erdtree",
+      "current_card_id": "chefe_guardiao_cinzas",
+      "omitted_partner_ids": [
+        "gwent_unidade_sentinela_rubra"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_convergencia_lunar",
+      "status": "passed",
+      "combo_id": "convergencia_lunar",
+      "current_card_id": "arma_duas_luas",
+      "omitted_partner_ids": [
+        "magia_nevoa_antiga"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_ritual_dinastia",
+      "status": "passed",
+      "combo_id": "ritual_dinastia",
+      "current_card_id": "chefe_rei_afogado",
+      "omitted_partner_ids": [
+        "gwent_unidade_carniceiro_forja"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_v75_juramento_dois_crisol",
+      "status": "passed",
+      "combo_id": "v75_juramento_dois_crisol",
+      "current_card_id": "gwent_v75_ordem_veterano_juramento",
+      "omitted_partner_ids": [
+        "gwent_v75_ordem_guardiao_crisol"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_v75_banquete_hemorragia",
+      "status": "passed",
+      "combo_id": "v75_banquete_hemorragia",
+      "current_card_id": "gwent_v75_veu_acolito_sangue",
+      "omitted_partner_ids": [
+        "gwent_v75_veu_devota_hemorragia"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_v75_convergencia_gelida",
+      "status": "passed",
+      "combo_id": "v75_convergencia_gelida",
+      "current_card_id": "gwent_v75_lua_oraculo_geada",
+      "omitted_partner_ids": [
+        "gwent_v75_lua_cartografo_lunar"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_fe_gloria",
+      "status": "passed",
+      "combo_id": "fe_gloria",
+      "current_card_id": "luterano_cruzado",
+      "omitted_partner_ids": [
+        "luterano_missionario"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_fe_devocao",
+      "status": "passed",
+      "combo_id": "fe_devocao",
+      "current_card_id": "luterano_missionario",
+      "omitted_partner_ids": [
+        "luterano_bispo"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_fe_evangelho",
+      "status": "passed",
+      "combo_id": "fe_evangelho",
+      "current_card_id": "luterano_missionario",
+      "omitted_partner_ids": [
+        "luterano_papa"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_fe_irmandade",
+      "status": "passed",
+      "combo_id": "fe_irmandade",
+      "current_card_id": "luterano_papa",
+      "omitted_partner_ids": [
+        "luterano_irmao"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_fe_soberania",
+      "status": "passed",
+      "combo_id": "fe_soberania",
+      "current_card_id": "luterano_papa",
+      "omitted_partner_ids": [
+        "luterano_sacerdote"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_negative_incomplete_fe_sacerdos",
+      "status": "passed",
+      "combo_id": "fe_sacerdos",
+      "current_card_id": "luterano_sacerdote",
+      "omitted_partner_ids": [
+        "luterano_diacon"
+      ],
+      "not_activated": true
+    },
+    {
+      "case": "combo_once_per_round_cinzas_fornalha",
+      "status": "passed",
+      "combo_id": "cinzas_fornalha",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "juramento_erdtree",
+      "resolver_return_on_second_card": "Juramento da Árvore Áurea"
+    },
+    {
+      "case": "combo_once_per_round_veu_sombrio",
+      "status": "passed",
+      "combo_id": "veu_sombrio",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_vazio_astral",
+      "status": "passed",
+      "combo_id": "vazio_astral",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "convergencia_lunar",
+      "resolver_return_on_second_card": "Convergência da Lua Negra"
+    },
+    {
+      "case": "combo_once_per_round_mare_abissal",
+      "status": "passed",
+      "combo_id": "mare_abissal",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "ritual_dinastia",
+      "resolver_return_on_second_card": "Ritual do Véu Carmesim"
+    },
+    {
+      "case": "combo_once_per_round_juramento_estandarte",
+      "status": "passed",
+      "combo_id": "juramento_estandarte",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_passos_duas_luas",
+      "status": "passed",
+      "combo_id": "passos_duas_luas",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_eco_convergente",
+      "status": "passed",
+      "combo_id": "eco_convergente",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_chama_dupla",
+      "status": "passed",
+      "combo_id": "chama_dupla",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_muralha_inabalavel",
+      "status": "passed",
+      "combo_id": "muralha_inabalavel",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_banquete_guerra",
+      "status": "passed",
+      "combo_id": "banquete_guerra",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_procissao_fantasma",
+      "status": "passed",
+      "combo_id": "procissao_fantasma",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_caravana_saqueadora",
+      "status": "passed",
+      "combo_id": "caravana_saqueadora",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_ritual_runico",
+      "status": "passed",
+      "combo_id": "ritual_runico",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_eclipse_voraz",
+      "status": "passed",
+      "combo_id": "eclipse_voraz",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_rota_peregrina",
+      "status": "passed",
+      "combo_id": "rota_peregrina",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_juramento_erdtree",
+      "status": "passed",
+      "combo_id": "juramento_erdtree",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_convergencia_lunar",
+      "status": "passed",
+      "combo_id": "convergencia_lunar",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_ritual_dinastia",
+      "status": "passed",
+      "combo_id": "ritual_dinastia",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_v75_juramento_dois_crisol",
+      "status": "passed",
+      "combo_id": "v75_juramento_dois_crisol",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_v75_banquete_hemorragia",
+      "status": "passed",
+      "combo_id": "v75_banquete_hemorragia",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_v75_convergencia_gelida",
+      "status": "passed",
+      "combo_id": "v75_convergencia_gelida",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_once_per_round_fe_gloria",
+      "status": "passed",
+      "combo_id": "fe_gloria",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "fe_evangelho",
+      "resolver_return_on_second_card": "Evangelho"
+    },
+    {
+      "case": "combo_once_per_round_fe_devocao",
+      "status": "passed",
+      "combo_id": "fe_devocao",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "fe_evangelho",
+      "resolver_return_on_second_card": "Evangelho"
+    },
+    {
+      "case": "combo_once_per_round_fe_evangelho",
+      "status": "passed",
+      "combo_id": "fe_evangelho",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "fe_soberania",
+      "resolver_return_on_second_card": "Soberania Divina"
+    },
+    {
+      "case": "combo_once_per_round_fe_irmandade",
+      "status": "passed",
+      "combo_id": "fe_irmandade",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "fe_soberania",
+      "resolver_return_on_second_card": "Soberania Divina"
+    },
+    {
+      "case": "combo_once_per_round_fe_soberania",
+      "status": "passed",
+      "combo_id": "fe_soberania",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": "fe_sacerdos",
+      "resolver_return_on_second_card": "Sacerdócio"
+    },
+    {
+      "case": "combo_once_per_round_fe_sacerdos",
+      "status": "passed",
+      "combo_id": "fe_sacerdos",
+      "first_activation": true,
+      "second_activation_of_same_combo_blocked": true,
+      "other_combo_triggered_on_second_card": null,
+      "resolver_return_on_second_card": null
+    },
+    {
+      "case": "combo_empty_tag_card_does_not_trigger",
+      "status": "passed",
+      "no_tag_card": "no_synergy_tag_card",
+      "combo": null
+    },
+    {
+      "case": "faction_passive_ordem_áurea",
+      "status": "passed",
+      "faction": "Ordem Áurea",
+      "foreign_unit_did_not_consume_passive": true,
+      "first_matching_unit_bonus": 1,
+      "second_matching_unit_bonus": 0,
+      "reset_after_round": true
+    },
+    {
+      "case": "faction_passive_lua_negra",
+      "status": "passed",
+      "faction": "Lua Negra",
+      "foreign_unit_did_not_consume_passive": true,
+      "first_matching_unit_bonus": 1,
+      "second_matching_unit_bonus": 0,
+      "reset_after_round": true
+    },
+    {
+      "case": "faction_passive_véu_carmesim",
+      "status": "passed",
+      "faction": "Véu Carmesim",
+      "foreign_unit_did_not_consume_passive": true,
+      "first_matching_unit_bonus": 1,
+      "second_matching_unit_bonus": 0,
+      "reset_after_round": true
+    },
+    {
+      "case": "faction_passive_os_esquecidos",
+      "status": "passed",
+      "faction": "Os Esquecidos",
+      "foreign_unit_did_not_consume_passive": true,
+      "first_matching_unit_bonus": 1,
+      "second_matching_unit_bonus": 0,
+      "reset_after_round": true
+    },
+    {
+      "case": "special_cards_do_not_consume_unit_faction_passive",
+      "status": "passed",
+      "special_card_id": "gwent_especial_chifre",
+      "passive_consumed": false,
+      "passive_bonus_applied": 0
+    }
+  ],
+  "limitations": [
+    "Each combo has one concrete activating card pair discovered from the current tag map and verified against the actual resolver; alternate card combinations and all tag permutations are not exhausted.",
+    "The negative combo cases isolate the tested combo by marking other combos used; they verify missing partner/participant behavior, not all overlapping-combo precedence permutations.",
+    "Faction passive tests cover each faction's foreign-card, first matching unit, second matching unit and round-reset behavior; they do not test every faction-specific card identity or rarity modifier.",
+    "The special-card test confirms the separate special branch does not consume the unit-only faction passive in the tested catalog card.",
+    "Synthetic fixtures are not complete matches and do not measure win rate, effect EV or competitive balance; no DB/API/frontend/Discord/R2 integration is exercised."
+  ]
+}

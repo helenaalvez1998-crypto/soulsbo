@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "document": "Special and relic effect behavioral assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; SELECTED SPECIAL/RELIC BRANCHES",
+    "baseline": "soulsbo-main(1).zip",
+    "engine": "sistemas.gwent.aplicar_jogada; public relic action path tested"
+  },
+  "counts": {
+    "assertions": 18,
+    "passed": 18,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "special_clima_sets_weather",
+      "status": "passed",
+      "skill": "gwent_clima",
+      "weather_ranged": 1
+    },
+    {
+      "case": "special_nevoa_marks_row",
+      "status": "passed",
+      "skill": "gwent_nevoa",
+      "enemy_marks": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "special_geada_marks_all_enemies",
+      "status": "passed",
+      "skill": "gwent_geada",
+      "all_enemy_marks": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "special_chuva_second_mark_bleeds",
+      "status": "passed",
+      "skill": "gwent_chuva",
+      "second_mark_bonus_after": 1,
+      "new_mark": 1
+    },
+    {
+      "case": "special_medico_returns_discard_to_hand",
+      "status": "passed",
+      "skill": "gwent_medico",
+      "returned_to_hand": "doctor_target"
+    },
+    {
+      "case": "special_vinculo_buffs_two_allies",
+      "status": "passed",
+      "skill": "gwent_vinculo",
+      "ally_bonuses": [
+        2,
+        2
+      ]
+    },
+    {
+      "case": "special_muralha_buffs_selected_row",
+      "status": "passed",
+      "skill": "gwent_muralha",
+      "target_bonuses": [
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "case": "special_geada_cariana_caps_existing_marks",
+      "status": "passed",
+      "skill": "gwent_geada_cariana",
+      "marks_after": [
+        1,
+        2
+      ]
+    },
+    {
+      "case": "special_podrida_second_mark_corrosion",
+      "status": "passed",
+      "skill": "gwent_podrida",
+      "old_mark_target": [
+        2,
+        2
+      ],
+      "fresh_mark_target": [
+        1,
+        2
+      ]
+    },
+    {
+      "case": "special_loucura_second_mark_removes_positive_bonus",
+      "status": "passed",
+      "skill": "gwent_loucura",
+      "old_mark_target": [
+        2,
+        0
+      ],
+      "fresh_mark_target": [
+        1,
+        2
+      ]
+    },
+    {
+      "case": "special_chama_purifies_frost_and_buffs",
+      "status": "passed",
+      "skill": "gwent_chama",
+      "purified_unit_bonus": 1,
+      "untouched_unit_bonus": 0
+    },
+    {
+      "case": "relic_godrick_allies_plus1",
+      "status": "passed",
+      "relic": "reliquia_grande_runa_godrick",
+      "ally_bonuses": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "relic_renala_purifies",
+      "status": "passed",
+      "relic": "reliquia_runa_nao_nascidos",
+      "purified": 2
+    },
+    {
+      "case": "relic_morte_reduces_best_bonus_per_row",
+      "status": "passed",
+      "relic": "reliquia_runa_morte",
+      "row_targets_after": [
+        1,
+        0
+      ],
+      "non_selected_bonus": 2
+    },
+    {
+      "case": "relic_night_mode_applies_frost",
+      "status": "passed",
+      "relic": "reliquia_noite_chama",
+      "mode": "night",
+      "enemy_marks": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "relic_black_blade_targets_and_consumes",
+      "status": "passed",
+      "relic": "reliquia_lamina_negra",
+      "target_bonus_after": 1,
+      "relic_consumed": true
+    },
+    {
+      "case": "relic_margit_cuffs_zeroes_positive_bonus",
+      "status": "passed",
+      "relic": "reliquia_algemas_margit",
+      "positive_zeroed": true,
+      "negative_preserved": true
+    },
+    {
+      "case": "negative_relic_black_blade_shield_blocks_without_consuming_relic",
+      "status": "passed",
+      "relic": "reliquia_lamina_negra",
+      "shield_consumed": true,
+      "relic_still_available": true
+    }
+  ],
+  "limitations": [
+    "These tests cover the additional special handlers and all six relics in selected Common/specific states; rarity scaling is not tested.",
+    "Multiple-target caps, shield/target edge cases for every special, and full UI target-option parity remain open.",
+    "Leader abilities are not included in this suite and need their own action tests.",
+    "Synthetic boards do not estimate the frequency or competitive value of the effects.",
+    "No persistent database, API, site, Discord, R2, or production match is involved."
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "document": "Lifecycle effect behavioral assertions v0.1",
+    "status": "DIAGNOSTIC ONLY; CONTROLLED ROUND-END/REMOVAL CASES",
+    "engine": "sistemas.gwent._remover_unidade and _resolve_round",
+    "baseline": "soulsbo-main(1).zip"
+  },
+  "counts": {
+    "assertions": 7,
+    "passed": 7,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "vinganca_death_triggers_same_row_only",
+      "status": "passed",
+      "event": "vengeance_victim caiu. Vingança: +1 para 1 aliado(s).",
+      "same_row_bonus": 1,
+      "other_row_bonus": 0
+    },
+    {
+      "case": "vinganca_shield_blocks_death_trigger",
+      "status": "passed",
+      "event": "vengeance_shielded resistiu graças ao escudo.",
+      "victim_remains": true,
+      "ally_bonus": 0
+    },
+    {
+      "case": "espolios_winner_draws",
+      "status": "passed",
+      "cards_drawn": 1,
+      "drawn": "loot_card"
+    },
+    {
+      "case": "espolios_loser_does_not_draw",
+      "status": "passed",
+      "cards_drawn": 0,
+      "draw_pile_remaining": 1
+    },
+    {
+      "case": "gloria_winner_keeps_only_strongest",
+      "status": "passed",
+      "retained": "gloria_strong",
+      "discarded": [
+        "gloria_weak",
+        "non_gloria_ally"
+      ]
+    },
+    {
+      "case": "gloria_loser_discards_all",
+      "status": "passed",
+      "retained": false,
+      "discarded": true
+    },
+    {
+      "case": "sobrevivente_keeps_strongest_round_end",
+      "status": "passed",
+      "declared_effect": "survive round end",
+      "actual": "kept (hook implemented v0.1 deck-budget step)"
+    }
+  ],
+  "limitations": [
+    "Synthetic boards only; does not model player decision-making or full match win rate.",
+    "The suite tests the current hidden Gloria behavior as observed, not whether that behavior is approved design.",
+    "Sobrevivente's failure is evidence of a missing hook in the current source; it is not a claim that the card exists in the 137-card catalogue."
+  ]
+}

@@ -1,0 +1,1152 @@
+{
+  "metadata": {
+    "document": "Catalogo de pontuação EFP v0.1",
+    "generated_at": "2026-11-27",
+    "source_baseline": "soulsbo-main(1).zip",
+    "status": "PROPOSTA NÃO APROVADA; valores estimados, não medidos em partidas",
+    "unit": "EFP (pontos estimados de força do efeito)",
+    "warning": "Não usar estes pontos para alterar cartas de produção sem simulação, revisão de parâmetros e aprovação do balanceamento."
+  },
+  "generic_skills": [
+    {
+      "id": "primeira_luz",
+      "name": "Graça Dourada",
+      "description": "Na primeira rodada, ganha +1 de poder ao entrar em campo.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "retaliacao",
+      "name": "Retaliação dos Semideuses",
+      "description": "Ganha +1 de poder quando sua pontuação total é menor que a do adversário.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "impeto",
+      "name": "Ímpeto do Lorde",
+      "description": "Ganha +1 de poder quando sua pontuação total é maior que a do adversário.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "ultimo_folego",
+      "name": "Último Suspiro",
+      "description": "Na terceira rodada, ganha +1 de poder ao entrar em campo.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "contragolpe",
+      "name": "Contragolpe",
+      "description": "Ganha +2 de poder quando sua pontuação total é menor que a do adversário.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "encadeamento",
+      "name": "Postura Encadeada",
+      "description": "Ganha +2 de poder se for jogada na mesma fileira que sua última unidade.",
+      "efp_provisional": 1.5,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "adaptacao",
+      "name": "Passo do Peregrino",
+      "description": "Ganha +1 de poder se for jogada em uma fileira diferente da sua última unidade.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "sangue_frio",
+      "name": "Concentração",
+      "description": "Ganha +2 de poder quando os dois jogadores estão com a mesma pontuação.",
+      "efp_provisional": 0.9,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "instinto",
+      "name": "Instinto de Caçador",
+      "description": "Ganha +2 de poder quando sua pontuação total é menor que a do adversário.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "precisao",
+      "name": "Mira Cariana",
+      "description": "Ganha +1 de poder ao entrar na fileira de Longa Distância.",
+      "efp_provisional": 0.9,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "drenagem",
+      "name": "Selo Enfraquecedor",
+      "description": "Diminui em 1 o bônus dos inimigos, até o mínimo de -2.",
+      "efp_provisional": 1.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "cacador_arcano",
+      "name": "Caçador de Feitiços",
+      "description": "Ganha +1 de poder se o adversário tiver uma unidade da Lua Negra ou uma unidade com bônus acima de zero.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "quebra_ritmo",
+      "name": "Ruptura de Postura",
+      "description": "Ganha +1 de poder se o adversário jogou uma unidade na mesma fileira no turno anterior.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "lei_primeva",
+      "name": "Lei Primeva",
+      "description": "Recebe +2 de poder ao entrar na primeira rodada.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "decreto_soberano",
+      "name": "Decreto Soberano",
+      "description": "Reduz em 2 o bônus de todas as unidades inimigas, até o limite de -2.",
+      "efp_provisional": 3.2,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "olho_tempestade",
+      "name": "Olho da Tempestade",
+      "description": "Recebe +2 quando sua fileira estiver sob efeito climático.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "fome_abismo",
+      "name": "Fome do Abismo",
+      "description": "Ganha +2 de poder quando sua pontuação total é menor que a do adversário.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "paradoxo_eterno",
+      "name": "Paradoxo Eterno",
+      "description": "Recebe +2 na terceira rodada se o adversário venceu a segunda.",
+      "efp_provisional": 0.9,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "guardiao_fileira",
+      "name": "Guardião da Fileira",
+      "description": "+1 para cada outra unidade sua na mesma fileira, até +3.",
+      "efp_provisional": 1.8,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "cacador_solitario",
+      "name": "Caçador Solitário",
+      "description": "+2 se não houver outra unidade sua na fileira.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "estandarte",
+      "name": "Estandarte",
+      "description": "Concede +1 às outras unidades aliadas da mesma fileira.",
+      "efp_provisional": 1.5,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "resistencia_climatica",
+      "name": "Resistência Climática",
+      "description": "Ignora até 2 pontos de penalidade climática; sem clima ativo ao entrar, recebe +1.",
+      "efp_provisional": 1.8,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "eco_arcano",
+      "name": "Eco Arcano",
+      "description": "+2 se você tiver uma carta especial no descarte.",
+      "efp_provisional": 1.4,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "gwent_clima",
+      "name": "Tempestade dos Picos",
+      "description": "Escolha uma fileira. A tempestade reduz em 1 o poder efetivo de todas as unidades dos dois lados nessa fileira enquanto o clima estiver ativo.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_nevoa",
+      "name": "Névoa de Sellia",
+      "description": "Aplica 1 marca de Podridão Escarlate a todas as unidades inimigas da fileira escolhida; raridades Lendárias ou superiores aplicam uma segunda marca.",
+      "efp_provisional": 2.0,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_geada",
+      "name": "Lua Gélida",
+      "description": "Aplica 1 marca de Geada a todas as unidades inimigas em campo; raridades Lendárias ou superiores aplicam uma segunda marca.",
+      "efp_provisional": 2.6,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_chuva",
+      "name": "Sangue Corrompido",
+      "description": "Aplica uma marca de Sangramento a todas as unidades inimigas na fileira de Cerco; a segunda marca reduz 2 de bônus (mínimo -2) e consome as marcas.",
+      "efp_provisional": 1.7,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_chifre",
+      "name": "Rugido de Godfrey",
+      "description": "Concede +2 às suas unidades na fileira escolhida até o fim da rodada.",
+      "efp_provisional": 2.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_medico",
+      "name": "Lágrima Sagrada",
+      "description": "Devolve à sua mão uma unidade do seu descarte com poder-base 4 ou menos; você pode escolher o alvo.",
+      "efp_provisional": 2.1,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_queima",
+      "name": "Chama Negra",
+      "description": "Tenta remover a unidade de maior poder efetivo de cada lado; um escudo pode bloquear cada remoção.",
+      "efp_provisional": 3.5,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_purificar",
+      "name": "Lei da Regressão",
+      "description": "Remove todos os efeitos climáticos.",
+      "efp_provisional": 0.7,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_execucao",
+      "name": "Lâmina da Morte Destinada",
+      "description": "Remove uma unidade inimiga escolhida da fileira selecionada se ela tiver poder efetivo 6 ou menos; um escudo pode bloquear a remoção.",
+      "efp_provisional": 3.3,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_vinculo",
+      "name": "Juramento do Crisol",
+      "description": "Se houver ao menos duas unidades aliadas na fileira escolhida, concede +2 a todas elas até o fim da rodada.",
+      "efp_provisional": 2.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_batedor",
+      "name": "Passo do Cão de Caça",
+      "description": "Compra uma carta da reserva, se disponível.",
+      "efp_provisional": 2.0,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_muralha",
+      "name": "Bastião de Leyndell",
+      "description": "Concede +1 às suas unidades na fileira escolhida até o fim da rodada.",
+      "efp_provisional": 1.6,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "vinganca",
+      "name": "Vingança",
+      "description": "Ao cair, concede +1 às unidades aliadas da mesma fileira.",
+      "efp_provisional": 0.9,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "escudo_ferro",
+      "name": "Escudo de Ferro",
+      "description": "Entra com escudo: ignora a primeira remoção sofrida.",
+      "efp_provisional": 1.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "ressurgir",
+      "name": "Ressurgir",
+      "description": "Se houver uma unidade elegível, traz do descarte a mais forte com poder base 5 ou menos diretamente ao campo.",
+      "efp_provisional": 4.0,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "devorar",
+      "name": "Devorar",
+      "description": "Ao entrar, consome a unidade aliada de menor poder efetivo na mesma fileira e recebe bônus igual ao poder dela, até +4.",
+      "efp_provisional": 0.6,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "sobrevivente",
+      "name": "Sobrevivente",
+      "description": "Ao fim da rodada, permanece no campo (a mais forte, se houver várias).",
+      "efp_provisional": null,
+      "status": "declared_without_matching_handler",
+      "notes": [
+        "A definição existe no catálogo, mas não foi localizado handler correspondente na partida; EFP null até resolver ou remover."
+      ]
+    },
+    {
+      "id": "espolios",
+      "name": "Espólios",
+      "description": "Se você vencer a rodada com ela em campo, compra uma carta.",
+      "efp_provisional": 1.0,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "gwent_egide",
+      "name": "Bênção da Árvore Áurea",
+      "description": "Concede escudo a uma unidade sua.",
+      "efp_provisional": 1.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_requiem",
+      "name": "Chamado dos Mortos",
+      "description": "Traz do descarte diretamente ao campo uma unidade com poder base 6 ou menos.",
+      "efp_provisional": 4.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_passo",
+      "name": "Passo do Lobo",
+      "description": "Move uma unidade sua para a fileira escolhida.",
+      "efp_provisional": 0.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "dupla_fornalha",
+      "name": "Pacto da Fornalha",
+      "description": "+2 se houver outra unidade aliada na mesma fileira.",
+      "efp_provisional": 1.5,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "irmandade_veu",
+      "name": "Formação do Véu",
+      "description": "+2 se houver outra unidade aliada em uma fileira diferente.",
+      "efp_provisional": 1.5,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "circulo_arcano",
+      "name": "Círculo de Ressonância",
+      "description": "+2 se houver outra unidade aliada na mesma fileira ou uma carta especial no descarte.",
+      "efp_provisional": 1.5,
+      "status": "estimate_ready",
+      "notes": [
+        "Handler/metadado existente, mas sem atribuição direta a unidade atual segundo a matriz baseline; valor é apenas estimativa caso seja reutilizada."
+      ]
+    },
+    {
+      "id": "gwent_sangramento",
+      "name": "Sangramento",
+      "description": "Marca as unidades inimigas da fileira; a segunda marca reduz o bônus em 2 (mínimo -2) e consome as marcas. Marcas expiram no fim da rodada.",
+      "efp_provisional": 1.7,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_geada_cariana",
+      "name": "Geada Cariana",
+      "description": "Aplica até duas marcas às unidades inimigas da fileira escolhida; cada marca reduz 1 de poder efetivo até o fim da rodada.",
+      "efp_provisional": 2.3,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_podrida",
+      "name": "Podridão Escarlate",
+      "description": "Cada marca reduz 1 de poder efetivo; a segunda também corrói 1 ponto de bônus positivo, se houver. Marcas expiram no fim da rodada.",
+      "efp_provisional": 2.3,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_loucura",
+      "name": "Loucura Frenética",
+      "description": "Cada marca reduz 1 de poder efetivo; a segunda remove todos os bônus positivos da unidade. Marcas expiram no fim da rodada.",
+      "efp_provisional": 2.8,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_chama",
+      "name": "Chama do Gigante",
+      "description": "Remove Geada de todas as suas unidades; cada unidade purificada recebe +1 de poder até o fim da rodada.",
+      "efp_provisional": 2.2,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "gwent_invocacao",
+      "name": "Cinzas dos Lobos Solitários",
+      "description": "Invoca Lobos Espirituais com 3 de poder na fileira escolhida.",
+      "efp_provisional": 3.0,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "reliquia_godrick",
+      "name": "Grande Runa de Godrick",
+      "description": "Exige ao menos uma unidade aliada em campo. Concede +1 de bônus a todas as unidades aliadas.",
+      "efp_provisional": 2.6,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "reliquia_renala",
+      "name": "Grande Runa dos Não Nascidos",
+      "description": "Remove Geada e Podridão das unidades aliadas afetadas; cada unidade purificada recebe +1 de bônus.",
+      "efp_provisional": 2.0,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "reliquia_morte",
+      "name": "Runa da Morte",
+      "description": "Em cada fileira, reduz em até 2 o bônus positivo da unidade inimiga que tiver o maior bônus naquela fileira.",
+      "efp_provisional": 2.4,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "reliquia_noite_chama",
+      "name": "Espada da Noite e da Chama",
+      "description": "Na postura da Noite, aplica Geada a todas as unidades inimigas da fileira escolhida. Na postura da Chama, atinge a unidade de maior poder efetivo: reduz 1 de poder-base e 2 de bônus; Escudo bloqueia o golpe.",
+      "efp_provisional": 3.0,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "reliquia_lamina_negra",
+      "name": "Lâmina Negra",
+      "description": "Na fileira escolhida, reduz em 3 o bônus de uma unidade inimiga (a escolhida ou a de maior poder efetivo). Escudo bloqueia o efeito sem consumir a Relíquia.",
+      "efp_provisional": 2.3,
+      "status": "estimate_ready",
+      "notes": []
+    },
+    {
+      "id": "reliquia_algemas",
+      "name": "Algemas de Margit",
+      "description": "Na fileira escolhida, zera o bônus positivo de uma unidade inimiga (a escolhida ou a de maior bônus); bônus negativos permanecem inalterados.",
+      "efp_provisional": 1.7,
+      "status": "estimate_ready",
+      "notes": []
+    }
+  ],
+  "identity_effects": [
+    {
+      "card_id": "chefe_guardiao_cinzas",
+      "effect_id": "ash_guardian",
+      "name": "Égide das Cinzas",
+      "description": "Ao entrar em campo, dá +1 de bônus a um aliado da mesma fileira. Se já houver um aliado nessa fileira, esta carta também ganha +1.",
+      "efp_provisional": 1.6,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_dama_vazio",
+      "effect_id": "void_rend",
+      "name": "Fenda do Vazio",
+      "description": "Ao entrar em campo, tira 2 pontos de bônus da unidade inimiga mais forte. O bônus dela não pode ficar abaixo de -2.",
+      "efp_provisional": 1.5,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_rei_afogado",
+      "effect_id": "abyss_tithe",
+      "name": "Dízimo do Abismo",
+      "description": "Ganha +2 se você tiver uma unidade no descarte. Se não tiver, ganha +1 caso o adversário tenha mais unidades em campo.",
+      "efp_provisional": 1.4,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_oraculo_ruina",
+      "effect_id": "ruin_omen",
+      "name": "Presságio da Ruína",
+      "description": "Tira 1 ponto de bônus da unidade inimiga mais forte. Também ganha +1 se o adversário estiver vencendo.",
+      "efp_provisional": 1.5,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "arma_duas_luas",
+      "effect_id": "twin_dance",
+      "name": "Dança Espelhada",
+      "description": "Ganha +1 se você tiver outro aliado em uma fileira diferente.",
+      "efp_provisional": 0.8,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "arma_grande_sino",
+      "effect_id": "last_bell",
+      "name": "Sino do Último Bastião",
+      "description": "Ganha +2 quando sua pontuação total for menor que a do adversário.",
+      "efp_provisional": 1.4,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "magia_selo_vigilia",
+      "effect_id": "vigil_seal",
+      "name": "Selo de Vigília",
+      "description": "Reduz em 1 o dano do clima sofrido por esta carta e dá +1 de bônus a um aliado da mesma fileira.",
+      "efp_provisional": 1.5,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "magia_trovao_oco",
+      "effect_id": "hollow_thunder",
+      "name": "Descarga Oca",
+      "description": "Tira 1 ponto de bônus de cada unidade inimiga na mesma fileira.",
+      "efp_provisional": 1.6,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "magia_nevoa_antiga",
+      "effect_id": "ancient_mist",
+      "name": "Névoa Ancestral",
+      "description": "Ganha +2 se houver efeito climático em qualquer fileira.",
+      "efp_provisional": 1.4,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "magia_sol_negro",
+      "effect_id": "devouring_eclipse",
+      "name": "Eclipse Devorador",
+      "description": "Ganha +2 se algum inimigo tiver bônus acima de zero.",
+      "efp_provisional": 1.4,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "covenant_lua_velada",
+      "effect_id": "veiled_moon",
+      "name": "Aliança Lunar",
+      "description": "Esta carta ganha +1 e dá +1 de bônus a um aliado em outra fileira.",
+      "efp_provisional": 1.6,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_malenia_lamina_miquella",
+      "effect_id": "scarlet_bloom",
+      "name": "Flor Escarlate",
+      "description": "Ao entrar em campo, aplica Podridão Escarlate aos inimigos da fileira. Quem já estiver contaminado recebe uma segunda marca.",
+      "efp_provisional": 2.8,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_radahn_flagelo_estrelas",
+      "effect_id": "star_gravity",
+      "name": "Gravidade do Flagelo",
+      "description": "Ao entrar em campo, move o inimigo mais forte para sua fileira e tira 2 pontos de bônus dele.",
+      "efp_provisional": 2.1,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_maliketh_morte_destinada",
+      "effect_id": "destined_death",
+      "name": "Morte Destinada",
+      "description": "Ao entrar em campo, tira até 2 pontos de bônus do inimigo mais forte.",
+      "efp_provisional": 1.5,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_messmer_impalador",
+      "effect_id": "impaling_spear",
+      "name": "Lança do Impalador",
+      "description": "Ao entrar em campo, marca os inimigos da fileira com Sangramento. A segunda marca causa Hemorragia.",
+      "efp_provisional": 2.0,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "chefe_placidusax_lorde_dragao",
+      "effect_id": "time_storm",
+      "name": "Tempestade do Tempo",
+      "description": "Ao entrar em campo, aplica Geada aos inimigos da fileira e ganha +1 para cada inimigo atingido, até +3.",
+      "efp_provisional": 3.0,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "gwent_v75_ordem_veterano_juramento",
+      "effect_id": "v75_golden_vow",
+      "name": "Juramento Dourado",
+      "description": "Ao entrar, recebe +1; se houver aliado na mesma fileira, o aliado mais fraco também recebe +1.",
+      "efp_provisional": 1.7,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "gwent_v75_ordem_confessora_graca",
+      "effect_id": "v75_grace_mender",
+      "name": "Regressão Serena",
+      "description": "Purifica até dois aliados da mesma fileira de estados negativos; cada aliado purificado recebe +1. Se ninguém precisar de purificação, fortalece o aliado mais fraco em +1.",
+      "efp_provisional": 2.2,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "gwent_v75_veu_acolito_sangue",
+      "effect_id": "v75_blood_mark",
+      "name": "Marca da Dinastia",
+      "description": "Aplica uma marca de Sangramento ao inimigo mais forte da fileira; a segunda marca provoca Hemorragia e reduz 2 de bônus.",
+      "efp_provisional": 1.5,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "gwent_v75_veu_carrasco_preco",
+      "effect_id": "v75_blood_price",
+      "name": "Preço em Sangue",
+      "description": "Sacrifica o aliado mais fraco da mesma fileira e recebe bônus igual ao seu poder efetivo, até +3; sem aliado, recebe +1.",
+      "efp_provisional": 0.8,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "gwent_v75_lua_oraculo_geada",
+      "effect_id": "v75_frost_oracle",
+      "name": "Presságio da Geada",
+      "description": "Aplica uma marca de Geada ao inimigo mais forte da fileira; se já tinha uma marca, completa a segunda e recebe +1.",
+      "efp_provisional": 1.0,
+      "status": "active_runtime_estimate"
+    },
+    {
+      "card_id": "gwent_v75_lua_graviturgista",
+      "effect_id": "v75_gravity_shear",
+      "name": "Cisalhamento Gravitacional",
+      "description": "Reduz em 1 o bônus de até dois inimigos com bônus positivo na fileira; se atingir dois, recebe +1.",
+      "efp_provisional": 1.8,
+      "status": "active_runtime_estimate"
+    }
+  ],
+  "combos": [
+    {
+      "id": "cinzas_fornalha",
+      "name": "Aliança da Árvore Áurea",
+      "required_tags": [
+        "cinzas",
+        "fornalha"
+      ],
+      "minimum": null,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "veu_sombrio",
+      "name": "Caçada da Faca Negra",
+      "required_tags": [
+        "veu_sombrio"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "vazio_astral",
+      "name": "Alinhamento Astral",
+      "required_tags": [
+        "astral",
+        "vazio"
+      ],
+      "minimum": null,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "mare_abissal",
+      "name": "Maré Abissal",
+      "required_tags": [
+        "abismo"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "juramento_estandarte",
+      "name": "Juramento de Leyndell",
+      "required_tags": [
+        "estandarte"
+      ],
+      "minimum": 2,
+      "bonus": 1,
+      "team_bonus": 1,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "passos_duas_luas",
+      "name": "Dança da Lua Negra",
+      "required_tags": [
+        "duas_luas"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "eco_convergente",
+      "name": "Eco das Pedras Cintilantes",
+      "required_tags": [
+        "astral",
+        "eco"
+      ],
+      "minimum": null,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "chama_dupla",
+      "name": "Chamas do Monte Gelmir",
+      "required_tags": [
+        "chama"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "muralha_inabalavel",
+      "name": "Defesa de Leyndell",
+      "required_tags": [
+        "muralha"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 1,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "banquete_guerra",
+      "name": "Banquete de Sangue",
+      "required_tags": [
+        "banquete"
+      ],
+      "minimum": 2,
+      "bonus": 3,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "procissao_fantasma",
+      "name": "Procissão dos que Vivem na Morte",
+      "required_tags": [
+        "fantasmas"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 1,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "caravana_saqueadora",
+      "name": "Saque da Cidade Eterna",
+      "required_tags": [
+        "caravana"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "ritual_runico",
+      "name": "Ritual das Runas",
+      "required_tags": [
+        "runico"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 1,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "eclipse_voraz",
+      "name": "Eclipse Sanguíneo",
+      "required_tags": [
+        "eclipse_voraz"
+      ],
+      "minimum": 2,
+      "bonus": 3,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "rota_peregrina",
+      "name": "Caminho do Maculado",
+      "required_tags": [
+        "peregrino"
+      ],
+      "minimum": 2,
+      "bonus": 1,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "juramento_erdtree",
+      "name": "Juramento da Árvore Áurea",
+      "required_tags": [
+        "ordem_dourada"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 1,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "convergencia_lunar",
+      "name": "Convergência da Lua Negra",
+      "required_tags": [
+        "lua_cariana"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "ritual_dinastia",
+      "name": "Ritual do Véu Carmesim",
+      "required_tags": [
+        "sangue_mohgwyn"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 1,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "v75_juramento_dois_crisol",
+      "name": "Juramento do Crisol e da Graça",
+      "required_tags": [
+        "v75_crucible_guard",
+        "v75_erdtree_oath"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "v75_banquete_hemorragia",
+      "name": "Banquete da Hemorragia",
+      "required_tags": [
+        "v75_blood_feast",
+        "v75_blood_mark"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "v75_convergencia_gelida",
+      "name": "Convergência da Geada Lunar",
+      "required_tags": [
+        "v75_frost_lore",
+        "v75_lunar_paths"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "fe_gloria",
+      "name": "Glória Divina",
+      "required_tags": [
+        "fe",
+        "gloria_divina"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "fe_devocao",
+      "name": "Devoção",
+      "required_tags": [
+        "devocao",
+        "fe"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "fe_evangelho",
+      "name": "Evangelho",
+      "required_tags": [
+        "evangelho",
+        "fe"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "fe_irmandade",
+      "name": "Irmandade Esquecida",
+      "required_tags": [
+        "fe",
+        "irmandade"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "fe_soberania",
+      "name": "Soberania Divina",
+      "required_tags": [
+        "fe",
+        "soberania"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    },
+    {
+      "id": "fe_sacerdos",
+      "name": "Sacerdócio",
+      "required_tags": [
+        "fe",
+        "sacerdos"
+      ],
+      "minimum": 2,
+      "bonus": 2,
+      "team_bonus": 0,
+      "efp_per_participant_formula": "min(2, 0.5 × (bonus + 2 × team_bonus) / participants_minimos)",
+      "status": "formula_estimate_requires_activation_frequency_simulation"
+    }
+  ],
+  "leaders": [
+    {
+      "id": "comandante_fornalha",
+      "effect_id": "godfrey_warlord",
+      "name": "Godfrey",
+      "faction": "Ordem Áurea",
+      "description": "Concede +2 de bônus a todas as suas unidades de Corpo a Corpo.",
+      "efp_provisional": 3.0,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "bastiao_ancestral",
+      "effect_id": "morgott_omen",
+      "name": "Morgott",
+      "faction": "Ordem Áurea",
+      "description": "Na fileira escolhida, concede Escudo a até 2 aliados mais fortes e +1 de bônus a eles.",
+      "efp_provisional": 2.5,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "juiz_cerco",
+      "effect_id": "radagon_purification",
+      "name": "Radagon",
+      "faction": "Ordem Áurea",
+      "description": "Remove Sangramento, Geada, Podridão e Loucura de todos os aliados; cada aliado purificado recebe +1 de bônus.",
+      "efp_provisional": 2.0,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "mestre_veu",
+      "effect_id": "mohg_blood_rite",
+      "name": "Mohg",
+      "faction": "Véu Carmesim",
+      "description": "Aplica uma marca de Sangramento aos 2 inimigos mais fortes da fileira escolhida; uma segunda marca causa Hemorragia (-2 de bônus).",
+      "efp_provisional": 3.0,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "sombra_caminhante",
+      "effect_id": "rykard_devour",
+      "name": "Rykard",
+      "faction": "Véu Carmesim",
+      "description": "Sacrifica seu aliado mais fraco na fileira escolhida; os demais aliados dessa fileira recebem +2 de bônus.",
+      "efp_provisional": 3.2,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "voz_caidos",
+      "effect_id": "esgar_blood_priest",
+      "name": "Esgar",
+      "faction": "Véu Carmesim",
+      "description": "Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus.",
+      "efp_provisional": 3.0,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "lider_papa_esquecido",
+      "effect_id": "forgotten_blessing",
+      "name": "Papa Esquecido",
+      "faction": "Os Esquecidos",
+      "description": "Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.",
+      "efp_provisional": 2.0,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "arquimaga_eclipse",
+      "effect_id": "rennala_full_moon",
+      "name": "Rennala",
+      "faction": "Lua Negra",
+      "description": "Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus.",
+      "efp_provisional": 1.8,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "mestre_eclipse",
+      "effect_id": "astel_gravity",
+      "name": "Astel",
+      "faction": "Lua Negra",
+      "description": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes.",
+      "efp_provisional": 2.4,
+      "status": "leader_load_estimate_only"
+    },
+    {
+      "id": "oraculo_tempestade",
+      "effect_id": "loretta_knight",
+      "name": "Loretta",
+      "faction": "Lua Negra",
+      "description": "Concede +2 de bônus às 2 unidades aliadas mais fortes de Longa Distância.",
+      "efp_provisional": 2.5,
+      "status": "leader_load_estimate_only"
+    }
+  ],
+  "scoring_rules": {
+    "components": {
+      "self_or_ally_buff_per_point": 1.0,
+      "enemy_effective_power_reduction_per_point": 1.0,
+      "enemy_bonus_reduction_per_point": 0.75,
+      "enemy_base_power_reduction_per_point": 1.5,
+      "unit_removal_per_eligible_target": 4.0,
+      "draw_one_card": 2.0,
+      "return_unit_to_hand": 1.5,
+      "revive_to_field_base": 2.5,
+      "revive_to_field_power_multiplier": 0.25,
+      "token_power_multiplier": 0.75,
+      "shield_per_unit": 2.0,
+      "cleanse_per_status": 0.75,
+      "move_per_unit": 0.75,
+      "weather_resistance_per_avoided_power": 0.5,
+      "sacrifice_ally_per_base_power": -1.0
+    },
+    "target_standardization": {
+      "single_target": 1,
+      "row_effect_targets": 2,
+      "board_effect_targets": 3
+    },
+    "condition_factors": {
+      "unconditional": 1.0,
+      "common_board_state": 0.85,
+      "tactical_specific_condition": 0.7,
+      "rare_or_round_dependent": 0.55,
+      "two_or_more_prerequisites": 0.4
+    },
+    "duration_factors": {
+      "persistent": 1.0,
+      "until_round_end": 0.75,
+      "event_expiring": 0.6
+    },
+    "individual_score": "min(10, sum(component_value × target_count × condition_factor × duration_factor))",
+    "combo_score_per_card": "min(2, 0.5 × (combo_bonus + 2 × team_bonus) / minimum_required_participants)",
+    "total_card_effect_score": "min(10, individual_score + sum(combo_score_per_card))",
+    "null_vs_zero": "null = não executável/não associado/incompleto; 0 = puro intencional sem efeito. Não converter null em 0 automaticamente."
+  }
+}
