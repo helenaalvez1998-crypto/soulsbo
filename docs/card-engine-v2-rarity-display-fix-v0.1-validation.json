@@ -1,0 +1,47 @@
+{
+  "revision": 32,
+  "date": "2026-11-28",
+  "scope": "site rarity display and artwork prompt consistency",
+  "automated_tests": {
+    "pytest_passed": 250,
+    "pytest_failed": 0,
+    "parametrized_subtests_passed": 61,
+    "command": "python -m pytest -q tests"
+  },
+  "static_validation": {
+    "site_app_js_node_check": "passed",
+    "inline_scripts_checked": 8,
+    "generated_card_prompt_sample": "passed; no visible potency field or 0-6 scale",
+    "legacy_event_log_sanitizer": "passed; potency text replaced in UI only",
+    "inline_scripts_node_check": "passed",
+    "python_compile": [
+      "site_hub.py",
+      "sistemas/atelie_coliseu.py",
+      "sistemas/prompt_arte_criador.py"
+    ],
+    "python_compile_status": "passed",
+    "site_source_scan_obsolete_rarity_ui_refs": 0,
+    "site_v2_api_rarity_metadata_serialization": "removed and covered by regression test",
+    "legacy_gwent_api": "internal potency field retained for old engine compatibility; frontend does not render it",
+    "legacy_match_event_presentation": "potency-specific log string is neutralized in UI; stored event unchanged",
+    "cache_busting": {
+      "site_style_css": "updated",
+      "site_app_js": "updated",
+      "forge_iframe": "updated"
+    }
+  },
+  "preserved": [
+    "rarity label and rarity color classification",
+    "rarity ascension path and costs",
+    "base power and maximum power fields",
+    "legacy internal metadata needed for server-side compatibility",
+    "gameplay rules and old engine mechanics"
+  ],
+  "limitations": [
+    "No deployment was performed.",
+    "No live browser session against the production host was available.",
+    "Existing complete-card images stored in external object storage may contain the old text baked into pixels; they require individual regeneration and human approval.",
+    "Legacy gameplay in sistemas/gwent.py still contains the historical rarity effect-budget mechanic; this revision changes presentation and web projection, not gameplay. The Card Engine v2 approved contract remains rarity-as-classification."
+  ],
+  "result": "passed; site UI no longer renders the 0-6 indicator; v2/Forja projections omit the field and legacy log text is neutralized. The legacy Gwent API retains its internal payload for compatibility."
+}

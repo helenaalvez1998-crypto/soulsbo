@@ -1,4 +1,15 @@
-# Handoff mais recente — fechamento de produto e prontidão operacional (rev. 31, 2026-11-28)
+# Handoff mais recente — correção de exibição da raridade no site (rev. 32, 2026-11-28)
+
+**Baseline:** `soulsbo-main-continuity-2026-11-28-rev31.zip`.  
+**Pacote resultante:** `soulsbo-main-continuity-2026-11-28-rev32.zip`.  
+**Regra visual:** raridade é exibida apenas como classificação; o site não exibe indicador numérico de potência nem escala 0–6. Poder-base, poder máximo, custo e bônus continuam separados. A timeline e o evento principal também mascaram mensagens históricas do motor antigo que descrevam explicitamente o orçamento de raridade. As respostas JSON v2/Forja omitem o campo; APIs antigas do Gwent preservam o payload interno por compatibilidade e a UI não o renderiza.  
+**Escopo:** `site/app.js`, `site/index.html`, `site/forja.html`, `site/style.css`, `site/narabot-visual-v59.css`, `site_hub.py`, prompts do Ateliê e documentação. Nenhuma regra de gameplay foi alterada.  
+**Assets:** artes completas antigas podem conter o texto incorporado aos pixels; não foram regeneradas nesta revisão e precisam ser substituídas individualmente após geração/aprovação.  
+**Validação:** 250/250 testes aprovados + 61 subtests parametrizados; `site/app.js` e oito scripts inline verificados por Node; `site_hub.py` e prompts compilados; projeções JSON v2/Forja sem `potencia_raridade`; APIs Gwent antigas preservam o metadado interno por compatibilidade; timeline mascara a mensagem de orçamento legado; busca estática do site sem o widget antigo. Não houve deploy ou verificação visual no servidor real.
+
+---
+
+# Handoff histórico — fechamento de produto e prontidão operacional (rev. 31, 2026-11-28)
 
 **Baseline:** `soulsbo-main-continuity-2026-11-28-rev30.zip`.  
 **Pacote resultante:** `soulsbo-main-continuity-2026-11-28-rev31.zip`.  

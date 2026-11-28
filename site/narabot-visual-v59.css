@@ -200,7 +200,6 @@ main{
 .gwent-unit.v51-card>b{color:#f0e6d4!important}
 .v51-card-topline{background:linear-gradient(90deg,#1b2838,#111923)!important}
 .v51-card-bottomline{background:rgba(8,13,20,.97)!important}
-.v54-card-rarity-line{background:linear-gradient(90deg,rgba(216,187,122,.12),rgba(11,16,24,.55))!important}
 .modal{
   border-color:var(--n59-line-strong)!important;border-radius:18px!important;
   background:linear-gradient(145deg,#172231,#0c121b)!important;box-shadow:0 30px 100px #000d!important;

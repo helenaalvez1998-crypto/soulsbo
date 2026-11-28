@@ -550,6 +550,9 @@ def registrar_rotas(bot, app: web.Application) -> None:
             data["definition"] = json.loads(data.pop("definition_json") or "{}")
         except (TypeError, ValueError, json.JSONDecodeError):
             data["definition"] = {}
+        # A potência legada é metadado interno; nunca faz parte da projeção web.
+        data.pop("potencia_raridade", None)
+        data["definition"].pop("potencia_raridade", None)
         # A ficha e o prompt usam a mesma cópia pessoal exibida na coleção.
         exemplar_rows = await bot.db.coliseu_listar_exemplares(uid, str(data["card_id"]))
         stored_exemplar_id = int(data.get("exemplar_id") or 0)
@@ -561,7 +564,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
         if exemplar is None and len(exemplar_rows) == 1:
             exemplar = dict(exemplar_rows[0])
         if exemplar:
-            from sistemas.gwent import RARITY_EFFECT_BUDGET
             current_power = int(exemplar.get("power") if exemplar.get("power") is not None else data["power"])
             current_rarity = str(exemplar.get("rarity") or data["rarity"] or "Comum")
             data.update({
@@ -575,7 +577,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 "poder": current_power,
                 "poder_base": current_power,
                 "poder_maximo": current_power,
-                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(current_rarity, 0)),
                 "exemplar_id": int(exemplar["id"]),
             })
         return web.json_response(data, headers={"Cache-Control": "no-store"})
@@ -596,6 +597,9 @@ def registrar_rotas(bot, app: web.Application) -> None:
             return web.json_response({"error": "Carta não encontrada para esta conta."}, status=404)
         try:
             definition = json.loads(row["definition_json"] or "{}")
+            # Remove metadado visual legado; o construtor valida qualquer
+            # compatibilidade interna no servidor sem expor esse campo no prompt.
+            definition.pop("potencia_raridade", None)
             # A carta transmutada tem um exemplar pessoal. O prompt precisa usar
             # exatamente os valores que a coleção e o modal exibem para essa cópia.
             exemplar_rows = await bot.db.coliseu_listar_exemplares(uid, card_id)
@@ -612,7 +616,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
                     {"error": "Não foi possível identificar o exemplar dono desta carta para bloquear seus atributos."},
                     status=409,
                 )
-            from sistemas.gwent import RARITY_EFFECT_BUDGET
             current_power = int(exemplar.get("power") if exemplar.get("power") is not None else row["power"])
             current_rarity = str(exemplar.get("rarity") or row["rarity"] or definition.get("raridade", "Comum"))
             definition.update({
@@ -625,7 +628,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 # No Gwent, o exemplar transmutado não tem evolução de poder separada:
                 # a própria coleção publica max_power igual ao poder atual.
                 "poder_maximo": current_power,
-                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(current_rarity, 0)),
                 "exemplar_id": int(exemplar["id"]),
             })
             from sistemas.prompt_arte_criador import gerar_prompt_arte
@@ -767,7 +769,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
             CUSTO_APRIMORAMENTO_ALMAS, BONUS_EVOLUCAO_FRAGMENTOS,
             RARIDADES, get_carta, faixa_poder_exemplar,
         )
-        from sistemas.gwent import RARITY_EFFECT_BUDGET
         items = []
         for row in rows:
             card = get_carta(str(row["card_id"]))
@@ -788,7 +789,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 "name": str(getattr(card, "nome", None) or getattr(card, "name", None) or row["card_id"]),
                 "image_url": f"/api/gwent/public-cards/{quote(str(row['card_id']), safe='')}/image?rarity={quote(str(row['rarity']), safe='')}&power={int(row['power'] or 0)}&exemplar_id={int(row['id'])}&thumb=1",
                 "rarity": rarity, "power": power, "max_power": int(maximum),
-                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "lap_cost": CUSTO_APRIMORAMENTO_ALMAS.get(rarity),
                 "next_rarity": next_rarity,
                 "evo_cost": BONUS_EVOLUCAO_FRAGMENTOS.get(rarity) if next_rarity else None,

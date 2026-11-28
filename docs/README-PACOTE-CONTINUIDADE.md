@@ -1,4 +1,14 @@
-# Continuidade atual — revisão rev. 31 (2026-11-28)
+# Continuidade atual — revisão rev. 32 (2026-11-28)
+
+**Pacote de referência:** `soulsbo-main-continuity-2026-11-28-rev32.zip`  
+**Baseline:** `soulsbo-main-continuity-2026-11-28-rev31.zip`.  
+**Estado:** Card Engine v2 permanece alpha isolada; `CardInstance v0.7`/schema 7 ainda é draft, não congelado.  
+**Última entrega:** correção visual da raridade. Removido o indicador numérico de potência/escala 0–6 do site (cartas, coleção, jogo, portal e Forja); raridade mantida apenas como classificação. Prompts do Ateliê corrigidos para não solicitar o campo em novas artes. Artes completas já armazenadas podem conter texto queimado nos pixels e precisam ser regeneradas/aprovadas individualmente.  
+**Validação:** ver `docs/card-engine-v2-rarity-display-fix-v0.1-validation.json`; sem deploy nem browser conectado ao host real.  
+
+---
+
+# Continuidade histórica — revisão rev. 31 (2026-11-28)
 
 **Pacote de referência:** `soulsbo-main-continuity-2026-11-28-rev31.zip`  
 **Baseline:** `soulsbo-main-continuity-2026-11-28-rev30.zip`.  

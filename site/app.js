@@ -63,9 +63,6 @@ const cardSigil = value => {
     : key.includes('cura') || key.includes('purif') ? '✧'
     : key.includes('Especial') ? '◇' : '✦');
 };
-const RARITY_POWER = {'Comum':0,'Rara':1,'Épica':2,'Lendária':3,'Mítica':4,'Primordial':5,'Singular':6};
-const rarityPower = card => Number.isFinite(Number(card?.potencia_raridade)) ? Number(card.potencia_raridade) : (RARITY_POWER[card?.raridade] ?? 0);
-const rarityPowerMarkup = card => `<span class=\"v54-rarity-power\" title=\"Potência da raridade: amplia habilidades; não é poder de ataque\"><i>✦</i> Potência ${rarityPower(card)}</span>`;
 const cardInsigniaMarkup = card => {
   const category = card.categoria === 'Especial' ? 'Especial' : 'Unidade';
   const faction = card.faccao || 'Sem facção';
@@ -74,9 +71,9 @@ const cardInsigniaMarkup = card => {
   const ability = card.habilidade_nome || card.efeito_nome || card.habilidade || card.efeito || '';
   if (category === 'Especial') {
     const effect = card.habilidade_texto || card.texto_efeito || 'Efeito especial';
-    return `<div class="v51-special-banner"><span><i>◇</i> CARTA ESPECIAL</span><span>${escapeHTML(rarity)}</span></div><div class="v54-card-rarity-line">${rarityPowerMarkup(card)}<small>Escala do efeito · não soma ao poder-base</small></div><div class="v51-card-bottomline v51-special-effect"><span title="${escapeHTML(effect)}"><i>${cardSigil(effect)}</i>${escapeHTML(effect)}</span></div>`;
+    return `<div class="v51-special-banner"><span><i>◇</i> CARTA ESPECIAL</span><span>${escapeHTML(rarity)}</span></div><div class="v51-card-bottomline v51-special-effect"><span title="${escapeHTML(effect)}"><i>${cardSigil(effect)}</i>${escapeHTML(effect)}</span></div>`;
   }
-  return `<div class="v51-card-topline"><span class="v51-card-faction" title="${escapeHTML(faction)}"><i>${cardSigil(faction)}</i>${escapeHTML(faction)}</span><span class="v51-card-rarity">${escapeHTML(rarity)}</span></div><div class="v54-card-rarity-line">${rarityPowerMarkup(card)}<small>Escala do efeito · não soma ao poder-base</small></div><div class="v51-card-bottomline"><span title="${escapeHTML(row)}"><i>${cardSigil(row)}</i>${escapeHTML(row)}</span>${ability ? `<span class="v51-card-ability" title="${escapeHTML(ability)}"><i>${cardSigil(ability)}</i>${escapeHTML(ability)}</span>` : `<span class="v51-card-ability v51-no-ability"><i>—</i>Sem habilidade especial</span>`}</div>`;
+  return `<div class="v51-card-topline"><span class="v51-card-faction" title="${escapeHTML(faction)}"><i>${cardSigil(faction)}</i>${escapeHTML(faction)}</span><span class="v51-card-rarity">${escapeHTML(rarity)}</span></div><div class="v51-card-bottomline"><span title="${escapeHTML(row)}"><i>${cardSigil(row)}</i>${escapeHTML(row)}</span>${ability ? `<span class="v51-card-ability" title="${escapeHTML(ability)}"><i>${cardSigil(ability)}</i>${escapeHTML(ability)}</span>` : `<span class="v51-card-ability v51-no-ability"><i>—</i>Sem habilidade especial</span>`}</div>`;
 };
 const CARD_IMAGE_FALLBACK = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 620"><rect width="420" height="620" rx="20" fill="#17131c"/><rect x="18" y="18" width="384" height="584" rx="16" fill="none" stroke="#9b805a" stroke-width="4"/><path d="M210 190l55 55-55 55-55-55z" fill="none" stroke="#9b805a" stroke-width="8"/><text x="210" y="390" fill="#d8c6a6" font-family="sans-serif" font-size="22" text-anchor="middle">ARTE INDISPONÍVEL</text><text x="210" y="425" fill="#978a9b" font-family="sans-serif" font-size="16" text-anchor="middle">Tente recarregar a página</text></svg>')}`;
 const CARD_IMAGE_RETRY_DELAYS = [700, 1600];
@@ -408,7 +405,6 @@ function openGwentCollectionCardModal(cardId) {
   const special = card.categoria === 'Especial';
   const abilityName = card.habilidade_nome || card.efeito_nome || (special ? 'Efeito especial' : 'Sem habilidade especial');
   const abilityText = card.habilidade_texto || card.texto_efeito || (special ? 'Efeito não informado.' : 'Esta unidade não possui habilidade especial.');
-  const rarityBudget = rarityPower(card);
   const src = imageUrl(card);
   const modalCard = {...card};
   if (isCardImageUrl(src)) {
@@ -447,7 +443,6 @@ function openGwentCollectionCardModal(cardId) {
         <section class="gwent-collection-power">
           <div><small>PODER-BASE</small><strong>${special ? '—' : number(card.poder)}</strong></div>
           <div><small>PODER MÁXIMO</small><strong>${special ? '—' : number(card.max_power || card.poder)}</strong></div>
-          <div><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></div>
         </section>
         <section class="gwent-collection-section gwent-collection-effect">
           <small>EFEITO DE COMBATE</small>
@@ -1437,8 +1432,8 @@ function gwentSimpleExplanation(card) {
     irmandade_veu: 'Se houver outra unidade sua em uma fileira diferente, esta carta ganha +2.',
     circulo_arcano: 'Esta carta ganha +2 se você tiver outra unidade na mesma fileira ou uma carta especial no descarte.',
     gwent_clima: 'Escolha uma fileira. A chuva enfraquece em 1 ponto todas as unidades dos dois lados que estiverem nela enquanto o clima durar.',
-    gwent_nevoa: 'Escolha uma fileira inimiga. Todas as unidades dela recebem uma marca de Podridão, que reduz seu poder. Cartas de raridade Lendária ou maior aplicam uma segunda marca.',
-    gwent_geada: 'Todas as unidades inimigas recebem uma marca de Geada, que reduz seu poder. Raridades Lendárias ou maiores aplicam uma segunda marca.',
+    gwent_nevoa: 'Escolha uma fileira inimiga. Todas as unidades dela recebem uma marca de Podridão, que reduz seu poder. A quantidade de marcas segue os limites definidos pelo próprio efeito, independentemente da raridade.',
+    gwent_geada: 'Todas as unidades inimigas recebem uma marca de Geada, que reduz seu poder. A quantidade de marcas segue os limites definidos pelo próprio efeito, independentemente da raridade.',
     gwent_chuva: 'As unidades inimigas na fileira de Cerco recebem Sangramento. Quando uma unidade junta duas marcas, perde 2 pontos de bônus.',
     gwent_chifre: 'Escolha uma das suas fileiras. Suas unidades nela recebem +2 de bônus.',
     gwent_medico: 'Escolhe uma unidade permitida do seu descarte e devolve essa carta para sua mão.',
@@ -1991,6 +1986,16 @@ function gwentCrystalMeterMarkup(count, side, playerLabel) {
   </div>`;
 }
 
+function gwentPublicEventText(value) {
+  const text = String(value || '');
+  // O log legado pode conter a trilha histórica do orçamento de raridade.
+  // Não a expomos na interface: no Card Engine v2 raridade é classificação.
+  if (/pot[eê]ncia\s+da\s+raridade|rarity\s+(?:effect\s+)?budget|rarity\s+potency/i.test(text)) {
+    return 'Efeito adicional da carta aplicado.';
+  }
+  return text;
+}
+
 function renderGwentArena(data) {
   if (gwentLastRenderedMatch !== null && gwentLastRenderedMatch !== String(data.match_id)) {
     gwentPreviousPowerSnapshot = new Map();
@@ -2099,7 +2104,7 @@ function renderGwentArena(data) {
 
   const eventHistory = Array.isArray(data.event_log) ? data.event_log : [];
   const activeWeatherLabel = activeWeatherRows.map(([row]) => ({melee:'Corpo a corpo',ranged:'Longa distância',siege:'Cerco'}[row] || row)).join(' · ');
-  const eventPanel = `<details class="gwent-history"><summary>Histórico · ${number(eventHistory.length)}</summary><ol>${eventHistory.slice().reverse().map(item => `<li>${escapeHTML(item)}</li>`).join('') || '<li>A partida ainda não possui jogadas registradas.</li>'}</ol></details>`;
+  const eventPanel = `<details class="gwent-history"><summary>Histórico · ${number(eventHistory.length)}</summary><ol>${eventHistory.slice().reverse().map(item => `<li>${escapeHTML(gwentPublicEventText(item))}</li>`).join('') || '<li>A partida ainda não possui jogadas registradas.</li>'}</ol></details>`;
   const reward = data.reward;
   const rewardPanel = data.status === 'finished' && reward
     ? `<aside class="gwent-reward-panel"><b>Recompensas</b><span>+${number(reward.reward_xp)} XP · +${number(reward.reward_denarios)} Denários · ${number(reward.mmr_delta)} MMR</span></aside>`
@@ -2167,7 +2172,7 @@ function renderGwentArena(data) {
   gwentLastRenderedRound = Number(data.round);
 
   replaceGwentArenaMarkup(arena, `<div class="gwent-arena-head">
-      <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${activeWeatherRows.length ? `⛈ CLIMA ATIVO · ${escapeHTML(activeWeatherLabel)}` : escapeHTML(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`)}</p></div>
+      <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${activeWeatherRows.length ? `⛈ CLIMA ATIVO · ${escapeHTML(activeWeatherLabel)}` : escapeHTML(gwentPublicEventText(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`))}</p></div>
       <div class="gwent-turn-indicator ${turnClass}" role="status" aria-live="polite"><span class="gwent-turn-dot" aria-hidden="true"></span><strong>${turnHeadline}</strong>${prep || data.status === 'finished' || mine.passed ? `<small>${turnSubline}</small>` : ''}</div>
       <div class="gwent-arena-head-actions">${eventPanel}<button type="button" class="gwent-theme-toggle${gwentEldenRingThemeEnabled() ? ' is-active' : ''}" data-gwent-theme-toggle aria-pressed="${gwentEldenRingThemeEnabled()}">${gwentEldenRingThemeEnabled() ? '✧ ELDEN RING · ATIVO' : '✧ TEMA ELDEN RING'}</button><button type="button" class="gwent-exit" data-gwent-exit>Voltar ao lobby</button></div>
     </div>
@@ -2231,7 +2236,7 @@ function showGwentResultOverlay(data, roundResult = null) {
       : outcome === 'loss' ? `VOCÊ PERDEU A RODADA ${number(roundResult?.round)}` : `RODADA ${number(roundResult?.round)} EMPATADA`);
   const subline = roundResult
     ? `Você ${number(roundResult.your_score)} × ${number(roundResult.opponent_score)} ${escapeHTML(opponentName)}`
-    : (data.last_event || 'Resultado final registrado.');
+    : gwentPublicEventText(data.last_event || 'Resultado final registrado.');
   const scoreLine = roundResult
     ? `<div class="gwent-result-score"><span>SUA PONTUAÇÃO</span><strong>${number(roundResult.your_score)}</strong><i>×</i><strong>${number(roundResult.opponent_score)}</strong><span>${escapeHTML(opponentName)}</span></div>`
     : `<div class="gwent-result-crowns"><span>SUAS COROAS <b>${number(data.crowns?.[myId] || 0)}</b></span><span>COROAS DO ADVERSÁRIO <b>${number(data.crowns?.[String(data.opponent?.id || '')] || 0)}</b></span></div>`;
@@ -2636,7 +2641,6 @@ function openGwentBoardCardModal(cardId) {
   const bonus = Number(card.bonus || 0);
   const currentPower = Math.max(1, basePower + bonus);
   const shield = Number(card.escudo || 0);
-  const rarityBudget = rarityPower(card);
   const bonusSources = Array.isArray(card.bonus_sources) ? card.bonus_sources : [];
   const trackedBonusTotal = bonusSources.reduce((total, item) => total + (Number(item?.delta) || 0), 0);
   const untrackedBonus = bonus - trackedBonusTotal;
@@ -2687,7 +2691,6 @@ function openGwentBoardCardModal(cardId) {
             <span>CLIQUE PARA DETALHAR</span>
           </button>
           <article><small>ESCUDO</small><strong>${number(shield)}</strong></article>
-          <article class="gwent-rarity-potency"><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></article>
         </div>
         <section class="gwent-bonus-breakdown" id="gwent-bonus-breakdown" hidden>
           <div class="gwent-bonus-breakdown-heading"><div><small>RASTREIO DE COMBATE</small><strong>Origem do bônus ${signedBonus(bonus)}</strong></div><span>DETALHAMENTO</span></div>
@@ -2699,7 +2702,7 @@ function openGwentBoardCardModal(cardId) {
           <p>${escapeHTML(card.habilidade_texto || 'Sem habilidade especial.')}</p>
         </section>
         ${card.descricao ? `<section class="gwent-board-card-ability gwent-board-card-lore"><small>DESCRIÇÃO</small><p>${escapeHTML(card.descricao)}</p></section>` : ''}
-        <p class="gwent-board-card-note"><strong>Como ler o poder:</strong> o número impresso na carta é o poder-base (${number(basePower)}). O bônus de combate é ${bonus > 0 ? "+" : ""}${number(bonus)}. Por isso, o poder atual é ${number(currentPower)} (poder-base + bônus, com mínimo de 1). A potência da raridade melhora apenas os efeitos da habilidade; ela não é somada ao poder.</p>
+        <p class="gwent-board-card-note"><strong>Como ler o poder:</strong> o número impresso na carta é o poder-base (${number(basePower)}). O bônus de combate é ${bonus > 0 ? "+" : ""}${number(bonus)}. Por isso, o poder atual é ${number(currentPower)} (poder-base + bônus, com mínimo de 1). A raridade exibida identifica a categoria da carta; não é um valor de poder.</p>
         <button type="button" class="gwent-board-card-dismiss" data-gwent-board-close>FECHAR INSPEÇÃO</button>
       </div>
     </section>`;

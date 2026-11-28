@@ -1,7 +1,7 @@
 # Card Engine v2 — expanded playable alpha validation v0.5
 
 **Status:** PASS  
-**Executado (UTC):** 2026-11-28T06:49:19.553506+00:00  
+**Executado (UTC):** 2026-11-28T06:51:16.188198+00:00  
 **Resultado:** 240/240 testes aprovados; 0 falhas; 0 ignorados.
 
 ## Conteúdo validado

@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07080d"><title>NARABOT — Comunidade e Gwent do Coliseu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Cormorant+Garamond:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=soulsbot-arena-bonus-origin-20261127-r6">
+  <link rel="stylesheet" href="/style.css?v=soulsbot-rarity-classification-20261128-r1">
 <link rel="stylesheet" href="/elden-ui.css?v=v49">
 <script>try{const v=JSON.parse(localStorage.getItem('vis')||'{}'),r=document.documentElement;r.dataset.theme=v.tema||'cinzas';if(/^#[0-9a-f]{6}$/i.test(v.cor||'')){r.style.setProperty('--gold',v.cor);r.style.setProperty('--gold-bright','color-mix(in srgb,'+v.cor+' 70%,#fff)')}}catch(e){}</script>
 
@@ -375,7 +375,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
     <footer>NARABOT · GWENT DO COLISEU <span>Jogo principal · conectado ao servidor oficial</span></footer>
   </main>
 </div>
-<script src="/app.js?v=soulsbot-arena-bonus-origin-20261127-r6" defer></script>
+<script src="/app.js?v=soulsbot-rarity-classification-20261128-r1" defer></script>
 <script>
 (()=>{const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});
 const sc=()=>document.querySelectorAll('.reveal:not(.in),.gwent-store,.atelier-panel,.gwent-drop-history,.challenge-panel').forEach(el=>{if(!el.dataset.o){el.dataset.o=1;el.classList.add('reveal');io.observe(el)}});sc();
@@ -425,7 +425,6 @@ function render(){const c=list[idx],rk=key(c.raridade),esp=c.categoria==='Especi
 ov.style.setProperty('--rc',RC[rk]||RC.comum);ov.dataset.r=rk;
 ov.querySelector('.prev').hidden=ov.querySelector('.next').hidden=list.length<2;
 const seg=Array.from({length:Math.max(15,mx)},(_,i)=>`<i class="${i<pw?'on':i<mx?'pot':''}"></i>`).join('');
-const rarityPot=Number.isFinite(Number(c.potencia_raridade))?Number(c.potencia_raridade):RAR.indexOf(c.raridade);
 const ri=RAR.indexOf(c.raridade),ladder=RAR.map((r,i)=>`<li class="${i<ri?'done':i===ri?'now':''}" style="--c:${RC[key(r)]}"><span>${i<ri?'✓':i===ri?'◆':'◇'}</span><b>${r}</b></li>`).join('');
 const chips=[c.faccao,c.row_label||c.fileira,c.papel_gwent,c.categoria,c.custo!=null?`Custo ${N(c.custo)}`:''].filter(Boolean).map(x=>`<span>${E(x)}</span>`).join('');
 const syn=(c.sinergias||[]).map(s=>`<span class="syn">${E(String(s).replaceAll('_',' '))}</span>`).join('');
@@ -438,7 +437,6 @@ ov.querySelector('.cd-body').innerHTML=`
  <h2>${E(c.nome)}</h2>
  <div class="cd-rar"><span class="cd-badge">${E(c.raridade||'Comum')}</span>${chips}</div>
  <section class="cd-power"><div class="cd-pcol"><small>PODER ATUAL</small><strong>${esp?'—':N(pw)}</strong></div><div class="cd-pmid">${esp?'<p class="muted">Carta especial: efeito tático, sem poder próprio.</p>':`<div class="cd-seg">${seg}</div><small>${pw>=mx?'Poder máximo atingido':`Faltam ${N(mx-pw)} para o máximo`}</small>`}</div><div class="cd-pcol"><small>PODER MÁXIMO</small><strong>${esp?'—':N(mx)}</strong></div></section>
- <section class="cd-box cd-rarity-power"><h4>Potência da raridade</h4><strong>${rarityPot} / 6</strong><p>Amplia a eficácia de habilidades conforme as regras de cada efeito. Não é poder-base, não aumenta diretamente o ataque e não substitui o poder efetivo em combate.</p></section>
  <section class="cd-box"><h4>Habilidade</h4><div class="cd-skill"><b>${E(c.habilidade_nome||'Sem habilidade')}</b><p>${E(c.habilidade_texto||'Sem efeito adicional.')}</p></div>${c.descricao&&c.descricao!==c.habilidade_texto?`<blockquote>${E(c.descricao)}</blockquote>`:''}${c.arquetipo_descricao?`<small class="muted">${E(c.arquetipo_descricao)}</small>`:''}</section>
  ${syn||combos?`<section class="cd-box"><h4>Sinergias</h4>${syn?`<div class="cd-syns">${syn}</div>`:''}${combos?`<ul class="cd-combos">${combos}</ul>`:''}</section>`:''}
  <section class="cd-box"><h4>Caminho de raridade</h4><ol class="cd-ladder">${ladder}</ol></section>

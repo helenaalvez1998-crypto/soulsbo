@@ -5217,17 +5217,8 @@ body.gwent-match-active .gwent-row.has-entering {
 }
 
 
-/* V54 — potência de raridade separada do poder-base */
-.v54-card-rarity-line{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 8px;background:linear-gradient(90deg,rgba(190,155,96,.13),rgba(20,17,22,.3));border-bottom:1px solid rgba(190,155,96,.22);color:#d8c39d;font-size:10px;line-height:1.25}
-.v54-card-rarity-line small{color:#a99a84;font-size:9px;text-align:right}
-.v54-rarity-power{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-weight:800;letter-spacing:.025em;color:#efd49b}
-.v54-rarity-power i{font-style:normal;color:#f5c96e}
-.cd-rarity-power{border-color:rgba(205,169,104,.45)!important;background:linear-gradient(135deg,rgba(117,82,38,.2),rgba(22,18,23,.8))!important}
-.cd-rarity-power>strong{display:inline-block;font:800 25px Georgia,serif;color:#f0d49b}
-.cd-rarity-power p{margin:6px 0 0;color:#bcb0a0;font-size:13px;line-height:1.5}
+/* Indicadores de potência por raridade removidos: raridade é classificatória no Card Engine v2. */
 
-.gwent-board-card-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.gwent-board-card-stats .gwent-rarity-potency{border-color:rgba(205,169,104,.52);background:linear-gradient(145deg,rgba(76,55,29,.75),rgba(23,17,12,.94))}.gwent-board-card-stats .gwent-rarity-potency strong{color:#efd49b}
-@media(max-width:560px){.gwent-board-card-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* V55 — Lore separado da regra mecânica nas inspeções de cartas. */
 .gwent-board-card-lore,
@@ -5488,7 +5479,7 @@ body.gwent-match-active .gwent-row.has-entering {
 .gwent-collection-info h2 { margin:0; color:#f2c47e; font:900 clamp(23px,2.5vw,35px)/1.12 Cinzel,serif; }
 .gwent-collection-tags,.gwent-collection-chips { display:flex; flex-wrap:wrap; gap:7px; }
 .gwent-collection-tags span,.gwent-collection-chips span { padding:6px 9px; border:1px solid rgba(196,160,100,.4); border-radius:3px; background:rgba(5,10,20,.7); color:#e4d1ae; font:800 9px Cinzel,serif; }
-.gwent-collection-power { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.gwent-collection-power { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .gwent-collection-power>div { display:grid; gap:6px; padding:12px 8px; border:1px solid #344a70; background:rgba(9,16,30,.82); text-align:center; }
 .gwent-collection-power small { color:#aab9d1; font:800 8px Cinzel,serif; letter-spacing:.08em; }
 .gwent-collection-power strong { color:#f0c77e; font:900 24px Cinzel,serif; }

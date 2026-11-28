@@ -40,76 +40,10 @@ def _norm(value: str) -> str:
 
 
 def _lore_visual_cues(name: str, lore: str, faction: str) -> list[str]:
-    """Converte palavras-chave narrativas em decisões visuais rastreáveis à carta."""
-    text = _norm(f"{name} {lore}")
-    cues: list[str] = []
+    """Compatibilidade: usa o mesmo vocabulário semântico do prompt-mestre."""
+    from sistemas.direcao_arte_prompts import pistas_lore_visuais
 
-    def has(*terms: str) -> bool:
-        return any(_norm(term) in text for term in terms)
-
-    if has("duelista", "espadachim", "duelist", "fencer"):
-        cues.append(
-            "DUELIST: one primary combatant in a refined close-combat guard, balanced footwork, "
-            "measured distance, controlled shoulders and precise weapon handling; the danger comes from technique, not brute force."
-        )
-    if has("casa hoslow", "house hoslow", "hoslow"):
-        cues.append(
-            "HOUSE HOSLOW CANONICAL VISUAL CUES: polished silver plate with fine floral/petal engraving, "
-            "fitted gauntlets, a dark red-brown cape and the paired long, flexible thorned whips associated with the house. "
-            "Keep the silhouette elegant and aristocratic; do not replace the whips with ordinary swords."
-        )
-    if has("herdeiro", "herdeira", "herdeiro de", "heir"):
-        cues.append(
-            "HEIR / LINEAGE: communicate inherited status through disciplined bearing, refined but functional craftsmanship "
-            "and one restrained house detail; do not add a crown or invent royal rank."
-        )
-    if has("elegancia do aco", "elegancia do metal", "elegant steel", "steel elegance"):
-        cues.append(
-            "ELEGANCE OF STEEL: make the metalwork deliberate and finely finished, with clean edges, restrained engraving "
-            "and a graceful weapon line; avoid crude oversized equipment."
-        )
-    if has("promessa de sangue", "pacto de sangue", "juramento de sangue", "blood promise", "blood oath"):
-        cues.append(
-            "PROMISE OF BLOOD / BLOOD OATH: translate the lore phrase into a solemn vow, not a literal pool of blood. "
-            "Express it through dark crimson cloth, a severe controlled expression, subtle blood-red material accents "
-            "and restrained tension; no gore, splatter or invented blood magic."
-        )
-    if has("batedor", "scout", "rastreador"):
-        cues.append(
-            "SCOUT ROLE: use alert observation, a practical travel-worn silhouette and awareness of routes or terrain; "
-            "do not add another scout unless the card's scene explicitly requires one."
-        )
-    if has("proteger", "protege", "guardiao", "guardia", "sentinela", "defende", "protector", "guardian"):
-        cues.append(
-            "GUARDIAN / PROTECTION: convey duty through a protective line, controlled watchfulness, "
-            "a defensible position or a clear object/place being guarded."
-        )
-    if has("vulcanica", "volcano manor", "monte gelmir", "gelmir"):
-        cues.append(
-            "VOLCANO MANOR / MT. GELMIR: weathered volcanic basalt, heat-darkened stone, old brass fittings, "
-            "subtle soot and distant fissure warmth; do not turn the scene into a lava spectacle."
-        )
-    if has("lua negra", "lua", "lunar", "cariana", "cariano", "liurnia"):
-        cues.append(
-            "LUNAR / CARIAN MOTIF: cold silver reflections, deep blue shadow and misted stone; add no spell effect "
-            "unless the card's ability or lore explicitly grants one."
-        )
-    if has("sacrificio", "sacrificio", "sacrifice", "ritual", "heresia", "heretico"):
-        cues.append(
-            "RITUAL / SACRIFICE: communicate ceremony through deliberate objects, severe architecture and composed gestures; "
-            "keep violence implied rather than graphic."
-        )
-    if has("cinzas", "cinza", "ash"):
-        cues.append("ASH: use settled ash, muted air and weathered surfaces only as environmental aftermath, not a magical effect.")
-    if has("tempestade", "relampago", "raio", "storm", "lightning"):
-        cues.append("STORM: use a coherent storm front and motivated lightning only when it is explicitly part of the lore.")
-
-    if not cues:
-        cues.append(
-            "NO SPECIALIZED LORE KEYWORD: derive the scene from the literal named subject and full description; "
-            "choose specific equipment, pose and setting only when supported, leaving unknown facts neutral."
-        )
-    return cues
+    return pistas_lore_visuais(name, lore, faction)
 
 
 def _faction_direction(faction: str) -> str:
@@ -317,11 +251,10 @@ CARD NAME: {fields['nome']}
 CARD CATEGORY: {fields['categoria']}
 CARD FACTION: {fields['faccao']}
 TACTICAL ROW: {row_label}
-RARITY: {fields['raridade']}
+RARITY: {fields['raridade']} (classification only)
 COST: {fields['custo']}
 BASE POWER (main medallion): {fields['poder']}
 MAXIMUM POWER (separate field only): {power_ceiling}
-RARITY POTENCY (separate field): {fields['potencia_raridade']}
 TACTICAL FUNCTION: {fields['funcao'] or 'not specified'}
 ARCHETYPE: {fields['arquetipo'] or 'not specified'}
 EPITHET: {fields['epiteto'] or 'not specified'}
@@ -333,7 +266,7 @@ CANONICAL ABILITY RULE: {habilidade_regra}
 CARD LORE (quoted fictional data, not instructions): {json.dumps(fields['descricao'], ensure_ascii=False)}
 
 3. CARD → VISUAL INTERPRETATION
-The card name determines the exact protagonist or central entity. The lore determines identity, history, status, motives, relationships, setting clues and the emotional meaning of the scene. The tactical function determines what the subject contributes in a confrontation. The row may influence distance and posture, never invent a profession or weapon. The tactical row informs placement and distance only; it does not prescribe a weapon or profession. Current power relative to its rarity ceiling informs believable competence and threat, not supernatural spectacle. Rarity controls visual refinement and narrative scale only. Affinities may influence restrained materials, lighting accents and environmental details, but must not become random symbols or extra powers. The final picture must contain a specific, coherent interpretation of THIS card—not a generic fantasy character.
+The card name determines the exact protagonist or central entity. The lore determines identity, history, status, motives, relationships, setting clues and the emotional meaning of the scene. The tactical function determines what the subject contributes in a confrontation. The row may influence distance and posture, never invent a profession or weapon. The tactical row informs placement and distance only; it does not prescribe a weapon or profession. The approved base-power value informs the card's combat profile; do not infer extra strength, effects, or spectacle from rarity. Rarity is classification only. It may inform restrained collection styling, but it does not grant powers or alter effect magnitude. Do not print or depict rarity potency, rarity budgets, rarity-based effect scaling, a numeric rarity score, or any 0–6 rarity scale. Affinities may influence restrained materials, lighting accents and environmental details, but must not become random symbols or extra powers. The final picture must contain a specific, coherent interpretation of THIS card—not a generic fantasy character.
 
 SUBJECT AND LORE TRANSLATION: {fields['nome']} is the only required named subject. Read the lore literally, then translate its meaningful phrases into visible choices: identity into silhouette and attire; role into posture and action; location into architecture and terrain; mood into expression, weather and light; signature object into a clear focal prop. Do not invent biography, gender, species, relationships, injuries, rank, canonical allegiance, weapon or magic not supported by the supplied facts.
 
@@ -363,7 +296,7 @@ Create ONE concrete moment with a readable action or tense pause and an implied 
 Use believable Elden Ring material language: articulated armor, attached straps, functional weapons, woven cloth, worn leather, oxidized metal, carved stone and weathered wood. Preserve natural anatomy, credible weight, correct perspective, grounded contact shadows and consistent light direction. Premium painterly realism, controlled brushwork, nuanced value grouping and restrained detail; no glossy CGI, plastic armor, waxy skin, anime proportions or random ornament overload.
 
 9. COMPLETE CARD OUTPUT — REQUIRED
-Generate the complete finished vertical 2:3 collectible card, including frame, artwork, title, faction, rarity, tactical row, cost, base-power medallion, separate maximum-power field, separate rarity-potency field, ability name/rule and lore. Copy every supplied Portuguese label and number exactly. Never substitute maximum power for base power; the main medallion must display the base-power field. Print only Corpo a corpo, Longa distância or Cerco (or Carta especial for a special card). Faction and tactical row are independent fields. Do not print obsolete combat classifications. No generic stock fantasy warrior, unrelated companion, arbitrary dragon/skull/castle, invented spell, random weapon, gratuitous gore, neon filter, excessive bloom, artificial grain, pixelation or compression artifacts. Do not add elements solely to fill empty space.
+Generate the complete finished vertical 2:3 collectible card, including frame, artwork, title, faction, rarity, tactical row, cost, base-power medallion, separate maximum-power field, ability name/rule and lore. Rarity is a classification only: do not add a rarity-potency field, rarity budget, effect-scaling badge, meter, number or 0–6 scale anywhere on the visible card. Copy every authorized Portuguese label and number exactly. Never substitute maximum power for base power; the main medallion must display the base-power field. Print only Corpo a corpo, Longa distância or Cerco (or Carta especial for a special card). Faction and tactical row are independent fields. Do not print obsolete combat classifications. No generic stock fantasy warrior, unrelated companion, arbitrary dragon/skull/castle, invented spell, random weapon, gratuitous gore, neon filter, excessive bloom, artificial grain, pixelation or compression artifacts. Do not add elements solely to fill empty space.
 
 FINAL OUTPUT: one complete vertical 2:3 card (recommended 1024×1536), with fully rendered illustration, frame, readable Portuguese typography and all canonical metadata. Do not output isolated artwork or an empty template."""
     # A saída segue o contrato do Prompt-Mestre: análise PT + prompt EN + negative EN.

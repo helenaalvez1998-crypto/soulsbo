@@ -171,14 +171,15 @@ experienced fantasy illustrator, not assembled from generic fantasy motifs.
 COMPLETE COLLECTIBLE CARD — STRICT OUTPUT RULES
 Create ONE finished vertical 2:3 collectible card. The output MUST contain the
 full card silhouette, frame, original artwork window, readable Portuguese
-lettering and every canonical data field supplied in CARD DATA: exact card
-name, faction, rarity, tactical row, cost, base power, maximum power, rarity
-potency, ability name and rule, lore/description, and synergies only when
-provided. Do not omit fields, invent values, replace one number with another,
+lettering and every visible canonical data field supplied in CARD DATA: exact
+card name, faction, rarity, tactical row, cost, base power, maximum power,
+ability name and rule, lore/description, and synergies only when provided.
+Do not omit visible fields, invent values, replace one number with another,
 repeat values in the wrong location, or improvise labels. Base power belongs in
 the main power medallion; maximum power belongs only in its separately labeled
-field; rarity potency and cost each have their own field. Faction and tactical
-row are separate concepts. Print only Corpo a corpo, Longa distância, Cerco,
+field; cost has its own field. Legacy rarity-potency metadata is internal only
+and must never be printed, depicted, or requested as a visible field.
+Faction and tactical row are separate concepts. Print only Corpo a corpo, Longa distância, Cerco,
 or Carta especial as the tactical classification. Never use Força, Destreza,
 or Magia as combat classes. Magia may appear only as a documented theme,
 ability, or lore element. The submitted image is already the entire card: the
@@ -1321,7 +1322,7 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
         f'CARD NAME: "{nome}".\nCATEGORY: {categoria_raw}.\n'
         f'FACTION: {faccao or "not specified"}.\nTACTICAL ROW: {posicao_tatica}.\nGWENT ROLE: {papel_gwent or "not specified"}.\n'
         f'RARITY: {raridade or "not specified"}.\nCOST: {carta.get("custo", "not specified")}.\n'
-        f'BASE POWER (main medallion): {poder}.\nMAXIMUM POWER (separate field): {poder_maximo}.\nRARITY POTENCY (separate field): {carta.get("potencia_raridade", "not specified")}.\n{leitura_poder}\n'
+        f'BASE POWER (main medallion): {poder}.\nMAXIMUM POWER (separate field): {poder_maximo}.\n{leitura_poder}\n'
         f'GAME ORIGIN: {jogo_origem_prompt}.\nARCHETYPE: {arquetipo or "not specified"}.\nEPITHET: {epiteto or "not specified"}.\n'
         f'DOMINANT AFFINITY: {afinidade_dominante or "not specified"}.\nALL AFFINITIES: {", ".join(afinidades) if afinidades else "not specified"}.\n'
         f'ABILITY: {habilidade_nome}.\nCANONICAL ABILITY RULE: {habilidade_regra}'
@@ -1384,7 +1385,7 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
             "CARD FACTS TO IMAGE DECISIONS: Use CARD NAME to decide the exact protagonist or central entity; "
             "use CANONICAL CARD DESCRIPTION and CANONICAL ABILITY RULE to decide the depicted event and consequence; "
             "use CARD CATEGORY to distinguish Unit from Special; use FACTION to decide only supported cultural/material motifs; use TACTICAL ROW for placement language and tactical emblem; "
-            "use RARITY only for narrative scale/intensity, never for new powers or a rarity-colored frame; use POWER and MAXIMUM POWER as separate exact printed card fields; use RARITY POTENCY and COST only in their own labeled fields. "
+            "use RARITY only as a classification and restrained visual cue, never as a numerical scale or source of extra powers; use POWER and MAXIMUM POWER as separate exact printed card fields; show COST only in its own labeled field. Never print rarity potency, rarity budget, effect amplification, or a 0–6 rarity score. "
             "Never swap or recalculate these values. TACTICAL ROW is placement metadata, not a weapon or profession. "
             "The scene's protagonist, action and setting must be explainable from these facts. If no description exists, "
             "the card name plus ability rule still define the scene; do not pad missing lore with random backstory."
@@ -1472,8 +1473,8 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
         "NEGATIVE CONSTRAINTS: no generic fantasy stock character, no random dragon/skull/castle unless the card data calls for it, no unrelated companions, no extra weapons, no exaggerated anatomy, no waxy skin, no plastic materials, no glossy CGI finish, no anime styling, "
         "no film grain, digital noise, pixelation, compression artifacts, dithering, speckling, artificial micro-texture, excessive pores, random scratch noise, oversharpening, clarity halos, HDR crunch or tiny unreadable ornaments, "
         "no contradictory faction colors, no ability symbols that look like interface icons, no split panels, no collage, no illegible runes, no misspelled text, no wrong numbers, no watermark or external logo.\n\n"
-        "FULL-CARD SOURCE DATA: reproduce exact name, faction, rarity, tactical row, cost, base power, maximum power, rarity potency, ability text and lore from the canonical data block assembled by the master prompt. "
-        "The base-power value belongs in the main power medallion; maximum power and rarity potency each belong in distinct labeled fields. Never swap or recalculate them. "
+        "FULL-CARD SOURCE DATA: reproduce exact name, faction, rarity, tactical row, cost, base power, maximum power, ability text and lore from the canonical data block assembled by the master prompt. "
+        "The base-power value belongs in the main power medallion; maximum power belongs in its distinct labeled field. Do not create a rarity-potency field, badge, meter or number. Never swap or recalculate the approved power values. "
         "FINAL OUTPUT: one complete vertical 2:3 collectible card with finished illustration, frame, typography, stat panels and all official text; no isolated artwork, no empty template and no multi-card sheet."
     )
     return "\n\n".join(blocos)
