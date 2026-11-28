@@ -244,14 +244,14 @@ class StatusRegistryTests(unittest.TestCase):
         unit = {"poder": 10, "bonus": 0, "geada": 2, "podrida": 2, "loucura": 2}
         self.assertEqual(7, legacy_gwent._poder_efetivo(unit, {}))
 
-    def test_legacy_malenia_repeats_corrosion_at_mark_cap(self):
+    def test_runtime_malenia_does_not_repeat_corrosion_at_mark_cap(self):
         player = {"board": []}
         target = {"id": "enemy", "nome": "Alvo", "row": "melee", "poder": 8, "bonus": 3, "podrida": 2}
         other = {"board": [target]}
         card = {"id": "chefe_malenia_lamina_miquella", "nome": "Malenia", "poder": 8, "bonus": 0}
         legacy_gwent._aplicar_habilidade_identidade(player, other, card, {"weather": {}}, "melee")
         self.assertEqual(2, target["podrida"])
-        self.assertEqual(2, target["bonus"])
+        self.assertEqual(3, target["bonus"], "Malenia não volta a corroer um alvo que já está no limite de duas marcas")
 
     def test_legacy_frost_oracle_rewards_again_even_when_target_is_at_cap(self):
         player = {"board": []}

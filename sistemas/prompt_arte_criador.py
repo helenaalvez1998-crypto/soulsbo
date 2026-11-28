@@ -139,9 +139,28 @@ def gerar_prompt_arte(definition: dict[str, Any], *, card_id: str) -> dict[str, 
         habilidade.get("texto") or definition.get("habilidade_descricao") or definition.get("habilidade_regra"),
         500,
     )
-    # An unresolved internal key is not, by itself, proof of an ability. Only a
-    # known ability name or an explicit canonical rule may authorize a visual effect.
-    tem_habilidade = bool(fields["habilidade_id"] and (habilidade_nome or habilidade_regra))
+    # IDs do catálogo usam a mesma regra já resolvida pelo motor e exibida no site.
+    # Isso inclui habilidades de identidade e modificadores efetivos de raridade.
+    try:
+        from sistemas.cartas import get_carta
+        from sistemas.gwent import preparar_carta
+        official_model = get_carta(card_id)
+        if official_model is not None:
+            canonical = official_model.para_dict()
+            for key in ("raridade", "poder", "custo", "exemplar_id"):
+                if definition.get(key) not in (None, ""):
+                    canonical[key] = definition[key]
+            prepared = preparar_carta(canonical)
+            habilidade_nome = _safe(prepared.get("habilidade_nome") or "Sem habilidade especial", 100)
+            habilidade_regra = _safe(prepared.get("habilidade_texto") or "Sem habilidade especial.", 500)
+            fields["habilidade_id"] = _safe(prepared.get("habilidade_id_efetiva") or prepared.get("habilidade") or "", 80).casefold()
+    except Exception:
+        # A criação de arte deve falhar fechada: dados não resolvidos nunca
+        # autorizam inventar uma habilidade no desenho.
+        habilidade_nome = "Sem habilidade especial"
+        habilidade_regra = "Regra não resolvida no catálogo. Não inventar efeitos, feitiços ou poderes visuais."
+    # An unresolved internal key is not, by itself, proof of an ability.
+    tem_habilidade = bool(fields["habilidade_id"] and habilidade_nome != "Sem habilidade especial")
     if not tem_habilidade:
         habilidade_nome = "Sem habilidade especial"
         habilidade_regra = "A carta não possui habilidade especial. Não inventar efeitos, feitiços ou poderes visuais."

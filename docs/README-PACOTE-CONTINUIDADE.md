@@ -1,3 +1,9 @@
+# Estado corrente — Malenia e NARA (2026-11-28)
+
+A revisão atual do runtime do Gwent está documentada em `docs/card-game-malenia-runtime-and-nara-training-v1.0.md`. Malenia usa poder 9, raridade Primordial, custo 6 e habilidade `scarlet_bloom` / Flor Escarlate; a corrosão não se repete quando o alvo já está no limite de duas marcas. A NARA tem três decks separados por dificuldade e espera 3–5 segundos antes de cada decisão usando o motor normal de partidas. O deck difícil inclui Malenia. O relatório de rastreabilidade de 2026-11-27 e as revisões candidatas abaixo são históricos e não substituem esse registro de runtime vigente.
+
+---
+
 # Continuidade atual — revisão rev. 32 (2026-11-28)
 
 **Pacote de referência:** `soulsbo-main-continuity-2026-11-28-rev32.zip`  

@@ -1115,17 +1115,21 @@ async function createGwentSoloMatch() {
   if (gwentSavedIds.length !== 12) return showNotice('Salve primeiro um deck Gwent com 12 cartas.', 'error');
   const button = $('#gwent-solo-match');
   if (!button) return;
+  const difficulty = $('#gwent-ai-difficulty')?.value || 'normal';
   button.disabled = true;
   const originalText = button.textContent;
   button.textContent = 'Preparando adversária…';
   try {
     const response = await fetch('/api/gwent/matches/solo', {
       method: 'POST', credentials: 'same-origin',
-      headers: {'Content-Type': 'application/json'}, body: JSON.stringify({difficulty: 'normal'})
+      headers: {'Content-Type': 'application/json'}, body: JSON.stringify({difficulty})
     });
     const data = await parseGwentApiResponse(response);
     if (!response.ok) throw new Error(data.error || 'Não foi possível iniciar o treino contra a NARA.');
-    showNotice('A NARA está pronta. Boa partida.', 'success');
+    const difficultyLabel = data.difficulty_name || 'Estrategista';
+    const leaderLabel = data.leader_name ? ` · líder ${data.leader_name}` : '';
+    const relicLabel = data.relic_name ? ` · Relíquia ${data.relic_name}` : '';
+    showNotice(`NARA · ${difficultyLabel} preparada com ${data.deck_name || 'deck de treino'}${leaderLabel}${relicLabel}.`, 'success');
     await loadGwentMatches();
     await openGwentMatch(data.match_id);
   } catch (error) {
@@ -1235,22 +1239,13 @@ const GWENT_LEADER_ROW_CHOICES = new Set([
   'bastiao_ancestral','mestre_veu','sombra_caminhante','voz_caidos',
   'lider_papa_esquecido','mestre_eclipse'
 ]);
-const GWENT_LEADER_SIMPLE = {
-  comandante_fornalha: 'Todas as suas unidades que estão em Corpo a Corpo ficam 2 pontos mais fortes.',
-  bastiao_ancestral: 'Na fileira escolhida, até duas unidades suas mais fortes que ainda não têm Escudo recebem proteção e +1 de força.',
-  juiz_cerco: 'Remove Sangramento, Geada, Podridão e Loucura de suas unidades. Cada unidade que for limpa ganha +1 de força.',
-  mestre_veu: 'Na fileira escolhida, marca até duas unidades inimigas mais fortes com Sangramento. Uma segunda marca causa Hemorragia e tira 2 de bônus.',
-  sombra_caminhante: 'Na fileira escolhida, sacrifica sua unidade mais fraca. Depois, suas outras unidades dessa fileira ganham +2 de bônus.',
-  voz_caidos: 'Pega do seu descarte a unidade mais forte com poder-base 5 ou menos e coloca na fileira escolhida com +1 de bônus.',
-  lider_papa_esquecido: 'Todas as suas unidades dos Esquecidos na fileira escolhida ganham +1 de bônus.',
-  arquimaga_eclipse: 'Remove Geada e Podridão das suas unidades. As que forem limpas em Cerco ganham +1 de bônus.',
-  mestre_eclipse: 'Na fileira escolhida, até três unidades inimigas mais fortes recebem uma marca de Geada.',
-  oraculo_tempestade: 'As duas unidades suas mais fortes de Longa Distância ganham +2 de bônus.'
-};
-function gwentLeaderIcon(leaderId) { return GWENT_LEADER_ICONS[String(leaderId || '')] || '♜'; }
-function gwentLeaderSimpleExplanation(leaderId, fallback = '') {
-  return GWENT_LEADER_SIMPLE[String(leaderId || '')] || fallback || 'Ativa a habilidade especial do líder. Consulte a descrição para ver os alvos e as condições.';
+function gwentLeaderSimpleExplanation(_leaderId, canonicalDescription = '') {
+  // A descrição da carta de líder vem do mesmo registro usado por aplicar_jogada.
+  // Não manter uma segunda tabela de regras no navegador evita divergência.
+  return String(canonicalDescription || '').trim()
+    || 'Ativa a habilidade especial do líder. Consulte a descrição para ver os alvos e as condições.';
 }
+
 function closeGwentLeaderModal() { document.getElementById('gwent-leader-modal')?.remove(); }
 function openGwentLeaderModal() {
   const data = currentGwentData;
@@ -1296,423 +1291,12 @@ function openGwentLeaderModal() {
   modal.querySelector('[data-leader-close]')?.focus();
 }
 
-const GWENT_IDENTITY_GUIDE = {
-  chefe_guardiao_cinzas: {
-    simple: 'Quando entra, fortalece em +1 um aliado que já esteja na mesma fileira. Se houver esse aliado, esta própria carta também ganha +1.',
-    example: 'Exemplo: já existe um aliado em Corpo a Corpo. Ao jogar esta carta nessa fileira, o aliado ganha +1 e a nova carta também ganha +1. Se a fileira estiver vazia, nenhum desses bônus é aplicado.'
-  },
-  chefe_dama_vazio: {
-    simple: 'A unidade inimiga mais forte perde 2 pontos de bônus. Ela não pode ficar com menos de -2 de bônus.',
-    example: 'Exemplo: o inimigo mais forte tem +3 de bônus. Ele passa a ter +1. Se já tinha -2, não perde mais nada.'
-  },
-  chefe_rei_afogado: {
-    simple: 'Esta carta ganha +2 se você já tiver alguma unidade no descarte. Se não tiver, ganha +1 quando o adversário tiver mais unidades em campo que você.',
-    example: 'Exemplo: há uma unidade no seu descarte, então a carta recebe +2. Se seu descarte estiver vazio, ela só ganha +1 caso o adversário tenha mais unidades no campo.'
-  },
-  chefe_oraculo_ruina: {
-    simple: 'A unidade inimiga mais forte perde 1 ponto de bônus. Esta carta também ganha +1 se o adversário estiver vencendo em pontos.',
-    example: 'Exemplo: o inimigo mais forte tem +2 de bônus e cai para +1. Se o adversário ainda estiver na frente no placar, esta carta também recebe +1.'
-  },
-  arma_duas_luas: {
-    simple: 'Esta carta ganha +1 se você tiver pelo menos outro aliado em uma fileira diferente da escolhida para ela.',
-    example: 'Exemplo: você já tem uma unidade em Corpo a Corpo e joga esta carta em Cerco. Como há um aliado em outra fileira, ela recebe +1.'
-  },
-  arma_grande_sino: {
-    simple: 'Esta carta ganha +2 quando sua pontuação total está menor que a do adversário.',
-    example: 'Exemplo: você tem 12 pontos e o adversário tem 16. A carta recebe +2. Se você empatar ou ficar na frente, não recebe esse bônus.'
-  },
-  magia_selo_vigilia: {
-    simple: 'Esta carta sofre 1 ponto a menos da penalidade do clima. Além disso, fortalece em +1 o primeiro aliado que já estiver na mesma fileira.',
-    example: 'Exemplo: a fileira está sob chuva que tira 1 ponto. Esta carta ignora essa perda. Se já houver um aliado na fileira, ele recebe +1 de bônus.'
-  },
-  magia_trovao_oco: {
-    simple: 'Todas as unidades inimigas na mesma fileira perdem 1 ponto de bônus. O bônus de cada uma não pode ficar abaixo de -2.',
-    example: 'Exemplo: há três inimigos na fileira. Um tem +2 e cai para +1; outro tem +1 e fica com 0; o terceiro já está em -2 e não muda.'
-  },
-  magia_nevoa_antiga: {
-    simple: 'Esta carta ganha +2 se houver chuva ou outro efeito climático ativo em qualquer fileira.',
-    example: 'Exemplo: existe chuva em Cerco. Mesmo que esta carta seja jogada em Corpo a Corpo, ela recebe +2.'
-  },
-  magia_sol_negro: {
-    simple: 'Esta carta ganha +2 se pelo menos uma unidade inimiga tiver bônus positivo.',
-    example: 'Exemplo: uma unidade inimiga tem +1 de bônus. A condição já foi cumprida e esta carta recebe +2.'
-  },
-  covenant_lua_velada: {
-    simple: 'Esta carta ganha +1. Depois, o aliado mais fraco que estiver em outra fileira também recebe +1 de bônus.',
-    example: 'Exemplo: você joga esta carta em Longa Distância. Um aliado mais fraco está em Corpo a Corpo; ele recebe +1 e esta carta também recebe +1.'
-  },
-  chefe_malenia_lamina_miquella: {
-    simple: 'Todos os inimigos da fileira escolhida recebem Podridão Escarlate. Quem já tinha uma marca recebe a segunda, que também corrói 1 ponto de bônus positivo.',
-    example: 'Exemplo: há três inimigos em Cerco. Todos recebem Podridão. Um deles já estava marcado, então completa a segunda marca e perde 1 de bônus positivo, se tiver.'
-  },
-  chefe_radahn_flagelo_estrelas: {
-    simple: 'O inimigo mais forte do campo é puxado para a fileira escolhida e perde 2 pontos de bônus.',
-    example: 'Exemplo: a unidade inimiga mais forte está em Longa Distância. Você joga Radahn em Cerco: essa unidade é movida para Cerco e perde 2 de bônus.'
-  },
-  chefe_maliketh_morte_destinada: {
-    simple: 'A unidade inimiga mais forte perde até 2 pontos de bônus. O bônus dela não pode ficar abaixo de -2.',
-    example: 'Exemplo: o inimigo mais forte tem +3 de bônus e passa a ter +1. Se tinha +1, passa a -1.'
-  },
-  chefe_messmer_impalador: {
-    simple: 'Todos os inimigos da fileira escolhida recebem Sangramento. Se alguém já tinha uma marca, a segunda causa Hemorragia e tira 2 pontos de bônus.',
-    example: 'Exemplo: dois inimigos estão em Corpo a Corpo. Os dois recebem Sangramento. Se um já estava marcado, sofre Hemorragia e perde 2 de bônus.'
-  },
-  chefe_placidusax_lorde_dragao: {
-    simple: 'Todos os inimigos da fileira escolhida recebem Geada. Esta carta ganha +1 para cada inimigo atingido, até no máximo +3.',
-    example: 'Exemplo: há dois inimigos em Cerco. Os dois recebem Geada e Placidusax ganha +2. Com quatro inimigos, o bônus continua limitado a +3.'
-  },
-  gwent_v75_ordem_veterano_juramento: {
-    simple: 'Esta carta entra com +1 de bônus. Se já houver um aliado na mesma fileira, o aliado mais fraco também recebe +1.',
-    example: 'Exemplo: há dois aliados em Corpo a Corpo. Ao jogar o Veterano nessa fileira, ele ganha +1 e o aliado mais fraco também ganha +1.'
-  },
-  gwent_v75_ordem_confessora_graca: {
-    simple: 'Limpa efeitos negativos de até dois aliados da mesma fileira e dá +1 de bônus a cada um. Se ninguém precisar ser limpo, fortalece o aliado mais fraco em +1. Se não houver aliado, esta carta ganha +1.',
-    example: 'Exemplo: dois aliados em Cerco estão com Geada e Sangramento. A Confessora remove esses efeitos e cada um recebe +1. Se ninguém estiver afetado, ela fortalece o aliado mais fraco.'
-  },
-  gwent_v75_veu_acolito_sangue: {
-    simple: 'O inimigo mais forte da fileira escolhida recebe Sangramento. Se já tinha uma marca, sofre Hemorragia, perde 2 de bônus e esta carta ganha +1.',
-    example: 'Exemplo: o inimigo mais forte em Longa Distância já tem Sangramento. O Acólito completa a segunda marca, tira 2 de bônus desse inimigo e ganha +1.'
-  },
-  gwent_v75_veu_carrasco_preco: {
-    simple: 'Sacrifica seu aliado mais fraco da mesma fileira e recebe bônus igual ao poder efetivo dele, até +3. Se não houver aliado, recebe +1.',
-    example: 'Exemplo: há um aliado com 2 de poder efetivo na fileira. Ele é sacrificado e o Carrasco ganha +2 de bônus. O ganho nunca passa de +3.'
-  },
-  gwent_v75_lua_oraculo_geada: {
-    simple: 'O inimigo mais forte da fileira escolhida recebe Geada. Se ele já tinha uma marca de Geada, esta carta também ganha +1.',
-    example: 'Exemplo: o inimigo mais forte em Cerco já tem uma marca de Geada. O Oráculo completa a segunda e recebe +1.'
-  },
-  gwent_v75_lua_graviturgista: {
-    simple: 'Até dois inimigos da fileira escolhida que tenham bônus positivo perdem 1 ponto de bônus. Se atingir dois, esta carta ganha +1.',
-    example: 'Exemplo: dois inimigos em Cerco têm +2 e +1 de bônus. Os dois perdem 1; como foram atingidos dois inimigos, o Graviturgista recebe +1.'
-  }
-};
-
 function gwentSimpleExplanation(card) {
-  const identityGuide = card?.habilidade_identidade ? GWENT_IDENTITY_GUIDE[String(card.id || '')] : null;
-  if (identityGuide?.simple) return identityGuide.simple;
-  const skill = String(card?.habilidade || '');
-  const explanations = {
-    devoto: 'Quando esta carta entra, ela ganha +1 de poder se você já tiver pelo menos duas unidades da mesma facção no campo.',
-    gloria: 'Se você vencer a rodada com esta unidade no campo, ela permanece para a próxima rodada. Se perder, ela vai para o descarte normalmente.',
-    legado: 'Se você venceu a rodada anterior, esta unidade entra na próxima rodada com +2 de poder.',
-    sinergia_faccao: 'Quando esta carta entra, ela ganha +1 de poder para cada unidade aliada da mesma facção que já estiver no campo.',
-    primeira_luz: 'Se esta unidade entrar na primeira rodada, ela ganha +1 de poder.',
-    retaliacao: 'Se sua pontuação estiver menor que a do adversário, esta unidade ganha +1 de poder.',
-    impeto: 'Se sua pontuação estiver maior que a do adversário, esta unidade ganha +1 de poder.',
-    ultimo_folego: 'Se esta unidade entrar na terceira rodada, ela ganha +1 de poder.',
-    contragolpe: 'Quando você estiver perdendo em pontos, esta unidade ganha +2 de poder.',
-    encadeamento: 'Se sua última unidade foi colocada nesta mesma fileira, esta unidade ganha +2.',
-    adaptacao: 'Se sua última unidade foi colocada em outra fileira, esta unidade ganha +1.',
-    sangue_frio: 'Se os dois jogadores estiverem empatados em pontos, esta unidade ganha +2.',
-    instinto: 'Quando você estiver perdendo em pontos, esta unidade ganha +2.',
-    precisao: 'Quando esta unidade entra em Longa Distância, ela ganha +1.',
-    drenagem: 'Todas as unidades inimigas perdem 1 ponto de bônus, até o limite de -2.',
-    cacador_arcano: 'Esta unidade ganha +1 se o inimigo tiver uma unidade da Lua Negra ou alguma unidade fortalecida.',
-    quebra_ritmo: 'Esta unidade ganha +1 se o adversário jogou sua última unidade nesta mesma fileira.',
-    lei_primeva: 'Na primeira rodada, esta unidade entra 2 pontos mais forte.',
-    decreto_soberano: 'Todas as unidades inimigas perdem 2 pontos de bônus. A redução não passa do limite de -2.',
-    olho_tempestade: 'Quando a fileira desta unidade está com clima ativo, ela ganha +2 de poder.',
-    fome_abismo: 'Quando sua pontuação total está menor que a do adversário, esta unidade ganha +2 de poder.',
-    paradoxo_eterno: 'Na terceira rodada, esta unidade ganha +2 se o adversário venceu a segunda rodada.',
-    guardiao_fileira: 'Para cada outra unidade sua na mesma fileira, esta carta ganha +1, até ganhar +3.',
-    cacador_solitario: 'Se esta for a única unidade sua na fileira, ela ganha +2.',
-    estandarte: 'Quando entra, fortalece em +1 as outras unidades suas que estão na mesma fileira.',
-    resistencia_climatica: 'Ignora até 2 pontos da fraqueza causada pelo clima. Se entrar sem clima ativo, ganha +1.',
-    eco_arcano: 'Se você já tiver uma carta especial no descarte, esta unidade ganha +2.',
-    vinganca: 'Quando esta unidade for destruída, suas outras unidades na mesma fileira ganham +1.',
-    escudo_ferro: 'Esta unidade entra protegida por um Escudo. O Escudo pode impedir a primeira tentativa de removê-la.',
-    ressurgir: 'Se houver uma unidade elegível no descarte, traz a mais forte com poder-base 5 ou menos de volta ao campo.',
-    devorar: 'Ao entrar, esta unidade consome sua unidade mais fraca na mesma fileira e recebe parte da força dela, até +4.',
-    sobrevivente: 'Se você vencer a rodada com esta unidade em campo, ela permanece para a próxima rodada.',
-    espolios: 'Se você vencer a rodada com esta unidade em campo, compra mais uma carta.',
-    gwent_egide: 'Escolha uma unidade sua para receber Escudo e ficar protegida contra uma tentativa de remoção.',
-    gwent_requiem: 'Traz do descarte uma unidade com poder-base 6 ou menos diretamente para o campo.',
-    gwent_passo: 'Escolha uma unidade sua e uma fileira de destino. A carta muda essa unidade de lugar.',
-    dupla_fornalha: 'Se houver outra unidade sua na mesma fileira, esta carta ganha +2.',
-    irmandade_veu: 'Se houver outra unidade sua em uma fileira diferente, esta carta ganha +2.',
-    circulo_arcano: 'Esta carta ganha +2 se você tiver outra unidade na mesma fileira ou uma carta especial no descarte.',
-    gwent_clima: 'Escolha uma fileira. A chuva enfraquece em 1 ponto todas as unidades dos dois lados que estiverem nela enquanto o clima durar.',
-    gwent_nevoa: 'Escolha uma fileira inimiga. Todas as unidades dela recebem uma marca de Podridão, que reduz seu poder. A quantidade de marcas segue os limites definidos pelo próprio efeito, independentemente da raridade.',
-    gwent_geada: 'Todas as unidades inimigas recebem uma marca de Geada, que reduz seu poder. A quantidade de marcas segue os limites definidos pelo próprio efeito, independentemente da raridade.',
-    gwent_chuva: 'As unidades inimigas na fileira de Cerco recebem Sangramento. Quando uma unidade junta duas marcas, perde 2 pontos de bônus.',
-    gwent_chifre: 'Escolha uma das suas fileiras. Suas unidades nela recebem +2 de bônus.',
-    gwent_medico: 'Escolhe uma unidade permitida do seu descarte e devolve essa carta para sua mão.',
-    gwent_queima: 'Tenta destruir a unidade mais forte de cada jogador. Um Escudo pode impedir a destruição.',
-    gwent_purificar: 'Remove o clima ativo de todas as fileiras.',
-    gwent_execucao: 'Escolha uma fileira inimiga. Pode destruir uma unidade com até 6 de poder efetivo. Escudo pode impedir.',
-    gwent_vinculo: 'Se você tiver pelo menos duas unidades na fileira escolhida, todas elas recebem +2 de bônus.',
-    gwent_batedor: 'Compra uma carta da sua reserva, caso ainda exista alguma.',
-    gwent_muralha: 'Escolha uma fileira. Suas unidades nela recebem +1 de bônus.',
-    gwent_sangramento: 'Marca as unidades inimigas da fileira escolhida. A segunda marca causa Hemorragia e reduz 2 de bônus.',
-    gwent_geada_cariana: 'Escolha uma fileira inimiga. As unidades nela recebem marcas de Geada, que diminuem seu poder.',
-    gwent_podrida: 'Escolha uma fileira inimiga. As marcas de Podridão diminuem o poder e podem corroer bônus positivos.',
-    gwent_loucura: 'Escolha uma fileira inimiga. As marcas de Loucura diminuem o poder e podem apagar bônus positivos.',
-    gwent_chama: 'Remove Geada das suas unidades. Cada unidade limpa recebe +1 de poder.',
-    gwent_invocacao: 'Escolha uma fileira e invoque Lobos Espirituais nela.',
-    reliquia_godrick: 'Você precisa ter pelo menos uma unidade sua no campo. Todas as suas unidades recebem +1 de bônus.',
-    reliquia_renala: 'Remove Geada e Podridão das suas unidades afetadas. Cada uma que for limpa recebe +1 de bônus.',
-    reliquia_morte: 'Em cada fileira, reduz até 2 pontos do bônus positivo da unidade inimiga que tiver o maior bônus.',
-    reliquia_noite_chama: 'Escolha uma fileira e uma postura. A Noite aplica Geada a todos os inimigos dela; a Chama atinge o inimigo mais forte.',
-    reliquia_lamina_negra: 'Escolha uma fileira e uma unidade inimiga. Reduz o bônus dela em 3. Escudo bloqueia o golpe.',
-    reliquia_algemas: 'Escolha uma fileira e uma unidade inimiga. Remove o bônus positivo dela. Escudo não é removido.'
-  };
-  return explanations[skill] || String(card?.habilidade_texto || 'Esta carta ativa o efeito especial descrito em Habilidade. Leia a condição e escolha a fileira ou o alvo quando a tela pedir.');
-}
-
-function closeGwentCardPreview() {
-  document.querySelectorAll('.gwent-row.is-card-preview, .gwent-board-card.is-card-preview, .gwent-board-side.is-card-preview').forEach(el => el.classList.remove('is-card-preview'));
-}
-function updateGwentCardPreview(card, row, previewNode) {
-  closeGwentCardPreview();
-  if (!card || !currentGwentData || !previewNode) return;
-  const skill = String(card.habilidade || '');
-  const score = currentGwentData.score || {};
-  const mine = score[String(currentGwentData.your_id)] || {};
-  const enemyKey = Object.keys(score).find(id => String(id) !== String(currentGwentData.your_id));
-  const enemy = score[enemyKey] || {};
-  let rowKey = row || 'melee';
-  if (skill === 'gwent_chuva') rowKey = 'siege';
-
-  let targets = [];
-  let affectedSides = [];
-  let allRows = false;
-  let message = '';
-  const identityExtraRows = new Map();
-  const markIdentityRow = (side, rowName) => {
-    if (!rowName) return;
-    if (!identityExtraRows.has(side)) identityExtraRows.set(side, new Set());
-    identityExtraRows.get(side).add(rowName);
-  };
-  const ownRows = new Set(['gwent_chifre','gwent_vinculo','gwent_muralha','gwent_invocacao']);
-  const enemyAll = new Set(['gwent_geada','drenagem','decreto_soberano']);
-  const enemyPicked = new Set(['gwent_nevoa','gwent_geada_cariana','gwent_podrida','gwent_loucura','gwent_sangramento']);
-  const bothPicked = new Set(['gwent_clima']);
-
-  // For selectable targets, use the exact eligible list returned by the backend.
-  // This keeps the preview aligned with server rules for shields, rarity and power limits.
-  const serverTargets = gwentOpcoesDoAlvo(String(card.id), rowKey);
-  if (serverTargets && ['gwent_execucao','gwent_passo','gwent_egide'].includes(skill)) {
-    const side = skill === 'gwent_execucao' ? 'enemy' : 'mine';
-    const sideData = side === 'mine' ? mine : enemy;
-    targets = serverTargets.opcoes || [];
-    affectedSides = [[side, sideData]];
-    if (skill === 'gwent_execucao') message = `Prévia: ${targets.length} unidade(s) inimiga(s) elegíveis em ${gwentRowLabel(rowKey)} podem ser atingidas. O Escudo ainda pode bloquear a remoção.`;
-    else if (skill === 'gwent_passo') message = `Prévia: ${targets.length} unidade(s) sua(s) podem ser movidas para ${gwentRowLabel(rowKey)}.`;
-    else message = `Prévia: ${targets.length} unidade(s) sua(s) podem receber Escudo.`;
-  } else if (card?.habilidade_identidade) {
-    // Habilidades individuais são identificadas pelo ID real da carta no motor.
-    // A prévia usa o mesmo conjunto de alvos do efeito correspondente.
-    const id = String(card.id || '');
-    const ownBoard = Array.isArray(mine.board) ? mine.board : [];
-    const enemyBoard = Array.isArray(enemy.board) ? enemy.board : [];
-    const powerOf = unit => gwentEffectivePower(unit, gwentWeatherSnapshot(currentGwentData)[unit.row] || 0);
-    const weakest = units => units.slice().sort((a,b) => powerOf(a) - powerOf(b))[0] || null;
-    const strongest = units => units.slice().sort((a,b) => powerOf(b) - powerOf(a))[0] || null;
-    const ownRow = ownBoard.filter(unit => unit.row === rowKey);
-    const enemyRow = enemyBoard.filter(unit => unit.row === rowKey);
-    if (['chefe_dama_vazio','chefe_oraculo_ruina','chefe_maliketh_morte_destinada'].includes(id)) {
-      targets = [strongest(enemyBoard)].filter(Boolean); affectedSides = [['enemy', enemy]];
-      message = `Prévia: a unidade inimiga mais forte no campo será afetada fora da fileira escolhida.`;
-    } else if (id === 'chefe_guardiao_cinzas') {
-      targets = [ownRow[0]].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
-      message = targets.length ? `Prévia: o primeiro aliado seu em ${gwentRowLabel(rowKey)} recebe +1; a carta também recebe +1.` : 'Prévia: sem aliado na fileira escolhida, o bônus desta habilidade não será ativado.';
-    } else if (id === 'chefe_rei_afogado') {
-      message = 'Prévia: a carta ganha +2 se você tiver carta no descarte; sem descarte, ganha +1 se o adversário tiver mais unidades em campo.';
-    } else if (id === 'arma_duas_luas') {
-      message = 'Prévia: a carta ganha +1 se você já tiver um aliado em outra fileira.';
-    } else if (id === 'arma_grande_sino') {
-      message = 'Prévia: a carta ganha +2 se sua pontuação total estiver abaixo da pontuação adversária.';
-    } else if (id === 'magia_selo_vigilia') {
-      targets = [ownRow[0]].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
-      message = 'Prévia: a carta reduz em 1 a penalidade de clima que sofre; o primeiro aliado já presente na fileira recebe +1.';
-    } else if (id === 'magia_trovao_oco') {
-      targets = enemyRow; affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
-      message = `Prévia: ${targets.length} inimigo(s) em ${gwentRowLabel(rowKey)} perde(m) 1 de bônus.`;
-    } else if (id === 'magia_nevoa_antiga') {
-      message = 'Prévia: a carta ganha +2 se houver clima ativo em qualquer fileira.';
-    } else if (id === 'magia_sol_negro') {
-      message = 'Prévia: a carta ganha +2 se algum inimigo tiver bônus positivo.';
-    } else if (id === 'covenant_lua_velada') {
-      targets = [weakest(ownBoard.filter(unit => unit.row !== rowKey))].filter(Boolean); affectedSides = [['mine', mine]];
-      message = targets.length ? 'Prévia: a carta ganha +1 e o aliado mais fraco em outra fileira recebe +1.' : 'Prévia: a carta ganha +1; não há aliado em outra fileira para receber o segundo bônus.';
-    } else if (['chefe_malenia_lamina_miquella','chefe_messmer_impalador','chefe_placidusax_lorde_dragao'].includes(id)) {
-      targets = enemyRow; affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
-      const effectLabel = id === 'chefe_malenia_lamina_miquella' ? 'Podridão Escarlate' : id === 'chefe_messmer_impalador' ? 'Sangramento' : 'Geada';
-      message = `Prévia: ${targets.length} inimigo(s) em ${gwentRowLabel(rowKey)} receberá(ão) ${effectLabel}.`;
-    } else if (id === 'chefe_radahn_flagelo_estrelas') {
-      targets = [strongest(enemyBoard)].filter(Boolean); affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
-      message = 'Prévia: o inimigo mais forte será movido para a fileira escolhida e perderá 2 de bônus.';
-    } else if (id === 'gwent_v75_ordem_veterano_juramento') {
-      targets = [weakest(ownRow)].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
-      message = 'Prévia: a carta ganha +1; se houver aliado na fileira, o mais fraco também ganha +1.';
-    } else if (id === 'gwent_v75_ordem_confessora_graca') {
-      const statusKeys = ['sangramento','geada','podrida','loucura'];
-      const marked = ownRow.filter(unit => statusKeys.some(key => Number(unit[key] || 0) > 0));
-      targets = marked.length ? marked.slice().sort((a,b) => powerOf(a)-powerOf(b)).slice(0,2) : [weakest(ownRow)].filter(Boolean);
-      affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
-      message = marked.length ? `Prévia: até ${targets.length} aliado(s) em ${gwentRowLabel(rowKey)} serão purificados e receberão +1.` : (targets.length ? 'Prévia: nenhum aliado precisa de purificação; o aliado mais fraco recebe +1.' : 'Prévia: sem aliados nessa fileira, a própria carta recebe +1.');
-    } else if (id === 'gwent_v75_veu_acolito_sangue') {
-      targets = [strongest(enemyRow)].filter(Boolean); affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
-      message = targets.length ? 'Prévia: o inimigo mais forte da fileira recebe Sangramento; a segunda marca causa Hemorragia.' : 'Prévia: não há inimigo nessa fileira para receber Sangramento.';
-    } else if (id === 'gwent_v75_veu_carrasco_preco') {
-      targets = [weakest(ownRow)].filter(Boolean); affectedSides = [['mine', mine]]; markIdentityRow('mine', rowKey);
-      message = targets.length ? 'Prévia: o aliado mais fraco da fileira será sacrificado para fortalecer esta carta (até +3).' : 'Prévia: sem aliado nessa fileira, esta carta recebe +1.';
-    } else if (id === 'gwent_v75_lua_oraculo_geada') {
-      targets = [strongest(enemyRow)].filter(Boolean); affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
-      message = targets.length ? 'Prévia: o inimigo mais forte recebe Geada; se já estiver marcado, esta carta ganha +1.' : 'Prévia: não há inimigo nessa fileira para receber Geada.';
-    } else if (id === 'gwent_v75_lua_graviturgista') {
-      targets = enemyRow.filter(unit => Number(unit.bonus || 0) > 0).sort((a,b) => Number(b.bonus || 0) - Number(a.bonus || 0)).slice(0,2);
-      affectedSides = [['enemy', enemy]]; markIdentityRow('enemy', rowKey);
-      message = `Prévia: ${targets.length} inimigo(s) com bônus positivo em ${gwentRowLabel(rowKey)} perderá(ão) 1 de bônus.`;
-    } else {
-      message = 'Prévia: esta unidade tem uma habilidade exclusiva; consulte a explicação detalhada antes de jogar.';
-    }
-  } else {
-    if (enemyAll.has(skill)) {
-      affectedSides = [['enemy', enemy]];
-      targets = [...(enemy.board || [])];
-      allRows = true;
-    } else if (enemyPicked.has(skill)) {
-      affectedSides = [['enemy', enemy]];
-      targets = (enemy.board || []).filter(unit => unit.row === rowKey);
-    } else if (bothPicked.has(skill)) {
-      affectedSides = [['mine', mine],['enemy', enemy]];
-      targets = [...(mine.board || []), ...(enemy.board || [])].filter(unit => unit.row === rowKey);
-    } else if (skill === 'gwent_chuva') {
-      affectedSides = [['enemy', enemy]];
-      targets = (enemy.board || []).filter(unit => unit.row === 'siege');
-    } else if (ownRows.has(skill)) {
-      affectedSides = [['mine', mine]];
-      targets = (mine.board || []).filter(unit => unit.row === rowKey);
-    } else if (skill === 'gwent_chama') {
-      affectedSides = [['mine', mine]];
-      targets = (mine.board || []).filter(unit => Number(unit.geada || 0) > 0);
-    } else if (skill === 'reliquia_renala') {
-      affectedSides = [['mine', mine]];
-      targets = (mine.board || []).filter(unit => Number(unit.geada || 0) > 0 || Number(unit.podrida || 0) > 0);
-    } else if (skill === 'gwent_purificar') {
-      affectedSides = [['mine', mine],['enemy', enemy]];
-      allRows = true;
-    } else if (skill === 'gwent_queima') {
-      const highest = side => (side.board || []).slice().sort((a,b) => gwentEffectivePower(b)-gwentEffectivePower(a))[0];
-      targets = [highest(mine), highest(enemy)].filter(Boolean);
-      affectedSides = [['mine',mine],['enemy',enemy]];
-    } else if (skill === 'reliquia_morte') {
-      affectedSides = [['enemy', enemy]];
-      targets = ['melee','ranged','siege'].map(rowName => (enemy.board || [])
-        .filter(unit => unit.row === rowName)
-        .sort((a,b) => Number(b.bonus || 0) - Number(a.bonus || 0))[0]).filter(Boolean);
-      allRows = true;
-    }
-  }
-
-  const rowsToHighlight = new Map();
-  for (const [side, sideData] of affectedSides) {
-    const rows = new Set(targets
-      .filter(unit => (sideData.board || []).some(candidate => String(candidate.id) === String(unit.id)))
-      .map(unit => unit.row));
-    if (allRows || skill === 'gwent_geada' || skill === 'gwent_purificar' || skill === 'reliquia_morte') {
-      for (const [key] of gwentRows) rows.add(key);
-    }
-    if (skill === 'gwent_clima' || skill === 'gwent_invocacao' || skill === 'gwent_execucao' || enemyPicked.has(skill) || ownRows.has(skill) || skill === 'gwent_chuva') rows.add(rowKey);
-    if (skill === 'gwent_passo') rows.add(rowKey);
-    rowsToHighlight.set(side, [...rows].filter(Boolean));
-  }
-  for (const [side, extraRows] of identityExtraRows) {
-    const rows = rowsToHighlight.get(side) || [];
-    rowsToHighlight.set(side, [...new Set([...rows, ...extraRows])]);
-  }
-  for (const [side, rows] of rowsToHighlight) {
-    const sideSelector = side === 'mine' ? '.gwent-board-mine' : '.gwent-board-enemy';
-    const sideNode = document.querySelector(`#gwent-arena ${sideSelector}`);
-    sideNode?.classList.add('is-card-preview');
-    for (const targetRow of rows) sideNode?.querySelector(`.gwent-row[data-row="${CSS.escape(targetRow)}"]`)?.classList.add('is-card-preview');
-  }
-  for (const unit of targets) {
-    document.querySelector(`#gwent-arena .gwent-board-card[data-card-id="${CSS.escape(String(unit.id))}"]`)?.classList.add('is-card-preview');
-  }
-
-  const rowName = gwentRowLabel(rowKey);
-  if (message) previewNode.textContent = message;
-  else if (skill === 'gwent_clima') previewNode.textContent = `Prévia: ${targets.length} unidade(s) dos dois lados em ${rowName} sofrerão a penalidade da chuva.`;
-  else if (skill === 'gwent_geada') previewNode.textContent = `Prévia: ${targets.length} unidade(s) inimiga(s) em todas as fileiras receberão Geada.`;
-  else if (skill === 'gwent_purificar') previewNode.textContent = 'Prévia: o clima será removido das três fileiras para os dois jogadores.';
-  else if (skill === 'gwent_invocacao') previewNode.textContent = `Prévia: Lobos Espirituais serão invocados em ${rowName}.`;
-  else if (skill === 'gwent_batedor') previewNode.textContent = 'Prévia: você comprará carta(s) da sua reserva, se ainda houver.';
-  else if (skill === 'gwent_medico' || skill === 'gwent_requiem') previewNode.textContent = 'Prévia: a escolha será feita entre unidades elegíveis do seu descarte.';
-  else if (!affectedSides.length) previewNode.textContent = 'Prévia: confira as unidades e a fileira destacadas. O servidor valida a jogada antes de aplicá-la.';
-  else previewNode.textContent = `Prévia: ${targets.length} unidade(s) em ${rowName} no ${affectedSides.map(([side]) => side === 'mine' ? 'seu campo' : 'campo inimigo').join(' e ')} serão afetadas.`;
-}
-function gwentSimpleExample(card) {
-  const identityGuide = card?.habilidade_identidade ? GWENT_IDENTITY_GUIDE[String(card.id || '')] : null;
-  if (identityGuide?.example) return identityGuide.example;
-  const skill = String(card?.habilidade || '');
-  const examples = {
-    devoto: 'Exemplo: você já tem duas unidades dos Esquecidos no campo e joga outra carta dos Esquecidos com Devoto. Ela recebe +1. Com apenas uma aliada da mesma facção, não recebe o bônus.',
-    gloria: 'Exemplo: o Anjo Esquecido está no campo e você vence a rodada. Ele permanece para a próxima. Se a NARA vencer, ele vai para o descarte.',
-    legado: 'Exemplo: você vence a primeira rodada. Ao jogar o Missionário Esquecido na segunda, ele entra com +2 de poder. Se você perdeu a rodada anterior, esse bônus não ativa.',
-    sinergia_faccao: 'Exemplo: você tem três unidades dos Esquecidos no campo e joga o Cruzado Esquecido. Ele ganha +3 de poder, porque já havia três aliados da mesma facção.',
-    lei_primeva: 'Exemplo: se jogar esta unidade na primeira rodada, ela recebe +2. Se jogar nas rodadas seguintes, esse bônus especial não acontece.',
-    decreto_soberano: 'Exemplo: um inimigo com +3 de bônus passa a ter +1; outro com +1 passa a ter -1. A habilidade não reduz ninguém abaixo de -2 de bônus.',
-    olho_tempestade: 'Exemplo: se a fileira onde esta unidade está tiver chuva, ela recebe +2. Sem clima naquela fileira, não recebe esse bônus.',
-    fome_abismo: 'Exemplo: se você tem 18 pontos e a NARA tem 22, a unidade recebe +2. Se você estiver empatando ou vencendo, não recebe esse bônus.',
-    paradoxo_eterno: 'Exemplo: se a NARA venceu a segunda rodada, esta unidade recebe +2 quando entrar na terceira.',
-    guardiao_fileira: 'Exemplo: com três outras unidades suas na mesma fileira, esta carta pode receber +3 no máximo.',
-    cacador_solitario: 'Exemplo: se esta unidade estiver sozinha na fileira, recebe +2. Se você colocar outra ali, perde a condição de solitária.',
-    estandarte: 'Exemplo: se você tiver outras duas unidades na fileira, as duas recebem +1 quando o Estandarte entrar.',
-    resistencia_climatica: 'Exemplo: sob chuva de nível 2, esta unidade ignora até 2 pontos da penalidade. Se entrar em uma fileira sem clima, recebe +1.',
-    eco_arcano: 'Exemplo: depois que uma carta especial for para seu descarte, esta unidade recebe +2 quando a condição for verificada.',
-    vinganca: 'Exemplo: se esta unidade for destruída, suas outras unidades que estiverem na mesma fileira recebem +1.',
-    escudo_ferro: 'Exemplo: se um efeito tentar destruir esta unidade, o Escudo é consumido e ela continua no campo.',
-    ressurgir: 'Exemplo: se houver no descarte uma unidade com poder-base 4 e outra com poder-base 5, a de poder 5 é a mais forte elegível e pode voltar.',
-    devorar: 'Exemplo: se sua unidade mais fraca na fileira tiver poder efetivo 3, esta carta pode ganhar +3 de bônus ao consumi-la.',
-    sobrevivente: 'Exemplo: se você ganhar a rodada com esta carta em campo, ela continua na arena quando a próxima rodada começar.',
-    espolios: 'Exemplo: se você vencer a rodada e esta carta continuar no campo, compra uma carta da sua reserva.',
-    gwent_egide: 'Exemplo: escolha uma unidade sua sem Escudo. Ela recebe proteção contra uma tentativa de remoção.',
-    gwent_requiem: 'Exemplo: uma unidade no descarte com poder-base 5 pode voltar diretamente ao campo; uma com poder-base 7 não pode.',
-    gwent_passo: 'Exemplo: escolha uma unidade sua de Corpo a Corpo e mande-a para Longa Distância.',
-    dupla_fornalha: 'Exemplo: esta unidade ganha +2 se você já tiver outra unidade na mesma fileira.',
-    irmandade_veu: 'Exemplo: se esta carta está em Corpo a Corpo e você tem outra unidade em Cerco, ela ganha +2.',
-    circulo_arcano: 'Exemplo: uma unidade sua na mesma fileira ou uma carta especial no descarte já pode ativar o bônus +2.',
-    primeira_luz: 'Exemplo: se esta carta entrar na primeira rodada com poder 4, passa a contar como 5. Na segunda rodada, esse bônus de entrada não acontece.',
-    retaliacao: 'Exemplo: você tem 12 pontos e o adversário 16. Enquanto estiver perdendo, esta unidade recebe +1.',
-    impeto: 'Exemplo: você tem 18 pontos e o adversário 14. Como está vencendo, esta unidade recebe +1.',
-    ultimo_folego: 'Exemplo: ao jogar esta unidade na terceira rodada, ela recebe +1. Na primeira ou na segunda rodada, não recebe esse bônus.',
-    contragolpe: 'Exemplo: você tem 10 pontos e o adversário 15. Esta unidade recebe +2 enquanto você estiver atrás.',
-    encadeamento: 'Exemplo: sua última carta foi colocada em Cerco. Se jogar esta unidade também em Cerco, ela ganha +2.',
-    adaptacao: 'Exemplo: sua última unidade foi para Corpo a Corpo. Ao colocar esta carta em Longa Distância, ela ganha +1.',
-    sangue_frio: 'Exemplo: você e o adversário têm 17 pontos. Como o placar está empatado, esta unidade recebe +2.',
-    instinto: 'Exemplo: você tem 9 pontos e o adversário 12. Enquanto estiver perdendo, esta unidade recebe +2.',
-    precisao: 'Exemplo: esta unidade tem 4 de poder. Ao colocá-la em Longa Distância, passa a contar como 5.',
-    drenagem: 'Exemplo: um inimigo tem +2 de bônus. A habilidade reduz esse bônus em 1. Os inimigos afetados não perdem além do limite de -2.',
-    cacador_arcano: 'Exemplo: se a NARA tiver uma unidade da Lua Negra em campo, esta carta recebe +1. Uma unidade inimiga com bônus positivo também pode cumprir a condição.',
-    quebra_ritmo: 'Exemplo: a NARA acabou de jogar uma unidade em Cerco. Se esta carta entrar em Cerco no seu turno, recebe +1.',
-    gwent_batedor: 'Exemplo: se ainda houver cartas na sua reserva, esta habilidade compra uma. Em raridades mais altas, pode comprar uma segunda.',
-    gwent_chama: 'Exemplo: se duas unidades suas estiverem com Geada, as duas são purificadas e recebem +1 de bônus cada.',
-    gwent_execucao: 'Exemplo: escolha uma unidade inimiga com poder efetivo dentro do limite mostrado. A carta tenta removê-la; se ela tiver Escudo, poderá resistir.',
-    gwent_geada_cariana: 'Exemplo: escolha uma fileira inimiga. As unidades nela recebem Geada; as primeiras podem receber uma marca extra conforme a raridade da carta.',
-    gwent_invocacao: 'Exemplo: escolha Longa Distância. A carta coloca Lobos Espirituais nessa fileira para aumentar seu exército.',
-    gwent_loucura: 'Exemplo: uma unidade inimiga recebe a segunda marca de Loucura. Além de perder poder efetivo, ela perde os bônus positivos que ainda tinha.',
-    gwent_medico: 'Exemplo: uma unidade sua de poder-base 4 está no descarte. A habilidade pode devolvê-la para sua mão para você jogar depois.',
-    gwent_podrida: 'Exemplo: a segunda marca de Podridão reduz o poder efetivo e também corrói 1 ponto de bônus positivo, se a unidade tiver algum.',
-    gwent_purificar: 'Exemplo: se houver chuva em Cerco e outra condição climática em Longa Distância, esta carta limpa o clima das três fileiras.',
-    gwent_sangramento: 'Exemplo: escolha uma fileira inimiga. Se uma unidade que já tinha Sangramento receber outra marca, sofre Hemorragia e perde 2 de bônus.',
-    reliquia_algemas: 'Exemplo: um inimigo tem +3 de bônus. As Algemas removem esse bônus positivo; se ele tiver Escudo, o Escudo continua intacto.',
-    reliquia_lamina_negra: 'Exemplo: escolha um inimigo na fileira selecionada. A Lâmina reduz seu bônus em 3; se houver Escudo, ele bloqueia o golpe.',
-    reliquia_morte: 'Exemplo: em cada fileira, o inimigo com maior bônus positivo perde até 2 pontos desse bônus.',
-    reliquia_noite_chama: 'Exemplo: escolha Cerco e a postura da Noite para aplicar Geada a todos os inimigos ali. Na postura da Chama, atinge o inimigo mais forte; o Escudo pode bloquear.',
-    reliquia_renala: 'Exemplo: duas unidades suas estão com Geada ou Podridão. A Runa limpa esses efeitos e cada unidade purificada recebe +1 de bônus.',
-    gwent_clima: 'Exemplo: escolha Longa Distância. Uma unidade sua com poder efetivo 5 e uma unidade inimiga com poder 4 passam a contar como 4 e 3 enquanto a chuva estiver ativa (sem cair abaixo de 1).',
-    gwent_nevoa: 'Exemplo: se houver três unidades inimigas em Cerco, as três recebem Podridão e perdem poder efetivo. A tempestade não atinge suas próprias unidades.',
-    gwent_geada: 'Exemplo: se o adversário tiver uma unidade em cada fileira, as três recebem Geada. A redução é aplicada ao poder efetivo.',
-    gwent_chuva: 'Exemplo: cada inimigo em Cerco recebe uma marca de Sangramento. Quando uma unidade acumula a segunda marca, perde 2 pontos de bônus e as marcas são consumidas.',
-    gwent_chifre: 'Exemplo: se você tiver duas unidades em Corpo a Corpo, ambas recebem +2 de bônus.',
-    gwent_vinculo: 'Exemplo: escolha Cerco. Se você tiver pelo menos duas unidades nessa fileira, todas recebem +2 de bônus.',
-    gwent_muralha: 'Exemplo: escolha Longa Distância. Todas as suas unidades nessa fileira recebem +1 de bônus.',
-    reliquia_godrick: 'Exemplo: você tem três unidades no campo. Ao ativar a runa, as três recebem +1 de bônus. Sem nenhuma unidade aliada, a carta não pode ser usada.',
-    gwent_queima: 'Exemplo: o jogo compara a unidade mais forte de cada lado e tenta remover as duas. Um Escudo pode bloquear a remoção da unidade protegida.'
-  };
-  return examples[skill] || 'Exemplo: observe a condição descrita na habilidade. Quando ela for cumprida, a carta aplica esse efeito à unidade, fileira ou jogador indicado. Se a jogada exigir um alvo, a tela permite escolhê-lo antes de confirmar.';
+  // Uma única fonte de verdade: o texto canônico preparado pelo motor do jogo.
+  // Evita que guias manuais por habilidade divergiam do que a partida executa.
+  const canonical = String(card?.habilidade_texto || '').trim();
+  if (canonical) return canonical;
+  return 'Esta carta não possui habilidade especial; seu poder, custo, fileira e raridade definem seu papel na partida.';
 }
 
 function gwentAnimateRemovedBoardCards(arena, nextIds, enabled = true) {
@@ -2153,7 +1737,8 @@ function renderGwentArena(data) {
   const turnSubline = prep ? 'Troque até duas cartas ou mantenha sua mão.'
     : data.status === 'finished' ? 'Confira o resultado da partida.'
     : mine.passed ? 'Aguarde o adversário concluir a rodada.'
-    : myTurn ? 'Escolha uma carta para jogar.' : (data.is_ai_match ? 'A NARA está calculando a jogada.' : 'Aguarde a jogada do adversário.');
+    : myTurn ? 'Escolha uma carta para jogar.'
+    : (data.is_ai_match ? (data.ai_thinking ? 'A NARA está avaliando a próxima jogada…' : 'A NARA está preparando a jogada.') : 'Aguarde a jogada do adversário.');
   const turnAnnouncement = data.status === 'finished' ? 'finished' : prep ? 'prep' : mine.passed ? 'passed' : myTurn ? 'mine' : 'enemy';
   if (data.status === 'active' && turnAnnouncement !== gwentLastTurnAnnouncement) {
     if (myTurn) window.gwentBanner?.('SUA VEZ!');
@@ -2173,7 +1758,7 @@ function renderGwentArena(data) {
 
   replaceGwentArenaMarkup(arena, `<div class="gwent-arena-head">
       <div class="gwent-arena-title"><small class="eyebrow">GWENT DO COLISEU · RODADA ${number(data.round)} / 3</small><h2>Arena <span>${escapeHTML(phaseLabel)}</span></h2><p class="gwent-log">${activeWeatherRows.length ? `⛈ CLIMA ATIVO · ${escapeHTML(activeWeatherLabel)}` : escapeHTML(gwentPublicEventText(data.last_event || `${opponentName} · ${data.opponent?.faction || 'Facção não informada'}`))}</p></div>
-      <div class="gwent-turn-indicator ${turnClass}" role="status" aria-live="polite"><span class="gwent-turn-dot" aria-hidden="true"></span><strong>${turnHeadline}</strong>${prep || data.status === 'finished' || mine.passed ? `<small>${turnSubline}</small>` : ''}</div>
+      <div class="gwent-turn-indicator ${turnClass}" role="status" aria-live="polite"><span class="gwent-turn-dot" aria-hidden="true"></span><strong>${turnHeadline}</strong>${prep || data.status === 'finished' || mine.passed || (data.is_ai_match && enemyTurn) ? `<small>${turnSubline}</small>` : ''}</div>
       <div class="gwent-arena-head-actions">${eventPanel}<button type="button" class="gwent-theme-toggle${gwentEldenRingThemeEnabled() ? ' is-active' : ''}" data-gwent-theme-toggle aria-pressed="${gwentEldenRingThemeEnabled()}">${gwentEldenRingThemeEnabled() ? '✧ ELDEN RING · ATIVO' : '✧ TEMA ELDEN RING'}</button><button type="button" class="gwent-exit" data-gwent-exit>Voltar ao lobby</button></div>
     </div>
     <div class="gwent-arena-toolbar">
@@ -2182,7 +1767,7 @@ function renderGwentArena(data) {
     <div class="gwent-battlefield" aria-label="Campo de batalha">
       <section class="gwent-board-side gwent-board-mine ${myTurn ? 'is-active' : ''} ${mine.passed ? 'is-passed' : ''}"><h3><span>SEU CAMPO</span>${myTurn ? '<b>SUA VEZ</b>' : mine.passed ? '<b>PASSOU</b>' : ''}</h3>${myBoardMarkup}</section>
       <div class="gwent-battle-line" aria-hidden="true"><span>LINHA DE CONFRONTO</span></div>
-      <section class="gwent-board-side gwent-board-enemy ${enemyTurn ? 'is-active' : ''} ${theirs.passed ? 'is-passed' : ''}"><h3><span>CAMPO DE ${escapeHTML(opponentName)}${data.is_ai_match ? ' · NARA IA' : ''}</span>${enemyTurn ? '<b>JOGANDO AGORA</b>' : theirs.passed ? '<b>PASSOU</b>' : ''}</h3>${enemyBoardMarkup}</section>
+      <section class="gwent-board-side gwent-board-enemy ${enemyTurn ? 'is-active' : ''} ${theirs.passed ? 'is-passed' : ''}"><h3><span>CAMPO DE ${escapeHTML(opponentName)}${data.is_ai_match ? ' · NARA IA' : ''}</span>${enemyTurn ? `<b>${data.is_ai_match && data.ai_thinking ? 'NARA ESTÁ PENSANDO' : 'JOGANDO AGORA'}</b>` : theirs.passed ? '<b>PASSOU</b>' : ''}</h3>${data.is_ai_match ? `<p class="gwent-ai-profile">${escapeHTML([data.opponent?.deck_name, data.opponent?.faction, data.opponent?.leader_name, data.opponent?.relic_name].filter(Boolean).join(' · '))}</p>` : ''}${enemyBoardMarkup}</section>
     </div>
     <div class="gwent-actions ${prep ? 'is-prep' : ''}">
       <div class="gwent-score gwent-score-you">
@@ -2697,7 +2282,7 @@ function openGwentBoardCardModal(cardId) {
           ${bonusBreakdownContent}
         </section>
         <section class="gwent-board-card-ability">
-          <small>HABILIDADE</small>
+          <small>EFEITO DE COMBATE</small>
           <strong>${escapeHTML(card.habilidade_nome || 'Sem habilidade especial')}</strong>
           <p>${escapeHTML(card.habilidade_texto || 'Sem habilidade especial.')}</p>
         </section>
@@ -2774,7 +2359,7 @@ function openGwentPlayCardModal(cardId) {
         <h2>${escapeHTML(card.nome || 'Carta')}</h2>
         <div class="gwent-play-card-tags"><span>${escapeHTML(card.raridade || 'Carta')}</span><span>${escapeHTML(power)}</span></div>
         <section class="gwent-play-card-ability">
-          <small>HABILIDADE</small>
+          <small>EFEITO DE COMBATE</small>
           <strong>${escapeHTML(card.habilidade_nome || 'Sem habilidade especial')}</strong>
           <p>${escapeHTML(card.habilidade_texto || 'Sem habilidade especial.')}</p>
         </section>
@@ -2786,8 +2371,7 @@ function openGwentPlayCardModal(cardId) {
         <div class="gwent-play-card-preview" data-gwent-card-preview aria-live="polite">Prévia: confira as unidades que serão afetadas.</div>
         <button type="button" class="gwent-play-card-explain-toggle" data-gwent-explain-toggle aria-expanded="false">EXPLICAÇÃO DETALHADA</button>
         <section class="gwent-play-card-simple-explanation" data-gwent-simple-explanation hidden>
-          <small>ENTENDA DE UM JEITO SIMPLES</small><p>${escapeHTML(gwentSimpleExplanation(card))}</p>
-          <small>EXEMPLO</small><p>${escapeHTML(gwentSimpleExample(card))}</p>
+          <small>REGRA CANÔNICA DO JOGO</small><p>${escapeHTML(gwentSimpleExplanation(card))}</p>
         </section>
         <button type="button" class="gwent-play-card-confirm" data-gwent-modal-play ${canPlay && !prep ? '' : 'disabled'}>JOGAR CARTA</button>
       </div>
@@ -3616,28 +3200,58 @@ window.addEventListener('resize', () => {
 }, {passive:true});
 
 
-/* V20 — Arsenal de Relíquias: pré-seleção persistida no navegador. */
+/* V20 — Arsenal de Relíquias: pré-seleção persistida no navegador.
+   Os efeitos e nomes são sincronizados com o catálogo público usado pelo combate. */
 (() => {
   const relics = {
-    reliquia_grande_runa_godrick: ['Grande Runa de Godrick','Lendária','Concede +1 de bônus a todas as unidades aliadas em campo.','Grande Runa'],
-    reliquia_runa_nao_nascidos: ['Grande Runa dos Não Nascidos','Lendária','Purifica Geada e Podridão dos aliados e fortalece os purificados.','Grande Runa'],
-    reliquia_runa_morte: ['Runa da Morte','Mítica','Corrói bônus positivos das unidades inimigas em cada fileira.','Grande Runa'],
-    reliquia_noite_chama: ['Espada da Noite e da Chama','Lendária','Escolha entre a postura da Chama ou da Noite para atacar uma fileira inimiga.','Arma lendária'],
-    reliquia_lamina_negra: ['Lâmina Negra','Mítica','Reduz o bônus de uma unidade inimiga; Escudo pode bloquear o golpe.','Arma lendária'],
-    reliquia_algemas_margit: ['Algemas de Margit','Épica','Anula os bônus positivos de uma unidade inimiga.','Artefato']
+    reliquia_grande_runa_godrick: ['Grande Runa de Godrick','Lendária','','Grande Runa'],
+    reliquia_runa_nao_nascidos: ['Grande Runa dos Não Nascidos','Lendária','','Grande Runa'],
+    reliquia_runa_morte: ['Runa da Morte','Mítica','','Grande Runa'],
+    reliquia_noite_chama: ['Espada da Noite e da Chama','Lendária','','Arma lendária'],
+    reliquia_lamina_negra: ['Lâmina Negra','Mítica','','Arma lendária'],
+    reliquia_algemas_margit: ['Algemas de Margit','Épica','','Artefato']
   };
   const select = document.querySelector('#gwent-relic-select');
   const preview = document.querySelector('#gwent-relic-preview');
   const status = document.querySelector('#gwent-relic-status');
   if (!select || !preview) return;
+  let catalogReady = false;
   const render = () => {
     const relic = relics[select.value];
+    const description = catalogReady
+      ? (relic?.[2] || 'Efeito não encontrado no catálogo oficial.')
+      : 'Consultando a definição oficial do efeito…';
     preview.innerHTML = relic
-      ? `<div class="v52-relic-seal"><i>♜</i><span>${escapeHTML(relic[3])}</span></div><small>${escapeHTML(relic[1])} · ${escapeHTML(relic[3])}</small><b>${escapeHTML(relic[0])}</b><p>${escapeHTML(relic[2])}</p><span class="gwent-relic-equipped">PREPARADA</span>`
+      ? `<div class="v52-relic-seal"><i>♜</i><span>${escapeHTML(relic[3])}</span></div><small>${escapeHTML(relic[1])} · ${escapeHTML(relic[3])}</small><b>${escapeHTML(relic[0])}</b><p>${escapeHTML(description)}</p><span class="gwent-relic-equipped">PREPARADA</span>`
       : '<b>Nenhuma Relíquia selecionada</b><p>Você entrará sem Relíquia equipada.</p>';
-    if (status) status.textContent = relic ? 'Carta possuída. Salve o deck para equipar esta Relíquia. Chance de Relíquia: 0,50% por drop.' : 'Somente cartas de Relíquia que você possui podem ser equipadas. Chance de drop: 0,50% por carta.';
+    if (status) status.textContent = relic
+      ? 'Carta possuída. Salve o deck para equipar esta Relíquia. Chance de Relíquia: 0,50% por drop.'
+      : 'Somente cartas de Relíquia que você possui podem ser equipadas. Chance de drop: 0,50% por carta.';
+  };
+  const syncOfficialDescriptions = async () => {
+    try {
+      const response = await fetch('/api/gwent/catalogo-cartas', {
+        credentials: 'same-origin', cache: 'no-store', headers: {Accept: 'application/json'}
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'Catálogo indisponível');
+      const cards = new Map((payload.cartas || []).map(card => [String(card.card_id), card]));
+      for (const [id, entry] of Object.entries(relics)) {
+        const card = cards.get(id);
+        if (!card) continue;
+        entry[0] = card.nome;
+        entry[1] = card.raridade;
+        entry[2] = card.habilidade_texto;
+      }
+      catalogReady = true;
+    } catch (error) {
+      catalogReady = true;
+      for (const entry of Object.values(relics)) entry[2] = 'Não foi possível confirmar este efeito no catálogo oficial. Atualize a página para tentar novamente.';
+    }
+    render();
   };
   render();
+  syncOfficialDescriptions();
   select.addEventListener('change', () => {
     render();
     if (typeof renderGwentBuilder === 'function') renderGwentBuilder();

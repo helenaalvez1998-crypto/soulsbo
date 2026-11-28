@@ -662,16 +662,15 @@ A seção da lista `CARTAS_EXPANSAO_V75` introduz “Nova facção: Os Esquecido
 
 A discrepância é demonstrável entre agrupamento/comentários e o campo de facção. A intenção provável é que os seis sejam `Os Esquecidos`, mas isso é uma inferência contextual; confirmar a regra de facção antes de mudar dados, especialmente porque facção influencia predominância e passiva da partida.
 
-### 10.9 Imagem pode divergir dos dados e da habilidade executada
+### 10.9 Texto mecânico e arte aprovada
 
-- `preparar_payload_carta_base()` chama `preparar_carta()` e replica `habilidade_nome`/`habilidade_texto` para a renderização gerada.
-- Em `_draw_card()`, quando `illustration_bytes` contém arte oficial completa, o renderizador abre e redimensiona a imagem e retorna imediatamente; não sobrepõe nome, poder, raridade, habilidade, moldura ou efeitos. Os textos antigos estão literalmente incorporados nos pixels.
-- A documentação do Ateliê (`docs/ATELIE_CARTA_COMPLETA.md`) confirma que a arte oficial é associada a `card_id + exemplar_id` e que imagens antigas já aprovadas não são reescritas pelo código.
-- A imagem-base desenha aura usando `card['habilidade']`, não `habilidade_identidade` nem `CARD_IDENTITY_ABILITIES[card_id]['effect']`. Assim, as auras só cobrem algumas habilidades genéricas.
-- `_AURAS` contém 6 entradas: `escudo_ferro`, `vinganca`, `ressurgir`, `devorar`, `sobrevivente`, `espolios`. A última lista inclui `sobrevivente`, que não tem resolução no motor.
-- `_EMBLEMAS` de especiais também é um mapeamento específico e parcial; se o ID não for desenhado, o renderer usa emblema genérico.
+- `preparar_payload_carta_base()` chama `preparar_carta()` e marca o texto resultante como canônico para evitar reaplicar os sufixos de raridade durante a renderização.
+- `_dados_habilidade_visual()` usa os campos preparados ou recalcula a regra uma única vez. O painel procedural e o painel do template medem título e corpo; se a regra completa não couber, a renderização falha em vez de publicar texto truncado.
+- Arte completa aprovada no Ateliê permanece vinculada ao par `card_id + exemplar_id`, mas não é mais servida como pixels finais intocados. O renderizador extrai a janela da ilustração e recompõe os elementos de carta e o efeito atual a partir do catálogo/motor. O texto antigo incorporado à imagem não é usado como fonte mecânica.
+- A rota privada também exige dados canônicos para compor uma carta com arte aprovada. Se o modelo/snapshot não estiver disponível, não serve uma imagem isolada como se fosse uma carta validada.
+- A validação de catálogo cruza 137 cartas com o payload público do site, incluindo identidade, efeito, sinergias e combos; verifica 65 definições de efeito, 22 efeitos de identidade e o pool de 13 habilidades de recompensas dinâmicas.
 
-**Impacto:** corrigir catálogo/motor não atualiza imagem completa aprovada. Uma carta pode continuar visualmente mostrando regra/nome/poder antigo mesmo após os dados atuais serem atualizados. As imagens precisam ser identificadas por revisão/fingerprint ou regeneradas/reaprovadas segundo política explícita.
+**Impacto:** alteração de efeito, raridade, poder ou fileira invalida o cache e atualiza a carta exibida a partir dos dados atuais. O arquivo original aprovado é preservado no armazenamento, mas os textos embutidos nele não controlam mais o cartão renderizado.
 
 ### 10.10 Cobertura da lista V18 não equivale a carta pura
 

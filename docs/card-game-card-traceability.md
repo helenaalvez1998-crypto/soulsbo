@@ -2,6 +2,8 @@
 
 > Documento de auditoria estática gerado a partir do catálogo carregado em runtime. Não altera regras nem autoriza exclusão automática. Os valores representam o estado do ZIP original, em 2026-11-27.
 
+> **Atualização de runtime (2026-11-28):** este relatório e suas tabelas são um snapshot histórico do ZIP de 2026-11-27. Para Malenia, não use os campos históricos de custo 4, habilidade `drenagem` ou texto antigo como estado atual. A definição autoritativa corrigida está em `data/card_game/malenia-runtime-current.v1.json`; o runtime atual usa custo 6, habilidade `scarlet_bloom` / Flor Escarlate, poder 9 e regra de corrosão sem repetição no limite.
+
 ## 1. Escopo e fontes
 
 - Catálogo runtime: `sistemas/cartas.py` → `CARTAS_POR_ID` e `Carta.para_dict()`.

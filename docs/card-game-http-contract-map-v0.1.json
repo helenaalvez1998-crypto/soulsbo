@@ -15,13 +15,13 @@
     {
       "method": "GET",
       "path": "/api/gwent/cards",
-      "registration_line": 830,
+      "registration_line": 832,
       "handler": "_api_gwent_cards",
       "handler_contract": {
         "handler": "_api_gwent_cards",
         "handler_lines": [
-          2114,
-          2207
+          2296,
+          2389
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": false,
@@ -54,13 +54,13 @@
     {
       "method": "GET",
       "path": "/api/gwent/cards/{card_id}/image",
-      "registration_line": 836,
+      "registration_line": 838,
       "handler": "_api_gwent_card_image",
       "handler_contract": {
         "handler": "_api_gwent_card_image",
         "handler_lines": [
-          3342,
-          3639
+          3524,
+          3821
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": false,
@@ -91,13 +91,13 @@
     {
       "method": "GET",
       "path": "/api/gwent/deck",
-      "registration_line": 853,
+      "registration_line": 855,
       "handler": "_api_gwent_deck",
       "handler_contract": {
         "handler": "_api_gwent_deck",
         "handler_lines": [
-          1093,
-          1232
+          1095,
+          1234
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": false,
@@ -138,13 +138,13 @@
     {
       "method": "POST",
       "path": "/api/gwent/deck",
-      "registration_line": 854,
+      "registration_line": 856,
       "handler": "_api_gwent_deck_save",
       "handler_contract": {
         "handler": "_api_gwent_deck_save",
         "handler_lines": [
-          1234,
-          1349
+          1236,
+          1351
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": true,
@@ -185,13 +185,13 @@
     {
       "method": "POST",
       "path": "/api/gwent/deck/reset",
-      "registration_line": 855,
+      "registration_line": 857,
       "handler": "_api_gwent_deck_reset",
       "handler_contract": {
         "handler": "_api_gwent_deck_reset",
         "handler_lines": [
-          1351,
-          1365
+          1353,
+          1367
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": true,
@@ -217,13 +217,13 @@
     {
       "method": "GET",
       "path": "/api/gwent/matches",
-      "registration_line": 856,
+      "registration_line": 858,
       "handler": "_api_gwent_matches",
       "handler_contract": {
         "handler": "_api_gwent_matches",
         "handler_lines": [
-          1414,
-          1429
+          1416,
+          1431
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": false,
@@ -252,13 +252,13 @@
     {
       "method": "POST",
       "path": "/api/gwent/matches",
-      "registration_line": 857,
+      "registration_line": 859,
       "handler": "_api_gwent_match_create",
       "handler_contract": {
         "handler": "_api_gwent_match_create",
         "handler_lines": [
-          1431,
-          1517
+          1433,
+          1519
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": true,
@@ -291,25 +291,33 @@
     {
       "method": "POST",
       "path": "/api/gwent/matches/solo",
-      "registration_line": 858,
+      "registration_line": 860,
       "handler": "_api_gwent_match_create_solo",
       "handler_contract": {
         "handler": "_api_gwent_match_create_solo",
         "handler_lines": [
-          1519,
-          1613
+          1651,
+          1765
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": true,
-        "request_body_fields_detected": [],
+        "request_body_fields_detected": [
+          "difficulty"
+        ],
         "route_parameters_detected": [],
         "response_keys_detected": [
+          "deck_name",
           "difficulty",
+          "difficulty_name",
           "error",
+          "faction",
+          "leader_name",
           "match_id",
           "mode",
           "ok",
           "opponent",
+          "relic_id",
+          "relic_name",
           "rewards",
           "status"
         ],
@@ -335,13 +343,13 @@
     {
       "method": "GET",
       "path": "/api/gwent/matches/{match_id}",
-      "registration_line": 860,
+      "registration_line": 862,
       "handler": "_api_gwent_match_detail",
       "handler_contract": {
         "handler": "_api_gwent_match_detail",
         "handler_lines": [
-          1706,
-          1829
+          1858,
+          2003
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": false,
@@ -370,13 +378,13 @@
     {
       "method": "POST",
       "path": "/api/gwent/matches/{match_id}/action",
-      "registration_line": 861,
+      "registration_line": 863,
       "handler": "_api_gwent_match_action",
       "handler_contract": {
         "handler": "_api_gwent_match_action",
         "handler_lines": [
-          1831,
-          1995
+          2005,
+          2177
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": true,
@@ -400,8 +408,7 @@
           "tx.conn.execute"
         ],
         "engine_calls_detected": [
-          "aplicar_jogada",
-          "executar_turno_ia"
+          "aplicar_jogada"
         ],
         "transaction_execute_detected": true,
         "frontend_signal_literals_found": [
@@ -415,13 +422,13 @@
     {
       "method": "POST",
       "path": "/api/gwent/matches/{match_id}/respond",
-      "registration_line": 859,
+      "registration_line": 861,
       "handler": "_api_gwent_match_respond",
       "handler_contract": {
         "handler": "_api_gwent_match_respond",
         "handler_lines": [
-          1615,
-          1704
+          1767,
+          1856
         ],
         "auth_guard_detected": true,
         "origin_guard_detected": true,
@@ -457,13 +464,13 @@
     {
       "method": "GET",
       "path": "/api/gwent/public-cards/{card_id}/image",
-      "registration_line": 835,
+      "registration_line": 837,
       "handler": "_api_gwent_public_card_image",
       "handler_contract": {
         "handler": "_api_gwent_public_card_image",
         "handler_lines": [
-          3012,
-          3339
+          3194,
+          3521
         ],
         "auth_guard_detected": false,
         "origin_guard_detected": false,
@@ -503,6 +510,7 @@
     "arquetipo_faccao",
     "categoria",
     "combos_compativeis",
+    "custo",
     "descricao",
     "especial",
     "faccao",
@@ -525,11 +533,12 @@
   ],
   "findings": [
     "The deck-save handler validates 12 unique card models, at least 8 units, at most 4 specials, faction predominance, leader/faction compatibility, and relic ownership; it does not sum deck cost or enforce a budget.",
-    "Deck/catalog API code assigns payload['custo'] before calling preparar_carta(), but preparar_carta() returns an explicit dictionary that does not include 'custo'. The final prepared card payload therefore drops the assigned cost.",
+    "preparar_carta() includes the resolved card cost in the public payload.",
     "The frontend posts cards as {card_id, exemplar_id} plus faction, leader_id and relic_id. Match actions post action, card_id, row, card_ids and target_id, then refresh the match detail endpoint.",
     "The action endpoint returns {ok: true}; the frontend refreshes GET /api/gwent/matches/{match_id} to retrieve the updated public state.",
     "Pending invitations are answered through the separate /respond endpoint; match detail returns status-only for pending rows and full state for active/finished rows.",
     "Human-vs-human invitation creation stores deck/config snapshots; acceptance revalidates relic ownership, shuffles snapshots and creates the initial game state.",
-    "Solo creation mirrors the player's saved deck/config for NARA; the action handler executes the AI turn server-side and uses a pass fallback if AI execution raises."
+    "Solo creation preserves the player's saved deck and gives NARA a separate validated 12-card profile deck for the selected difficulty (9 units, 3 specials).",
+    "The asynchronous NARA worker waits 3–5 seconds before each decision and evaluates one action at a time through the normal aplicar_jogada() resolver; the AI does not inspect the identities of cards in the human hand."
   ]
 }

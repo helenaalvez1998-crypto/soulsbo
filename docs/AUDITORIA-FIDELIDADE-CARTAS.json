@@ -1,0 +1,3862 @@
+{
+  "total_cartas": 137,
+  "total_publicadas_site": 137,
+  "total_habilidades_catalogadas": 65,
+  "total_identidades": 22,
+  "total_habilidades_recompensas_dinamicas": 13,
+  "habilidades_recompensas_dinamicas_sem_cobertura": [],
+  "total_lideres": 10,
+  "lideres": [
+    {
+      "id": "arquimaga_eclipse",
+      "nome": "Rennala",
+      "faccao": "Lua Negra",
+      "efeito_id": "rennala_full_moon",
+      "descricao_canonica": "Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus."
+    },
+    {
+      "id": "bastiao_ancestral",
+      "nome": "Morgott",
+      "faccao": "Ordem Áurea",
+      "efeito_id": "morgott_omen",
+      "descricao_canonica": "Na fileira escolhida, concede Escudo a até 2 aliados mais fortes e +1 de bônus a eles."
+    },
+    {
+      "id": "comandante_fornalha",
+      "nome": "Godfrey",
+      "faccao": "Ordem Áurea",
+      "efeito_id": "godfrey_warlord",
+      "descricao_canonica": "Concede +2 de bônus a todas as suas unidades de Corpo a Corpo."
+    },
+    {
+      "id": "juiz_cerco",
+      "nome": "Radagon",
+      "faccao": "Ordem Áurea",
+      "efeito_id": "radagon_purification",
+      "descricao_canonica": "Remove Sangramento, Geada, Podridão e Loucura de todos os aliados; cada aliado purificado recebe +1 de bônus."
+    },
+    {
+      "id": "lider_papa_esquecido",
+      "nome": "Papa Esquecido",
+      "faccao": "Os Esquecidos",
+      "efeito_id": "forgotten_blessing",
+      "descricao_canonica": "Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida."
+    },
+    {
+      "id": "mestre_eclipse",
+      "nome": "Astel",
+      "faccao": "Lua Negra",
+      "efeito_id": "astel_gravity",
+      "descricao_canonica": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes."
+    },
+    {
+      "id": "mestre_veu",
+      "nome": "Mohg",
+      "faccao": "Véu Carmesim",
+      "efeito_id": "mohg_blood_rite",
+      "descricao_canonica": "Aplica uma marca de Sangramento aos 2 inimigos mais fortes da fileira escolhida; uma segunda marca causa Hemorragia (-2 de bônus)."
+    },
+    {
+      "id": "oraculo_tempestade",
+      "nome": "Loretta",
+      "faccao": "Lua Negra",
+      "efeito_id": "loretta_knight",
+      "descricao_canonica": "Concede +2 de bônus às 2 unidades aliadas mais fortes de Longa Distância."
+    },
+    {
+      "id": "sombra_caminhante",
+      "nome": "Rykard",
+      "faccao": "Véu Carmesim",
+      "efeito_id": "rykard_devour",
+      "descricao_canonica": "Sacrifica seu aliado mais fraco na fileira escolhida; os demais aliados dessa fileira recebem +2 de bônus."
+    },
+    {
+      "id": "voz_caidos",
+      "nome": "Esgar",
+      "faccao": "Véu Carmesim",
+      "efeito_id": "esgar_blood_priest",
+      "descricao_canonica": "Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus."
+    }
+  ],
+  "total_sem_efeito_catalogadas": 43,
+  "contagens": {
+    "identidade": 22,
+    "unidade": 35,
+    "especial": 27,
+    "combo": 38,
+    "sem_efeito_individual": 15
+  },
+  "erros": [],
+  "total_erros": 0,
+  "status": "OK",
+  "cartas": [
+    {
+      "id": "gwent_v75_veu_acolito_sangue",
+      "nome": "Acólito da Dinastia Sanguínea",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "v75_blood_mark",
+      "habilidade_nome": "Marca da Dinastia",
+      "habilidade_texto": "Marca o inimigo de maior poder efetivo na fileira. Na segunda marca, consome Sangramento, reduz 2 de bônus (mín. -2) e esta carta recebe +1. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um acólito do Palácio de Mohgwyn prepara o altar para os ritos secretos da dinastia e reverencia a chama do sangue.",
+      "sinergias": [
+        "v75_blood_mark"
+      ],
+      "combos": [
+        {
+          "id": "v75_banquete_hemorragia",
+          "nome": "Banquete da Hemorragia",
+          "descricao": "Uma marca aberta alimenta o ritual: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "patente_5",
+      "nome": "Acólito Sanguíneo — Guardião das Cinzas",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "encadeamento",
+      "habilidade_nome": "Postura Encadeada",
+      "habilidade_texto": "Recebe +2 de bônus se entrar na mesma fileira da sua última unidade jogada. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 20.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_singular_intocavel",
+      "nome": "Adaga da Faca Negra",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Singular",
+      "poder": 9,
+      "custo": 0,
+      "habilidade_id": "precisao",
+      "habilidade_nome": "Mira Cariana",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar na fileira de Longa Distância. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Conquistada ao concluir um desafio sem sofrer dano.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "reliquia_algemas_margit",
+      "nome": "Algemas de Margit",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "reliquia_algemas",
+      "habilidade_nome": "Algemas de Margit",
+      "habilidade_texto": "Na fileira escolhida, zera o bônus positivo do alvo escolhido ou do inimigo com maior bônus. Bônus negativos não mudam; Escudos não bloqueiam o efeito. A ativação consome a Relíquia.",
+      "descricao": "Correntes forjadas para conter o Agouro caído, capazes de subjugar até mesmo um inimigo temível.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_anjo2",
+      "nome": "Anjo de Segunda Ordem",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Lendária",
+      "poder": 5,
+      "custo": 4,
+      "habilidade_id": "gloria",
+      "habilidade_nome": "Glória",
+      "habilidade_texto": "Ao vencer a rodada, mantém no campo a unidade com Glória ou Sobrevivente de maior poder efetivo; as demais são descartadas. Em empate ou derrota, nenhuma permanece. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Uma presença alada atravessa os salões esquecidos, iluminando os vitrais partidos.",
+      "sinergias": [
+        "fe",
+        "gloria_divina"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 5,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_anjo",
+      "nome": "Anjo Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Longa distância",
+      "raridade": "Épica",
+      "poder": 3,
+      "custo": 3,
+      "habilidade_id": "gloria",
+      "habilidade_nome": "Glória",
+      "habilidade_texto": "Ao vencer a rodada, mantém no campo a unidade com Glória ou Sobrevivente de maior poder efetivo; as demais são descartadas. Em empate ou derrota, nenhuma permanece. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um mensageiro alado atravessa os vitrais partidos da antiga catedral, levando uma luz que quase se apagou.",
+      "sinergias": [
+        "fe",
+        "gloria_divina"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 5,
+      "status": "OK"
+    },
+    {
+      "id": "patente_3",
+      "nome": "Aprendiz Cariano — Caçador de Almas",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 10.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "magia_fagulha",
+      "nome": "Aprendiz de Feitiçaria Cariana",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Um aprendiz da tradição cariana começa a dominar os projéteis de pedra cintilante.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "magia_sol_negro",
+      "nome": "Apóstolo da Pele Divina",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 8,
+      "custo": 4,
+      "habilidade_id": "devouring_eclipse",
+      "habilidade_nome": "Eclipse Devorador",
+      "habilidade_texto": "Ganha +2 se algum inimigo tiver bônus acima de zero. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Devoto da antiga ordem da Pele Divina, empunha a chama negra associada à morte dos deuses.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_invocador",
+      "nome": "Apóstolo da Pele Divina Errante",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Cerco",
+      "raridade": "Épica",
+      "poder": 7,
+      "custo": 3,
+      "habilidade_id": "cacador_arcano",
+      "habilidade_nome": "Caçador de Feitiços",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se o adversário tiver uma unidade da Lua Negra ou qualquer unidade com bônus positivo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Converte conhecimento arcano em força de combate.",
+      "sinergias": [
+        "astral"
+      ],
+      "combos": [
+        {
+          "id": "vazio_astral",
+          "nome": "Alinhamento Astral",
+          "descricao": "Ranni e uma unidade Astral distinta convergem (+2)."
+        },
+        {
+          "id": "eco_convergente",
+          "nome": "Eco das Pedras Cintilantes",
+          "descricao": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_apostolo",
+      "nome": "Apóstolo Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um pregador percorre as estradas douradas com fragmentos de escrituras antigas.",
+      "sinergias": [
+        "evangelho",
+        "fe"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_ordem_arauto_estandarte",
+      "nome": "Arauto do Estandarte Áureo",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Longa distância",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Não possui habilidade individual. Pode completar combos de formação da Ordem Áurea com a unidade compatível.",
+      "sinergias": [
+        "v75_crucible_guard"
+      ],
+      "combos": [
+        {
+          "id": "v75_juramento_dois_crisol",
+          "nome": "Juramento do Crisol e da Graça",
+          "descricao": "Formação e proteção convergem: a carta participante que ativa o juramento recebe +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_cacador_sem_rosto",
+      "nome": "Assassina da Faca Negra",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Uma assassina Numen ligada à Noite das Facas Negras, quando um fragmento da Runa da Morte foi usado para matar Godwyn.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_cacadora_fantasma",
+      "nome": "Assassina de Ravenmount",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Uma assassina de Ravenmount atravessa a névoa sem deixar rastros fáceis de seguir.",
+      "sinergias": [
+        "fantasmas"
+      ],
+      "combos": [
+        {
+          "id": "procissao_fantasma",
+          "nome": "Procissão dos que Vivem na Morte",
+          "descricao": "Duas unidades fantasmas marcham juntas (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "magia_nevoa_antiga",
+      "nome": "Astróloga de Liurnia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Épica",
+      "poder": 7,
+      "custo": 3,
+      "habilidade_id": "ancient_mist",
+      "habilidade_nome": "Névoa Ancestral",
+      "habilidade_texto": "Ganha +2 se houver efeito climático em qualquer fileira. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Sob os céus de Liurnia, uma astróloga procura nas estrelas sinais de destinos ainda ocultos.",
+      "sinergias": [
+        "astral",
+        "lua_cariana"
+      ],
+      "combos": [
+        {
+          "id": "vazio_astral",
+          "nome": "Alinhamento Astral",
+          "descricao": "Ranni e uma unidade Astral distinta convergem (+2)."
+        },
+        {
+          "id": "eco_convergente",
+          "nome": "Eco das Pedras Cintilantes",
+          "descricao": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."
+        },
+        {
+          "id": "convergencia_lunar",
+          "nome": "Convergência da Lua Negra",
+          "descricao": "Duas unidades ligadas à Lua Negra convergem e recebem +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_muralha",
+      "nome": "Bastião de Leyndell",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 0,
+      "custo": 1,
+      "habilidade_id": "gwent_muralha",
+      "habilidade_nome": "Bastião de Leyndell",
+      "habilidade_texto": "Escolha uma fileira: seus aliados nela recebem +1 de bônus até o fim da rodada.",
+      "descricao": "As muralhas douradas de Leyndell erguem-se como símbolo da resistência da capital.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 2,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "arma_arco_peregrino",
+      "nome": "Batedor da Mansão Vulcânica",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um recusante percorre os caminhos do Monte Gelmir, atento às rotas e aos movimentos dos inimigos.",
+      "sinergias": [
+        "peregrino"
+      ],
+      "combos": [
+        {
+          "id": "rota_peregrina",
+          "nome": "Caminho do Maculado",
+          "descricao": "Duelista e Batedor da Mansão Vulcânica coordenam o avanço (+1)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "primordial_origem",
+      "nome": "Besta Prístina, Arauto da Vontade Maior",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Cerco",
+      "raridade": "Primordial",
+      "poder": 8,
+      "custo": 6,
+      "habilidade_id": "lei_primeva",
+      "habilidade_nome": "Lei Primeva",
+      "habilidade_texto": "Recebe +2 de bônus ao entrar na primeira rodada. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "A Besta Prístina manifesta a vontade que veio além das estrelas e deu forma à ordem dourada.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_bibliotecaria",
+      "nome": "Bibliotecária de Raya Lucaria",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "O conhecimento reunido na guerra vale mais que ouro.",
+      "sinergias": [
+        "eclipse_voraz"
+      ],
+      "combos": [
+        {
+          "id": "eclipse_voraz",
+          "nome": "Eclipse Sanguíneo",
+          "descricao": "Cavaleiro de Sangue de Mohg e Bibliotecária eclipsam a mesma fonte (+3)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_bispo",
+      "nome": "Bispo Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Cerco",
+      "raridade": "Lendária",
+      "poder": 5,
+      "custo": 4,
+      "habilidade_id": "devoto",
+      "habilidade_nome": "Devoção",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se já houver pelo menos 2 outras unidades da mesma facção em campo. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um bispo dos Esquecidos conduz os fiéis entre ruínas de antigas catedrais.",
+      "sinergias": [
+        "devocao",
+        "fe"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_senhor_cacada",
+      "nome": "Blaidd, o Meio-Lobo",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "vinganca",
+      "habilidade_nome": "Vingança",
+      "habilidade_texto": "Quando esta unidade é removida, cada aliado da mesma fileira recebe +1 de bônus. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "A presa que o derruba desperta a matilha inteira.",
+      "sinergias": [
+        "fantasmas"
+      ],
+      "combos": [
+        {
+          "id": "procissao_fantasma",
+          "nome": "Procissão dos que Vivem na Morte",
+          "descricao": "Duas unidades fantasmas marcham juntas (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_egide",
+      "nome": "Bênção da Árvore Áurea",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_egide",
+      "habilidade_nome": "Bênção da Árvore Áurea",
+      "habilidade_texto": "Escolha um aliado sem Escudo para receber 1 Escudo; a raridade pode proteger até 3 aliados. Escudos não bloqueiam sacrifícios. Raridade Rara: protege até 2 aliados sem Escudo.",
+      "descricao": "Uma prece antiga invoca a proteção dourada que envolve os campeões da capital.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_veu_carrasco_preco",
+      "nome": "Carrasco da Procissão Carmesim",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "v75_blood_price",
+      "habilidade_nome": "Preço em Sangue",
+      "habilidade_texto": "Sacrifica o aliado de menor poder efetivo da mesma fileira e recebe bônus igual ao poder efetivo dele (mín. +1, máx. +3). Sem aliado, recebe +1. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "O carrasco conduz procissões sob estandartes vermelhos, vestindo as vestes cerimoniais dos guerreiros de Mohgwyn.",
+      "sinergias": [
+        "v75_blood_feast"
+      ],
+      "combos": [
+        {
+          "id": "v75_banquete_hemorragia",
+          "nome": "Banquete da Hemorragia",
+          "descricao": "Uma marca aberta alimenta o ritual: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_carniceiro_forja",
+      "nome": "Carrasco de Volcano Manor",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "devorar",
+      "habilidade_nome": "Devorar",
+      "habilidade_texto": "Ao entrar, sacrifica o aliado de menor poder efetivo na mesma fileira e recebe bônus igual ao poder efetivo dele (mín. +1, máx. +4). Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um executor da Mansão Vulcânica veste o aço manchado dos recusantes e serve aos banquetes de Tanith.",
+      "sinergias": [
+        "banquete",
+        "sangue_mohgwyn"
+      ],
+      "combos": [
+        {
+          "id": "banquete_guerra",
+          "nome": "Banquete de Sangue",
+          "descricao": "Carniceiro da Forja e Intendente dividem o butim (+3)."
+        },
+        {
+          "id": "ritual_dinastia",
+          "nome": "Ritual do Véu Carmesim",
+          "descricao": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_lua_cartografo_lunar",
+      "nome": "Cartógrafo das Cidades Eternas",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.",
+      "sinergias": [
+        "v75_lunar_paths"
+      ],
+      "combos": [
+        {
+          "id": "v75_convergencia_gelida",
+          "nome": "Convergência da Geada Lunar",
+          "descricao": "Geada e leitura das fileiras entram em ressonância: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_cavaleira",
+      "nome": "Cavaleira Cariana",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Uma duelista cariana, treinada nas tradições de combate da realeza lunar.",
+      "sinergias": [
+        "veu_sombrio"
+      ],
+      "combos": [
+        {
+          "id": "veu_sombrio",
+          "nome": "Caçada da Faca Negra",
+          "descricao": "Duas unidades do Véu Sombrio entram em sintonia (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_mitica_coroa",
+      "nome": "Cavaleiro Consagrado do Haligtree",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Mítica",
+      "poder": 8,
+      "custo": 5,
+      "habilidade_id": "estandarte",
+      "habilidade_nome": "Estandarte",
+      "habilidade_texto": "Ao entrar, concede +1 de bônus aos outros aliados na mesma fileira. Raridade Mítica: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um cavaleiro consagrado guarda os ramos pálidos do Haligtree, onde a esperança resiste à decadência.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_coroa_abismo",
+      "nome": "Cavaleiro da Dinastia Mohgwyn",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 7,
+      "custo": 4,
+      "habilidade_id": "drenagem",
+      "habilidade_nome": "Selo Enfraquecedor",
+      "habilidade_texto": "Reduz em 1 o bônus de cada unidade inimiga, até o mínimo de -2. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um guerreiro jurado à dinastia sanguínea guarda os domínios ocultos de Mohg.",
+      "sinergias": [
+        "abismo",
+        "sangue_mohgwyn"
+      ],
+      "combos": [
+        {
+          "id": "mare_abissal",
+          "nome": "Maré Abissal",
+          "descricao": "Godfrey e Cavaleiro Carmesim despertam a mesma força (+2)."
+        },
+        {
+          "id": "ritual_dinastia",
+          "nome": "Ritual do Véu Carmesim",
+          "descricao": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_guardiao_cinzas",
+      "nome": "Cavaleiro da Árvore Áurea",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "ash_guardian",
+      "habilidade_nome": "Égide das Cinzas",
+      "habilidade_texto": "Se já houver um aliado na mesma fileira, ele recebe +1 de bônus e esta carta também recebe +1. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um sentinela montado patrulha os caminhos que conduzem à Árvore Áurea, impondo a autoridade da capital.",
+      "sinergias": [
+        "cinzas",
+        "ordem_dourada"
+      ],
+      "combos": [
+        {
+          "id": "cinzas_fornalha",
+          "nome": "Aliança da Árvore Áurea",
+          "descricao": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."
+        },
+        {
+          "id": "juramento_erdtree",
+          "nome": "Juramento da Árvore Áurea",
+          "descricao": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_vigia_cinzento",
+      "nome": "Cavaleiro de Leyndell",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Um soldado da capital mantém a vigília entre as muralhas erguidas em nome da Ordem Áurea.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_sentinela_rubra",
+      "nome": "Cavaleiro de Radahn",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um cavaleiro da hoste de Radahn mantém sua posição sob o estandarte vermelho de Caelid.",
+      "sinergias": [
+        "muralha",
+        "ordem_dourada"
+      ],
+      "combos": [
+        {
+          "id": "muralha_inabalavel",
+          "nome": "Defesa de Leyndell",
+          "descricao": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        },
+        {
+          "id": "juramento_erdtree",
+          "nome": "Juramento da Árvore Áurea",
+          "descricao": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_devorador_mana",
+      "nome": "Cavaleiro de Sangue de Mohg",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um cavaleiro ligado ao sangue de Mohg participa dos rituais sombrios da dinastia subterrânea.",
+      "sinergias": [
+        "eclipse_voraz",
+        "sangue_mohgwyn"
+      ],
+      "combos": [
+        {
+          "id": "eclipse_voraz",
+          "nome": "Eclipse Sanguíneo",
+          "descricao": "Cavaleiro de Sangue de Mohg e Bibliotecária eclipsam a mesma fonte (+3)."
+        },
+        {
+          "id": "ritual_dinastia",
+          "nome": "Ritual do Véu Carmesim",
+          "descricao": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_baluarte",
+      "nome": "Cavaleiro do Crisol",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um cavaleiro do Crisol, marcado pelas antigas formas que antecederam a Árvore Áurea, guarda a formação com disciplina.",
+      "sinergias": [
+        "fornalha",
+        "ordem_dourada"
+      ],
+      "combos": [
+        {
+          "id": "cinzas_fornalha",
+          "nome": "Aliança da Árvore Áurea",
+          "descricao": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."
+        },
+        {
+          "id": "juramento_erdtree",
+          "nome": "Juramento da Árvore Áurea",
+          "descricao": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_cervo_sombrio",
+      "nome": "Cavaleiro do Cão de Caça",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um cavaleiro errante segue a trilha de presas pelas florestas enevoadas das Terras Intermédias.",
+      "sinergias": [
+        "veu_sombrio"
+      ],
+      "combos": [
+        {
+          "id": "veu_sombrio",
+          "nome": "Caçada da Faca Negra",
+          "descricao": "Duas unidades do Véu Sombrio entram em sintonia (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_veterano_cercos",
+      "nome": "Cavaleiro Draconiano",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Já viu mais muralhas caírem do que rostos conhecidos.",
+      "sinergias": [
+        "muralha"
+      ],
+      "combos": [
+        {
+          "id": "muralha_inabalavel",
+          "nome": "Defesa de Leyndell",
+          "descricao": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_lobos_cinza",
+      "nome": "Cavaleiros de Radahn",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Veteranos da hoste do Flagelo das Estrelas, marcham sob o estandarte do general de Caelid.",
+      "sinergias": [
+        "cinzas"
+      ],
+      "combos": [
+        {
+          "id": "cinzas_fornalha",
+          "nome": "Aliança da Árvore Áurea",
+          "descricao": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_ultimos",
+      "nome": "Cavaleiros de sangue juramentados",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Combatentes unidos por juramentos de sangue permanecem ao lado de seu senhor até o último fôlego.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_veu_cacador_sangue",
+      "nome": "Caçador das Catacumbas de Mohgwyn",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Não possui habilidade individual. Pode completar combos de marca de Sangramento com a unidade compatível.",
+      "sinergias": [
+        "v75_blood_mark"
+      ],
+      "combos": [
+        {
+          "id": "v75_banquete_hemorragia",
+          "nome": "Banquete da Hemorragia",
+          "descricao": "Uma marca aberta alimenta o ritual: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_lamina_sem_juramento",
+      "nome": "Caçador de Dedos",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Caçador de Dedos, um duelista errante que prefere trilhas solitárias e confrontos sem testemunhas.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "elden_especial_chama",
+      "nome": "Chama do Gigante",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_chama",
+      "habilidade_nome": "Chama do Gigante",
+      "habilidade_texto": "Remove Geada de todos os aliados afetados; cada unidade purificada recebe +1 de bônus até o fim da rodada. A raridade pode ampliar esses bônus. Raridade Rara: acrescenta +1 de bônus a até 1 aliados purificados.",
+      "descricao": "A chama dos gigantes arde contra o frio que tenta aprisionar os vivos.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "elden_especial_loucura",
+      "nome": "Chama Frenética",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "gwent_loucura",
+      "habilidade_nome": "Loucura Frenética",
+      "habilidade_texto": "Escolha uma fileira inimiga. Cada marca reduz 1 de poder efetivo; a segunda zera bônus positivos. Marcas expiram no fim da rodada; a raridade antecipa marcas. Raridade Épica: aplica a segunda marca imediatamente a até 1 alvos sem marca prévia; reforça reduções de bônus causadas, até -2.",
+      "descricao": "A chama frenética consome razão e identidade, deixando apenas o caos da Chama Frenética.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_queima",
+      "nome": "Chama Negra",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "gwent_queima",
+      "habilidade_nome": "Chama Negra",
+      "habilidade_texto": "Em cada lado, tenta remover a unidade de maior poder efetivo. Escudo bloqueia a remoção; se ela ocorrer, gatilhos de queda são resolvidos. Raridade Épica: reforça bônus gerados por efeitos de queda em até 1 alvo; não amplia remoções nem atravessa Escudos.",
+      "descricao": "A chama negra, temida até pelos deuses, consome tudo o que toca.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_requiem",
+      "nome": "Chamado dos Mortos",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "gwent_requiem",
+      "habilidade_nome": "Chamado dos Mortos",
+      "habilidade_texto": "Traz do descarte diretamente ao campo uma unidade escolhida com poder-base até 6; a raridade pode elevar esse limite até 9. Raridade Épica: o limite de poder-base sobe até 7.",
+      "descricao": "Um cântico atravessa as catacumbas e ecoa entre os nomes que a história tentou apagar.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "elden_especial_invocacao",
+      "nome": "Cinzas dos Lobos Solitários",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_invocacao",
+      "habilidade_nome": "Cinzas dos Lobos Solitários",
+      "habilidade_texto": "Escolha uma fileira e invoque Lobos Espirituais nela com 3 de poder; a raridade pode elevar o poder da invocação até 6. Raridade Rara: invoca Lobos Espirituais com 4 de poder.",
+      "descricao": "Cinzas antigas despertam os espíritos de lobos que outrora caçaram ao lado de seus mestres.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_ordem_confessora_graca",
+      "nome": "Confessora da Graça Serena",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Cerco",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "v75_grace_mender",
+      "habilidade_nome": "Regressão Serena",
+      "habilidade_texto": "Purifica até 2 aliados da fileira de Sangramento, Geada, Podridão ou Loucura; cada um recebe +1. Se ninguém precisar, o aliado mais fraco recebe +1; sem aliados, esta carta recebe +1. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Uma Confessora percorre os caminhos de Leyndell em silêncio, levando os ensinamentos da Lei da Regressão aos santuários esquecidos.",
+      "sinergias": [
+        "v75_erdtree_oath"
+      ],
+      "combos": [
+        {
+          "id": "v75_juramento_dois_crisol",
+          "nome": "Juramento do Crisol e da Graça",
+          "descricao": "Formação e proteção convergem: a carta participante que ativa o juramento recebe +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "magia_selo_vigilia",
+      "nome": "Confessora da Ordem Áurea",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "vigil_seal",
+      "habilidade_nome": "Selo de Vigília",
+      "habilidade_texto": "Esta carta recebe Resistência Climática 1. Se houver aliado na mesma fileira, o primeiro recebe +1 de bônus. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Treinada para agir discretamente, a Confessora combina devoção, infiltração e combate próximo.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_singular_cacador_chefes",
+      "nome": "Coroa do Lorde Prístino",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Singular",
+      "poder": 9,
+      "custo": 0,
+      "habilidade_id": "paradoxo_eterno",
+      "habilidade_nome": "Paradoxo Eterno",
+      "habilidade_texto": "Na terceira rodada, recebe +2 de bônus se o adversário venceu a rodada anterior. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Conquistada ao derrotar todos os chefes de um desafio.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_cruzado",
+      "nome": "Cruzado Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "sinergia_faccao",
+      "habilidade_nome": "Sinergia de Facção",
+      "habilidade_texto": "Recebe +1 de bônus por cada outra unidade aliada da mesma facção que já esteja em campo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um guerreiro sagrado guarda as estradas em ruínas e carrega no escudo o símbolo de uma ordem que já não existe.",
+      "sinergias": [
+        "fe",
+        "gloria_divina"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_veu_devota_hemorragia",
+      "nome": "Devota da Hemorragia",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Não possui habilidade individual. Pode completar o combo Banquete da Hemorragia com a unidade compatível.",
+      "sinergias": [
+        "v75_blood_feast"
+      ],
+      "combos": [
+        {
+          "id": "v75_banquete_hemorragia",
+          "nome": "Banquete da Hemorragia",
+          "descricao": "Uma marca aberta alimenta o ritual: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_circulo",
+      "nome": "Discípulo da Academia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Discípulo de Raya Lucaria, dedica-se ao estudo dos círculos arcanos e dos resíduos de feitiçaria.",
+      "sinergias": [
+        "astral"
+      ],
+      "combos": [
+        {
+          "id": "vazio_astral",
+          "nome": "Alinhamento Astral",
+          "descricao": "Ranni e uma unidade Astral distinta convergem (+2)."
+        },
+        {
+          "id": "eco_convergente",
+          "nome": "Eco das Pedras Cintilantes",
+          "descricao": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_filhos_brasa",
+      "nome": "Discípulos do Monge do Fogo",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Seguidores dos antigos monges preservam a chama dos gigantes e seus rituais esquecidos.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_diacon",
+      "nome": "Diácono Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 3,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Auxiliar dos rituais, mantém acesas as lâmpadas dos altares esquecidos.",
+      "sinergias": [
+        "diaconia",
+        "fe"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "magia_trovao_oco",
+      "nome": "Dragoeiro Ancião",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Longa distância",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "hollow_thunder",
+      "habilidade_nome": "Descarga Oca",
+      "habilidade_texto": "Cada inimigo na mesma fileira perde 1 de bônus (mín. -2). Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um guerreiro ligado aos antigos dragões canaliza relâmpagos ancestrais em meio à batalha.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "arma_lamina_peregrino",
+      "nome": "Duelista da Casa Hoslow",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Herdeiro de uma casa de duelistas, transforma a elegância do aço em uma promessa de sangue.",
+      "sinergias": [
+        "peregrino"
+      ],
+      "combos": [
+        {
+          "id": "rota_peregrina",
+          "nome": "Caminho do Maculado",
+          "descricao": "Duelista e Batedor da Mansão Vulcânica coordenam o avanço (+1)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "magia_orbe_eco",
+      "nome": "Erudito da Academia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Pesquisador de Raya Lucaria, dedica a vida ao estudo dos segredos das pedras cintilantes.",
+      "sinergias": [
+        "eco"
+      ],
+      "combos": [
+        {
+          "id": "eco_convergente",
+          "nome": "Eco das Pedras Cintilantes",
+          "descricao": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_eco",
+      "nome": "Erudito das Pedras Cintilantes",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um estudioso das pedras cintilantes investiga as ressonâncias deixadas por feitiçarias antigas.",
+      "sinergias": [
+        "astral",
+        "eco"
+      ],
+      "combos": [
+        {
+          "id": "vazio_astral",
+          "nome": "Alinhamento Astral",
+          "descricao": "Ranni e uma unidade Astral distinta convergem (+2)."
+        },
+        {
+          "id": "eco_convergente",
+          "nome": "Eco das Pedras Cintilantes",
+          "descricao": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "patente_4",
+      "nome": "Escudeiro da Árvore Áurea — Cavaleiro do Abismo",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 15.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "reliquia_noite_chama",
+      "nome": "Espada da Noite e da Chama",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 0,
+      "custo": 4,
+      "habilidade_id": "reliquia_noite_chama",
+      "habilidade_nome": "Espada da Noite e da Chama",
+      "habilidade_texto": "Noite: aplica 1 marca de Geada (máx. 2) a todos os inimigos da fileira escolhida. Chama: atinge o inimigo de maior poder efetivo na fileira, reduzindo 1 de poder-base (mín. 1) e 2 de bônus. Escudo bloqueia o golpe; a Relíquia é consumida.",
+      "descricao": "Arma lendária da Mansão Cariana. Sua postura especial libera um ataque mágico ou uma onda de fogo.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "arma_duas_luas",
+      "nome": "Espadachim da Lua Negra",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 7,
+      "custo": 3,
+      "habilidade_id": "twin_dance",
+      "habilidade_nome": "Dança Espelhada",
+      "habilidade_texto": "Ganha +1 se você tiver outro aliado em uma fileira diferente. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um duelista das tradições carianas conduz a lâmina sob a luz fria da Lua Negra.",
+      "sinergias": [
+        "duas_luas",
+        "lua_cariana"
+      ],
+      "combos": [
+        {
+          "id": "passos_duas_luas",
+          "nome": "Dança da Lua Negra",
+          "descricao": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."
+        },
+        {
+          "id": "convergencia_lunar",
+          "nome": "Convergência da Lua Negra",
+          "descricao": "Duas unidades ligadas à Lua Negra convergem e recebem +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_cartografa",
+      "nome": "Exploradora da Cidade Eterna",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Encontra rotas onde os outros veem obstáculos.",
+      "sinergias": [
+        "duas_luas"
+      ],
+      "combos": [
+        {
+          "id": "passos_duas_luas",
+          "nome": "Dança da Lua Negra",
+          "descricao": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "magia_chama_fria",
+      "nome": "Feiticeira da Lua Gélida",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Uma feiticeira errante combina o frio das antigas artes lunares com chamas de origem desconhecida.",
+      "sinergias": [
+        "chama"
+      ],
+      "combos": [
+        {
+          "id": "chama_dupla",
+          "nome": "Chamas do Monte Gelmir",
+          "descricao": "Piromante e Feiticeira da Lua Gélida equilibram suas chamas (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "arma_cajado_marulho",
+      "nome": "Feiticeiro Cariano",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Discípulo da realeza cariana, conjura feitiçarias de pedra cintilante sob a proteção da lua.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "patente_7",
+      "nome": "Feiticeiro Cariano — Executor Sombrio",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 7,
+      "custo": 3,
+      "habilidade_id": "cacador_arcano",
+      "habilidade_nome": "Caçador de Feitiços",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se o adversário tiver uma unidade da Lua Negra ou qualquer unidade com bônus positivo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 40.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "arma_martelo_fornalha",
+      "nome": "Ferreiro de Volcano Manor",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Entre fornalhas e juramentos de traição, um artesão molda armas para os recusantes do Monte Gelmir.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_cantora_lamentos",
+      "nome": "Fia, Companheira do Leito de Morte",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Fia, Companheira do Leito de Morte, entoa lamentos pelos que encontraram repouso entre os mortos.",
+      "sinergias": [
+        "fantasmas"
+      ],
+      "combos": [
+        {
+          "id": "procissao_fantasma",
+          "nome": "Procissão dos que Vivem na Morte",
+          "descricao": "Duas unidades fantasmas marcham juntas (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "elden_especial_podrida",
+      "nome": "Flor da Podridão Escarlate",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "gwent_podrida",
+      "habilidade_nome": "Podridão Escarlate",
+      "habilidade_texto": "Escolha uma fileira inimiga. Cada marca reduz 1 de poder efetivo; a segunda reduz 1 de bônus positivo (mín. 0). Marcas expiram no fim da rodada; a raridade antecipa marcas. Raridade Épica: aplica a segunda marca imediatamente a até 1 alvos sem marca prévia; reforça reduções de bônus causadas, até -2.",
+      "descricao": "A flor escarlate floresce onde a podridão encontra carne, pedra e memória.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 5,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_geada",
+      "nome": "Geada dos Picos dos Gigantes",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_geada",
+      "habilidade_nome": "Lua Gélida",
+      "habilidade_texto": "Todas as unidades inimigas recebem 1 marca de Geada; cada marca reduz 1 de poder efetivo, até 2 marcas. Raridades Lendárias ou superiores aplicam a segunda marca imediatamente. As marcas acabam no fim da rodada.",
+      "descricao": "O frio dos Picos dos Gigantes avança sobre o campo e silencia o vigor dos combatentes.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_gigante",
+      "nome": "Gigante de Fogo",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 7,
+      "custo": 3,
+      "habilidade_id": "instinto",
+      "habilidade_nome": "Instinto de Caçador",
+      "habilidade_texto": "Recebe +2 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Uma presença colossal na linha de frente.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_rei_afogado",
+      "nome": "Godfrey, Primeiro Lorde Prístino",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 7,
+      "custo": 3,
+      "habilidade_id": "abyss_tithe",
+      "habilidade_nome": "Dízimo do Abismo",
+      "habilidade_texto": "Recebe +2 se houver qualquer carta no seu descarte; caso contrário, recebe +1 se o adversário tiver mais unidades em campo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Primeiro Lorde Prístino e consorte de Marika, Godfrey liderou os guerreiros que conquistaram as Terras Intermédias.",
+      "sinergias": [
+        "abismo",
+        "sangue_mohgwyn"
+      ],
+      "combos": [
+        {
+          "id": "mare_abissal",
+          "nome": "Maré Abissal",
+          "descricao": "Godfrey e Cavaleiro Carmesim despertam a mesma força (+2)."
+        },
+        {
+          "id": "ritual_dinastia",
+          "nome": "Ritual do Véu Carmesim",
+          "descricao": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_herdeiro_portao",
+      "nome": "Godwyn, o Dourado",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "vinganca",
+      "habilidade_nome": "Vingança",
+      "habilidade_texto": "Quando esta unidade é removida, cada aliado da mesma fileira recebe +1 de bônus. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "O príncipe dourado foi amado por dragões e homens; sua queda marcou a primeira rachadura irreversível no destino das Terras Intermédias.",
+      "sinergias": [
+        "muralha",
+        "ordem_dourada"
+      ],
+      "combos": [
+        {
+          "id": "muralha_inabalavel",
+          "nome": "Defesa de Leyndell",
+          "descricao": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        },
+        {
+          "id": "juramento_erdtree",
+          "nome": "Juramento da Árvore Áurea",
+          "descricao": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "reliquia_grande_runa_godrick",
+      "nome": "Grande Runa de Godrick",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 0,
+      "custo": 4,
+      "habilidade_id": "reliquia_godrick",
+      "habilidade_nome": "Grande Runa de Godrick",
+      "habilidade_texto": "Exige ao menos 1 unidade aliada em campo. Concede +1 de bônus a todas as unidades aliadas; uso único por partida.",
+      "descricao": "Fragmento do Anel Prístino reivindicado por Godrick, o Enxertado, que buscava poder por meio do enxerto.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "reliquia_runa_nao_nascidos",
+      "nome": "Grande Runa dos Não Nascidos",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 0,
+      "custo": 4,
+      "habilidade_id": "reliquia_renala",
+      "habilidade_nome": "Grande Runa dos Não Nascidos",
+      "habilidade_texto": "Remove Geada e Podridão dos aliados afetados; cada unidade purificada recebe +1 de bônus. Uso único por partida.",
+      "descricao": "A Grande Runa guardada por Rennala conserva o poder do renascimento e da perfeição inacabada.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_lua_graviturgista",
+      "nome": "Graviturgista de Nokron",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "v75_gravity_shear",
+      "habilidade_nome": "Cisalhamento Gravitacional",
+      "habilidade_texto": "Até 2 inimigos com bônus positivo na fileira perdem 1 (mín. -2). Se atingir 2 alvos, esta carta recebe +1. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um astrólogo das Cidades Eternas estuda as correntes gravitacionais que sustentam as ruínas suspensas de Nokron.",
+      "sinergias": [
+        "v75_frost_lore"
+      ],
+      "combos": [
+        {
+          "id": "v75_convergencia_gelida",
+          "nome": "Convergência da Geada Lunar",
+          "descricao": "Geada e leitura das fileiras entram em ressonância: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_irmandade_ferro",
+      "nome": "Guardas da Árvore Áurea",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "retaliacao",
+      "habilidade_nome": "Retaliação dos Semideuses",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se sua pontuação estiver abaixo da adversária.",
+      "descricao": "Defensores juramentados protegem os caminhos e santuários consagrados à Árvore Áurea.",
+      "sinergias": [
+        "estandarte"
+      ],
+      "combos": [
+        {
+          "id": "juramento_estandarte",
+          "nome": "Juramento de Leyndell",
+          "descricao": "Porta-estandarte e Guardas da Árvore Áurea fortalecem a formação (+1 para a carta participante que ativa o combo e +1 aos aliados na mesma fileira)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 2,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_lua_guardia",
+      "nome": "Guardiã do Juramento Lunar",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.",
+      "sinergias": [
+        "v75_lunar_paths"
+      ],
+      "combos": [
+        {
+          "id": "v75_convergencia_gelida",
+          "nome": "Convergência da Geada Lunar",
+          "descricao": "Geada e leitura das fileiras entram em ressonância: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_guardiao_runas",
+      "nome": "Guardião da Ordem Áurea",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um guardião da Ordem Áurea carrega inscrições rúnicas ligadas aos ensinamentos da capital.",
+      "sinergias": [
+        "runico"
+      ],
+      "combos": [
+        {
+          "id": "ritual_runico",
+          "nome": "Ritual das Runas",
+          "descricao": "Duas unidades rúnicas completam o círculo (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_ordem_guardiao_crisol",
+      "nome": "Guardião do Crisol Menor",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Não possui habilidade individual. Pode completar combos da Ordem Áurea quando estiver em campo com a unidade compatível.",
+      "sinergias": [
+        "v75_crucible_guard"
+      ],
+      "combos": [
+        {
+          "id": "v75_juramento_dois_crisol",
+          "nome": "Juramento do Crisol e da Graça",
+          "descricao": "Formação e proteção convergem: a carta participante que ativa o juramento recebe +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_sentinelas",
+      "nome": "Guardiões de Sellia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Vigias da cidade oculta de Sellia protegem seus segredos e as passagens de feitiçaria.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_detonador",
+      "nome": "Guerreiro da Chama Frenética",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "vinganca",
+      "habilidade_nome": "Vingança",
+      "habilidade_texto": "Quando esta unidade é removida, cada aliado da mesma fileira recebe +1 de bônus. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Sua queda libera a energia que ele guardava.",
+      "sinergias": [
+        "runico"
+      ],
+      "combos": [
+        {
+          "id": "ritual_runico",
+          "nome": "Ritual das Runas",
+          "descricao": "Duas unidades rúnicas completam o círculo (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_oraculo_ruina",
+      "nome": "Gurranq, Clérigo Bestial",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 7,
+      "custo": 4,
+      "habilidade_id": "ruin_omen",
+      "habilidade_nome": "Presságio da Ruína",
+      "habilidade_texto": "A unidade inimiga de maior poder efetivo perde 1 de bônus (mín. -2). Se sua pontuação estiver menor ao entrar, esta carta recebe +1. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "O clérigo bestial consome Raiz da Morte e guarda um segredo ligado à própria Runa da Morte.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_dupla_veu",
+      "nome": "Gêmeas da Cidade Eterna",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Duas irmãs das Cidades Eternas percorrem caminhos subterrâneos que raramente aparecem nos mapas.",
+      "sinergias": [
+        "duas_luas",
+        "veu_sombrio"
+      ],
+      "combos": [
+        {
+          "id": "veu_sombrio",
+          "nome": "Caçada da Faca Negra",
+          "descricao": "Duas unidades do Véu Sombrio entram em sintonia (+2)."
+        },
+        {
+          "id": "passos_duas_luas",
+          "nome": "Dança da Lua Negra",
+          "descricao": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_irmao",
+      "nome": "Irmão Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um peregrino humilde permanece ao lado de sua irmandade, mesmo quando todos os demais recuam.",
+      "sinergias": [
+        "fe",
+        "irmandade"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_lua_velada",
+      "nome": "Juramentada de Ranni",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "veiled_moon",
+      "habilidade_nome": "Aliança Lunar",
+      "habilidade_texto": "Esta carta recebe +1. O aliado de menor poder efetivo em outra fileira também recebe +1 de bônus, se existir. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Uma aliada juramentada à princesa lunar acompanha sua busca por um caminho além da Ordem Áurea.",
+      "sinergias": [
+        "duas_luas",
+        "lua_cariana"
+      ],
+      "combos": [
+        {
+          "id": "passos_duas_luas",
+          "nome": "Dança da Lua Negra",
+          "descricao": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."
+        },
+        {
+          "id": "convergencia_lunar",
+          "nome": "Convergência da Lua Negra",
+          "descricao": "Duas unidades ligadas à Lua Negra convergem e recebem +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_vinculo",
+      "nome": "Juramento do Crisol",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_vinculo",
+      "habilidade_nome": "Juramento do Crisol",
+      "habilidade_texto": "Escolha uma fileira com ao menos 2 aliados. Todas as unidades aliadas nela recebem +2 de bônus até o fim da rodada. Raridade Rara: acrescenta +1 de bônus a até 1 aliados afetados.",
+      "descricao": "Um juramento ancestral une os guerreiros às formas primordiais que precederam a Erdtree.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_singular_primeiro",
+      "nome": "Juramento Primordial do Crisol",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Singular",
+      "poder": 10,
+      "custo": 0,
+      "habilidade_id": "cacador_solitario",
+      "habilidade_nome": "Caçador Solitário",
+      "habilidade_texto": "Recebe +2 de bônus ao entrar se não houver outro aliado na mesma fileira. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Exemplar singular conquistado por um feito extraordinário.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_saqueadora_veu",
+      "nome": "Ladina da Cidade Eterna",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Nenhuma rota é cara demais para quem leva o butim.",
+      "sinergias": [
+        "caravana"
+      ],
+      "combos": [
+        {
+          "id": "caravana_saqueadora",
+          "nome": "Saque da Cidade Eterna",
+          "descricao": "Saqueadora e Contrabandista fecham o negócio (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "arma_lanca_fornalha",
+      "nome": "Lanceiro da Árvore Áurea",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Treinado para defender os domínios da Árvore Áurea, avança com lança e disciplina militar.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_purificar",
+      "nome": "Lei da Regressão",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_purificar",
+      "habilidade_nome": "Lei da Regressão",
+      "habilidade_texto": "Remove o clima ativo das três fileiras para os dois jogadores.",
+      "descricao": "A Lei da Regressão revela a verdade por trás das ilusões e desfaz os véus que encobrem o mundo.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 2,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "arma_agulha_astro",
+      "nome": "Leitora de Estrelas de Sellia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 3 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Uma estudiosa de Sellia observa os astros e procura caminhos ocultos na feitiçaria noturna.",
+      "sinergias": [
+        "astral",
+        "lua_cariana"
+      ],
+      "combos": [
+        {
+          "id": "vazio_astral",
+          "nome": "Alinhamento Astral",
+          "descricao": "Ranni e uma unidade Astral distinta convergem (+2)."
+        },
+        {
+          "id": "eco_convergente",
+          "nome": "Eco das Pedras Cintilantes",
+          "descricao": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."
+        },
+        {
+          "id": "convergencia_lunar",
+          "nome": "Convergência da Lua Negra",
+          "descricao": "Duas unidades ligadas à Lua Negra convergem e recebem +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "patente_9",
+      "nome": "Lorde de Leyndell — Lenda do Coliseu",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Cerco",
+      "raridade": "Lendária",
+      "poder": 8,
+      "custo": 4,
+      "habilidade_id": "impeto",
+      "habilidade_nome": "Ímpeto do Lorde",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se sua pontuação estiver acima da adversária. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 75.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "elden_especial_geada",
+      "nome": "Lua Cheia de Rennala",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_geada_cariana",
+      "habilidade_nome": "Geada Cariana",
+      "habilidade_texto": "Escolha uma fileira inimiga. Cada unidade nela recebe 1 marca de Geada; cada marca reduz 1 de poder efetivo até o fim da rodada. A raridade pode aplicar a segunda marca imediatamente a até 3 alvos. Raridade Rara: aplica a segunda marca imediatamente a até 1 alvos sem Geada prévia.",
+      "descricao": "A lua cheia de Rennala ilumina o campo com a frieza ancestral da realeza cariana.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_medico",
+      "nome": "Lágrima Sagrada",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_medico",
+      "habilidade_nome": "Lágrima Sagrada",
+      "habilidade_texto": "Devolve à sua mão uma unidade escolhida do seu descarte com poder-base até 4; a raridade pode elevar esse limite até 7. Raridade Rara: o limite de poder-base sobe até 5.",
+      "descricao": "Uma lágrima consagrada guarda a memória dos que tombaram e ainda podem retornar à jornada.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_execucao",
+      "nome": "Lâmina da Morte Destinada",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "gwent_execucao",
+      "habilidade_nome": "Lâmina da Morte Destinada",
+      "habilidade_texto": "Escolha uma fileira e um inimigo nela com poder efetivo até 6. Tenta removê-lo; Escudo pode bloquear. Se a remoção ocorrer, gatilhos de queda são resolvidos. A raridade eleva o limite até 9. Raridade Épica: alcança poder efetivo até 7; pode reforçar bônus gerados por efeitos de queda em até 1 alvo.",
+      "descricao": "A lâmina da Morte Destinada carrega o fragmento de um poder que deveria permanecer selado.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 5,
+      "status": "OK"
+    },
+    {
+      "id": "reliquia_lamina_negra",
+      "nome": "Lâmina Negra",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Mítica",
+      "poder": 0,
+      "custo": 5,
+      "habilidade_id": "reliquia_lamina_negra",
+      "habilidade_nome": "Lâmina Negra",
+      "habilidade_texto": "Na fileira escolhida, reduz em 3 o bônus do alvo escolhido ou, sem alvo, do inimigo de maior poder efetivo. Escudo é consumido e bloqueia o efeito sem consumir a Relíquia.",
+      "descricao": "A arma de Maliketh, que guarda a Morte Destinada selada em sua lâmina. Não é uma das adagas usadas pelas Assassinas da Faca Negra.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_aparicao_veio",
+      "nome": "Lâmina Negra Errante",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Uma figura encapuzada atravessa as sombras, deixando apenas o rumor de uma lâmina silenciosa.",
+      "sinergias": [
+        "veu_sombrio"
+      ],
+      "combos": [
+        {
+          "id": "veu_sombrio",
+          "nome": "Caçada da Faca Negra",
+          "descricao": "Duas unidades do Véu Sombrio entram em sintonia (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_malenia_lamina_miquella",
+      "nome": "Malenia, Lâmina de Miquella",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Primordial",
+      "poder": 9,
+      "custo": 6,
+      "habilidade_id": "scarlet_bloom",
+      "habilidade_nome": "Flor Escarlate",
+      "habilidade_texto": "Cada inimigo da fileira recebe 1 marca de Podridão (máx. 2); cada marca reduz 1 de poder efetivo. Ao atingir 2, bônus positivo perde 1 (mín. 0). Primordial: até 3 alvos nessa transição perdem mais 1 (mín. -2). Não reduz de novo com 2 marcas.",
+      "descricao": "Malenia é uma Empírea e semideusa, filha de Marika e Radagon e irmã gêmea de Miquella. Nasceu afligida pela Podridão Escarlate e foi treinada por um espadachim cego, tornando-se uma espadachim incomparável. Como Lâmina de Miquella, protegeu o irmão e aguarda seu retorno em Elphael, sob a Árvore Sacra. Empunha a Mão de Malenia, uma katana, e combate com próteses douradas. Na batalha contra Radahn em Caelid, liberou uma florescência da Podridão Escarlate que devastou a região. Esta ficha representa Malenia antes de sua transformação na Deusa da Podridão.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "primordial_eternidade",
+      "nome": "Maliketh, Guardião da Morte Destinada",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Primordial",
+      "poder": 8,
+      "custo": 6,
+      "habilidade_id": "paradoxo_eterno",
+      "habilidade_nome": "Paradoxo Eterno",
+      "habilidade_texto": "Na terceira rodada, recebe +2 de bônus se o adversário venceu a rodada anterior. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Maliketh guarda a Morte Destinada, o poder cuja ausência sustenta a ordem sem morte de Marika.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_maliketh_morte_destinada",
+      "nome": "Maliketh, Lâmina Negra",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 8,
+      "custo": 4,
+      "habilidade_id": "destined_death",
+      "habilidade_nome": "Morte Destinada",
+      "habilidade_texto": "Ao entrar, o inimigo de maior poder efetivo perde 2 de bônus (mín. -2). Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Sombra leal de Marika e guardião da Runa da Morte, carrega a Morte Destinada selada em sua lâmina.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "primordial_trono",
+      "nome": "Marika, Rainha Eterna",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Primordial",
+      "poder": 8,
+      "custo": 6,
+      "habilidade_id": "decreto_soberano",
+      "habilidade_nome": "Decreto Soberano",
+      "habilidade_texto": "Ao entrar, reduz em 2 o bônus de todas as unidades inimigas (mín. -2). Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Marika, a Rainha Eterna, ergueu a ordem dourada e rompeu o Anel Prístino, mudando para sempre as Terras Intermédias.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_intendente",
+      "nome": "Mercador Nômade",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um mercador nômade percorre as Terras Intermédias levando provisões e notícias entre assentamentos.",
+      "sinergias": [
+        "banquete"
+      ],
+      "combos": [
+        {
+          "id": "banquete_guerra",
+          "nome": "Banquete de Sangue",
+          "descricao": "Carniceiro da Forja e Intendente dividem o butim (+3)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_messmer_impalador",
+      "nome": "Messmer, o Empalador",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 8,
+      "custo": 4,
+      "habilidade_id": "impaling_spear",
+      "habilidade_nome": "Lança do Impalador",
+      "habilidade_texto": "Ao entrar, cada inimigo da fileira recebe 1 marca de Sangramento. A segunda marca consome as marcas e causa -2 de bônus (mín. -2); estados expiram no fim da rodada. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Filho de Marika e senhor da chama impura, comandou a purga que devastou o Reino das Sombras.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "patente_10",
+      "nome": "Mestre Cariano — Sentinela Imortal",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Lendária",
+      "poder": 6,
+      "custo": 4,
+      "habilidade_id": "quebra_ritmo",
+      "habilidade_nome": "Ruptura de Postura",
+      "habilidade_texto": "Recebe +1 de bônus se a última unidade jogada pelo adversário entrou na mesma fileira. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 100.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_mestre_forja",
+      "nome": "Mestre Ferreiro de Volcano Manor",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um mestre ferreiro de Volcano Manor trabalha entre brasas, aço e os juramentos dos recusantes.",
+      "sinergias": [
+        "fornalha",
+        "ordem_dourada"
+      ],
+      "combos": [
+        {
+          "id": "cinzas_fornalha",
+          "nome": "Aliança da Árvore Áurea",
+          "descricao": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."
+        },
+        {
+          "id": "juramento_erdtree",
+          "nome": "Juramento da Árvore Áurea",
+          "descricao": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_nevoa",
+      "nome": "Miasma da Podridão",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_nevoa",
+      "habilidade_nome": "Névoa de Sellia",
+      "habilidade_texto": "Escolha uma fileira inimiga. Cada unidade nela recebe 1 marca de Podridão Escarlate; cada marca reduz 1 de poder efetivo, até 2 marcas. Raridades Lendárias ou superiores aplicam a segunda marca imediatamente. As marcas acabam no fim da rodada.",
+      "descricao": "Uma nuvem pútrida se espalha pelo campo, lembrando os pântanos corrompidos de Caelid.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_missionario",
+      "nome": "Missionário Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um viajante percorre capelas abandonadas levando escrituras preservadas por gerações.",
+      "sinergias": [
+        "evangelho",
+        "fe"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "magia_brasa_errante",
+      "nome": "Monge do Fogo",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 4,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Devoto do fogo dos gigantes, preserva ritos antigos nas encostas geladas dos Picos dos Gigantes.",
+      "sinergias": [
+        "chama"
+      ],
+      "combos": [
+        {
+          "id": "chama_dupla",
+          "nome": "Chamas do Monte Gelmir",
+          "descricao": "Piromante e Feiticeira da Lua Gélida equilibram suas chamas (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "primordial_abismo",
+      "nome": "Mãe Sem Forma",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Cerco",
+      "raridade": "Primordial",
+      "poder": 8,
+      "custo": 6,
+      "habilidade_id": "fome_abismo",
+      "habilidade_nome": "Fome do Abismo",
+      "habilidade_texto": "Recebe +2 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "A Mãe Sem Forma é venerada pelos seguidores de Mohg como origem do poder sanguíneo.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_mistico",
+      "nome": "Místico Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "devoto",
+      "habilidade_nome": "Devoção",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se já houver pelo menos 2 outras unidades da mesma facção em campo. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um intérprete de sinais antigos contempla as estrelas sobre as ruínas de Sellia.",
+      "sinergias": [
+        "devocao",
+        "fe"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "patente_1",
+      "nome": "Novato de Raya Lucaria — Cinzas Novatas",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 3,
+      "custo": 1,
+      "habilidade_id": "cacador_arcano",
+      "habilidade_nome": "Caçador de Feitiços",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se o adversário tiver uma unidade da Lua Negra ou qualquer unidade com bônus positivo.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 1.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "patente_2",
+      "nome": "Novato de Raya Lucaria — Guerreiro Caído",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Comum",
+      "poder": 3,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 5.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_lua_oraculo_geada",
+      "nome": "Oráculo Gélido de Sellia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "v75_frost_oracle",
+      "habilidade_nome": "Presságio da Geada",
+      "habilidade_texto": "O inimigo de maior poder efetivo na fileira recebe 1 marca de Geada (máx. 2). Se já tinha marca, esta carta recebe +1. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Uma astróloga de Sellia lê presságios nas lâminas de gelo que se formam sobre as águas imóveis da cidade.",
+      "sinergias": [
+        "v75_frost_lore"
+      ],
+      "combos": [
+        {
+          "id": "v75_convergencia_gelida",
+          "nome": "Convergência da Geada Lunar",
+          "descricao": "Geada e leitura das fileiras entram em ressonância: a carta participante que ativa o combo recebe +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_papa",
+      "nome": "Papa Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Cerco",
+      "raridade": "Mítica",
+      "poder": 7,
+      "custo": 5,
+      "habilidade_id": "sinergia_faccao",
+      "habilidade_nome": "Sinergia de Facção",
+      "habilidade_texto": "Recebe +1 de bônus por cada outra unidade aliada da mesma facção que já esteja em campo. Raridade Mítica: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Sumo sacerdote dos Esquecidos, governa uma ordem que sobreviveu à queda de seus templos.",
+      "sinergias": [
+        "fe",
+        "soberania"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_batedor",
+      "nome": "Passo do Cão de Caça",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_batedor",
+      "habilidade_nome": "Passo do Cão de Caça",
+      "habilidade_texto": "Compra 1 carta da reserva; a raridade pode elevar a compra para 2, se houver cartas disponíveis. Raridade Rara: compra até 2 cartas da reserva.",
+      "descricao": "O passo do cão de caça atravessa o campo antes que o inimigo perceba sua aproximação.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_passo",
+      "nome": "Passo do Lobo",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_passo",
+      "habilidade_nome": "Passo do Lobo",
+      "habilidade_texto": "Escolha uma fileira e mova para ela uma unidade aliada que esteja em outra fileira. Raridade Rara: move até 2 aliados.",
+      "descricao": "O antigo instinto de caça guia seus guerreiros por caminhos que parecem impossíveis.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_pastor",
+      "nome": "Pastor Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "legado",
+      "habilidade_nome": "Legado",
+      "habilidade_texto": "Recebe +2 de bônus ao entrar se você venceu a rodada imediatamente anterior. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um guia errante conduz os fiéis por trilhas esquecidas e capelas abandonadas.",
+      "sinergias": [
+        "fe",
+        "irmandade"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "covenant_peregrinos_nevoa",
+      "nome": "Peregrinos da Cidade Eterna",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "Viajantes das cidades subterrâneas cruzam a escuridão em busca de uma nova estrela.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_placidusax_lorde_dragao",
+      "nome": "Placidusax, Lorde Dragão",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Primordial",
+      "poder": 9,
+      "custo": 6,
+      "habilidade_id": "time_storm",
+      "habilidade_nome": "Tempestade do Tempo",
+      "habilidade_texto": "Ao entrar, cada inimigo da fileira recebe 1 marca de Geada (máx. 2); esta carta recebe +1 por inimigo atingido, até +3. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Lorde Dragão ancestral que aguarda, em Farum Azula, o retorno de seu deus desaparecido.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "primordial_tempestade",
+      "nome": "Placidusax, Senhor Dragão",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Primordial",
+      "poder": 8,
+      "custo": 6,
+      "habilidade_id": "olho_tempestade",
+      "habilidade_nome": "Olho da Tempestade",
+      "habilidade_texto": "Recebe +2 de bônus ao entrar se sua fileira estiver sob clima ativo. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Placidusax, antigo lorde dos dragões, permanece suspenso no tempo em Farum Azula.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_portaestandarte",
+      "nome": "Porta-estandarte de Leyndell",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 3 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "O estandarte de Leyndell reúne soldados dispersos sob o símbolo dourado da capital.",
+      "sinergias": [
+        "estandarte",
+        "fornalha",
+        "ordem_dourada"
+      ],
+      "combos": [
+        {
+          "id": "cinzas_fornalha",
+          "nome": "Aliança da Árvore Áurea",
+          "descricao": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."
+        },
+        {
+          "id": "juramento_estandarte",
+          "nome": "Juramento de Leyndell",
+          "descricao": "Porta-estandarte e Guardas da Árvore Áurea fortalecem a formação (+1 para a carta participante que ativa o combo e +1 aos aliados na mesma fileira)."
+        },
+        {
+          "id": "juramento_erdtree",
+          "nome": "Juramento da Árvore Áurea",
+          "descricao": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_oraculo_clima",
+      "nome": "Profeta de Liurnia",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 6,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sem habilidade especial",
+      "habilidade_texto": "Sem habilidade especial.",
+      "descricao": "O profeta de Liurnia observa as mudanças do céu e interpreta os sinais trazidos por tempestades e geadas.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "sem_efeito_individual",
+      "linhas_na_carta": 1,
+      "linhas_template": 1,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_profeta",
+      "nome": "Profeta Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Mítica",
+      "poder": 6,
+      "custo": 5,
+      "habilidade_id": "sinergia_faccao",
+      "habilidade_nome": "Sinergia de Facção",
+      "habilidade_texto": "Recebe +1 de bônus por cada outra unidade aliada da mesma facção que já esteja em campo. Raridade Mítica: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Líder espiritual que reúne seus seguidores sob os vitrais partidos de Leyndell.",
+      "sinergias": [
+        "fe",
+        "soberania"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_radahn_flagelo_estrelas",
+      "nome": "Radahn, Flagelo das Estrelas",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Cerco",
+      "raridade": "Primordial",
+      "poder": 9,
+      "custo": 6,
+      "habilidade_id": "star_gravity",
+      "habilidade_nome": "Gravidade do Flagelo",
+      "habilidade_texto": "Ao entrar, move o inimigo de maior poder efetivo para esta fileira e reduz seu bônus em 2 (mín. -2). Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "General temido da Fragmentação, dominou a gravidade para deter o curso das estrelas e permaneceu em Caelid após a Podridão.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "chefe_dama_vazio",
+      "nome": "Ranni, Bruxa da Lua",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Épica",
+      "poder": 6,
+      "custo": 3,
+      "habilidade_id": "void_rend",
+      "habilidade_nome": "Fenda do Vazio",
+      "habilidade_texto": "Ao entrar em campo, tira 2 pontos de bônus da unidade inimiga mais forte. O bônus dela não pode ficar abaixo de -2. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "A princesa lunar rompeu com os Dois Dedos e busca um destino independente da Vontade Maior.",
+      "sinergias": [
+        "lua_cariana",
+        "vazio"
+      ],
+      "combos": [
+        {
+          "id": "vazio_astral",
+          "nome": "Alinhamento Astral",
+          "descricao": "Ranni e uma unidade Astral distinta convergem (+2)."
+        },
+        {
+          "id": "convergencia_lunar",
+          "nome": "Convergência da Lua Negra",
+          "descricao": "Duas unidades ligadas à Lua Negra convergem e recebem +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_contrabandista",
+      "nome": "Recusante da Mansão Vulcânica",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Longa distância",
+      "raridade": "Comum",
+      "poder": 5,
+      "custo": 1,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.",
+      "descricao": "Um recusante de Volcano Manor, acostumado a negociar favores e segredos nas encostas do Monte Gelmir.",
+      "sinergias": [
+        "caravana"
+      ],
+      "combos": [
+        {
+          "id": "caravana_saqueadora",
+          "nome": "Saque da Cidade Eterna",
+          "descricao": "Saqueadora e Contrabandista fecham o negócio (+2)."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 3,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "elden_especial_sangramento",
+      "nome": "Ritual de Sangue",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_sangramento",
+      "habilidade_nome": "Sangramento",
+      "habilidade_texto": "Escolha uma fileira inimiga. Cada unidade nela recebe Sangramento; a segunda marca reduz 2 de bônus (mín. -2) e consome as marcas. Marcas expiram no fim da rodada. Raridade Rara: aplica a segunda marca a até 1 alvo sem marca; reforça a redução de bônus em até 1 alvo (mín. -2).",
+      "descricao": "O ritual desperta o poder do sangue e transforma cada ferida em um presságio de ruína.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_chifre",
+      "nome": "Rugido de Godfrey",
+      "categoria": "Especial",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 0,
+      "custo": 3,
+      "habilidade_id": "gwent_chifre",
+      "habilidade_nome": "Rugido de Godfrey",
+      "habilidade_texto": "Escolha uma fileira: seus aliados nela recebem +2 de bônus até o fim da rodada. Raridade Épica: acrescenta +1 de bônus a até 1 aliados afetados.",
+      "descricao": "O rugido do Primeiro Lorde Prístino ecoa entre as fileiras e reacende a coragem dos guerreiros.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "reliquia_runa_morte",
+      "nome": "Runa da Morte",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Mítica",
+      "poder": 0,
+      "custo": 5,
+      "habilidade_id": "reliquia_morte",
+      "habilidade_nome": "Runa da Morte",
+      "habilidade_texto": "Em cada fileira, a unidade inimiga com maior bônus positivo perde até 2 pontos de bônus (sem ficar negativa). Uso único por partida.",
+      "descricao": "O fragmento da Morte Destinada recorda o poder que Maliketh recebeu para manter selado.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_sacerdote",
+      "nome": "Sacerdote Esquecido",
+      "categoria": "Unidade",
+      "faccao": "Os Esquecidos",
+      "fileira": "Longa distância",
+      "raridade": "Rara",
+      "poder": 5,
+      "custo": 2,
+      "habilidade_id": "",
+      "habilidade_nome": "Sinergia de combate",
+      "habilidade_texto": "Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).",
+      "descricao": "Um sacerdote conserva os ritos de sua ordem em um santuário quase tomado pelo tempo.",
+      "sinergias": [
+        "fe",
+        "sacerdos"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "combo",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_chuva",
+      "nome": "Sangue Corrompido",
+      "categoria": "Especial",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 0,
+      "custo": 1,
+      "habilidade_id": "gwent_chuva",
+      "habilidade_nome": "Sangue Corrompido",
+      "habilidade_texto": "Aplica 1 Sangramento a cada inimigo em Cerco. Na segunda marca, consome as marcas e reduz 2 de bônus (mín. -2). Estados expiram no fim da rodada.",
+      "descricao": "Um rito sanguíneo mancha o campo de batalha com a promessa de uma dívida ainda não paga.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 3,
+      "linhas_template": 2,
+      "status": "OK"
+    },
+    {
+      "id": "arma_grande_sino",
+      "nome": "Sentinela do Portão de Leyndell",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Lendária",
+      "poder": 8,
+      "custo": 4,
+      "habilidade_id": "last_bell",
+      "habilidade_nome": "Sino do Último Bastião",
+      "habilidade_texto": "Ganha +2 quando sua pontuação total for menor que a do adversário. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um guardião de elite protege os acessos da capital e enfrenta qualquer ameaça à ordem dourada.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_unidade_necromante",
+      "nome": "Servo dos que Vivem na Morte",
+      "categoria": "Unidade",
+      "faccao": "Lua Negra",
+      "fileira": "Cerco",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "ressurgir",
+      "habilidade_nome": "Ressurgir",
+      "habilidade_texto": "Ao entrar, traz do seu descarte ao campo a unidade elegível de maior poder-base até 5; ela retorna sem bônus nem Escudo. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Um devoto da raiz da morte percorre criptas esquecidas, guiado por sussurros que os vivos não conseguem ouvir.",
+      "sinergias": [
+        "runico"
+      ],
+      "combos": [
+        {
+          "id": "ritual_runico",
+          "nome": "Ritual das Runas",
+          "descricao": "Duas unidades rúnicas completam o círculo (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 5,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_especial_tempestade",
+      "nome": "Tempestade dos Picos",
+      "categoria": "Especial",
+      "faccao": "Lua Negra",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 0,
+      "custo": 2,
+      "habilidade_id": "gwent_clima",
+      "habilidade_nome": "Tempestade dos Picos",
+      "habilidade_texto": "Escolha uma fileira. Enquanto o clima estiver ativo, todas as unidades dos dois lados nela perdem 1 de poder efetivo (mínimo 1); Resistência Climática pode absorver a penalidade.",
+      "descricao": "Nuvens pesadas cobrem uma fileira. A chuva atravessa as defesas e enfraquece todas as unidades expostas enquanto o clima durar.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "especial",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "patente_6",
+      "nome": "Veterano de Leyndell — Arauto da Ruína",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "retaliacao",
+      "habilidade_nome": "Retaliação dos Semideuses",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 30.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "patente_8",
+      "nome": "Veterano de Leyndell — Senhor das Almas",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Longa distância",
+      "raridade": "Épica",
+      "poder": 5,
+      "custo": 3,
+      "habilidade_id": "retaliacao",
+      "habilidade_nome": "Retaliação dos Semideuses",
+      "habilidade_texto": "Recebe +1 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Recompensa de patente concedida ao alcançar o nível 50.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_v75_ordem_veterano_juramento",
+      "nome": "Veterano do Juramento Dourado",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Rara",
+      "poder": 4,
+      "custo": 2,
+      "habilidade_id": "v75_golden_vow",
+      "habilidade_nome": "Juramento Dourado",
+      "habilidade_texto": "Ao entrar, esta carta recebe +1; o aliado de menor poder efetivo na mesma fileira também recebe +1, se existir. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Veterano das muralhas internas de Leyndell, traz no escudo o juramento feito diante da Árvore Áurea.",
+      "sinergias": [
+        "v75_erdtree_oath"
+      ],
+      "combos": [
+        {
+          "id": "v75_juramento_dois_crisol",
+          "nome": "Juramento do Crisol e da Graça",
+          "descricao": "Formação e proteção convergem: a carta participante que ativa o juramento recebe +2."
+        }
+      ],
+      "classificacao": "identidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 4,
+      "status": "OK"
+    },
+    {
+      "id": "luterano_vigia",
+      "nome": "Vigia da Noite",
+      "categoria": "Unidade",
+      "faccao": "Véu Carmesim",
+      "fileira": "Corpo a corpo",
+      "raridade": "Comum",
+      "poder": 3,
+      "custo": 1,
+      "habilidade_id": "gloria",
+      "habilidade_nome": "Glória",
+      "habilidade_texto": "Ao vencer a rodada, mantém no campo a unidade com Glória ou Sobrevivente de maior poder efetivo; as demais são descartadas. Em empate ou derrota, nenhuma permanece.",
+      "descricao": "Um sentinela solitário vigia os portões enquanto a noite cobre as ruínas.",
+      "sinergias": [
+        "fe",
+        "gloria_divina"
+      ],
+      "combos": [
+        {
+          "id": "fe_gloria",
+          "nome": "Glória Divina",
+          "descricao": "A fé e a glória convergem: +2 para a carta participante que ativa o combo."
+        },
+        {
+          "id": "fe_devocao",
+          "nome": "Devoção",
+          "descricao": "Duas unidades devotas fortalecem a formação: +2."
+        },
+        {
+          "id": "fe_evangelho",
+          "nome": "Evangelho",
+          "descricao": "Missionários espalham a palavra: +2."
+        },
+        {
+          "id": "fe_irmandade",
+          "nome": "Irmandade Esquecida",
+          "descricao": "Irmãos e missionários unem forças: +2."
+        },
+        {
+          "id": "fe_soberania",
+          "nome": "Soberania Divina",
+          "descricao": "O Papa e seus seguidores estabelecem soberania: +2."
+        },
+        {
+          "id": "fe_sacerdos",
+          "nome": "Sacerdócio",
+          "descricao": "Sacerdotes abençoam a formação: +2."
+        }
+      ],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    },
+    {
+      "id": "gwent_singular_nivel1",
+      "nome": "Vontade de Marika",
+      "categoria": "Unidade",
+      "faccao": "Ordem Áurea",
+      "fileira": "Corpo a corpo",
+      "raridade": "Singular",
+      "poder": 10,
+      "custo": 0,
+      "habilidade_id": "ultimo_folego",
+      "habilidade_nome": "Último Suspiro",
+      "habilidade_texto": "Na terceira rodada, recebe +1 de bônus ao entrar em campo. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.",
+      "descricao": "Conquistada ao vencer um desafio no nível um.",
+      "sinergias": [],
+      "combos": [],
+      "classificacao": "unidade",
+      "linhas_na_carta": 4,
+      "linhas_template": 3,
+      "status": "OK"
+    }
+  ]
+}

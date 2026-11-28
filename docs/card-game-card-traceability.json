@@ -54,7 +54,22 @@
       "gwent_requiem",
       "gwent_vinculo"
     ],
-    "nota_identidade_generica": "Correção confirmada no código: em aplicar_jogada(), card_id com identidade ativa faz skill=\"\"; o campo habilidade retornado por preparar_carta() ainda contém o ID genérico, enquanto nome/texto exibidos são da identidade."
+    "nota_identidade_generica": "Correção confirmada no código: em aplicar_jogada(), card_id com identidade ativa faz skill=\"\"; o campo habilidade retornado por preparar_carta() ainda contém o ID genérico, enquanto nome/texto exibidos são da identidade.",
+    "runtime_reconciliation": {
+      "current_card_record": "data/card_game/malenia-runtime-current.v1.json",
+      "last_verified": "2026-11-28",
+      "scope": "Active runtime override; historical baseline rows remain unchanged for audit provenance.",
+      "supersedes_for_malenia": {
+        "cost_model": 6,
+        "rarity": "Primordial",
+        "power_base": 9,
+        "ability_id": "scarlet_bloom",
+        "ability_name": "Flor Escarlate",
+        "threshold_rule": "Only transition from one to two marks triggers corrosion; capped targets are not reduced again.",
+        "primordial_rule": "Up to three qualifying targets receive one additional bonus loss, floor -2.",
+        "ability_text": "Aplica 1 marca de Podridão Escarlate a cada inimigo da fileira. Ao passar de 1 para 2, o alvo com bônus positivo perde 1 (mín. 0). Primordial: até 3 desses alvos perdem mais 1 (mín. -2). Com 2 marcas, não há nova redução."
+      }
+    }
   },
   "cards": [
     {

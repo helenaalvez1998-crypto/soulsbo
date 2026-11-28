@@ -33,9 +33,10 @@ O prompt fixo também exige carta isolada, sem fundo externo, em PNG com canal a
 - O prompt recebe os dados do exemplar confirmado no banco; identidade, facção, categoria e fileira são verificadas contra o catálogo.
 - Poder-base, poder máximo e custo são os campos numéricos visíveis autorizados. A raridade é apenas classificatória no Card Engine v2: não desenhar potência, orçamento, escala de efeito, medidor ou pontuação de raridade.
 - O arquivo aprovado fica associado ao par `card_id` + `exemplar_id`. Outra cópia do mesmo modelo não herda essa arte completa.
-- Cartas completas aprovadas são servidas como imagem integral, sem aplicação de moldura, medalhão, título ou texto adicional. Arte legada por modelo continua sendo fallback apenas para instâncias sem arte nova específica.
+- Cartas completas aprovadas continuam vinculadas ao exemplar, mas não são servidas diretamente como pixels finais. O renderizador extrai somente a janela da ilustração e recompõe a moldura, nome, poder-base, raridade, facção, posição tática e efeito de combate a partir dos dados canônicos atuais. Texto antigo incorporado à imagem aprovada não pode substituir a regra executada no jogo.
+- Artes legadas por modelo continuam sendo fallback apenas para instâncias sem arte nova específica.
 - Classificação tática válida: Corpo a corpo, Longa distância ou Cerco. Cartas especiais usam Carta especial. Força, Destreza e Magia não são classificações de combate.
-- Modelos de imagem podem errar tipografia; revisão humana antes da aprovação continua obrigatória.
+- Modelos de imagem podem errar tipografia; revisão humana antes da aprovação continua obrigatória. O renderizador não confia nos textos impressos pelo modelo: usa apenas a região de arte e sobrepõe a regra mecânica canônica do jogo.
 
 
 ## Varredura de consistência (Opção B · v3.1)
@@ -47,7 +48,7 @@ O prompt fixo também exige carta isolada, sem fundo externo, em PNG com canal a
 - `tipo` legado não é fonte de facção nem de posição nos prompts ou no payload novo. Referências antigas a Força/Destreza/Magia aparecem somente como proibição explícita de classe de combate; Magia permanece permitida como afinidade, tema, habilidade ou lore documentada.
 - A saída da IA continua sendo uma carta integral vertical 2:3; os endpoints de upload preservam o enquadramento e rejeitam imagens horizontais.
 - O cache de renderização foi invalidado com `VERSAO_ARTES = 32`.
-- Imagens completas antigas já aprovadas não são reescritas pelo código: como os textos estão incorporados nos pixels, precisam ser regeneradas com o novo prompt e reaprovadas para remover rótulos antigos.
+- Imagens completas antigas aprovadas são preservadas no armazenamento, mas a visualização pública extrai a janela de ilustração e compõe novamente todos os dados da carta. Assim, revisões de habilidade, raridade, poder ou fileira atualizam o cartão exibido sem editar o arquivo aprovado original.
 
 
 ## Correção visual de raridade (rev. 32)

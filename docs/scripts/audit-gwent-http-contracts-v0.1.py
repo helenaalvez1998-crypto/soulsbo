@@ -103,7 +103,7 @@ def handler_contract(fn: ast.AsyncFunctionDef | ast.FunctionDef, js_text: str) -
                     engine_calls.add(chain)
                 if chain == "web.json_response" and node.args:
                     response_keys.update(literal_dict_keys(node.args[0]))
-            elif isinstance(f, ast.Name) and chain in {"aplicar_jogada", "novo_estado", "executar_turno_ia", "preparar_carta"}:
+            elif isinstance(f, ast.Name) and chain in {"aplicar_jogada", "novo_estado", "executar_turno_ia", "executar_uma_jogada_ia", "preparar_carta"}:
                 engine_calls.add(chain)
         if isinstance(node, ast.Subscript) and attr_chain(node.value) == "request.match_info":
             if isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
@@ -200,12 +200,13 @@ def main() -> None:
         "preparar_carta_return_keys": sorted(prep_return_keys),
         "findings": [
             "The deck-save handler validates 12 unique card models, at least 8 units, at most 4 specials, faction predominance, leader/faction compatibility, and relic ownership; it does not sum deck cost or enforce a budget.",
-            "Deck/catalog API code assigns payload['custo'] before calling preparar_carta(), but preparar_carta() returns an explicit dictionary that does not include 'custo'. The final prepared card payload therefore drops the assigned cost.",
+            ("preparar_carta() includes the resolved card cost in the public payload." if "custo" in prep_return_keys else "preparar_carta() does not include a resolved card cost in the public payload."),
             "The frontend posts cards as {card_id, exemplar_id} plus faction, leader_id and relic_id. Match actions post action, card_id, row, card_ids and target_id, then refresh the match detail endpoint.",
             "The action endpoint returns {ok: true}; the frontend refreshes GET /api/gwent/matches/{match_id} to retrieve the updated public state.",
             "Pending invitations are answered through the separate /respond endpoint; match detail returns status-only for pending rows and full state for active/finished rows.",
             "Human-vs-human invitation creation stores deck/config snapshots; acceptance revalidates relic ownership, shuffles snapshots and creates the initial game state.",
-            "Solo creation mirrors the player's saved deck/config for NARA; the action handler executes the AI turn server-side and uses a pass fallback if AI execution raises.",
+            "Solo creation preserves the player's saved deck and gives NARA a separate validated 12-card profile deck for the selected difficulty (9 units, 3 specials).",
+            "The asynchronous NARA worker waits 3–5 seconds before each decision and evaluates one action at a time through the normal aplicar_jogada() resolver; the AI does not inspect the identities of cards in the human hand.",
         ],
     }
     OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -235,30 +236,30 @@ def main() -> None:
         "",
         "O frontend envia `cards: [{card_id, exemplar_id}]`, `faction`, `leader_id` e `relic_id` em `POST /api/gwent/deck`. O handler exige 12 modelos únicos, facção válida/predominante, líder da facção, relíquia permitida e possuída, mínimo de oito unidades e máximo de quatro especiais. O estado da implementação não contém soma de custo nem teto de orçamento.",
         "",
-        f"A função `preparar_carta()` retorna estas chaves: `{', '.join(sorted(prep_return_keys))}`. **`custo` não está na lista.** As rotas `/api/gwent/cards` e `/api/gwent/deck` atribuem `payload['custo']` antes de chamar `preparar_carta()`, mas a preparação explícita descarta esse campo. Assim, o custo pode existir no modelo/base payload e ainda não chegar ao consumidor final desse contrato.",
+        f"A função `preparar_carta()` retorna estas chaves: `{', '.join(sorted(prep_return_keys))}`. **`custo` {'está incluído' if 'custo' in prep_return_keys else 'não está incluído'} no payload preparado.** O campo é calculado a partir do custo cadastrado ou da tabela de raridade; o relatório não pressupõe que custo seja orçamento obrigatório do deck.",
         "",
         "## Contrato de partidas",
         "",
         "- `GET /api/gwent/matches`: lista partidas/ranking/leaderboard do usuário autenticado.",
         "- `POST /api/gwent/matches`: recebe `opponent_id`; valida guild/decks, limite de três partidas pendentes/ativas e posse de relíquias; salva snapshot de deck/config em `state_json` com status `pending`.",
         "- `POST /api/gwent/matches/{match_id}/respond`: recebe `action` (`accept`, `decline`, `cancel`); somente o convidado aceita/recusa e somente o criador cancela. Na aceitação, revalida relíquias, embaralha snapshots e cria `novo_estado()`.",
-        "- `POST /api/gwent/matches/solo`: cria partida contra NARA com cópia do deck/config do usuário; a API informa `rewards: false`.",
-        "- `GET /api/gwent/matches/{match_id}`: para `pending`, retorna somente `match_id/status`; para `active/finished`, retorna estado público, mão, placar, alvos, clima, líder, relíquia, histórico e recompensa.",
-        "- `POST /api/gwent/matches/{match_id}/action`: recebe `action`, `card_id`, `row`, `card_ids`, `target_id`; aplica `aplicar_jogada()` dentro de transação e executa turno NARA no servidor quando necessário. Retorna `{ok: true}`; o frontend busca novamente o detalhe para obter o estado novo.",
+        "- `POST /api/gwent/matches/solo`: recebe dificuldade (`facil`, `normal`, `dificil`), preserva o deck do usuário e cria um deck oficial separado para a NARA (12 cartas: 9 unidades e 3 especiais); a API informa `rewards: false`.",
+        "- `GET /api/gwent/matches/{match_id}`: para `pending`, retorna somente `match_id/status`; para `active/finished`, retorna estado público, mão, placar, alvos, clima, líder, relíquia, histórico e metadados do deck/dificuldade da NARA. Se a NARA estiver no turno, recupera o worker caso necessário.",
+        "- `POST /api/gwent/matches/{match_id}/action`: recebe `action`, `card_id`, `row`, `card_ids`, `target_id`; aplica `aplicar_jogada()` dentro de transação. Quando passa o turno à NARA, persiste `ai_pending` e `ai_ready_at` com atraso aleatório de 3–5 segundos; agenda o worker após o commit. Retorna `{ok: true}`; o frontend busca novamente o detalhe.",
         "",
         "## Achados relevantes para a reconstrução",
         "",
         "1. **Custo não é uma regra de deck.** O handler de gravação não calcula soma de custo nem compara com orçamento.",
-        "2. **Custo não chega no payload preparado.** `preparar_carta()` não inclui `custo` no dicionário retornado, mesmo quando rotas anteriores calcularam `payload['custo']`.",
+        f"2. **Custo preparado.** `preparar_carta()` {'inclui' if 'custo' in prep_return_keys else 'não inclui'} `custo` no dicionário público retornado.",
         "3. **Ações são refetch-based.** O POST de ação devolve apenas sucesso; o frontend chama `refreshGwentMatch()` e `GET /api/gwent/matches/{id}`.",
         "4. **Convite é snapshot-based.** O deck/config enviado é guardado no convite; a aceitação revalida posse de relíquia, depois embaralha e inicializa a partida.",
-        "5. **NARA atua no servidor.** A ação humana pode ser seguida por `executar_turno_ia()` no mesmo handler; em exceção, o backend tenta `pass` como fallback.",
+        "5. **NARA usa o mesmo motor da partida.** O worker assíncrono aguarda 3–5 segundos fora da transação e chama `executar_uma_jogada_ia()`, que avalia uma ação por vez executando `aplicar_jogada()`; cada decisão usa o resolvedor de combate normal. Se continuar no turno (por exemplo, após o passe humano), agenda nova espera completa. Em exceção, o backend tenta `pass` como fallback.",
         "",
         "## Limites e próximo passo",
         "",
         "Todas as conclusões são estáticas. Não foi possível executar HTTP porque `discord.py` e `aiosqlite` não estão instalados; tentativa de instalação temporária foi bloqueada por DNS. Não usar esta auditoria como prova de respostas reais, autenticação, transações, race conditions, integração do browser ou DB.",
         "",
-        "Próxima execução: em ambiente com as dependências de `requirements.txt`, construir testes `aiohttp.TestClient` para cada rota de leitura/escrita, autenticação (401), origem (403), ownership, status (400/403/404/409), transação/rollback e refetch da UI. Em seguida, corrigir o contrato do custo junto da especificação aprovada — não antes de definir o schema/custo oficial.",
+        "Próxima execução: em ambiente com as dependências de `requirements.txt`, construir testes `aiohttp.TestClient` para cada rota de leitura/escrita, autenticação (401), origem (403), ownership, status (400/403/404/409), transação/rollback, atraso assíncrono e refetch da UI.",
         "",
         "## Reprodução",
         "",

@@ -1574,6 +1574,13 @@ def gerar_prompt_carta_estruturado(carta: dict[str, Any]) -> dict[str, Any]:
         if CARD_SYNERGY_TAGS.get(card_id, set()) & set(combo["tags"])
     ]
     card_data["sinergias"] = list(dict.fromkeys([*synergy_items, *synergy_tags, *synergy_combos]))
+    # Para cartas oficiais, a regra mostrada no briefing de arte é idêntica à
+    # payload canônica usado no combate e no catálogo público do site.
+    if model is not None:
+        prepared_card = preparar_carta(card_data)
+        ability_name = _valor_prompt(prepared_card.get("habilidade_nome") or "Sem habilidade especial", 100)
+        ability_rule = _valor_prompt(prepared_card.get("habilidade_texto") or "Sem habilidade especial.", 500)
+        has_ability = ability_name != "Sem habilidade especial"
     return pacote_prompt_arte(
         card_id=card_id,
         card=card_data,
@@ -1644,10 +1651,11 @@ def normalizar_imagem_carta(dados: bytes, *, exigir_carta_completa: bool = True)
 # V16 — briefings exclusivos dos novos chefes lendários.
 V16_BOSS_ART_PROMPTS = {
     "chefe_malenia_lamina_miquella": (
-        "Malenia, Blade of Miquella, canonical Elden Ring design: tall valkyrie with a weathered gold prosthetic arm and leg, long copper-red hair, ornate winged gold helm, scarlet rot-goddess atmosphere kept restrained. "
-        "She stands in the roots and pale blossoms of Elphael, Brace of the Haligtree, holding the curved Hand of Malenia. "
-        "Show a precise Waterfowl Dance preparation: cloak and hair caught in a rising spiral, scarlet petals and rot motes tracing the motion. "
-        "Cinematic dark-fantasy game key art, ancient architecture, realistic metal and cloth, no generic knight, no extraneous lettering inside the illustration window; the complete card title, labels, numbers and UI panels are required by the master layout."
+        "MALENIA — PHASE ONE / BLADE OF MIQUELLA. Depict the canonical first-phase warrior, not the Goddess of Rot transformation: a tall, poised, slender valkyrie with long copper-red hair, an ornate weathered gold winged helm that conceals the eyes, layered aged-gold Cleanrot-inspired armor, visible golden prosthetic arm and lower-limb prostheses, and the long curved katana Hand of Malenia. "
+        "Her silhouette must read instantly as Malenia: elegant controlled posture, precise sword technique, narrow blade, flowing red hair, worn gold plate and prosthetic joints. Do not add a second sword, oversized shield, generic knight helmet, monstrous limbs or full butterfly wings. "
+        "Set the duel at the shallow reflective pool and pale roots of Elphael, Brace of the Haligtree; frame the vast pale sacred branches and subdued blossoms behind her. "
+        "Capture the suspended opening of Waterfowl Dance: one foot lifted, torso turning, katana aligned for a swift flowing arc; hair, cloak and a restrained trail of scarlet petals describe the movement. Scarlet Rot is a controlled motif of a few red petals and fine motes, not a giant flower covering the subject. "
+        "Premium dark-fantasy collectible-card key art, painterly realism, highly resolved anatomical silhouette and prosthetic construction, believable worn gold, fine engraved armor, woven cloth, atmospheric depth, cinematic but legible lighting, clear focal hierarchy, no text or logo inside the illustration window."
     ),
     "chefe_radahn_flagelo_estrelas": (
         "Starscourge Radahn in his canonical Elden Ring form: enormous red-haired demigod wearing battered golden lion armor, riding the tiny exhausted horse Leonard, twin colossal curved greatswords in hand. "

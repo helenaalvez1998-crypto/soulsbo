@@ -2528,15 +2528,19 @@ body.gwent-match-active .gwent-swap-control input { width: 17px; height: 17px; }
 }
 
 
-/* Modo solo NARA — painel de entrada, preservando o novo layout da Arena */
-.gwent-solo-panel{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px auto 0;padding:18px 22px;max-width:920px;text-align:left;border:1px solid rgba(52,211,153,.48);border-radius:14px;background:linear-gradient(110deg,rgba(12,48,43,.72),rgba(12,18,31,.96));box-shadow:inset 0 0 24px rgba(0,0,0,.28),0 0 22px rgba(34,197,94,.08)}
+/* Modo solo NARA — seletor de desafio e deck próprio por dificuldade. */
+.gwent-solo-panel{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:18px auto 0;padding:18px 22px;max-width:980px;text-align:left;border:1px solid rgba(52,211,153,.48);border-radius:14px;background:linear-gradient(110deg,rgba(12,48,43,.72),rgba(12,18,31,.96));box-shadow:inset 0 0 24px rgba(0,0,0,.28),0 0 22px rgba(34,197,94,.08)}
+.gwent-solo-copy{flex:1 1 470px;min-width:0}
 .gwent-solo-panel b{display:block;font:900 18px var(--serif,Georgia);letter-spacing:.06em;color:#b7f7da;text-transform:uppercase}
-.gwent-solo-panel p{max-width:620px;margin:6px 0 0;color:var(--muted,#b6bfd1);font-size:13px;line-height:1.55}
-.gwent-solo-panel button{flex:0 0 auto;min-height:52px;padding:13px 24px;border:1px solid #50d9a1;border-radius:9px;background:linear-gradient(135deg,#167b57,#124a45);color:#fff;font-weight:900;letter-spacing:.06em;box-shadow:0 5px 18px rgba(16,185,129,.2)}
+.gwent-solo-panel p{max-width:650px;margin:6px 0 0;color:var(--muted,#b6bfd1);font-size:13px;line-height:1.55}
+.gwent-solo-controls{display:flex;flex:0 1 390px;min-width:260px;flex-direction:column;gap:8px}
+.gwent-solo-controls label{color:#b7f7da;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.gwent-solo-controls select{width:100%;min-height:45px;padding:10px 12px;border:1px solid rgba(148,163,184,.42);border-radius:8px;background:#111c2b;color:#eef6ff;font:700 12px inherit}
+.gwent-solo-panel button{flex:0 0 auto;min-height:48px;padding:12px 22px;border:1px solid #50d9a1;border-radius:9px;background:linear-gradient(135deg,#167b57,#124a45);color:#fff;font-weight:900;letter-spacing:.06em;box-shadow:0 5px 18px rgba(16,185,129,.2)}
 .gwent-solo-panel button:hover{filter:brightness(1.18);transform:translateY(-1px)}
 .gwent-solo-panel button:disabled{opacity:.55;cursor:wait;transform:none}
 .gwent-ai-match{border-color:rgba(52,211,153,.45)!important;box-shadow:inset 0 0 20px rgba(16,185,129,.06)}
-@media(max-width:650px){.gwent-solo-panel{align-items:stretch;flex-direction:column;padding:15px}.gwent-solo-panel button{width:100%}}
+@media(max-width:650px){.gwent-solo-panel{align-items:stretch;flex-direction:column;padding:15px}.gwent-solo-controls{min-width:0;width:100%}.gwent-solo-panel button{width:100%}}
 
 
 /* GWENT ARENA V23 — duelo em tela cheia, mão distribuída e ações centralizadas. */
@@ -7954,3 +7958,5 @@ body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] 
   font:500 10px/1.45 Inter,sans-serif;
 }
 .gwent-bonus-origin-empty { margin:0; }
+
+.gwent-ai-profile{margin:0 14px 10px;color:var(--muted,#a99f8b);font-size:.68rem;letter-spacing:.045em;line-height:1.35}

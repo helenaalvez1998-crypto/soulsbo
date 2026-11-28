@@ -5,7 +5,7 @@
     "source": "sistemas/cartas.py and sistemas/gwent.py from supplied baseline ZIP"
   },
   "generic_skills": {
-    "catalog_count": 59,
+    "catalog_count": 60,
     "direct_handler_literal_values_count": 56,
     "lifecycle_hook_ids_found_in_runtime": [
       "espolios",
@@ -13,6 +13,7 @@
     ],
     "declared_ids_covered_by_direct_or_lifecycle_hook": 58,
     "declared_ids_without_matching_handler_reference": [
+      "scarlet_bloom",
       "sobrevivente"
     ],
     "additional_hidden_lifecycle_hooks_not_in_catalog": [

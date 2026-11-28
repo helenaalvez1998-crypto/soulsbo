@@ -1,3 +1,18 @@
+# Atualização de runtime — Malenia e treino contra NARA (2026-11-28)
+
+**Estado atual:** revisão funcional implementada no Gwent legado, acima do baseline rev. 32. Leia `docs/card-game-malenia-runtime-and-nara-training-v1.0.md` e `data/card_game/malenia-runtime-current.v1.json` antes dos snapshots históricos abaixo.
+
+- Malenia está sincronizada em `sistemas/cartas.py`, `sistemas/gwent.py`, payloads preparados, ajuda da UI e direção de arte: poder 9, Primordial, custo 6, `scarlet_bloom` / Flor Escarlate. A regra só dispara ao cruzar de uma para duas marcas; até três alvos elegíveis recebem a corrosão adicional Primordial, e alvos no limite não sofrem repetição.
+- O texto de lore da carta foi substituído por uma descrição coerente com a personagem e com a forma representada. A arte é da fase 1 (Lâmina de Miquella), não da Deusa da Podridão.
+- `sistemas/gwent_treino.py` define três decks oficiais distintos (Fácil, Normal, Difícil), cada um com 9 unidades e 3 especiais, líder, Relíquia e plano de jogo próprios; o deck difícil inclui Malenia.
+- NARA não replica o deck do usuário. A partida solo usa `novo_estado()` e o mesmo resolvedor `aplicar_jogada()` da partida normal. A IA executa uma decisão por vez e aguarda 3–5 segundos antes de cada decisão; a interface indica quando NARA está pensando.
+- Treinos não concedem recompensas competitivas nem alteram MMR.
+- Relatórios de rastreabilidade de 2026-11-27 permanecem como evidência histórica, não como estado atual; o overlay atual de Malenia está no JSON runtime corrente.
+
+**Validação local desta revisão:** 282 testes + 106 subtests; suite Malenia/NARA 10/10; regressão de status 41/41; assertions de identidade 33/33; `py_compile` e `node --check site/app.js` aprovados. O contrato do worker e rotas foi auditado estaticamente; integração HTTP ponta a ponta, dependências externas e deploy permanecem não executados.
+
+---
+
 # Handoff mais recente — correção de exibição da raridade no site (rev. 32, 2026-11-28)
 
 **Baseline:** `soulsbo-main-continuity-2026-11-28-rev31.zip`.  
