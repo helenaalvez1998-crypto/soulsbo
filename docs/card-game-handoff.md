@@ -2,6 +2,13 @@
 
 > Documento operacional vivo. Leia primeiro este arquivo e depois o inventário técnico em [`card-game-mapping-audit.md`](card-game-mapping-audit.md).
 
+## Estado atual — potência da raridade e poder máximo (2026-11-28)
+
+- **Poder máximo ≠ habilidade:** `PODER MÁXIMO` vem de `faixa_poder_exemplar()` (teto da faixa da raridade, ex.: Rara 4–6) e indica até onde o exemplar pode ser **aprimorado com almas**; não é bônus de efeito. Rótulo no site agora diz "(APRIMORAMENTO)".
+- **Bug corrigido:** `bot.py` sobrescrevia `potencia_raridade` com `RARITY_EFFECT_BUDGET[raridade]` (Rara = 1) mesmo em carta sem efeito, mostrando "1/6" onde nada era amplificado. Agora vale o valor de `preparar_carta()` (0 sem habilidade/identidade/combo). Escala do site corrigida para `/ 3` (máximo real) e fallback por raridade removido.
+- **Lore:** cartas geradas `jogo_*` e `patente_*` não carregam mais "Papel tático…/Sem habilidade…" na descrição; apenas lore.
+- Testes: 8 suites 251/251; suíte de sincronia (lore sem mecânica inclui patentes) passa.
+
 ## Estado atual — efeitos não informados agora aparecem (2026-11-28)
 
 - **Problema:** 19 cartas sem habilidade individual participam de combos mas diziam "Sem habilidade especial"; cartas com habilidade também não mencionavam seus combos (a ficha de coleção mostrava, mas imagem, partida e catálogo não).

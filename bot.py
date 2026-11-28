@@ -1125,7 +1125,6 @@ class NaraBot(commands.Bot):
             if record and str(card_id).startswith("transmutacao_"):
                 personal = await self._gwent_generated_card_payload(user_id, str(card_id), record)
                 if personal:
-                    personal["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(str(personal.get("raridade", "Comum")), 0))
                     cards.append(personal)
                 continue
             card = get_carta(str(card_id))
@@ -1145,7 +1144,6 @@ class NaraBot(commands.Bot):
                 item["exemplar_id"] = int(record["id"])
                 item["id"] = f"{card_id}::{int(record['id'])}"
                 item["max_power"] = faixa_poder_exemplar(card, rarity)[1]
-                item["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(rarity, 0))
                 image_source = preparar_payload_carta_base(payload)
                 image_version = etag_carta_base(image_source, tamanho=(210, 310), quality=82)
                 item["image_url"] = (
@@ -2152,7 +2150,6 @@ class NaraBot(commands.Bot):
                         personal["source"] = str(record["source"] or "transmutacao")
                         personal["max_power"] = int(personal["poder"])
                         from sistemas.gwent import RARITY_EFFECT_BUDGET
-                        personal["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(str(personal.get("raridade", "Comum")), 0))
                         personal["image_url"] = (
                             f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?thumb=1"
                         )
@@ -2178,7 +2175,6 @@ class NaraBot(commands.Bot):
                 item["exemplares"] = 1
                 item["source"] = str(record["source"] or "")
                 item["max_power"] = faixa_poder_exemplar(card, rarity)[1]
-                item["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(rarity, 0))
                 image_source = preparar_payload_carta_base(payload)
                 image_version = etag_carta_base(image_source, tamanho=(210, 310), quality=82)
                 item["image_url"] = (
@@ -2341,7 +2337,6 @@ class NaraBot(commands.Bot):
                 "poder_base": power,
                 "poder_maximo": int(faixa_poder_exemplar(card, rarity)[1]),
                 "custo": int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0))),
-                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "exemplar_id": exemplar_id,
             })
             canonical = preparar_carta(payload)
@@ -2438,7 +2433,6 @@ class NaraBot(commands.Bot):
                 "raridade": rarity, "poder": power, "poder_base": power,
                 "poder_maximo": int(faixa_poder_exemplar(card, rarity)[1]),
                 "custo": int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0))),
-                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "exemplar_id": exemplar_id,
             })
             canonical = preparar_carta(payload)

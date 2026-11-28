@@ -40,7 +40,7 @@ from sistemas.arte_cartas import _dados_habilidade_visual
 res2 = []
 def ok2(n, c, e=""): res2.append({"name": n, "ok": bool(c), "extra": str(e)})
 mech = re.compile(r'\+\d|ganha |recebe |ao entrar|bônus|completar|combo|na fileira|se venceu|ao vencer a rodada', re.I)
-lore_bad = [c.id for c in cs.values() if mech.search(c.descricao or "") and not c.id.startswith("patente_")]
+lore_bad = [c.id for c in cs.values() if mech.search(c.descricao or "")]
 ok2("descrição (lore) sem mecânica", not lore_bad, lore_bad)
 img_bad = []
 for c in cs.values():

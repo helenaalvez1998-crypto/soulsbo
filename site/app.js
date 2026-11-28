@@ -64,7 +64,7 @@ const cardSigil = value => {
     : key.includes('Especial') ? '◇' : '✦');
 };
 const RARITY_POWER = {'Comum':0,'Rara':1,'Épica':2,'Lendária':3,'Mítica':4,'Primordial':5,'Singular':6};
-const rarityPower = card => Number.isFinite(Number(card?.potencia_raridade)) ? Number(card.potencia_raridade) : (RARITY_POWER[card?.raridade] ?? 0);
+const rarityPower = card => Number.isFinite(Number(card?.potencia_raridade)) ? Number(card.potencia_raridade) : 0;
 const rarityPowerMarkup = card => `<span class=\"v54-rarity-power\" title=\"Potência da raridade: amplia habilidades; não é poder de ataque\"><i>✦</i> Potência ${rarityPower(card)}</span>`;
 const cardInsigniaMarkup = card => {
   const category = card.categoria === 'Especial' ? 'Especial' : 'Unidade';
@@ -450,8 +450,8 @@ function openGwentCollectionCardModal(cardId) {
         </header>
         <section class="gwent-collection-power">
           <div><small>PODER-BASE</small><strong>${special ? '—' : number(card.poder)}</strong></div>
-          <div><small>PODER MÁXIMO</small><strong>${special ? '—' : number(card.max_power || card.poder)}</strong></div>
-          <div><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></div>
+          <div><small>PODER MÁXIMO (APRIMORAMENTO)</small><strong>${special ? '—' : number(card.max_power || card.poder)}</strong></div>
+          <div><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 3</strong></div>
         </section>
         <section class="gwent-collection-section gwent-collection-effect">
           <small>EFEITO DE COMBATE</small>
@@ -2691,7 +2691,7 @@ function openGwentBoardCardModal(cardId) {
             <span>CLIQUE PARA DETALHAR</span>
           </button>
           <article><small>ESCUDO</small><strong>${number(shield)}</strong></article>
-          <article class="gwent-rarity-potency"><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></article>
+          <article class="gwent-rarity-potency"><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 3</strong></article>
         </div>
         <section class="gwent-bonus-breakdown" id="gwent-bonus-breakdown" hidden>
           <div class="gwent-bonus-breakdown-heading"><div><small>RASTREIO DE COMBATE</small><strong>Origem do bônus ${signedBonus(bonus)}</strong></div><span>DETALHAMENTO</span></div>

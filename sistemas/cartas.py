@@ -515,12 +515,7 @@ def carta_jogo(nome_jogo: str, marco: str) -> Carta:
         "Véu Carmesim": "Combatente do Véu Carmesim, habituado a emboscadas, precisão e pressão sobre o adversário.",
         "Lua Negra": "Estudioso da Lua Negra, dedicado à feitiçaria, à observação dos astros e ao controle do campo.",
     }
-    descricao = descricoes[faccao] + " Papel tático: " + {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}[fileira] + "."
-    if habilidade:
-        nome_habilidade = HABILIDADES.get(habilidade, {}).get("nome", "técnica especial")
-        descricao += f" Habilidade: {nome_habilidade}."
-    else:
-        descricao += " Sem habilidade especial; seu valor vem do poder-base e dos bônus de combate."
+    descricao = descricoes[faccao]
     descricao += " Recompensa por domínio completo." if marco == "platina" else " Recompensa por conquista."
 
     return Carta(
@@ -566,7 +561,7 @@ def carta_patente(indice: int, nivel_minimo: int, nome_patente: str) -> Carta:
         raridade=raridade,
         custo=CUSTO_RARIDADE[raridade],
         habilidade=habilidade,
-        descricao=(f"Recompensa por alcançar o nível {nivel_minimo}. Papel tático: " + {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}[fileira] + ". " + (HABILIDADES.get(habilidade, {}).get("texto", "") if habilidade else "Esta carta não tem habilidade especial; seu efeito vem do poder e dos bônus recebidos em combate.")),
+        descricao=f"Recompensa por alcançar o nível {nivel_minimo}.",
         fileira=fileira,
     )
 
