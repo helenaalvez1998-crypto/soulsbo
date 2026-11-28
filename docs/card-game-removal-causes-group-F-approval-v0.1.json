@@ -1,0 +1,21 @@
+{
+  "approval": "card_game_removal_causes_group_F",
+  "version": "0.1",
+  "status": "OWNER_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev12.zip",
+  "evidence": "User message \"aprovo\" immediately followed the explicit request to approve FCAUSE-001 through FCAUSE-005.",
+  "decision_register": "docs/card-game-removal-causes-group-F-decisions-v0.1.json",
+  "approved_decision_ids": [
+    "FCAUSE-001",
+    "FCAUSE-002",
+    "FCAUSE-003",
+    "FCAUSE-004",
+    "FCAUSE-005"
+  ],
+  "boundaries": {
+    "numeric_vengeance_rykard_values_frozen": false,
+    "runtime_integration_authorized": false,
+    "production_database_changes_authorized": false,
+    "group_E_open": true
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-action-result.v1.json",
+  "title": "Soulsbo action result v1 (Group D candidate)",
+  "description": "Gameplay outcome envelope. Persistence conflicts are transport/storage responses in Group E, not gameplay outcomes.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "outcome": {
+      "enum": [
+        "applied",
+        "partial",
+        "blocked",
+        "consumed_no_effect",
+        "rejected"
+      ]
+    },
+    "revision_before": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "revision_after": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_instance_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "outcome": {
+            "enum": [
+              "applied",
+              "blocked",
+              "skipped"
+            ]
+          },
+          "effect_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "protection_grant_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "target_instance_id",
+          "outcome"
+        ]
+      }
+    },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "turn_consumed": {
+          "type": "boolean"
+        },
+        "source_consumed": {
+          "type": "boolean"
+        },
+        "activation_consumed": {
+          "type": "boolean"
+        },
+        "protection_grants_consumed": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "other_costs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cost_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "amount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "consumed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "cost_id",
+              "amount",
+              "consumed"
+            ]
+          }
+        }
+      },
+      "required": [
+        "turn_consumed",
+        "source_consumed",
+        "activation_consumed",
+        "protection_grants_consumed",
+        "other_costs"
+      ]
+    },
+    "event_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "reason_code": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "operation_id",
+    "outcome",
+    "revision_before",
+    "revision_after",
+    "target_results",
+    "costs",
+    "event_ids"
+  ]
+}

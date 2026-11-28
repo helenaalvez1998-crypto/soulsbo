@@ -1,0 +1,98 @@
+{
+  "document": "Soulsbo Card Engine v2 site alpha integration validation",
+  "version": "0.1",
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev28.zip",
+  "resulting_revision": "rev29",
+  "status": "PASS_WITH_EXTERNAL_RUNTIME_LIMITATIONS",
+  "implementation": {
+    "authenticated_page": "/card-engine-v2",
+    "home_hub_link": true,
+    "discord_signed_session_reused": true,
+    "player_identity_derived_server_side": true,
+    "deck_create_update_delete": true,
+    "deck_update_uses_optimistic_version": true,
+    "deck_validation": {
+      "deck_size": 30,
+      "max_copies_per_card_id": 3,
+      "exact_physical_exemplars": true,
+      "live_collection_ownership_revalidated": true
+    },
+    "list_and_resume_participant_matches": true,
+    "sanitized_paginated_match_history": true,
+    "web_match_poll_seconds": 10,
+    "discord_match_poll_seconds": 12,
+    "supported_match_actions": [
+      "play_unit",
+      "play_special",
+      "activate_leader",
+      "sacrifice_unit",
+      "pass_turn"
+    ],
+    "website_matchmaking": false,
+    "challenge_creation_remains_discord_based": true
+  },
+  "security": {
+    "signed_discord_session_required": true,
+    "csrf_origin_validation_for_writes": true,
+    "client_player_id_trusted": false,
+    "participant_check_before_view_or_action": true,
+    "player_safe_projection": true,
+    "opponent_hand_hidden": true,
+    "operation_id_uuid4_required": true,
+    "expected_revision_required": true,
+    "deck_compare_and_swap_version": true,
+    "json_body_limit_bytes": 32768,
+    "oversized_chunked_body_rejected": true,
+    "history_omits_physical_instance_and_operation_ids": true,
+    "legacy_collection_writes": false
+  },
+  "automated_validation": {
+    "card_engine_v2_test_count": 209,
+    "card_engine_v2_tests_passed": 209,
+    "card_engine_v2_tests_failed": 0,
+    "py_compile": "PASS",
+    "javascript_node_check": "PASS",
+    "aiohttp_http_tests": 7,
+    "site_hub_route_registration": {
+      "status": "PASS",
+      "method_path_registrations": 77,
+      "card_engine_v2_page_registered": true,
+      "card_engine_v2_bootstrap_registered": true
+    },
+    "catalog_staging": {
+      "status": "PASS",
+      "historical_models": 137,
+      "alpha_allowlist": 27,
+      "blocked": 110
+    },
+    "bo3_simulation": {
+      "status": "finished",
+      "winner_player_id": "1001",
+      "round_wins": {"1001": 2, "2002": 1},
+      "events": 97,
+      "sqlite_integrity": "ok"
+    },
+    "combo_faction_leader_simulation": {
+      "round_winner_player_id": "1001",
+      "round_scores": {"1001": 20, "2002": 10},
+      "events": 49,
+      "sqlite_integrity": "ok"
+    }
+  },
+  "environment_limitations": {
+    "aiohttp_installed": true,
+    "discord_py_installed": false,
+    "aiosqlite_installed": false,
+    "discord_token_available": false,
+    "discord_staging_guild_available": false,
+    "production_database_tested": false,
+    "deployment_performed": false
+  },
+  "legacy_protection": {
+    "bot.py_unchanged": true,
+    "database.py_unchanged": true,
+    "sistemas/gwent.py_unchanged": true,
+    "sistemas/cartas.py_unchanged": true,
+    "site/app.js_unchanged": true
+  }
+}

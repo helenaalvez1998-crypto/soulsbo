@@ -1,0 +1,57 @@
+{
+  "artifact_type": "soulsbo_card_engine_v2_combat_alpha_validation",
+  "version": "0.1",
+  "status": "passed_isolated_alpha_tests_not_production_validation",
+  "date": "2026-11-28",
+  "baseline_package": "soulsbo-main-continuity-2026-11-27-rev19.zip",
+  "resulting_revision": "rev20",
+  "test_suite": {
+    "previous_total": 109,
+    "current_total": 117,
+    "new_combat_tests": 8,
+    "passed": 117,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ruleset_release_id": "alpha-test-only.ruleset.v0.2",
+  "starting_player_life": 20,
+  "combat_resolution": "row_power_differential_at_round_close_v1",
+  "scenarios": {
+    "per_row_damage": "passed",
+    "climate_resistance_before_damage": "passed",
+    "lethal_match_end": "passed",
+    "simultaneous_lethal_draw": "passed",
+    "best_of_three_regression": {
+      "status": "passed",
+      "winner_player_id": "1001",
+      "round_wins": {"1001": 2, "2002": 1},
+      "operations": 16,
+      "events": 60,
+      "sqlite_integrity": "ok",
+      "foreign_key_violations": 0
+    },
+    "combo_faction_leader_regression": {
+      "status": "passed",
+      "round_winner_player_id": "1001",
+      "events": 25,
+      "sqlite_integrity": "ok",
+      "foreign_key_violations": 0
+    }
+  },
+  "catalog_staging": {
+    "historical_models": 137,
+    "alpha_test_only": 27,
+    "blocked": 110,
+    "validation": "passed"
+  },
+  "legacy_files_modified": false,
+  "production_database_accessed": false,
+  "discord_http_frontend_integrated": false,
+  "known_limits": [
+    "No per-unit attack, armor, defense or hit point attributes are defined by the current contract.",
+    "Current resistance is climate resistance, not physical damage mitigation.",
+    "Row combat damages player life and does not automatically destroy units.",
+    "Normal sacrifice action remains unconnected to AlphaMatchController.",
+    "Deck-exhaustion damage and full energy/action costs remain pending."
+  ]
+}

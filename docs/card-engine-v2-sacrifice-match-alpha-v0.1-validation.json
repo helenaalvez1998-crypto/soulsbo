@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "document": "Soulsbo Card Engine v2 normal sacrifice controller validation",
+    "version": "0.1",
+    "status": "PASS",
+    "implementation_scope": "isolated_alpha_only",
+    "baseline_archive": "soulsbo-main-continuity-2026-11-28-rev20.zip",
+    "resulting_revision": "rev.21",
+    "production_database_access": false,
+    "discord_http_frontend_integration": false
+  },
+  "summary": {
+    "new_end_to_end_tests": 3,
+    "total_card_engine_v2_tests": 120,
+    "passed": 120,
+    "failed": 0,
+    "skipped": 0
+  },
+  "behavior_checks": {
+    "server_generated_target_offer": "PASS",
+    "offer_bound_to_state_revision": "PASS",
+    "target_owner_and_board_zone_revalidated_transactionally": "PASS",
+    "stale_offer_rejected_without_state_runtime_or_journal_mutation": "PASS",
+    "sacrifice_transitions_exact_instance_from_board_to_discard": "PASS",
+    "sacrifice_bypasses_egide_without_consuming_shield_charge": "PASS",
+    "sacrifice_count_incremented_without_incrementing_board_removal_count": "PASS",
+    "vengeance_triggers_after_successful_sacrifice_for_surviving_allies_in_original_row": "PASS",
+    "removal_and_reactive_events_preserve_causal_relationship": "PASS",
+    "turn_action_is_consumed_and_turn_advances": "PASS",
+    "same_operation_id_replay_is_idempotent": "PASS"
+  },
+  "official_validation": {
+    "python_compile": "PASS",
+    "playable_alpha_suite": {
+      "status": "PASS",
+      "tests": 120,
+      "passed": 120,
+      "failed": 0,
+      "skipped": 0
+    },
+    "legacy_catalog_staging": {
+      "status": "PASS",
+      "historical_models": 137,
+      "alpha_allowlist_cards": 27,
+      "blocked_historical_models": 110
+    },
+    "best_of_three_simulation": {
+      "status": "PASS",
+      "winner": "Player A",
+      "round_wins": "2-1",
+      "operations": 16,
+      "events": 60,
+      "sqlite_quick_check": "ok",
+      "sqlite_integrity_check": "ok",
+      "foreign_key_violations": 0,
+      "state_revision_violations": 0,
+      "event_sequence_violations": 0
+    },
+    "combo_faction_leader_simulation": {
+      "status": "PASS",
+      "events": 25,
+      "sqlite_integrity_check": "ok"
+    }
+  },
+  "scope_limits": [
+    "The action is an internal alpha controller primitive and is not exposed through Discord, HTTP or frontend interfaces.",
+    "The only implemented cost is turn consumption; energy, currencies, card costs and sacrifice-per-round caps remain undefined or unimplemented.",
+    "The action reuses the approved generic sacrifice resolver and does not unlock historical catalog models or candidate sacrifice effects.",
+    "Per-unit attack, armor, physical defense, hit points, death lifecycle and deck fatigue are outside this implementation tranche.",
+    "No published database was accessed, no production migration or cutover was performed, and the legacy runtime remains isolated."
+  ]
+}

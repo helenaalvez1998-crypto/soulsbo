@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "operation_id": "8d0de8f2-a8b7-4e22-9ee4-0b9a8f6a4d11",
+  "expected_revision": 17,
+  "action": "play",
+  "source_instance_id": "3bce6e18-b48e-4a08-80f4-cccae6de7b31",
+  "target_row": "melee",
+  "selection": {
+    "mode": "manual_single",
+    "target_instance_id": "66eebf7c-96c9-4c26-b8dc-e1c850e99d50"
+  }
+}

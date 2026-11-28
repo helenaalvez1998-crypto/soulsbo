@@ -1,12 +1,14 @@
 """Painel de entrada do jogo Cartas do Coliseu.
 
-O comando público /jogo é a entrada Discord do Coliseu. O Discord consulta
-coleção, drops e recursos; Mercado, deckbuilding e partidas competitivas acontecem no site.
+O comando público /jogo é a entrada Discord do Coliseu. O painel mantém coleção,
+drops, recursos e links do site; o botão Partidas v2 · Alpha abre a UI isolada
+do novo motor para montagem de decks e partidas experimentais pelo Discord.
 """
 from __future__ import annotations
 
 import os
 import json
+import logging
 
 import discord
 from discord import app_commands
@@ -16,6 +18,7 @@ from sistemas.cartas import CARTAS_POR_ID, carta_de_jogo_por_id
 
 
 COR_COLISEU = 0x8E6A3A
+logger = logging.getLogger(__name__)
 
 
 def _nome_carta(card_id: str, game_name: str = "") -> str:
@@ -383,6 +386,34 @@ class PainelJogoView(discord.ui.View):
             color=COR_COLISEU)
         await interaction.response.send_message(
             embed=embed, view=ConvergenciaView(self.bot, self.user_id, elegiveis[:25]), ephemeral=True)
+
+    @discord.ui.button(label="Partidas v2 · Alpha", emoji="⚔️", style=discord.ButtonStyle.success, row=2)
+    async def card_engine_v2(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Open the isolated Card Engine v2 Deck Builder and match UI."""
+        try:
+            from cogs.card_engine_v2_ui import AlphaHomeView, get_card_engine_service
+            service = get_card_engine_service(self.bot)
+        except Exception:
+            logger.exception("Falha ao inicializar o painel Card Engine v2 alpha")
+            return await interaction.response.send_message(
+                "Não foi possível abrir o Card Engine v2 alpha agora. Tente novamente ou avise a equipe.",
+                ephemeral=True,
+            )
+        embed = discord.Embed(
+            title="⚔️ Card Engine v2 · Alpha",
+            description=(
+                "Monte decks competitivos com 30 exemplares físicos da sua coleção, desafie outro jogador "
+                "e acompanhe a partida nesta interface privada.\n\n"
+                "**Atenção:** catálogo e balanceamento ainda são experimentais. Somente 27 modelos estão "
+                "liberados nesta alpha; o motor legado permanece separado."
+            ),
+            color=COR_COLISEU,
+        )
+        await interaction.response.send_message(
+            embed=embed,
+            view=AlphaHomeView(service, self.user_id),
+            ephemeral=True,
+        )
 
     @discord.ui.button(label="Atualizar painel", emoji="🔄", style=discord.ButtonStyle.secondary, row=1)
     async def atualizar(self, interaction: discord.Interaction, button: discord.ui.Button):

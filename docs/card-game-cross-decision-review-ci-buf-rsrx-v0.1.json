@@ -1,0 +1,797 @@
+{
+  "metadata": {
+    "document": "Cross-decision review: CardInstance, buffs, removal/sacrifice/resurrection",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev4.zip",
+    "status": "TECHNICAL_RECOMMENDATIONS_FOR_OWNER_REVIEW_NOT_APPROVED",
+    "runtime_integration": false,
+    "owner_approval_inferred": false,
+    "scope": "Cross-reference and technical recommendations only; does not implement or approve game rules."
+  },
+  "counts": {
+    "CI": 14,
+    "BUF": 14,
+    "RSRX_review_local": 10
+  },
+  "decisions": {
+    "CI": [
+      {
+        "id": "CI-001",
+        "title": "Formato de instance_id",
+        "recommendation": "UUIDv4 canônico gerado pelo servidor; imutável na vida da ocorrência.",
+        "dependencies": [
+          "CI-002",
+          "CI-006",
+          "CI-011",
+          "BUF-013",
+          "RSRX-09"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-002",
+        "title": "Escopo de unicidade",
+        "recommendation": "Global por partida, ambos participantes, todas as zonas e instâncias temporárias materializadas.",
+        "dependencies": [
+          "CI-001",
+          "CI-006",
+          "CI-012",
+          "CI-014",
+          "RSRX-09"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-003",
+        "title": "Cópias do mesmo card_id",
+        "recommendation": "Permitir várias ocorrências no modelo; manter regra do deck builder de 12 modelos distintos como política separada.",
+        "dependencies": [
+          "CI-001",
+          "CI-002",
+          "CI-006",
+          "CI-012",
+          "BUF-013",
+          "RSRX-09"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-004",
+        "title": "exemplar_id",
+        "recommendation": "Preservar exemplar_id somente quando comprovado; para deck_exemplar exigir PK global atual cartas_exemplares.id e validar user_id/owner_player_id e card_id; aceitar null para token, catalog_deck, ativação transitória e migração sem vínculo provado.",
+        "dependencies": [
+          "CI-003",
+          "CI-006",
+          "CI-012",
+          "RSRX-09"
+        ],
+        "priority": "P1",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-005",
+        "title": "Snapshot imutável",
+        "recommendation": "Congelar definição e versões de catálogo/balanceamento; considerar digest canônico de integridade.",
+        "dependencies": [
+          "BUF-001",
+          "BUF-002",
+          "BUF-012",
+          "BUF-014",
+          "RSRX-01",
+          "RSRX-05",
+          "RSRX-06"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-006",
+        "title": "Tokens e relíquias temporárias",
+        "recommendation": "Cada ocorrência materializada em zona/pipeline recebe instance_id; equipamento continua fora das zonas; ativação só vira instância se materializada como carta.",
+        "dependencies": [
+          "CI-001",
+          "CI-002",
+          "CI-003",
+          "CI-004",
+          "CI-013",
+          "BUF-012",
+          "RSRX-09"
+        ],
+        "priority": "P1",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-007",
+        "title": "Controle entre jogadores",
+        "recommendation": "Owner imutável e transferência de controle bloqueada na v1; adicionar controller somente com mecânica aprovada e revisão das zonas.",
+        "dependencies": [
+          "CI-002",
+          "CI-013"
+        ],
+        "priority": "P2",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-008",
+        "title": "Políticas de limpeza",
+        "recommendation": "Toda transição declara política explícita para bônus, escudo, estados, resistência, combo e fileira; movimento de zona não normaliza implicitamente.",
+        "dependencies": [
+          "BUF-008",
+          "BUF-009",
+          "BUF-010",
+          "BUF-011",
+          "BUF-014",
+          "RSRX-03",
+          "RSRX-05",
+          "RSRX-07",
+          "RSRX-08",
+          "RSRX-10"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-009",
+        "title": "weather_resistance",
+        "recommendation": "Separar resistência intrínseca de modificadores temporários com origem, magnitude e expiração.",
+        "dependencies": [
+          "BUF-011",
+          "CI-005",
+          "CI-008",
+          "CI-012",
+          "RSRX-10"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-010",
+        "title": "Seleção de alvo",
+        "recommendation": "target_instance_id; compatibilidade legada somente em rota versionada e correspondência única; ambiguidade rejeita.",
+        "dependencies": [
+          "BUF-003",
+          "BUF-004",
+          "BUF-005",
+          "BUF-006",
+          "BUF-013",
+          "RSRX-06",
+          "RSRX-08",
+          "RSRX-09"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-011",
+        "title": "Idempotência",
+        "recommendation": "operation_id UUIDv4 e ledger durável transacional; replay igual retorna resultado; fingerprint diferente conflita.",
+        "dependencies": [
+          "CI-014",
+          "BUF-005",
+          "BUF-009",
+          "BUF-010",
+          "RSRX-02",
+          "RSRX-03",
+          "RSRX-05",
+          "RSRX-09",
+          "RSRX-10"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-012",
+        "title": "Migração de partidas",
+        "recommendation": "Migrar uma vez, criar IDs e persistir versão/snapshot atomicamente; preservar contagem/ordem; falha aborta ação; sem inferir exemplar.",
+        "dependencies": [
+          "CI-001",
+          "CI-002",
+          "CI-004",
+          "CI-005",
+          "CI-008",
+          "CI-009",
+          "CI-010",
+          "CI-014",
+          "BUF-011",
+          "RSRX-07",
+          "RSRX-08",
+          "RSRX-09",
+          "RSRX-10"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-013",
+        "title": "Zonas suportadas",
+        "recommendation": "Manter hand/draw_pile/board/discard na v1; board só unit; equipamento fora das zonas; zona nova exige schema novo.",
+        "dependencies": [
+          "CI-006",
+          "CI-007",
+          "CI-008",
+          "CI-012",
+          "RSRX-09",
+          "RSRX-10"
+        ],
+        "priority": "P1",
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "CI-014",
+        "title": "Concorrência na persistência",
+        "recommendation": "state_revision monotônica e CAS/serialização por partida; snapshot e ledger persistidos no mesmo commit; testar duas ações concorrentes.",
+        "dependencies": [
+          "CI-011",
+          "CI-012",
+          "ações multi-alvo",
+          "RSRX-02",
+          "RSRX-03",
+          "RSRX-05",
+          "RSRX-09"
+        ],
+        "priority": "P0",
+        "status": "OPEN_NOT_APPROVED"
+      }
+    ],
+    "BUF": [
+      {
+        "id": "BUF-001",
+        "title": "Atribuição de deltas à raridade",
+        "recommendation": "Amplificar somente outputs atribuídos ao efeito resolvido; eventos reativos declaram escala própria.",
+        "dependencies": [
+          "CI-005",
+          "CI-008",
+          "CI-011",
+          "RSRX-03",
+          "RSRX-05"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-002",
+        "title": "Raridade e Vingança",
+        "recommendation": "Vingança não herda raridade do efeito que causou a remoção, salvo regra própria explícita.",
+        "dependencies": [
+          "CI-005",
+          "CI-011",
+          "RSRX-03",
+          "RSRX-05"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-003",
+        "title": "Quantidade de alvos da Égide",
+        "recommendation": "Quantidade explícita por carta/efeito; UI recolhe e mostra todos os alvos efetivos.",
+        "dependencies": [
+          "CI-010",
+          "CI-011",
+          "RSRX-08",
+          "RSRX-09"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-004",
+        "title": "Alvos secundários do Passo",
+        "recommendation": "Não ocultar alvos adicionais; preferir seleção explícita de todos, ou seletor automático declarado e visível.",
+        "dependencies": [
+          "CI-010",
+          "CI-011",
+          "CI-014"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-005",
+        "title": "Ausência/parcialidade de alvos",
+        "recommendation": "Definir minimum_targets, on_no_target e on_partial_targets por efeito; distinguir reject de consume_no_effect.",
+        "dependencies": [
+          "CI-010",
+          "CI-011",
+          "CI-014",
+          "RSRX-02"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-006",
+        "title": "Seletor por efeito",
+        "recommendation": "Declarar lado, row_scope, eligibility, métrica, direção, quantidade, fallback e desempate; métrica UI=API.",
+        "dependencies": [
+          "CI-005",
+          "CI-010",
+          "BUF-013",
+          "RSRX-01",
+          "RSRX-06",
+          "RSRX-08",
+          "RSRX-09"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-007",
+        "title": "Operador transfer_bonus",
+        "recommendation": "Não criar operador genérico ainda; manter sacrifício/ganho e redução/ganho como efeitos compostos.",
+        "dependencies": [
+          "CI-008",
+          "CI-011",
+          "RSRX-03",
+          "RSRX-05"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-008",
+        "title": "Posição e histórico de sequência",
+        "recommendation": "Separar printed/base_row e current_row; last_unit_play_row pertence ao jogador e só muda ao jogar unidade; retorno não atualiza.",
+        "dependencies": [
+          "CI-005",
+          "CI-008",
+          "RSRX-08",
+          "RSRX-10"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-009",
+        "title": "Categorias bloqueadas por escudo",
+        "recommendation": "Escudo bloqueia remoção comum/execução; sacrifício ignora; status/debuff só se explicitamente configurado.",
+        "dependencies": [
+          "CI-008",
+          "CI-011",
+          "RSRX-03",
+          "RSRX-10"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-010",
+        "title": "Centralização da proteção",
+        "recommendation": "Resolver proteção centralmente com blockable_categories e consume_on_block; custo da própria carta/reliquia separado.",
+        "dependencies": [
+          "CI-008",
+          "CI-011",
+          "CI-014",
+          "RSRX-01",
+          "RSRX-03"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-011",
+        "title": "Duração de weather_resist",
+        "recommendation": "Separar resistência intrínseca de modificadores temporários com source, amount e expires_on/evento.",
+        "dependencies": [
+          "CI-005",
+          "CI-008",
+          "CI-009",
+          "CI-012",
+          "RSRX-10"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-012",
+        "title": "Branches sem atribuição ativa",
+        "recommendation": "Migrar apenas bindings ativos; aliases/ramos sem binding permanecem arquivados e não viram capacidades ativas.",
+        "dependencies": [
+          "CI-005",
+          "CI-012"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-013",
+        "title": "Ordem e desempate",
+        "recommendation": "Preservar ordem de zona quando o efeito define first; para empate semântico usar sequência estável e instance_id como último fallback.",
+        "dependencies": [
+          "CI-001",
+          "CI-002",
+          "CI-010",
+          "CI-012",
+          "RSRX-06",
+          "RSRX-09"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      },
+      {
+        "id": "BUF-014",
+        "title": "Piso/teto de bônus",
+        "recommendation": "Default/overrides explícitos por versão de balanceamento e efeito; nenhum limite global implícito; números dependem de balanceamento 1–15.",
+        "dependencies": [
+          "CI-005",
+          "CI-008",
+          "RSRX-05",
+          "RSRX-06",
+          "RSRX-07"
+        ],
+        "status": "OPEN_NOT_APPROVED"
+      }
+    ],
+    "RSRX": [
+      {
+        "id": "RSRX-01",
+        "title": "Limite da Execução",
+        "recommendation": "Declarar limite como parâmetro explícito; remover fórmula de raridade constante; o valor legado 6 não é aprovação de balanceamento.",
+        "dependencies": [
+          "BUF-006",
+          "BUF-014",
+          "CI-005",
+          "CI-010"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-02",
+        "title": "Devorar sem aliado elegível",
+        "recommendation": "Rejeitar antes do consumo/mutação se aliado for precondição; alternativamente usar fallback descrito; não permitir no-op silencioso.",
+        "dependencies": [
+          "BUF-005",
+          "BUF-006",
+          "CI-010",
+          "CI-011",
+          "CI-014"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-03",
+        "title": "Vingança em sacrifício",
+        "recommendation": "Listar causas elegíveis; recomendação compatível com legado é disparar uma vez após sacrifício bem-sucedido, nunca em tentativa bloqueada.",
+        "dependencies": [
+          "BUF-001",
+          "BUF-002",
+          "BUF-009",
+          "BUF-010",
+          "CI-008",
+          "CI-011",
+          "CI-014"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-04",
+        "title": "Contador baixas",
+        "recommendation": "Usar board_removals/removed_units para saídas; sacrifices separado; adaptar baixas legado sem chamar tudo de morte.",
+        "dependencies": [
+          "CI-005",
+          "CI-008",
+          "CI-012",
+          "RSRX-03"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-05",
+        "title": "Acúmulo Vingança + Rykard",
+        "recommendation": "Se aprovado, manter +1 e +2 como outputs separados e aditivos; evitar dupla execução e amplificação de raridade incidental.",
+        "dependencies": [
+          "BUF-001",
+          "BUF-002",
+          "BUF-007",
+          "BUF-014",
+          "CI-005",
+          "CI-008",
+          "CI-011"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-06",
+        "title": "Limites de poder no descarte",
+        "recommendation": "Elegibilidade/limite por efeito; revisar valores legados no balanceamento 1–15, sem congelar scaling por raridade implicitamente.",
+        "dependencies": [
+          "BUF-006",
+          "BUF-014",
+          "CI-005",
+          "CI-010",
+          "BUF-013"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-07",
+        "title": "Bônus na ressurreição",
+        "recommendation": "Definir bonus_policy por efeito; baseline candidato: Ressurgir/Réquiem zero, Esgar previous_plus_one; não assumir universalidade.",
+        "dependencies": [
+          "BUF-014",
+          "CI-008",
+          "CI-012",
+          "RSRX-10"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-08",
+        "title": "Fileira de retorno",
+        "recommendation": "Definir row_policy por efeito: preservar/fallback para Ressurgir e Réquiem; fileira escolhida para Esgar, com validação.",
+        "dependencies": [
+          "BUF-008",
+          "CI-008",
+          "CI-010",
+          "RSRX-10"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-09",
+        "title": "Identidade física da ocorrência",
+        "recommendation": "Selecionar/remover por instance_id; retirar exatamente uma cópia; card_id legado apenas em correspondência única.",
+        "dependencies": [
+          "CI-001",
+          "CI-002",
+          "CI-003",
+          "CI-004",
+          "CI-006",
+          "CI-010",
+          "CI-012",
+          "BUF-013"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      },
+      {
+        "id": "RSRX-10",
+        "title": "Estado após retorno ao campo",
+        "recommendation": "Remoção/retorno limpa escudo e status conforme policy; bônus/fileira explicitamente por efeito; retorno não repete hooks de entrada e resistência segue BUF-011.",
+        "dependencies": [
+          "CI-008",
+          "CI-009",
+          "CI-012",
+          "BUF-008",
+          "BUF-009",
+          "BUF-010",
+          "BUF-011",
+          "BUF-014",
+          "RSRX-07",
+          "RSRX-08"
+        ],
+        "status": "OPEN_NOT_APPROVED",
+        "id_scope": "local_to_this_review"
+      }
+    ]
+  },
+  "cross_decision_groups": [
+    {
+      "id": "GROUP-A-IDENTITY",
+      "decisions": [
+        "CI-001",
+        "CI-002",
+        "CI-003",
+        "CI-004",
+        "CI-006",
+        "CI-010",
+        "BUF-013",
+        "RSRX-09"
+      ],
+      "blocks": [
+        "new_target_selector",
+        "removal_resurrection_resolver",
+        "legacy_snapshot_migrator"
+      ]
+    },
+    {
+      "id": "GROUP-B-SNAPSHOT-CAUSALITY",
+      "decisions": [
+        "CI-005",
+        "CI-011",
+        "BUF-001",
+        "BUF-002",
+        "BUF-012",
+        "RSRX-03",
+        "RSRX-05"
+      ],
+      "blocks": [
+        "effect_resolver",
+        "reactive_triggers",
+        "rarity_attribution"
+      ]
+    },
+    {
+      "id": "GROUP-C-STATE-LIFECYCLE",
+      "decisions": [
+        "CI-008",
+        "CI-009",
+        "BUF-008",
+        "BUF-009",
+        "BUF-010",
+        "BUF-011",
+        "BUF-014",
+        "RSRX-07",
+        "RSRX-08",
+        "RSRX-10"
+      ],
+      "blocks": [
+        "card_instance_schema_v1_freeze",
+        "lifecycle_policies",
+        "resurrection_policy"
+      ]
+    },
+    {
+      "id": "GROUP-D-TARGETS-ATOMIC-ACTIONS",
+      "decisions": [
+        "CI-010",
+        "CI-011",
+        "CI-014",
+        "BUF-003",
+        "BUF-004",
+        "BUF-005",
+        "BUF-006",
+        "RSRX-01",
+        "RSRX-02",
+        "RSRX-06"
+      ],
+      "blocks": [
+        "multi_target_api",
+        "action_cost_policy",
+        "atomic_effect_resolution"
+      ]
+    },
+    {
+      "id": "GROUP-E-PERSISTENCE-MIGRATION",
+      "decisions": [
+        "CI-001",
+        "CI-002",
+        "CI-004",
+        "CI-005",
+        "CI-008",
+        "CI-009",
+        "CI-011",
+        "CI-012",
+        "CI-014"
+      ],
+      "blocks": [
+        "snapshot_migrator",
+        "sqlite_persistence_integration"
+      ]
+    },
+    {
+      "id": "GROUP-F-REMOVAL-CAUSES",
+      "decisions": [
+        "CI-008",
+        "CI-011",
+        "CI-014",
+        "BUF-009",
+        "BUF-010",
+        "RSRX-03",
+        "RSRX-04",
+        "RSRX-05",
+        "RSRX-10"
+      ],
+      "blocks": [
+        "removal_sacrifice_resolver"
+      ]
+    }
+  ],
+  "schema_gaps": [
+    {
+      "id": "GAP-01",
+      "field": "state.weather_resistance",
+      "issue": "Scalar cannot distinguish intrinsic value from temporary modifiers or expiration.",
+      "requires": [
+        "CI-009",
+        "BUF-011"
+      ],
+      "recommended_change": "Split intrinsic resistance from temporary modifiers with source, amount, and expiration event."
+    },
+    {
+      "id": "GAP-02",
+      "field": "state_policy_id",
+      "issue": "Current schema accepts only policy.identity_only.",
+      "requires": [
+        "CI-008",
+        "BUF-008",
+        "BUF-009",
+        "BUF-010",
+        "BUF-011",
+        "BUF-014",
+        "RSRX-07",
+        "RSRX-08",
+        "RSRX-10"
+      ],
+      "recommended_change": "Add named policies only after decisions are approved; do not assign final IDs prematurely."
+    },
+    {
+      "id": "GAP-03",
+      "field": "operation_record.result",
+      "issue": "Current schema only represents applied.",
+      "requires": [
+        "CI-011",
+        "BUF-005",
+        "BUF-009",
+        "BUF-010"
+      ],
+      "recommended_change": "Model blocked/rejected/consumed_no_effect/partial outcomes and their mutation semantics."
+    },
+    {
+      "id": "GAP-04",
+      "field": "operation_record",
+      "issue": "Current prototype is a single zone transition, not a complete multi-instance effect transaction.",
+      "requires": [
+        "CI-011",
+        "CI-014",
+        "BUF-004",
+        "BUF-005",
+        "RSRX-03",
+        "RSRX-05"
+      ],
+      "recommended_change": "Represent action/event context, source effect, causal event, and all affected instance IDs in a single atomic action."
+    },
+    {
+      "id": "GAP-05",
+      "field": "persistence",
+      "issue": "Current match table stores state_json without dedicated revision or operation ledger in the inspected DDL.",
+      "requires": [
+        "CI-011",
+        "CI-014"
+      ],
+      "recommended_change": "Add persisted revision/CAS and unique operation ledger, or prove equivalent per-match serialization in one transaction."
+    }
+  ],
+  "validation_rerun": {
+    "card_instance_contract": {
+      "passed": 30,
+      "total": 30
+    },
+    "removal_resurrection": {
+      "passed": 49,
+      "total": 49
+    },
+    "buffs_protection": {
+      "passed": 14,
+      "total": 14
+    },
+    "buffs_cross_interactions": {
+      "passed": 9,
+      "total": 9
+    },
+    "sequence_power": {
+      "passed": 10,
+      "total": 10
+    },
+    "target_selection": {
+      "passed": 15,
+      "total": 15
+    },
+    "manual_ui_parity": {
+      "passed": 12,
+      "total": 12
+    },
+    "identity_lifecycle": {
+      "passed": 17,
+      "total": 17
+    },
+    "note": "Independent scopes; do not sum as one coverage metric. These suites do not validate this recommendation document as production implementation."
+  },
+  "guardrails": {
+    "runtime_changed": false,
+    "catalog_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "frontend_changed": false,
+    "migrator_created": false,
+    "decisions_approved": false
+  },
+  "errata": [
+    {
+      "id": "ERRATA-CI-004-GROUP-A-REV6",
+      "finding": "database.py declares cartas_exemplares.id as INTEGER PRIMARY KEY AUTOINCREMENT, a table-global key.",
+      "supersedes": "owner-scoped-only uniqueness for exemplar_id in the rev.5 review and sample.",
+      "recommendation": "Require global exemplar_id uniqueness and validate matching user_id/owner_player_id and card_id.",
+      "owner_approval_inferred": false
+    }
+  ]
+}

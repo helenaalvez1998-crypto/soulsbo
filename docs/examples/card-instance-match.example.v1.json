@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "match_id": 2026112701,
+  "status": "active",
+  "players": {
+    "1001": {
+      "zones": {
+        "hand": [
+          "00000000-0000-4000-8000-000000000001"
+        ],
+        "draw_pile": [],
+        "board": [
+          "00000000-0000-4000-8000-000000000003"
+        ],
+        "discard": [
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      }
+    },
+    "2002": {
+      "zones": {
+        "hand": [
+          "00000000-0000-4000-8000-000000000004"
+        ],
+        "draw_pile": [],
+        "board": [],
+        "discard": []
+      }
+    }
+  },
+  "instances": {
+    "00000000-0000-4000-8000-000000000001": {
+      "schema_version": 1,
+      "instance_id": "00000000-0000-4000-8000-000000000001",
+      "card_id": "wolf_guardian",
+      "exemplar_id": 501,
+      "owner_player_id": "1001",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "catalog_version": "soulsbo-catalog-v1",
+        "balance_rules_version": "balance-v0.2",
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": []
+      },
+      "state": {
+        "current_row": "melee",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000002": {
+      "schema_version": 1,
+      "instance_id": "00000000-0000-4000-8000-000000000002",
+      "card_id": "wolf_guardian",
+      "exemplar_id": null,
+      "owner_player_id": "1001",
+      "origin_type": "generated_token",
+      "definition_snapshot": {
+        "catalog_version": "soulsbo-catalog-v1",
+        "balance_rules_version": "balance-v0.2",
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": []
+      },
+      "state": {
+        "current_row": "melee",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000003": {
+      "schema_version": 1,
+      "instance_id": "00000000-0000-4000-8000-000000000003",
+      "card_id": "golden_knight",
+      "exemplar_id": 503,
+      "owner_player_id": "1001",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "catalog_version": "soulsbo-catalog-v1",
+        "balance_rules_version": "balance-v0.2",
+        "card_id": "golden_knight",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "ranged",
+        "power_base": 6,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": []
+      },
+      "state": {
+        "current_row": "ranged",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000004": {
+      "schema_version": 1,
+      "instance_id": "00000000-0000-4000-8000-000000000004",
+      "card_id": "wolf_guardian",
+      "exemplar_id": 504,
+      "owner_player_id": "2002",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "catalog_version": "soulsbo-catalog-v1",
+        "balance_rules_version": "balance-v0.2",
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": []
+      },
+      "state": {
+        "current_row": "melee",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    }
+  },
+  "operations": {},
+  "state_revision": 0
+}

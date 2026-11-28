@@ -1125,6 +1125,7 @@ class NaraBot(commands.Bot):
             if record and str(card_id).startswith("transmutacao_"):
                 personal = await self._gwent_generated_card_payload(user_id, str(card_id), record)
                 if personal:
+                    personal["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(str(personal.get("raridade", "Comum")), 0))
                     cards.append(personal)
                 continue
             card = get_carta(str(card_id))
@@ -1144,6 +1145,7 @@ class NaraBot(commands.Bot):
                 item["exemplar_id"] = int(record["id"])
                 item["id"] = f"{card_id}::{int(record['id'])}"
                 item["max_power"] = faixa_poder_exemplar(card, rarity)[1]
+                item["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(rarity, 0))
                 image_source = preparar_payload_carta_base(payload)
                 image_version = etag_carta_base(image_source, tamanho=(210, 310), quality=82)
                 item["image_url"] = (
@@ -1334,19 +1336,6 @@ class NaraBot(commands.Bot):
             }, status=400)
         if unit_count < 8 or special_count > 4:
             return web.json_response({"error": "O deck precisa ter pelo menos 8 unidades e no máximo 4 cartas especiais."}, status=400)
-        # Orçamento autoritativo: o custo vem da raridade do exemplar no servidor, nunca do cliente.
-        from sistemas.gwent import ORCAMENTO_DECK, custo_total_deck
-        rarity_by_id = {int(e["id"]): str(e["rarity"]) for e in exemplars}
-        relic_rarity = None
-        if relic_id:
-            relic_rarity = max((str(e["rarity"]) for e in exemplars if str(e["card_id"]) == relic_id),
-                               key=lambda r: custo_total_deck([r]), default=None)
-        deck_cost = custo_total_deck([rarity_by_id.get(eid, "Comum") for eid in resolved], relic_rarity)
-        if deck_cost > ORCAMENTO_DECK:
-            return web.json_response({
-                "error": f"O deck custa {deck_cost} pontos e o limite é {ORCAMENTO_DECK}. Troque cartas por exemplares de menor raridade.",
-                "custo": deck_cost, "orcamento": ORCAMENTO_DECK,
-            }, status=400)
         import json
         async with self.db.transaction() as tx:
             await tx.conn.execute(
@@ -1357,8 +1346,7 @@ class NaraBot(commands.Bot):
                    leader_id=excluded.leader_id, relic_id=excluded.relic_id, updated_at=CURRENT_TIMESTAMP""",
                 (user_id, json.dumps(ids), json.dumps(resolved), faction, leader_id, relic_id))
         return web.json_response({"ok": True, "card_ids": ids, "exemplar_ids": resolved,
-                                  "faction": faction, "leader_id": leader_id, "relic_id": relic_id,
-                                  "custo": deck_cost, "orcamento": ORCAMENTO_DECK})
+                                  "faction": faction, "leader_id": leader_id, "relic_id": relic_id})
 
     async def _api_gwent_deck_reset(self, request: web.Request) -> web.Response:
         """Zera somente o deck do jogador autenticado; coleção e exemplares são preservados."""
@@ -2150,6 +2138,7 @@ class NaraBot(commands.Bot):
                         personal["source"] = str(record["source"] or "transmutacao")
                         personal["max_power"] = int(personal["poder"])
                         from sistemas.gwent import RARITY_EFFECT_BUDGET
+                        personal["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(str(personal.get("raridade", "Comum")), 0))
                         personal["image_url"] = (
                             f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?thumb=1"
                         )
@@ -2175,6 +2164,7 @@ class NaraBot(commands.Bot):
                 item["exemplares"] = 1
                 item["source"] = str(record["source"] or "")
                 item["max_power"] = faixa_poder_exemplar(card, rarity)[1]
+                item["potencia_raridade"] = int(RARITY_EFFECT_BUDGET.get(rarity, 0))
                 image_source = preparar_payload_carta_base(payload)
                 image_version = etag_carta_base(image_source, tamanho=(210, 310), quality=82)
                 item["image_url"] = (
@@ -2337,6 +2327,7 @@ class NaraBot(commands.Bot):
                 "poder_base": power,
                 "poder_maximo": int(faixa_poder_exemplar(card, rarity)[1]),
                 "custo": int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0))),
+                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "exemplar_id": exemplar_id,
             })
             canonical = preparar_carta(payload)
@@ -2433,6 +2424,7 @@ class NaraBot(commands.Bot):
                 "raridade": rarity, "poder": power, "poder_base": power,
                 "poder_maximo": int(faixa_poder_exemplar(card, rarity)[1]),
                 "custo": int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0))),
+                "potencia_raridade": int(RARITY_EFFECT_BUDGET.get(rarity, 0)),
                 "exemplar_id": exemplar_id,
             })
             canonical = preparar_carta(payload)

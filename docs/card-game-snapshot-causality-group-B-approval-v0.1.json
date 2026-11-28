@@ -1,0 +1,53 @@
+{
+  "document": "Group B approval — snapshot and causality",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev8.zip",
+  "status": "OWNER_APPROVED",
+  "approval_source": "Explicit owner reply: 'aprovo' to the Group B approval request, including Option A for BUF-001.",
+  "runtime_modified": false,
+  "approved_decisions": [
+    {
+      "id": "CI-005",
+      "status": "approved",
+      "approved_rule": "Each match freezes an immutable definition manifest with catalog, effect registry, balance rules and ruleset release IDs plus a verifiable content digest. Each CardInstance stores a resolved mechanical definition snapshot and per-definition digest. schema_version remains structural only."
+    },
+    {
+      "id": "CI-011",
+      "status": "approved",
+      "approved_rule": "Use a UUIDv4 operation_id for each logical action and separate UUIDv4 event_id values for domain events. Events are ordered, append-only and causally linked. Same operation_id plus same fingerprint replays the stored result; conflicting fingerprint reuse rejects. Updated state, revision, operation result and generated events commit atomically."
+    },
+    {
+      "id": "BUF-001",
+      "status": "approved",
+      "selected_option": "A",
+      "approved_rule": "Rarity is classification only. It does not modify effect magnitude, thresholds, target count/selection, duration or other execution parameters. RARITY_EFFECT_BUDGET must not exist as an execution dependency in the new system."
+    },
+    {
+      "id": "BUF-002",
+      "status": "approved",
+      "approved_rule": "Reactive effects have their own source_effect_id and causal parent. They never inherit rarity or execution parameters from the external effect that triggered them."
+    },
+    {
+      "id": "BUF-012",
+      "status": "approved",
+      "approved_rule": "Only active, verified catalog bindings become capabilities in the new effect registry. Orphan handlers and inactive aliases remain historical/compatibility records until explicitly rebound."
+    },
+    {
+      "id": "RSRX-03",
+      "status": "approved_with_group_F_dependency",
+      "approved_rule": "A successful removal/sacrifice produces its removal event. A separate Vengeance event may follow only when the target has Vengeance and the Group F cause policy permits that cause. A shield-blocked attempt is not a removal and does not trigger Vengeance."
+    },
+    {
+      "id": "RSRX-05",
+      "status": "approved_as_causal_separation_only",
+      "approved_rule": "Rykard's reactive Vengeance output and direct leader output are separate events with their own sources and order. The legacy +1 and +2 are recorded as observed outputs; the aggregate +3 is not frozen as a final balance value."
+    }
+  ],
+  "explicit_non_approvals": [
+    "The complete numeric balance model, rarity cutoffs, EFP, deck cost, deck budget 32 and leader_load remain unapproved.",
+    "The final list of removal/sacrifice causes that permit Vengeance remains a Group F decision.",
+    "Group C state duration and cleanup policies, Group D target/atomic action policies and Group E database/CAS implementation remain open.",
+    "No runtime code, active catalog, database schema, API or frontend is authorized to change by this approval alone."
+  ]
+}

@@ -1,3 +1,17 @@
+# Atualização mais recente: estados negativos v0.1 (2026-11-27)
+
+A auditoria complementar `docs/card-game-status-effects-review-v0.1.md` cruza as regras legadas de Geada, Podridão Escarlate, Sangramento e Loucura com o motor. Foram mapeadas 15 aplicações, cinco purificadores e os defeitos de transição/raridade/limpeza. O `status-registry-candidate.v1.json` e `sistemas/card_status_candidate.py` são candidatos isolados, não aprovados e não conectados ao runtime. Para resultado de testes e hashes, consultar `docs/card-game-status-effects-validation-v0.1.md/.json`. O resolvedor cobre transições/limiares/poder/purificação, não os seletores completos e handlers de cada carta. Não interpretar esta proposta como alteração das regras atualmente executadas.
+
+---
+
+# Atualização: contrato canônico v1.1 e baseline (2026-11-27)
+
+O mapeamento abaixo descreve o sistema legado. A reconstrução agora possui `docs/card-game-canonical-model-v1.md`, os schemas da carta e do registry (`data/card_game/card-definition.schema.v1.json` e `data/card_game/effect-registry.schema.v1.json`) e o validador `sistemas/card_contract.py`, além do snapshot reproduzível `data/card_game/catalog-legacy-baseline-v0.1.json`. A validação atual passou 35/35 testes; o registry tem validação de parâmetros e combos. Nada disso substitui ainda o runtime legado. O baseline foi normalizado em 110 unidades, 21 especiais e seis relíquias (137 no total). A distinção `special`/`relic` é nova e ainda não está ligada ao runtime antigo. A quota de 30% corresponde a 42 modelos puros; o baseline contém 15. O snapshot é histórico, não fonte da verdade do runtime futuro.
+
+Nenhum efeito legado foi removido ou migrado nesta etapa. O contrato v1.1 está isolado, sem importação no runtime. O próximo passo é consolidar o registry, fazer a matriz `effect_id -> handler -> parâmetros -> timing -> teste -> descrição`, então decidir `keep/merge/redesign/remove`. Fórmulas EFP, custo, raridade e teto do deck continuam não aprovadas.
+
+---
+
 # Auditoria de mapeamento do jogo de cartas — baseline e estado pós-política de combos
 
 > **Documento histórico + atualização de estado.** As seções 1–6 e a matriz de cartas preservam o baseline recebido (`soulsbo-main(1).zip`); a seção 7 foi atualizada com o catálogo de combos atualmente carregado, a seção 21 registra a política implementada e a seção 22 registra a validação stateful/snapshot. Os resultados v0.1 das seções 19–20 são históricos pré-patch, não o estado atual. A seção 22 é a referência mais recente para limites de integração de partidas.
@@ -926,3 +940,40 @@ A seção foi produzida pelo script `docs/scripts/audit-gwent-http-contracts-v0.
 
 O ambiente não possui `discord.py==2.7.1` nem `aiosqlite==0.22.1`; instalação temporária por `pip` falhou por DNS/rede. Não houve `aiohttp.TestClient`, execução real de handlers, classe `Database`, gateway Discord, browser, convite/solo/IA ou produção. Próximo passo: executar testes HTTP de cada rota em ambiente com dependências instaladas, incluindo autenticação, origem, ownership, status, rollback, resposta/refetch, convites, solo/IA e recompensas. O contrato de custo deve ser corrigido somente depois que custo/schema/budget forem aprovados.
 
+
+
+## 24. Pipelines de arte e evidência necessária de produção (2026-11-27)
+
+A leitura de `database.py`, `bot.py`, `sistemas/storage_r2.py` e `sistemas/arte_cartas_geradas.py` confirmou quatro origens distintas; não tratar toda arte aprovada como objeto R2:
+
+| Origem | Persistência | Como localizar/validar | O que o inventário read-only cobre |
+|---|---|---|---|
+| `cartas_atelie_submissoes` | `image_key` para R2 em novos envios; `image_data` BLOB para legado; status `pending/approved/rejected/archived` | `bot.py::_api_gwent_atelier_submit()` cria `atelier/submissions/<user_id>/<card_hash>/exemplar-<id>/<sha256>-<nonce>.jpg`; `database.py::coliseu_atelie_obter_arte_oficial_metadata()` seleciona submissão aprovada, priorizando exemplar | Hash de `image_key`, prefixo lógico, status, `image_data_bytes`, card/exemplar e reconciliação R2 |
+| `cartas_atelie_artes` | Pedido legado do fluxo Discord: `channel_id`, `message_id`, `attachment_id`, status; não possui `image_key` R2 nesta tabela | `database.py::coliseu_atelie_decidir_pedido()` atualiza aprovação/arquiva anterior; confirmar o anexo no canal privado com uma etapa separada do Discord | Status e presença booleana de referência a attachment; não prova que o anexo ainda existe no Discord |
+| `cartas_gwent_lideres_artes` | BLOB SQLite, `mime_type`, `revision`, timestamps | Acesso via métodos de líder no `database.py`; precisa validar BLOB e MIME caso a produção seja disponibilizada | Tamanho do BLOB e metadados sem baixar/exportar a imagem |
+| `cartas_geradas` + `cartas_geradas_artes` | PNG local em `DATA_DIR/cartas_geradas/<owner_id>/<card_id>.png`, `storage_path`, `content_hash`, dimensões e status `validated` | `sistemas/arte_cartas_geradas.py::persistir_arte_original()`; `bot.py` exige status publicado/validado e compara SHA-256 | `--verify-local-generated-art` verifica existência e hash sem gravar paths locais no relatório |
+| Cache público R2 | Objetos `cards/<card_hash>/<etag>.<ext>` | `bot.py` gera variantes cacheadas e usa `upload_public_card_image()`; não são os originais do Ateliê | Listagem por namespace; não associar um-para-um a submissões aprovadas |
+
+Ferramentas e runbook completos: `card-game-production-audit-runbook-v0.1.md` e os quatro scripts `snapshot-sqlite-readonly`, `audit-production-card-db`, `inventory-r2-readonly` e `reconcile-production-card-assets`, todos v0.1 em `docs/scripts/`.
+
+**Atenção à segurança:** `Database.connect()` executa schema/migrações e não deve ser usado para inspecionar produção em modo read-only. O snapshot usa a API SQLite Backup com origem `mode=ro`. `storage_r2.py` contém upload/download/delete para a aplicação; o novo inventariador não reutiliza esses métodos e invoca somente `ListObjectsV2`. O relatório não armazena paths completos, `user_id`, prompts, BLOBs, imagens ou `state_json`.
+
+**Estado atual:** os scripts foram testados com SQLite temporário (journal padrão e WAL) e cliente S3 simulado (7/7). O teste WAL confirmou leitura de uma linha ainda não checkpointada e que o arquivo `-wal` permaneceu byte a byte inalterado. Não existe ainda evidência real da produção neste repositório. Ausentes: banco/volume persistente, variáveis de configuração, bucket/listagem R2 e verificação de anexos Discord. Não classificar qualquer arte real como ausente/órfã até executar o runbook no host e reconciliar snapshots de janela compatível.
+
+
+## Atualização — catálogo de efeitos candidato v0.1 (2026-11-27)
+
+O inventário legado foi consolidado em 54 famílias de efeito candidatas. A ponte contém 59 IDs de `HABILIDADES` (32 unidade, 21 especial, seis relíquias), 22 identidades ativas, 16 cartas cuja habilidade genérica é suprimida pela identidade, 27 combos, dez líderes e quatro passivas de facção. O mapa preserva também os IDs de carta atualmente associados a cada habilidade.
+
+Existem 11 definições de unidade sem carta atualmente atribuída; 18 ramos filtrados V18, seis ramos V75 sem associação e quatro valores de campo fora de `HABILIDADES`. `gloria` é hook em `_resolve_round()` e está em três cartas; `sobrevivente` está declarado sem handler identificado. Cinco IDs de tags permanecem órfãos. Ver `docs/card-game-effect-catalog-decision-v0.1.md` para cada alias, família e decisão candidata.
+
+Validação no registro inicial: 21/21 testes estruturais (histórico; ampliado posteriormente para 23/23 estruturais + 11/11 semânticos, ver a atualização logo abaixo); Draft 2020-12 e validador Python aprovados. **Os handlers novos são apenas nomes candidatos e o registry não está conectado ao runtime.** Não houve alteração funcional nem remoção de legado. A próxima tarefa é revisar equivalência semântica das famílias e aprovar `keep/merge/redesign/remove` antes de implementação.
+
+
+## Atualização — auditoria semântica do catálogo candidato v0.1 (2026-11-27)
+
+A família de efeitos candidata foi ligada aos trechos do código por AST em `card-game-effect-semantic-audit-v0.1.md/.json`. O relatório cobre 54 famílias, os 59 aliases de `HABILIDADES`, 22 identidades ativas, ramos filtrados/inativos e hooks de ciclo de vida. Contagem do catálogo genérico: 56 branches diretos em `aplicar_jogada()`, dois hooks (`vinganca` em `_remover_unidade()` e `espolios` em `_resolve_round()`) e `sobrevivente` sem handler. `gloria` aparece separadamente como hook em `_resolve_round()` e não deve ser confundida com `sobrevivente`.
+
+A proposta `effect.sequence_power` foi corrigida para exigir `requires_previous_play=true`; o motor legado não concede o bônus quando não há `last_row` válido. A auditoria também assinala diferenças de condição/alvo/limite para remoção, status, sacrifício, bônus cruzado e sobrevivência. A triagem 18 HIGH/6 MEDIUM/30 LOW é apenas prioridade heurística para revisão, não força do efeito nem aprovação de merge. Nenhum handler foi criado e nenhum módulo do runtime foi alterado nesta etapa.
+
+Validação atual: 23/23 testes estruturais do candidato e 11/11 regressões do mapa semântico; schemas Draft 2020-12 e validador Python aprovados. Reproduzir com `build-effect-catalog-candidate-v0.1.py`, `test-effect-catalog-candidate-v0.1.py`, `audit-effect-semantic-groups-v0.1.py` e `test-effect-semantic-audit-v0.1.py`.

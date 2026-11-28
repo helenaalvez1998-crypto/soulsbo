@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-target-offer.v1.json",
+  "title": "Soulsbo server target offer v1 (Group D candidate)",
+  "description": "Server-generated options and display metrics tied to a state revision. The client renders this offer and never rebuilds eligibility or ordering.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "offer_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "state_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_policy_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{2,95}$"
+    },
+    "selection_mode": {
+      "enum": [
+        "none",
+        "manual_single",
+        "manual_set",
+        "automatic",
+        "manual_primary_auto_fill"
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eligibility_metric": {
+          "enum": [
+            "none",
+            "base_power",
+            "effective_power",
+            "bonus"
+          ]
+        },
+        "display_metric": {
+          "enum": [
+            "none",
+            "base_power",
+            "effective_power",
+            "bonus"
+          ]
+        },
+        "sort_metric": {
+          "enum": [
+            "none",
+            "base_power",
+            "effective_power",
+            "bonus",
+            "zone_order",
+            "played_sequence"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "none",
+            "ascending",
+            "descending"
+          ]
+        }
+      },
+      "required": [
+        "eligibility_metric",
+        "display_metric",
+        "sort_metric",
+        "direction"
+      ]
+    },
+    "target_count": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimum_targets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximum_targets": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "const": "all"
+            }
+          ]
+        }
+      },
+      "required": [
+        "minimum_targets",
+        "maximum_targets"
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_instance_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "current_row": {
+            "enum": [
+              "melee",
+              "ranged",
+              "siege",
+              null
+            ]
+          },
+          "base_power": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "effective_power": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "bonus": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "eligibility_value": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "display_value": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "selection_order": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "target_instance_id",
+          "display_name",
+          "eligibility_value",
+          "display_value",
+          "selection_order"
+        ]
+      }
+    },
+    "secondary_targets_preview": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "requires_confirmation": {
+      "type": "boolean"
+    },
+    "secondary_primary_instance_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "offer_id",
+    "state_revision",
+    "target_policy_id",
+    "selection_mode",
+    "metrics",
+    "target_count",
+    "candidates",
+    "secondary_targets_preview",
+    "requires_confirmation",
+    "secondary_primary_instance_id"
+  ]
+}

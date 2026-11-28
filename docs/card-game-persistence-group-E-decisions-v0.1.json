@@ -1,0 +1,209 @@
+{
+  "decision_register": "card_game_persistence_group_E",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "status": "OWNER_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev13.zip",
+  "audit_ref": "docs/card-game-persistence-group-E-audit-v0.1.json",
+  "evidence_ref": "docs/card-game-persistence-group-E-audit-v0.1.md",
+  "decisions": [
+    {
+      "id": "E-001",
+      "title": "Revisão monotônica por partida",
+      "proposal": {
+        "storage": "state_revision INTEGER NOT NULL DEFAULT 0 on cartas_gwent_matches",
+        "request_field": "expected_revision",
+        "increment": "exactly once for committed state-changing operation",
+        "rejected_request": "revision unchanged",
+        "conflict": "return persistence conflict without gameplay mutation"
+      },
+      "recommendation": "Manter state_revision no banco e no envelope; exigir expected_revision em offers/actions e validar no mesmo commit.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-002",
+      "title": "Serialização SQLite mais CAS explícito",
+      "proposal": {
+        "transaction": "BEGIN IMMEDIATE before loading match state",
+        "compare_and_swap": "UPDATE ... WHERE id=? AND state_revision=?",
+        "rowcount_required": 1,
+        "local_storage": "single-host local filesystem for WAL",
+        "busy_timeout_ms": 10000
+      },
+      "recommendation": "Preservar BEGIN IMMEDIATE (já existente) e acrescentar CAS como segunda barreira; não tratar _writer_lock como lock entre processos.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-003",
+      "title": "Ledger durável de idempotência",
+      "proposal": {
+        "table": "cartas_gwent_match_operations",
+        "unique_key": [
+          "match_id",
+          "operation_id"
+        ],
+        "fingerprint": "SHA-256 over canonical request plus actor/match/ruleset context",
+        "same_key_same_fingerprint": "return stored result without reapplying",
+        "same_key_different_fingerprint": "idempotency_conflict without mutation",
+        "rejected_result": "persist response/ledger while leaving gameplay revision unchanged"
+      },
+      "recommendation": "operation_id único por partida com resultado e fingerprint duráveis; não usar somente operations embutido em state_json.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-004",
+      "title": "Commit atômico de snapshot e ledger",
+      "proposal": {
+        "same_transaction": [
+          "state_json snapshot",
+          "state_revision",
+          "operation record",
+          "domain events",
+          "derived counters",
+          "match rewards"
+        ],
+        "failure": "rollback entire unit of work",
+        "revision": "only advances on accepted committed state change/cost; persisted rejected result does not advance it"
+      },
+      "recommendation": "Nenhum resultado pode ficar parcialmente aplicado: snapshot, ledger, eventos e recompensas devem compartilhar a transação.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-005",
+      "title": "Journal de eventos de domínio",
+      "proposal": {
+        "table": "cartas_gwent_match_events",
+        "unique": [
+          "event_id",
+          "(match_id,sequence)"
+        ],
+        "append_only": true,
+        "operation_fk": [
+          "match_id",
+          "operation_id"
+        ],
+        "sequence": "strictly increasing per match",
+        "event_log": "UI-only bounded projection; never source of truth"
+      },
+      "recommendation": "Manter eventos imutáveis e ordenados em armazenamento durável; state_json pode manter projeção/checkpoint com watermark para reduzir custo de leitura.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-006",
+      "title": "Transactional outbox para efeitos externos",
+      "proposal": {
+        "table": "cartas_gwent_outbox",
+        "events": [
+          "turn_notification",
+          "patent_sync",
+          "other post-commit delivery"
+        ],
+        "enqueue": "inside same DB transaction as state/event commit",
+        "delivery": "at-least-once with consumer idempotency key",
+        "retry": "attempt_count/next_attempt_at/dead_letter",
+        "no_precommit_task": true
+      },
+      "recommendation": "Substituir create_task pré-commit e retries apenas logados por outbox transacional; entrega externa é assíncrona, deduplicável e retomável.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-007",
+      "title": "Ledger versionado de migrations",
+      "proposal": {
+        "table": "card_game_schema_migrations",
+        "fields": [
+          "migration_id",
+          "checksum_sha256",
+          "applied_at",
+          "app_version"
+        ],
+        "execution": "one migration per transaction under write lock",
+        "repeat": "same id+checksum is no-op; same id+different checksum is fatal"
+      },
+      "recommendation": "Introduzir migration ledger versionado para as alterações do jogo, sem inferir aplicação apenas por coluna existir.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-008",
+      "title": "Backup imutável e arquivo da origem",
+      "proposal": {
+        "before_migration": [
+          "SQLite Backup API snapshot",
+          "quick_check and integrity_check",
+          "SHA-256",
+          "row counts by match status"
+        ],
+        "archive": [
+          "original state_json",
+          "source hash",
+          "target schema version",
+          "migration id"
+        ],
+        "write_mode": "never overwrite raw source before verification"
+      },
+      "recommendation": "Preservar um snapshot íntegro, externo ao repositório, e manter o JSON original/hash por match migrado para rastreabilidade e rollback.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-009",
+      "title": "Política de cutover para partidas legadas",
+      "proposal": {
+        "pending_and_active": "grandfather on legacy engine until completion/expiry; no silent live conversion",
+        "finished": "read-only legacy archive; optional separate projection",
+        "new_matches": "v6 only after E migration and integrated test gate",
+        "legacy_manifest_missing": "do not fabricate exact release provenance"
+      },
+      "recommendation": "Não converter partidas em andamento: o snapshot legado não traz DefinitionManifest nem instance_id, e não há banco de produção para comprovar sua proveniência.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "E-010",
+      "title": "Migração única e determinística de snapshots",
+      "proposal": {
+        "preflight": "classify every row/status and parse state_json on a clone",
+        "identity": "assign instance_id once per physical card occurrence and persist mapping atomically",
+        "provenance": "preserve exemplar_id if present; otherwise origin unknown, never infer",
+        "verification": [
+          "zone partition",
+          "card count conservation",
+          "owner consistency",
+          "event/counter projections",
+          "foreign_key_check",
+          "integrity_check"
+        ],
+        "rollback": "restore verified backup if any invariant fails"
+      },
+      "recommendation": "Migração por lotes com dry-run, hash de origem, mapping persistido e invariantes; UUID não pode ser regenerado em cada carregamento.",
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    }
+  ],
+  "scope_note": "Group E only. Groups A/B/C/D/F are approved within their stated boundaries. No production DB, aiosqlite wrapper, HTTP handler or migration is executed in this audit.",
+  "approval": {
+    "status": "OWNER_APPROVED",
+    "approved_decisions": [
+      "E-001",
+      "E-002",
+      "E-003",
+      "E-004",
+      "E-005",
+      "E-006",
+      "E-007",
+      "E-008",
+      "E-009",
+      "E-010"
+    ],
+    "owner_response": "ok, faça",
+    "approval_scope": "Aprovação em bloco das dez recomendações E-001 a E-010 e autorização para consolidar o contrato e iniciar implementação isolada do núcleo v2.",
+    "limitations": "A aprovação não autoriza acesso ao banco publicado, migração real, cutover, alteração do runtime legado ou integração de handlers/API. Essas ações dependem de clone verificável do banco e gate integrado posterior."
+  }
+}

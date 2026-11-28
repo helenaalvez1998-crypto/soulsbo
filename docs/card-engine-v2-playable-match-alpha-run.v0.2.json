@@ -1,0 +1,437 @@
+{
+  "actions": [
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A plays Lanceiro",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 1,
+      "step": 1,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "54060a4d-1658-451f-ac7b-05f8c557b83a"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "B plays Godwyn (Vingança)",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 2,
+      "step": 2,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "b6ce88b4-bbaf-495b-b812-87682fc05067"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A plays Veterano and buffs the weakest ally",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 3,
+      "step": 3,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "fb99aaa3-965a-4cae-b3d1-8548e7e9c850"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "B plays Cavaleiro de Leyndell",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 4,
+      "step": 4,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "655eef3f-cfc4-49c6-837f-616d8f3e1d25"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": true,
+        "turn_consumed": true
+      },
+      "label": "A applies Tempestade to melee",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 5,
+      "step": 5,
+      "target_results": []
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "pass_round",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 6,
+      "step": 6,
+      "target_results": []
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": true,
+        "turn_consumed": true
+      },
+      "label": "A applies Frost to enemy melee units",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 7,
+      "step": 7,
+      "target_results": [
+        {
+          "marks_added": 1,
+          "outcome": "applied",
+          "target_instance_id": "b6ce88b4-bbaf-495b-b812-87682fc05067"
+        },
+        {
+          "marks_added": 1,
+          "outcome": "applied",
+          "target_instance_id": "655eef3f-cfc4-49c6-837f-616d8f3e1d25"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": true,
+        "turn_consumed": true
+      },
+      "label": "gwent_especial_execucao -> Godwyn, o Dourado",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 8,
+      "step": 8,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "b6ce88b4-bbaf-495b-b812-87682fc05067"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": true,
+        "turn_consumed": true
+      },
+      "label": "gwent_especial_egide -> Lanceiro da Árvore Áurea",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 9,
+      "step": 9,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "54060a4d-1658-451f-ac7b-05f8c557b83a"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "pass_round",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 10,
+      "step": 10,
+      "target_results": []
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "B plays Ferreiro de Volcano Manor",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 11,
+      "step": 11,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "35b5a4d4-ed71-4890-93fc-7ff350ca1bf6"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "pass_round",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 12,
+      "step": 12,
+      "target_results": []
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "pass_round",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 13,
+      "step": 13,
+      "target_results": []
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A plays Ferreiro de Volcano Manor",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 14,
+      "step": 14,
+      "target_results": [
+        {
+          "outcome": "applied",
+          "target_instance_id": "aa794910-9172-4f0b-a0fe-a9a139f451a2"
+        }
+      ]
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "pass_round",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 15,
+      "step": 15,
+      "target_results": []
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "pass_round",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "replayed": false,
+      "state_revision_after": 16,
+      "step": 16,
+      "target_results": []
+    }
+  ],
+  "catalog_release": {
+    "artifact_sha256": {
+      "alpha_allowlist": "3dcf1062bf3aeadfde108fb57dc692e80269152831b2a1b61c6eba8bfa5a0e3e",
+      "balance_rules": "6297bb30e5c5f506371b92477353823aa897edd9947ec802080d30e8934c6b89",
+      "catalog": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+      "effect_registry": "cee60c46706aec704b86a1797b7bb7a143df4e04bbc7f88c63f19433f8e229d7",
+      "legacy_aliases": "af7206ffb206e467ed6388a7ef0207fae86cfc29aa8dfb0955f398fb001eadc5",
+      "ruleset": "ddf100598b23eada2c8efcc856269844191aeabeebc9aa1c19187a15bbb9471d"
+    },
+    "balance_rules_release_id": "alpha-test-only.balance.v0.1",
+    "canonicalization": "RFC8785",
+    "catalog_release_id": "alpha-test-only.catalog.v0.2",
+    "definition_digest": "9dc9bdff1fbf0a125f455bb3836deced84b715085622c79896826594f3670636",
+    "effect_registry_release_id": "alpha-test-only.effects.v0.2",
+    "manifest_version": 1,
+    "ruleset_release_id": "alpha-test-only.ruleset.v0.1"
+  },
+  "catalog_scope": {
+    "allowed_card_count": 24,
+    "allowlist_artifact": "data/card_game/card-engine-v2-alpha-catalog.v0.2.json",
+    "implemented_entry_effect_family_count": 12
+  },
+  "event_count": 48,
+  "event_kind_counts": {
+    "action_source_consumed": 4,
+    "cards_drawn": 2,
+    "golden_vow_resolved": 1,
+    "match_finished": 1,
+    "player_passed": 6,
+    "protection_grant_applied": 1,
+    "round_closed": 3,
+    "round_score_frozen": 3,
+    "round_started": 2,
+    "status_applied": 1,
+    "turn_action_completed": 10,
+    "unit_archived": 5,
+    "unit_played": 6,
+    "unit_removed": 1,
+    "vengeance_bonus_applied": 1,
+    "weather_applied": 1
+  },
+  "final_state_revision": 16,
+  "match_id": 202611270001,
+  "players": {
+    "1001": "Player A",
+    "2002": "Player B"
+  },
+  "round_history": [
+    {
+      "round_number": 1,
+      "scores": {
+        "1001": 9,
+        "2002": 4
+      },
+      "winner_player_id": "1001"
+    },
+    {
+      "round_number": 2,
+      "scores": {
+        "1001": 0,
+        "2002": 6
+      },
+      "winner_player_id": "2002"
+    },
+    {
+      "round_number": 3,
+      "scores": {
+        "1001": 6,
+        "2002": 0
+      },
+      "winner_player_id": "1001"
+    }
+  ],
+  "round_one_event_proof": {
+    "protection_grant_applied": 1,
+    "status_applied": 1,
+    "unit_removed": 1,
+    "vengeance_bonus_applied": 1,
+    "weather_applied": 1
+  },
+  "round_wins": {
+    "1001": 2,
+    "2002": 1
+  },
+  "scenario": "isolated_best_of_three_alpha_match",
+  "scope_notes": [
+    "Uses the explicit, hash-pinned 24-card alpha allowlist, not the full production catalog.",
+    "The 137-card historical staging file is review-only: 24 alpha-test-only and 113 blocked.",
+    "Runs in a disposable SQLite database created by this script.",
+    "Does not connect to Discord, HTTP, frontend, or the published database.",
+    "No production migration or legacy-engine replacement is performed."
+  ],
+  "sqlite_integrity": {
+    "event_sequence_violations": 0,
+    "foreign_key_violations": 0,
+    "integrity_check": "ok",
+    "ok": true,
+    "quick_check": "ok",
+    "row_counts": {
+      "card_engine_v2_legacy_archive": 0,
+      "cartas_gwent_match_events": 48,
+      "cartas_gwent_match_operations": 16,
+      "cartas_gwent_match_rewards": 0,
+      "cartas_gwent_matches": 1,
+      "cartas_gwent_outbox": 0
+    },
+    "state_revision_violations": 0
+  },
+  "status": "finished",
+  "winner_player_id": "1001"
+}

@@ -1,0 +1,319 @@
+{
+  "schema_version": 3,
+  "match_id": 2026112701,
+  "status": "active",
+  "players": {
+    "1001": {
+      "zones": {
+        "hand": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000005"
+        ],
+        "draw_pile": [],
+        "board": [
+          "00000000-0000-4000-8000-000000000003"
+        ],
+        "discard": []
+      }
+    },
+    "2002": {
+      "zones": {
+        "hand": [],
+        "draw_pile": [],
+        "board": [
+          "00000000-0000-4000-8000-000000000002"
+        ],
+        "discard": [
+          "00000000-0000-4000-8000-000000000004"
+        ]
+      }
+    }
+  },
+  "instances": {
+    "00000000-0000-4000-8000-000000000001": {
+      "schema_version": 3,
+      "instance_id": "00000000-0000-4000-8000-000000000001",
+      "card_id": "wolf_guardian",
+      "exemplar_id": 501,
+      "owner_player_id": "1001",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "definition_digest": "b24ac075d2db3f850217abd330eb5094d7eb9b2b191ee8955d49288b6da88d04"
+      },
+      "state": {
+        "current_row": "melee",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000002": {
+      "schema_version": 3,
+      "instance_id": "00000000-0000-4000-8000-000000000002",
+      "card_id": "survivor_guard",
+      "exemplar_id": null,
+      "owner_player_id": "2002",
+      "origin_type": "catalog_deck",
+      "definition_snapshot": {
+        "card_id": "survivor_guard",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "definition_digest": "6ddd372f207087c57d55fc6eab8e4d1c083ab19061a1641cf6a08dcc4c98e029"
+      },
+      "state": {
+        "current_row": "melee",
+        "bonus": 1,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000003": {
+      "schema_version": 3,
+      "instance_id": "00000000-0000-4000-8000-000000000003",
+      "card_id": "wolf_guardian",
+      "exemplar_id": 503,
+      "owner_player_id": "1001",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "ranged",
+        "power_base": 6,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "definition_digest": "7362a2b6bf065d335b96704fbc90be6ef9fd96ad2b28c31219ee35b0d9207b0f"
+      },
+      "state": {
+        "current_row": "ranged",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000004": {
+      "schema_version": 3,
+      "instance_id": "00000000-0000-4000-8000-000000000004",
+      "card_id": "vengeful_warrior",
+      "exemplar_id": null,
+      "owner_player_id": "2002",
+      "origin_type": "catalog_deck",
+      "definition_snapshot": {
+        "card_id": "vengeful_warrior",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": "unit.vengeance_on_removal",
+        "effect_params": {
+          "bonus_delta": 1
+        },
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "definition_digest": "3f4ef281f4b3a159e90d2af01f8bb6c3dbb89f6654c4860e7926ba31faff229a"
+      },
+      "state": {
+        "current_row": "melee",
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    },
+    "00000000-0000-4000-8000-000000000005": {
+      "schema_version": 3,
+      "instance_id": "00000000-0000-4000-8000-000000000005",
+      "card_id": "chama_negra",
+      "exemplar_id": null,
+      "owner_player_id": "1001",
+      "origin_type": "catalog_deck",
+      "definition_snapshot": {
+        "card_id": "chama_negra",
+        "kind": "special",
+        "faction_id": "crimson_veil",
+        "printed_row": null,
+        "power_base": null,
+        "rarity_id": "epic",
+        "effect_id": "special.remove_units",
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "definition_digest": "4dcc7c48a61608ad5e4400cebcef096c22e058e435a68453118474510d74a791"
+      },
+      "state": {
+        "current_row": null,
+        "bonus": 0,
+        "shield_charges": 0,
+        "statuses": {
+          "status.bleeding": 0,
+          "status.frost": 0,
+          "status.scarlet_rot": 0,
+          "status.madness": 0
+        },
+        "weather_resistance": 0,
+        "activated_combo_ids": [],
+        "effect_state": {}
+      }
+    }
+  },
+  "operations": {
+    "00000000-0000-4000-8000-000000000010": {
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "fingerprint": "70dab33de62998add36316c25426ca81ba3f1f526ac9efbab25a85e32d569d91",
+      "actor": {
+        "type": "player",
+        "player_id": "1001"
+      },
+      "expected_revision": 0,
+      "revision_before": 0,
+      "revision_after": 1,
+      "result": {
+        "status": "applied",
+        "payload": {
+          "illustrative": true
+        }
+      },
+      "event_ids": [
+        "00000000-0000-4000-8000-000000000011",
+        "00000000-0000-4000-8000-000000000012",
+        "00000000-0000-4000-8000-000000000013"
+      ]
+    }
+  },
+  "state_revision": 1,
+  "definition_manifest": {
+    "manifest_version": 1,
+    "canonicalization": "RFC8785",
+    "catalog_release_id": "example-only.catalog.2026-11-27",
+    "effect_registry_release_id": "example-only.effects.2026-11-27",
+    "balance_rules_release_id": "example-only.balance.2026-11-27",
+    "ruleset_release_id": "example-only.ruleset.2026-11-27",
+    "artifact_sha256": {
+      "catalog": "13ec370b6c93cd6b9f8c82fee839bdcc673f5569eec4b314919ce76840754a7f",
+      "effect_registry": "e9a1519f430a64572ae8222742ad9d3519f42034ca8cc64c21efef917987285e",
+      "balance_rules": "b225997815389cf302519e9978c1c5a08ea82d47430a303eeb57a843cc460706",
+      "ruleset": "ddd33262b2ed21094637e8d969b54a84c2272c236e40eaaea1e710412420143c"
+    },
+    "definition_digest": "b960fc5926771e22a92c97cf123dba76fedbfe3ba4d4fcf0fa6696a2f01423f9"
+  },
+  "events": [
+    {
+      "event_id": "00000000-0000-4000-8000-000000000011",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 1,
+      "caused_by_event_ids": [],
+      "kind": "operation_started",
+      "effect_scope": "system",
+      "source_effect_id": null,
+      "source_instance_id": null,
+      "target_instance_ids": [],
+      "payload": {}
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000012",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 2,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000011"
+      ],
+      "kind": "unit_removed",
+      "effect_scope": "direct",
+      "source_effect_id": "special.remove_units",
+      "source_instance_id": "00000000-0000-4000-8000-000000000005",
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000004"
+      ],
+      "payload": {
+        "cause": "effect",
+        "from_zone": "board",
+        "to_zone": "discard"
+      }
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000013",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 3,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000012"
+      ],
+      "kind": "vengeance_bonus_applied",
+      "effect_scope": "reactive",
+      "source_effect_id": "unit.vengeance_on_removal",
+      "source_instance_id": "00000000-0000-4000-8000-000000000004",
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000002"
+      ],
+      "payload": {
+        "parameter_source": "source_effect_definition",
+        "bonus_delta": 1
+      }
+    }
+  ]
+}

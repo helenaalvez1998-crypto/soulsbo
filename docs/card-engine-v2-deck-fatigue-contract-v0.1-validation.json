@@ -1,0 +1,64 @@
+{
+  "artifact_type": "soulsbo_card_engine_v2_deck_fatigue_contract_validation",
+  "version": "0.1",
+  "status": "candidate_reference_validated_runtime_not_integrated",
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev21.zip",
+  "reference": "sistemas/card_engine_v2/deck_fatigue_candidate.py",
+  "policy": "data/card_game/card-engine-v2-deck-fatigue-policy-candidate.v0.1.json",
+  "tests": {
+    "candidate_tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "cases": [
+      "arithmetic progression increases per failed draw phase",
+      "per-player counters are independent",
+      "explicit cap limits damage without resetting count",
+      "no cap does not imply an unapproved clamp",
+      "invalid counters and policy values fail closed",
+      "fully satisfied draw phase does not apply fatigue",
+      "partial draw phase applies one fatigue step",
+      "empty draw pile applies one step, not one per missing card",
+      "invalid draw phase counts fail closed",
+      "policy keeps unresolved values null and runtime integration disabled"
+    ]
+  },
+  "full_card_engine_suite": {
+    "tests": 130,
+    "passed": 130,
+    "failed": 0
+  },
+  "compile": "passed",
+  "official_regressions": {
+    "playable_alpha_v0_4": "passed",
+    "legacy_catalog_staging_v0_2": "passed",
+    "playable_match_v0_3": "passed; Player A won 2-1; 60 events; SQLite integrity passed",
+    "combo_faction_leader_v0_1": "passed; 25 events; SQLite integrity passed"
+  },
+  "runtime_changes": false,
+  "ruleset_changed": false,
+  "match_schema_changed": false,
+  "database_migration": false,
+  "legacy_core_files_changed": false,
+  "open_decisions": [
+    "draw cadence: per player turn or per new round",
+    "initial fatigue damage",
+    "damage increment",
+    "optional maximum damage",
+    "partial draw phase trigger timing",
+    "counter reset when cards return to draw pile",
+    "immediate lethal timing before player action",
+    "simultaneous processing boundary"
+  ],
+  "legacy_core_sha256": {
+    "sistemas/gwent.py": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+    "sistemas/cartas.py": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+    "bot.py": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+    "database.py": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+    "site/app.js": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b"
+  },
+  "baseline_diff": {
+    "modified_files": 8,
+    "added_files": 7,
+    "removed_files": 0
+  }
+}

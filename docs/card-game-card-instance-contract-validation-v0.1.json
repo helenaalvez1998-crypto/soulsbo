@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "document": "CardInstance match envelope and zone transition validation v0.1",
+    "status": "CANDIDATE_NOT_APPROVED; ISOLATED_REFERENCE_HARNESS",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev3.zip",
+    "runtime_imported": false,
+    "schema": "docs/card-game-card-instance-match.schema.v1.json",
+    "example": "docs/examples/card-instance-match.example.v1.json"
+  },
+  "counts": {
+    "assertions": 30,
+    "passed": 30,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "example_file_validates",
+      "status": "passed"
+    },
+    {
+      "case": "same_card_model_multiple_instances_allowed",
+      "status": "passed"
+    },
+    {
+      "case": "same_exemplar_integer_allowed_across_players",
+      "status": "passed"
+    },
+    {
+      "case": "instance_id_duplicate_across_zones_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instance_id aparece em mais de uma zona: 00000000-0000-4000-8000-000000000002"
+    },
+    {
+      "case": "duplicate_reference_within_zone_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "player 1001/hand: referência duplicada na zona"
+    },
+    {
+      "case": "unknown_zone_reference_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "referência de zona sem instância: 00000000-0000-4000-8000-000000000063"
+    },
+    {
+      "case": "orphan_instance_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância órfã ou fora de exatamente uma zona: 00000000-0000-4000-8000-000000000002"
+    },
+    {
+      "case": "registry_key_must_match_instance_id",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000063: chave do registry difere de instance_id"
+    },
+    {
+      "case": "owner_must_match_zone_owner",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instance_id 00000000-0000-4000-8000-000000000001: owner diverge do dono da zona"
+    },
+    {
+      "case": "instance_id_must_be_canonical_uuid4",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância not-a-uuid: instance_id deve ser UUIDv4 canônico"
+    },
+    {
+      "case": "deck_exemplar_requires_exemplar_id",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000001: deck_exemplar exige exemplar_id positivo"
+    },
+    {
+      "case": "same_owner_exemplar_cannot_be_used_twice",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "exemplar físico duplicado para o mesmo proprietário: ('1001', 501)"
+    },
+    {
+      "case": "board_rejects_special_cards",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "board contém carta não-unidade: 00000000-0000-4000-8000-000000000005"
+    },
+    {
+      "case": "unit_requires_valid_current_row",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000001: unidade exige current_row válida"
+    },
+    {
+      "case": "non_unit_requires_null_current_row",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000005: carta não-unidade deve ter current_row null"
+    },
+    {
+      "case": "shield_charges_must_be_nonnegative_integer",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000001: shield_charges inválido"
+    },
+    {
+      "case": "boolean_is_not_valid_status_counter",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000001: contador inválido para status.frost"
+    },
+    {
+      "case": "status_counter_respects_registry_limit",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000001: contador inválido para status.madness"
+    },
+    {
+      "case": "snapshot_card_id_must_match_instance_card_id",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "instância 00000000-0000-4000-8000-000000000001: card_id diverge do snapshot"
+    },
+    {
+      "case": "duplicate_json_object_keys_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "chave JSON duplicada: x"
+    },
+    {
+      "case": "transition_moves_same_instance_and_preserves_state",
+      "status": "passed"
+    },
+    {
+      "case": "transition_replay_is_idempotent",
+      "status": "passed"
+    },
+    {
+      "case": "operation_id_reuse_with_different_args_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "operation_id reutilizado com argumentos diferentes"
+    },
+    {
+      "case": "wrong_expected_source_fails_atomically",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "transition_instance() missing 1 required keyword-only argument: 'expected_revision'"
+    },
+    {
+      "case": "special_cannot_enter_board_transition",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "transition_instance() missing 1 required keyword-only argument: 'expected_revision'"
+    },
+    {
+      "case": "cross_owner_zone_transfer_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "transferência entre proprietários não suportada"
+    },
+    {
+      "case": "discard_to_hand_preserves_all_runtime_fields",
+      "status": "passed"
+    },
+    {
+      "case": "same_zone_transition_rejected",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "origem e destino não podem ser iguais"
+    },
+    {
+      "case": "stale_state_revision_fails_atomically",
+      "status": "passed",
+      "expected": "rejection",
+      "detail": "snapshot desatualizado: state_revision diverge de expected_revision"
+    },
+    {
+      "case": "zone_order_is_preserved_and_destination_appends",
+      "status": "passed"
+    }
+  ],
+  "limitations": [
+    "Validates a candidate in-memory envelope and a reference transition function only.",
+    "Does not import or modify sistemas.gwent, the legacy candidate resolver, bot.py, database.py, or site/app.js.",
+    "Does not test SQLite transaction isolation, HTTP/API integration, browser serialization, Discord, R2, production matches, or concurrent requests.",
+    "Passing assertions validate the prototype contract only; all CI-001 through CI-013 decisions remain open."
+  ]
+}

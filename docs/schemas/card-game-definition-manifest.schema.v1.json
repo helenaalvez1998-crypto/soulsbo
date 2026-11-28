@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-definition-manifest.v1.json",
+  "title": "Soulsbo Definition Manifest v1",
+  "description": "Manifesto imutável por partida. Release IDs apontam para artefatos publicados; schema_version do envelope não é release de conteúdo.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_version",
+    "canonicalization",
+    "catalog_release_id",
+    "effect_registry_release_id",
+    "balance_rules_release_id",
+    "ruleset_release_id",
+    "artifact_sha256",
+    "definition_digest"
+  ],
+  "properties": {
+    "manifest_version": {
+      "const": 1
+    },
+    "canonicalization": {
+      "const": "RFC8785"
+    },
+    "catalog_release_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "effect_registry_release_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "balance_rules_release_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "ruleset_release_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "artifact_sha256": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalog",
+        "effect_registry",
+        "balance_rules",
+        "ruleset"
+      ],
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "effect_registry": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "balance_rules": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "ruleset": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "definition_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 de JCS/RFC8785 do objeto manifesto sem o próprio campo definition_digest."
+    }
+  }
+}

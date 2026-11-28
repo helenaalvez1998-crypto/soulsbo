@@ -1,0 +1,155 @@
+{
+  "metadata": {
+    "document": "Buffs, movement, protection and weather audit v0.1",
+    "status": "DIAGNOSTIC ONLY; LEGACY BEHAVIOR, NOT APPROVED DESIGN",
+    "baseline": "soulsbo-main-handoff(1).zip",
+    "method": "Synthetic fixtures invoking sistemas.gwent.aplicar_jogada, _remover_unidade, _resolve_round and _poder_efetivo; no database, HTTP, Discord, browser or production match used."
+  },
+  "counts": {
+    "assertions": 14,
+    "passed": 14,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "gwent_vinculo_enforces_two_ally_minimum",
+      "status": "passed",
+      "expected": "reject below minimum of two pre-existing allies",
+      "observed_error": "O Juramento exige pelo menos duas unidades na fileira."
+    },
+    {
+      "case": "gwent_muralha_empty_row_is_consumed_as_noop",
+      "status": "passed",
+      "observed": "special moved to discard; no same-row ally was buffed",
+      "ally_bonus": 0
+    },
+    {
+      "case": "gwent_egide_rare_grants_two_shields",
+      "status": "passed",
+      "expected_shields": 2,
+      "observed_shielded_units": [
+        "ally_ranged",
+        "ally_siege"
+      ],
+      "reason": "Rara has budget 1; gwent_egide resolves min(3, 1 + budget) targets"
+    },
+    {
+      "case": "gwent_chifre_rarity_targets_first_changed_ally",
+      "status": "passed",
+      "expected_same_row_bonuses": [
+        3,
+        2
+      ],
+      "observed_same_row_bonuses": [
+        [
+          "ally_melee_a",
+          3
+        ],
+        [
+          "ally_melee_b",
+          2
+        ]
+      ],
+      "reason": "base +2 to each; rarity budget 1 adds +1 to the first changed target in board order"
+    },
+    {
+      "case": "gwent_passo_rare_moves_two_units",
+      "status": "passed",
+      "expected_moved_count": 2,
+      "observed_moved_units": [
+        "ally_ranged",
+        "ally_siege"
+      ],
+      "reason": "Rara budget 1; movement cap is min(3, 1 + budget)"
+    },
+    {
+      "case": "star_gravity_reposition_recalculates_weather",
+      "status": "passed",
+      "expected": "strongest enemy moved from siege to melee; new melee weather applies immediately",
+      "observed_row": "melee",
+      "printed_fileira": "siege",
+      "observed_effective_power": 5
+    },
+    {
+      "case": "vigil_seal_weather_resistance_and_rarity_buff",
+      "status": "passed",
+      "observed_weather_resist": 1,
+      "observed_played_effective_power": 4,
+      "observed_ally_bonus": 2,
+      "reason": "identity gives base +1 to first same-row ally; Rara budget 1 amplifies that changed bonus once"
+    },
+    {
+      "case": "gwent_queima_rarity_amplifies_vengeance_trigger",
+      "status": "passed",
+      "expected_from_vengeance_alone": {
+        "first_survivor": 1,
+        "second_survivor": 1
+      },
+      "observed_after_epic_rarity": {
+        "first_survivor": 2,
+        "second_survivor": 1
+      },
+      "finding": "the global rarity-diff scan treats a removal-triggered Vengeance bonus as a Chama Negra bonus target"
+    },
+    {
+      "case": "normal_removal_is_blocked_by_consumed_shield",
+      "status": "passed",
+      "observed_message": "shielded_unit resistiu graças ao escudo.",
+      "board_remaining": 1,
+      "discard_count": 0,
+      "baixas": 0,
+      "shield_after": 0
+    },
+    {
+      "case": "sacrifice_bypasses_shield",
+      "status": "passed",
+      "observed_message": "shielded_sacrifice caiu.",
+      "board_remaining": 0,
+      "discard_count": 1,
+      "baixas": 1,
+      "shield_field_present": false
+    },
+    {
+      "case": "bonus_debuff_bypasses_shield",
+      "status": "passed",
+      "observed_bonus": 1,
+      "shield_unchanged": 1,
+      "finding": "shield is not a universal prevention layer for bonus/status effects"
+    },
+    {
+      "case": "round_reset_keeps_weather_resistance_field",
+      "status": "passed",
+      "archived_bonus": 0,
+      "archived_shield": 0,
+      "archived_geada": 0,
+      "archived_weather_resist": 2,
+      "next_round_weather": {
+        "melee": 0,
+        "ranged": 0,
+        "siege": 0
+      },
+      "decision_needed": "whether weather resistance is persistent card data or a round-scoped modifier"
+    },
+    {
+      "case": "combo_team_bonus_and_faction_passive_stack",
+      "status": "passed",
+      "existing_ally_team_bonus": 1,
+      "new_card_combo_plus_faction_bonus": 3,
+      "combo": "juramento_erdtree",
+      "faction_boost_used": true
+    },
+    {
+      "case": "legacy_shield_and_resistance_skills_are_unassigned",
+      "status": "passed",
+      "legacy_escudo_ferro_card_skill": "",
+      "legacy_resistencia_climatica_card_skill": "",
+      "active_weather_resistance_identity": true
+    }
+  ],
+  "limits": [
+    "These assertions cover selected branches and interactions, not all 54 candidate effect families or all card/rarity combinations.",
+    "They establish the current engine's behavior, not whether that behavior should be retained in the rebuilt engine.",
+    "No full competitive simulation, HTTP dispatch, production database, Discord runtime, or browser interaction was performed.",
+    "Target tie-breaking, physical instance identity, and duration of weather_resist remain design questions."
+  ]
+}

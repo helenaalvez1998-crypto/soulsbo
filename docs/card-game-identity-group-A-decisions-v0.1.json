@@ -1,0 +1,125 @@
+{
+  "metadata": {
+    "document": "Identity physical Group A decision matrix",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev5.zip",
+    "status": "OWNER_APPROVED",
+    "owner_approval_inferred": false,
+    "runtime_integration": false,
+    "approval_record": "docs/card-game-identity-group-A-approval-v0.1.json",
+    "approval_evidence": "User replied 'ok, continue' directly after the explicit Group A approval question."
+  },
+  "correction": {
+    "id": "ERRATA-CI-004-GROUP-A-REV6",
+    "finding": "cartas_exemplares.id is a global table PK in current database.py DDL.",
+    "recommendation": "Global uniqueness of exemplar_id plus validation of user_id/owner_player_id and card_id."
+  },
+  "decisions": [
+    {
+      "id": "CI-001",
+      "recommendation": "UUIDv4 canonical lower-case generated server-side; immutable per occurrence.",
+      "dependencies": [
+        "CI-002",
+        "CI-006",
+        "CI-011"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "CI-002",
+      "recommendation": "instance_id globally unique within a match across players, zones and materialized transient occurrences; exactly one zone reference.",
+      "dependencies": [
+        "CI-001",
+        "CI-006",
+        "CI-012",
+        "CI-014"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "CI-003",
+      "recommendation": "Multiple instances may share card_id; keep the current 12 distinct card_id deck-builder rule unchanged.",
+      "dependencies": [
+        "CI-001",
+        "CI-002",
+        "CI-006",
+        "BUF-013",
+        "RSRX-09"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "CI-004",
+      "recommendation": "exemplar_id is the current global PK cartas_exemplares.id; validate owner/user_id and card_id; do not infer or reuse.",
+      "dependencies": [
+        "CI-003",
+        "CI-006",
+        "CI-012"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "CI-006",
+      "recommendation": "Materialized tokens get instance_id; equipped relic stays outside zones; represent activation as event where possible, otherwise as transient CardInstance with null exemplar_id.",
+      "dependencies": [
+        "CI-001",
+        "CI-002",
+        "CI-004",
+        "CI-013"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "CI-010",
+      "recommendation": "Use target_instance_id; legacy target_id/card_id adapter only when exactly one eligible occurrence matches.",
+      "dependencies": [
+        "BUF-003",
+        "BUF-004",
+        "BUF-005",
+        "BUF-006",
+        "BUF-013",
+        "RSRX-09"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "BUF-013",
+      "recommendation": "Persisted zone order defines explicit first/last semantics; metric ties use a declared effect tie_breaker, defaulting to zone_order then instance_id.",
+      "dependencies": [
+        "CI-001",
+        "CI-002",
+        "CI-010"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    },
+    {
+      "id": "RSRX-09",
+      "recommendation": "All removal, return and discard extraction resolve and move exactly one physical occurrence by instance_id.",
+      "dependencies": [
+        "CI-001",
+        "CI-002",
+        "CI-003",
+        "CI-004",
+        "CI-006",
+        "CI-010",
+        "BUF-013"
+      ],
+      "status": "OWNER_APPROVED",
+      "owner_approved": true
+    }
+  ],
+  "validation": {
+    "harness": "docs/scripts/validate-card-game-identity-group-A-v0.1.py",
+    "passed": 30,
+    "failed": 0,
+    "scope": "synthetic invariants and static checks only"
+  }
+}

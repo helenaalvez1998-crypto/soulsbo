@@ -1,0 +1,217 @@
+{
+  "metadata": {
+    "document": "Card identity and lifecycle audit v0.1",
+    "date": "2026-11-27",
+    "status": "READ_ONLY_LEGACY_AUDIT; CANDIDATE_NOT_APPROVED",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev2.zip",
+    "legacy_engine": "sistemas.gwent",
+    "candidate_engine": "sistemas.card_removal_resurrection_candidate",
+    "method": "Direct controlled fixtures plus static AST checks of deck-save/snapshot functions; no DB or production session.",
+    "source_references": {
+      "deck_save": "bot.py:_api_gwent_deck_save",
+      "deck_snapshot": "bot.py:_gwent_deck_snapshots",
+      "card_preparation": "sistemas/gwent.py:preparar_carta/preparar_carta_pessoal",
+      "match_initialization": "sistemas/gwent.py:novo_estado",
+      "legacy_removal": "sistemas/gwent.py:_remover_unidade",
+      "target_payload": "sistemas/gwent.py:_resumo_alvo",
+      "round_cleanup": "sistemas/gwent.py:_resolve_round",
+      "return_to_hand": "sistemas/gwent.py:gwent_medico",
+      "resurrection": "sistemas/gwent.py:gwent_requiem/ressurgir",
+      "leader_resurrection": "sistemas/gwent.py:voz_caidos (Esgar)",
+      "candidate_resolver": "sistemas/card_removal_resurrection_candidate.py"
+    }
+  },
+  "counts": {
+    "assertions": 17,
+    "passed": 17,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "deck_save_blocks_duplicate_model_ids",
+      "status": "passed",
+      "finding": "new deck-save endpoint requires 12 distinct card_id models",
+      "duplicate_models_allowed_by_current_save": false
+    },
+    {
+      "case": "snapshot_loader_does_not_revalidate_distinct_ids",
+      "status": "passed",
+      "finding": "stored deck snapshot loader checks count, not card_id uniqueness",
+      "legacy_or_malformed_saved_deck_can_reach_match_snapshot": true
+    },
+    {
+      "case": "standard_card_drops_exemplar_id_at_preparation",
+      "status": "passed",
+      "card_id": "chefe_guardiao_cinzas",
+      "source_exemplar_id": 654321,
+      "prepared_exemplar_id": null,
+      "prepared_instance_id": null
+    },
+    {
+      "case": "personal_card_uses_composite_id_but_no_instance_id",
+      "status": "passed",
+      "card_id": "transmutacao_audit_0001",
+      "runtime_id": "transmutacao_audit_0001::654322",
+      "exemplar_id": 654322,
+      "instance_id": null
+    },
+    {
+      "case": "match_initializer_does_not_assign_instance_id",
+      "status": "passed",
+      "id": "ordinary_card",
+      "exemplar_id": 111,
+      "instance_id": null
+    },
+    {
+      "case": "target_summary_omits_physical_identity",
+      "status": "passed",
+      "serialized_fields": [
+        "bonus",
+        "escudo",
+        "geada",
+        "id",
+        "loucura",
+        "nome",
+        "poder",
+        "podrida",
+        "row",
+        "sangramento"
+      ],
+      "id_only": true
+    },
+    {
+      "case": "legacy_removal_uses_structural_equality",
+      "status": "passed",
+      "event": "duplicated_model caiu.",
+      "intended_object": "second",
+      "object_left_on_board": "second",
+      "object_sent_to_discard": "second",
+      "first_equal_object_removed": true
+    },
+    {
+      "case": "legacy_removal_state_cleanup_is_partial",
+      "status": "passed",
+      "event": "removal_victim caiu.",
+      "bonus_retained": 4,
+      "statuses": {
+        "sangramento": 0,
+        "geada": 0,
+        "podrida": 0,
+        "loucura": 0
+      },
+      "shield_present": false,
+      "weather_resist_retained": 2,
+      "combo_marker_retained": "combo-x"
+    },
+    {
+      "case": "round_end_cleanup_resets_combat_state_not_weather_resistance",
+      "status": "passed",
+      "bonus": 0,
+      "shield": 0,
+      "statuses": {
+        "sangramento": 0,
+        "geada": 0,
+        "podrida": 0,
+        "loucura": 0
+      },
+      "weather_resist": 2,
+      "combo_marker_present": false,
+      "instance_id_preserved": "persisted-inst-1"
+    },
+    {
+      "case": "medico_recovers_removed_unit_to_hand_with_bonus",
+      "status": "passed",
+      "removal_event": "medico_victim caiu.",
+      "destination": "hand",
+      "bonus": 4,
+      "weather_resist": 2,
+      "statuses": {
+        "sangramento": 0,
+        "geada": 0,
+        "podrida": 0,
+        "loucura": 0
+      }
+    },
+    {
+      "case": "requiem_resets_bonus_but_does_not_clear_stale_status",
+      "status": "passed",
+      "destination": "board",
+      "bonus": 0,
+      "shield_present": false,
+      "statuses_preserved": {
+        "sangramento": 1,
+        "geada": 1,
+        "podrida": 1,
+        "loucura": 1
+      },
+      "row": "siege",
+      "weather_resist": 2
+    },
+    {
+      "case": "ressurgir_resets_bonus_but_does_not_clear_stale_status",
+      "status": "passed",
+      "destination": "board",
+      "bonus": 0,
+      "shield_present": false,
+      "statuses_preserved": {
+        "sangramento": 1,
+        "geada": 1,
+        "podrida": 1,
+        "loucura": 1
+      },
+      "row": "siege",
+      "weather_resist": 2
+    },
+    {
+      "case": "esgar_removes_every_discard_entry_with_same_id",
+      "status": "passed",
+      "same_model_discard_entries_before": 2,
+      "same_model_discard_entries_after": 0,
+      "one_returned": true,
+      "bonus_after": 4,
+      "row": "ranged",
+      "statuses_after": {
+        "sangramento": 0,
+        "geada": 0,
+        "podrida": 0,
+        "loucura": 0
+      }
+    },
+    {
+      "case": "candidate_removes_exact_equal_but_distinct_object",
+      "status": "passed",
+      "selected_instance_id": "copy-2",
+      "board_instance_id": "copy-1",
+      "discard_instance_id": "copy-2"
+    },
+    {
+      "case": "candidate_does_not_reject_duplicate_instance_id_on_board",
+      "status": "passed",
+      "duplicate_instance_id": "collision-1",
+      "remaining_on_board": true,
+      "also_in_discard": true,
+      "candidate_detected_collision": false
+    },
+    {
+      "case": "candidate_resurrection_does_not_check_cross_zone_collision",
+      "status": "passed",
+      "instance_id": "collision-2",
+      "copies_on_board_after": 2,
+      "candidate_detected_collision": false
+    },
+    {
+      "case": "candidate_rejects_ambiguous_duplicate_instance_id_in_discard",
+      "status": "passed",
+      "duplicate_instance_id": "dup-discard",
+      "ambiguous_target_rejected": true
+    }
+  ],
+  "limitations": [
+    "Synthetic states reproduce edge cases; they do not establish that a live user database currently contains duplicate card IDs.",
+    "The current deck-save endpoint rejects repeated card_id models, but legacy saved decks and direct snapshot construction are not revalidated for uniqueness.",
+    "No real SQLite, HTTP, Discord, browser, R2 or production match was accessed.",
+    "Status carry-over in Requiem/Ressurgir is proven for a deliberately pre-populated stale discard record. The central removal path clears those status counters first.",
+    "A passed case means the asserted behavior or gap was reproduced; it does not mean the observed behavior is desirable or an approved design rule.",
+    "The audit does not approve a design rule or integrate the candidate resolver into the legacy runtime."
+  ]
+}

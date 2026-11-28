@@ -1,0 +1,38 @@
+name: Soulsbo CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install runtime and test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Card Engine and integration tests
+        run: python -m pytest tests/card_engine_v2 -q
+      - name: Compile Python entry points
+        run: |
+          python -m py_compile bot.py config.py site_hub.py site_card_engine_v2.py
+          python -m py_compile sistemas/card_game_achievements.py sistemas/card_engine_v2/*.py
+          python -m py_compile scripts/runtime_preflight.py scripts/backup_sqlite.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JavaScript syntax
+        run: node --check site/app.js
+      - name: Docker Compose config
+        run: |
+          cp .env.production.example .env
+          docker compose config --quiet
+      - name: Build container
+        run: docker build --pull -t soulsbo:ci .

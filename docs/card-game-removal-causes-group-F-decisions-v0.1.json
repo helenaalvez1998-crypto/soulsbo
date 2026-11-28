@@ -1,0 +1,193 @@
+{
+  "decision_register": "card_game_removal_causes_group_F",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "status": "OWNER_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev12.zip",
+  "audit_ref": "docs/card-game-removal-causes-group-F-audit-v0.1.json",
+  "evidence_ref": "docs/card-game-removal-causes-group-F-review-v0.1.md",
+  "decisions": [
+    {
+      "id": "FCAUSE-001",
+      "source_decision": "RSRX-03",
+      "title": "Causas elegíveis de Vingança",
+      "observed_legacy": {
+        "triggers_after_successful_causes": [
+          "normal_removal",
+          "execution",
+          "sacrifice"
+        ],
+        "does_not_trigger_on": [
+          "shield_block",
+          "non_board_target",
+          "round_archive",
+          "movement",
+          "recovery_or_resurrection"
+        ]
+      },
+      "proposal": {
+        "trigger": "after_successful_removal_once",
+        "eligible_causes": [
+          "normal_removal",
+          "execution",
+          "sacrifice"
+        ],
+        "target_scope": "remaining_allies_same_row",
+        "block_behavior": "no_trigger"
+      },
+      "recommendation": "Preservar o conjunto de três causas bem-sucedidas observado no legado e no registry candidato; não disparar em bloqueio ou arquivamento.",
+      "dependencies": [
+        "CI-008",
+        "CI-011",
+        "CI-014",
+        "BUF-009",
+        "BUF-010",
+        "RSRX-03",
+        "RSRX-10"
+      ],
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "FCAUSE-002",
+      "source_decision": "RSRX-04",
+      "title": "Contadores separados de remoção e sacrifício",
+      "observed_legacy": {
+        "baixas_counts": [
+          "normal_removal",
+          "execution",
+          "sacrifice"
+        ],
+        "baixas_excludes": [
+          "shield_block",
+          "round_archive"
+        ]
+      },
+      "proposal": {
+        "derived_counters": {
+          "board_removal_count": [
+            "normal_removal",
+            "execution"
+          ],
+          "sacrifice_count": [
+            "sacrifice"
+          ]
+        },
+        "legacy_adapter": "legacy_baixas = board_removal_count + sacrifice_count",
+        "round_archive_counted": false,
+        "death_semantics": false
+      },
+      "recommendation": "Derivar projeções de eventos causais; manter `baixas` somente como adaptador de compatibilidade, nunca como contador de mortes.",
+      "dependencies": [
+        "CI-005",
+        "CI-008",
+        "CI-012",
+        "RSRX-03",
+        "RSRX-04"
+      ],
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "FCAUSE-003",
+      "source_decision": "RSRX-05",
+      "title": "Vingança e Rykard em outputs separados e aditivos",
+      "observed_legacy": {
+        "vengeance_bonus": 1,
+        "rykard_direct_bonus": 2,
+        "observed_combined_bonus_per_eligible_survivor": 3
+      },
+      "proposal": {
+        "causal_outputs": [
+          {
+            "source_effect_id": "effect.vengeance_on_removal",
+            "amount_parameter": "vengeance_bonus_per_target"
+          },
+          {
+            "source_effect_id": "leader.rykard_devour",
+            "amount_parameter": "rykard_remaining_row_bonus"
+          }
+        ],
+        "same_target_additive": true,
+        "deduplicate_distinct_sources": false,
+        "numeric_values_frozen": false
+      },
+      "recommendation": "Preservar a separação e a acumulação de fontes; versionar os valores por release, sem tratar +3 observado como valor final imutável.",
+      "dependencies": [
+        "CI-005",
+        "CI-008",
+        "CI-011",
+        "BUF-001",
+        "BUF-002",
+        "BUF-007",
+        "BUF-014",
+        "RSRX-05"
+      ],
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "FCAUSE-004",
+      "source_decision": "GROUP_F_CAUSE_ENUM",
+      "title": "Enum fechado de causas e arquivamento de rodada separado",
+      "observed_legacy": {
+        "cause_parameter": "string sem enum fechado",
+        "unknown_cause_behavior": "qualquer valor diferente de sacrificio segue caminho de remoção comum escudável",
+        "round_archive_uses_remover": false
+      },
+      "proposal": {
+        "allowed_cause_ids": [
+          "normal_removal",
+          "execution",
+          "sacrifice"
+        ],
+        "legacy_aliases": {
+          "remocao": "normal_removal",
+          "default": "normal_removal",
+          "execucao": "execution",
+          "sacrificio": "sacrifice"
+        },
+        "round_archive": "separate_zone_transition_event_not_removal_cause",
+        "unknown_cause": "internal_contract_error_before_mutation"
+      },
+      "recommendation": "Validar a causa em allowlist fechada no servidor; não mapear `round_archive` a remoção; nunca aceitar strings desconhecidas pelo fallback permissivo legado.",
+      "dependencies": [
+        "CI-008",
+        "CI-011",
+        "CI-014",
+        "BUF-009",
+        "BUF-010"
+      ],
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "FCAUSE-005",
+      "source_decision": "GROUP_F_EFFECT_ID",
+      "title": "ID canônico de Vingança",
+      "observed_legacy": {
+        "legacy_skill_id": "vinganca",
+        "candidate_registry_effect_id": "effect.vengeance_on_removal",
+        "v4_example_effect_id": "unit.vengeance_on_removal"
+      },
+      "proposal": {
+        "canonical_effect_id": "effect.vengeance_on_removal",
+        "legacy_alias": "habilidade == vinganca",
+        "historical_v4_fixture": "preserve_as_historical_evidence"
+      },
+      "recommendation": "Usar o ID já presente no registry candidato como canônico; corrigir fixtures novos e manter o campo legado apenas no adaptador de migração.",
+      "dependencies": [
+        "CI-005",
+        "CI-011",
+        "BUF-002",
+        "RSRX-03",
+        "RSRX-05"
+      ],
+      "status": "OWNER_APPROVED"
+    }
+  ],
+  "scope_note": "Grupo F aprovado. Grupo E também aprovado para implementação isolada; migração de produção, alteração do banco publicado e cutover continuam não autorizados.",
+  "approval": {
+    "status": "OWNER_APPROVED",
+    "evidence": "User replied \"aprovo\" immediately after the explicit request to approve FCAUSE-001 through FCAUSE-005.",
+    "scope": "All five resolutions in this register. Numeric balance parameters remain release-versioned and are not frozen by this approval.",
+    "runtime_modified": false,
+    "approval_date": "2026-11-27"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "document": "Group B decision proposals — snapshot and causality",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev7.zip",
+  "status": "OWNER_APPROVED",
+  "scope": [
+    "CI-005",
+    "CI-011",
+    "BUF-001",
+    "BUF-002",
+    "BUF-012",
+    "RSRX-03",
+    "RSRX-05"
+  ],
+  "decisions": [
+    {
+      "id": "CI-005",
+      "status": "approved",
+      "proposal": "Freeze an immutable match-level definition manifest with catalog, effect-registry, balance-rules and ruleset release IDs plus a canonical content digest. Each CardInstance keeps a resolved mechanical definition snapshot and its definition digest. schema_version remains structural only.",
+      "evidence": [
+        "data/card_game/catalog-legacy-baseline-v0.1.json is explicitly historical",
+        "data/card_game/effect-registry-candidate.v1.json has schema_version but no immutable release metadata",
+        "sistemas/gwent.py::novo_estado does not write a manifest"
+      ],
+      "dependencies": [
+        "catalog release",
+        "effect registry release",
+        "balance rules release",
+        "canonicalization specification"
+      ],
+      "approved_rule": "Each match freezes an immutable definition manifest with catalog, effect registry, balance rules and ruleset release IDs plus a verifiable content digest. Each CardInstance stores a resolved mechanical definition snapshot and per-definition digest. schema_version remains structural only."
+    },
+    {
+      "id": "CI-011",
+      "status": "approved",
+      "proposal": "Use one UUIDv4 operation_id per logical action and distinct UUIDv4 event_id values for each domain event. Store causal links, sequence, event source and targets. Persist operation result, state revision and generated events atomically; identical idempotency fingerprint replays the saved result, conflicting reuse rejects.",
+      "evidence": [
+        "aplicar_jogada has no operation_id parameter",
+        "_registrar_evento stores at most 20 descriptive strings",
+        "cartas_gwent_matches stores state_json and has no revision/idempotency columns"
+      ],
+      "dependencies": [
+        "CI-014",
+        "Group E transaction/CAS implementation"
+      ],
+      "approved_rule": "Use a UUIDv4 operation_id for each logical action and separate UUIDv4 event_id values for domain events. Events are ordered, append-only and causally linked. Same operation_id plus same fingerprint replays the stored result; conflicting fingerprint reuse rejects. Updated state, revision, operation result and generated events commit atomically."
+    },
+    {
+      "id": "BUF-001",
+      "status": "approved",
+      "options": {
+        "A": "Remove rarity-based effect amplification entirely, following card-game-balance-spec-v0.1.md: rarity is classification, not an effect multiplier.",
+        "B": "Retain rarity amplification only for direct outputs of the resolving effect; reactive outputs never inherit root rarity unless their own contract explicitly opts in."
+      },
+      "recommendation": "A",
+      "reason": "Option A is more consistent with the existing balance specification and eliminates hidden cross-effect amplification. Option B preserves more legacy mechanics but requires causal attribution on every output.",
+      "evidence": [
+        "RARITY_EFFECT_BUDGET in sistemas/gwent.py",
+        "Chama Negra + Vingança synthetic runtime reproduction",
+        "card-game-balance-spec-v0.1.md section 6",
+        "cross-decision review BUF-001"
+      ],
+      "approved_option": "A",
+      "approved_rule": "Rarity is classification only. It does not modify effect magnitude, thresholds, target count/selection, duration or other execution parameters. RARITY_EFFECT_BUDGET must not exist as an execution dependency in the new system."
+    },
+    {
+      "id": "BUF-002",
+      "status": "approved",
+      "proposal": "Every reactive effect has its own source_effect_id and causal parent; it does not inherit rarity or parameters from the external effect that triggered it. Under BUF-001 option A this is an invariant; under option B it is a mandatory rarity boundary.",
+      "evidence": [
+        "_remover_unidade triggers Vingança synchronously",
+        "rarity pass currently scans global bonus deltas without source attribution"
+      ],
+      "approved_rule": "Reactive effects have their own source_effect_id and causal parent. They never inherit rarity or execution parameters from the external effect that triggered them."
+    },
+    {
+      "id": "BUF-012",
+      "status": "approved",
+      "proposal": "Only active, verified catalog bindings become capabilities in the new effect registry. Orphan handlers and inactive aliases remain historical/compatibility records until explicitly rebound.",
+      "evidence": [
+        "effect-registry-candidate.v1.json is still candidate",
+        "card-game-effect-catalog-decision-v0.1.md marks extraction as not connected to runtime"
+      ],
+      "approved_rule": "Only active, verified catalog bindings become capabilities in the new effect registry. Orphan handlers and inactive aliases remain historical/compatibility records until explicitly rebound."
+    },
+    {
+      "id": "RSRX-03",
+      "status": "approved",
+      "proposal": "A successful removal/sacrifice produces a removal event; if the removed unit has Vingança and the approved cause policy allows it, create a separate reactive Vingança event. A shield-blocked attempt is not a removal and does not trigger Vingança. Exact cause set remains a Group F decision.",
+      "evidence": [
+        "_remover_unidade handles shield before moving unit",
+        "Vingança branch runs after successful movement to discard",
+        "legacy sacrifice call uses the same removal helper"
+      ],
+      "dependency_note": "Resolved by docs/card-game-removal-causes-group-F-approval-v0.1.json.",
+      "approved_rule": "Successful normal_removal, execution or sacrifice emits a removal event; Vingança emits a separate reactive event only after successful removal. Shield-blocked attempts do not trigger it. The allowed cause set is fixed by approved FCAUSE-001/FCAUSE-004."
+    },
+    {
+      "id": "RSRX-05",
+      "status": "approved_as_causal_separation_only",
+      "proposal": "Represent Rykard's Vingança +1 and leader +2 as separate causal outputs with source IDs and ordered events. Legacy +3 is observed behavior, not a final approved design value.",
+      "evidence": [
+        "Rykard leader handler removes victim then applies +2",
+        "legacy runtime fixture confirms +3 when victim has Vingança"
+      ],
+      "scope_note": "Causal separation is approved by Groups B and F; +1/+2/+3 legacy numbers remain balance parameters and are not frozen."
+    }
+  ],
+  "runtime_modified": false,
+  "audit_result": {
+    "passed": 20,
+    "failed": 0,
+    "script": "docs/scripts/audit-card-game-snapshot-causality-group-B-v0.1.py"
+  },
+  "approval_record": "docs/card-game-snapshot-causality-group-B-approval-v0.1.md",
+  "scope_note": "Grupo B aprovado. RSRX-03 cause set is now closed by Group F; E-001..E-010 is approved separately. No runtime integration or production migration is implied."
+}

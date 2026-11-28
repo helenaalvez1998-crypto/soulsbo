@@ -1,0 +1,79 @@
+{
+  "validation": "card_game_removal_causes_group_F",
+  "version": "0.1",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev12.zip",
+  "status": "PASS_READ_ONLY_AUDIT; DECISIONS_PENDING_OWNER_APPROVAL",
+  "total": 29,
+  "passed": 29,
+  "failed": 0,
+  "runtime_modified": false,
+  "test_source": "docs/scripts/audit-card-game-removal-causes-group-F-v0.1.py",
+  "audit_result": "docs/card-game-removal-causes-group-F-audit-v0.1.json",
+  "limitations": [
+    "Fixtures are synthetic in-memory states; no HTTP, database, Discord, R2 or production environment was exercised.",
+    "The 29 passing cases reproduce behavior and source facts; they do not approve the recommended new-game rules.",
+    "Vengeance trigger policy for sacrifice, counters, additive Rykard balance and effect ID canonicalization remain owner decisions in Group F."
+  ],
+  "regressions_reexecuted": [
+    {
+      "name": "card_instance_v0.5",
+      "passed": 28,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-card-instance-v0.5.py"
+    },
+    {
+      "name": "group_D_contract_validation",
+      "passed": 13,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-selection-group-D-v0.1.py"
+    },
+    {
+      "name": "group_D_audit",
+      "passed": 23,
+      "failed": 0,
+      "script": "docs/scripts/audit-card-game-selection-group-D-v0.1.py"
+    },
+    {
+      "name": "group_A_identity",
+      "passed": 30,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-identity-group-A-v0.1.py"
+    },
+    {
+      "name": "group_B_snapshot_causality",
+      "passed": 20,
+      "failed": 0,
+      "script": "docs/scripts/audit-card-game-snapshot-causality-group-B-v0.1.py"
+    },
+    {
+      "name": "group_C_state_lifecycle",
+      "passed": 43,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-state-lifecycle-group-C-v0.1.py"
+    },
+    {
+      "name": "cross_decision_matrix",
+      "passed": 272,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-cross-decision-review-v0.1.py"
+    },
+    {
+      "name": "target_selection_row_scope",
+      "passed": 15,
+      "failed": 0,
+      "script": "docs/scripts/audit-target-selection-row-scope-v0.1.py"
+    },
+    {
+      "name": "manual_target_ui_parity",
+      "passed": 12,
+      "failed": 0,
+      "script": "docs/scripts/audit-manual-target-ui-parity-v0.1.py"
+    },
+    {
+      "name": "removal_resurrection_candidate",
+      "passed": 49,
+      "failed": 0,
+      "script": "docs/scripts/test-card-removal-resurrection-candidate-v0.1.py"
+    }
+  ]
+}

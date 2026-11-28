@@ -1,0 +1,30 @@
+{
+  "approval": "card_game_selection_group_D",
+  "version": "0.1",
+  "status": "OWNER_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev11.zip",
+  "evidence": "User message \"ok, continua\" immediately followed the explicit request to approve all 12 DSEL decisions.",
+  "decision_register": "docs/card-game-selection-group-D-decisions-v0.1.json",
+  "approved_decision_ids": [
+    "DSEL-DEC-001",
+    "DSEL-DEC-002",
+    "DSEL-DEC-003",
+    "DSEL-DEC-004",
+    "DSEL-DEC-005",
+    "DSEL-DEC-006",
+    "DSEL-DEC-007",
+    "DSEL-DEC-008",
+    "DSEL-DEC-009",
+    "DSEL-DEC-010",
+    "DSEL-DEC-011",
+    "DSEL-DEC-012"
+  ],
+  "boundaries": {
+    "CI-014_closed": false,
+    "runtime_integration_authorized": false,
+    "production_api_or_database_changes_authorized": false,
+    "group_F_open": true,
+    "group_E_open": true,
+    "per_effect_release_parameters_finalized": false
+  }
+}

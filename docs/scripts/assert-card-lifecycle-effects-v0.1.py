@@ -77,12 +77,12 @@ def test_gloria_loser_discards_all():
  assert not p["board"] and any(x["id"]=="gloria_loser" for x in p["discard"])
  return {"retained":False,"discarded":True}
 
-def test_sobrevivente_keeps_strongest_regardless_of_result():
+def test_sobrevivente_declared_but_not_resolved():
  card=smoke.unit("survivor_declared",skill="sobrevivente",power=9)
  s,p,_=round_state([card],[smoke.unit("enemy",power=1)])
  gwent._resolve_round(s)
- assert [x["id"] for x in p["board"]]==["survivor_declared"]
- return {"declared_effect":"survive round end","actual":"kept (hook implemented v0.1 deck-budget step)"}
+ assert not p["board"] and any(x["id"]=="survivor_declared" for x in p["discard"])
+ return {"declared_effect":"survive round end","actual":"discarded","missing_hook_confirmed":True}
 
 for n,f in [
  ("vinganca_death_triggers_same_row_only",test_vengeance),
@@ -91,7 +91,7 @@ for n,f in [
  ("espolios_loser_does_not_draw",test_espolios_loser_does_not_draw),
  ("gloria_winner_keeps_only_strongest",test_gloria_winner_keeps_strongest),
  ("gloria_loser_discards_all",test_gloria_loser_discards_all),
- ("sobrevivente_keeps_strongest_round_end",test_sobrevivente_keeps_strongest_regardless_of_result),
+ ("sobrevivente_missing_round_end_hook",test_sobrevivente_declared_but_not_resolved),
 ]: check(n,f)
 
 report={"metadata":{"document":"Lifecycle effect behavioral assertions v0.1","status":"DIAGNOSTIC ONLY; CONTROLLED ROUND-END/REMOVAL CASES","engine":"sistemas.gwent._remover_unidade and _resolve_round","baseline":"soulsbo-main(1).zip"},"counts":{"assertions":len(cases),"passed":sum(x["status"]=="passed" for x in cases),"failed":sum(x["status"]=="failed" for x in cases)},"cases":cases,"limitations":["Synthetic boards only; does not model player decision-making or full match win rate.","The suite tests the current hidden Gloria behavior as observed, not whether that behavior is approved design.","Sobrevivente's failure is evidence of a missing hook in the current source; it is not a claim that the card exists in the 137-card catalogue."]}

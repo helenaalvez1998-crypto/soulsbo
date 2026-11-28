@@ -1,0 +1,13 @@
+{
+  "operation_id": "7b3c6e28-89a4-4f33-96b1-bf14a287a101",
+  "actor": {
+    "type": "player",
+    "player_id": "1001"
+  },
+  "expected_revision": 0,
+  "action_type": "play_unit",
+  "payload": {
+    "source_instance_id": "00000000-0000-4000-8000-000000000001",
+    "target_row": "melee"
+  }
+}

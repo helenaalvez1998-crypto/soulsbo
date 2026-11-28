@@ -1,0 +1,152 @@
+{
+  "document": "Soulsbo Card Engine v2 alpha v0.4 implementation summary",
+  "status": "PASS_ALPHA_ONLY_NOT_RELEASE_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev18.zip",
+  "catalog_release_id": "alpha-test-only.catalog.v0.3",
+  "tests": {
+    "tests": 109,
+    "passed": 109,
+    "failed": 0,
+    "skipped": 0
+  },
+  "catalog_scope": {
+    "historical_models": 137,
+    "alpha_allowlist_cards": 27,
+    "blocked_historical_models": 110,
+    "combo_definitions_registered": 27,
+    "combos_reachable_with_current_allowlist_tags": 9,
+    "combos_inert_until_missing_tag_sources_are_added": 18,
+    "faction_passives": 4,
+    "leader_handlers": 10,
+    "entry_effect_families": 12
+  },
+  "staging_summary": {
+    "historical_model_count": 137,
+    "alpha_test_only_count": 27,
+    "blocked_staging_only_count": 110,
+    "not_rebuilt_count": 137,
+    "faction_unreviewed_count": 137,
+    "legacy_cost_mismatch_count": 19
+  },
+  "combo_faction_leader_demo": {
+    "winner_player_id": "1001",
+    "round_scores": {
+      "1001": 20,
+      "2002": 10
+    },
+    "event_count": 21,
+    "event_counts": {
+      "card_combo_activated": 1,
+      "faction_passive_applied": 1,
+      "leader_activated": 1,
+      "leader_bonus_applied": 1,
+      "player_passed": 2,
+      "round_closed": 1,
+      "round_score_frozen": 1,
+      "round_started": 1,
+      "turn_action_completed": 4,
+      "unit_archived": 4,
+      "unit_played": 4
+    },
+    "sqlite_integrity": {
+      "event_sequence_violations": 0,
+      "foreign_key_violations": 0,
+      "integrity_check": "ok",
+      "ok": true,
+      "quick_check": "ok",
+      "row_counts": {
+        "card_engine_v2_legacy_archive": 0,
+        "cartas_gwent_match_events": 21,
+        "cartas_gwent_match_operations": 7,
+        "cartas_gwent_match_rewards": 0,
+        "cartas_gwent_matches": 1,
+        "cartas_gwent_outbox": 0
+      },
+      "state_revision_violations": 0
+    }
+  },
+  "playable_best_of_three": {
+    "winner_player_id": "1001",
+    "round_wins": {
+      "1001": 2,
+      "2002": 1
+    },
+    "event_count": 48,
+    "round_history": [
+      {
+        "round_number": 1,
+        "scores": {
+          "1001": 9,
+          "2002": 4
+        },
+        "winner_player_id": "1001"
+      },
+      {
+        "round_number": 2,
+        "scores": {
+          "1001": 0,
+          "2002": 6
+        },
+        "winner_player_id": "2002"
+      },
+      {
+        "round_number": 3,
+        "scores": {
+          "1001": 6,
+          "2002": 0
+        },
+        "winner_player_id": "1001"
+      }
+    ],
+    "sqlite_integrity": {
+      "event_sequence_violations": 0,
+      "foreign_key_violations": 0,
+      "integrity_check": "ok",
+      "ok": true,
+      "quick_check": "ok",
+      "row_counts": {
+        "card_engine_v2_legacy_archive": 0,
+        "cartas_gwent_match_events": 48,
+        "cartas_gwent_match_operations": 16,
+        "cartas_gwent_match_rewards": 0,
+        "cartas_gwent_matches": 1,
+        "cartas_gwent_outbox": 0
+      },
+      "state_revision_violations": 0
+    }
+  },
+  "scope_limits": [
+    "Tests use disposable local SQLite databases; no production database is accessed.",
+    "No Discord, HTTP, frontend, aiosqlite or multi-host integration is exercised.",
+    "The 27-card allowlist, 27 combo definitions, four faction passives and ten leaders are alpha-only fixtures, not a published catalog.",
+    "Only nine registered combos have all required tags represented in the current 27-card allowlist; 18 remain inert until tag-source cards are added.",
+    "Combo/passive/leader tests use isolated test matches; not every handler has been playtested through a human UI flow.",
+    "The remaining 110 historical models are blocked; the full card catalog, damage system, all special families and production adapter are incomplete."
+  ],
+  "staging_validation": {
+    "status": "PASS",
+    "summary": {
+      "historical_model_count": 137,
+      "alpha_test_only_count": 27,
+      "blocked_staging_only_count": 110,
+      "not_rebuilt_count": 137,
+      "faction_unreviewed_count": 137,
+      "legacy_cost_mismatch_count": 19
+    },
+    "checks": {
+      "review_only_status": true,
+      "all_137_historical_ids_present_once": true,
+      "allowlist_matches_alpha_catalog": true,
+      "27_alpha_models_only": true,
+      "110_models_blocked": true,
+      "blocked_models_have_blockers": true,
+      "source_hashes_match": true,
+      "staging_summary_matches_expected": true
+    },
+    "source_sha256": {
+      "catalog-legacy-baseline-v0.1.json": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+      "card-engine-v2-alpha-catalog.v0.3.json": "4a3296f3f666d4bf01c20abe58da1b78bb2a35fa95c29be212460ed0ccfe89ab",
+      "card-engine-v2-legacy-catalog-staging.v0.2.json": "1c4088665c576d73e7a549e2ff2c6e675c62526aa53cf64a681610278fb3f07b"
+    }
+  }
+}

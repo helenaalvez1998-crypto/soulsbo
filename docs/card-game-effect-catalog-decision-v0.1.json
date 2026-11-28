@@ -1,0 +1,3329 @@
+{
+  "metadata": {
+    "document": "Decisões de consolidação do catálogo de efeitos v0.1",
+    "generated_at": "2026-11-27",
+    "status": "CANDIDATE FOR REVIEW; NOT AN APPROVED FINAL GAME RULESET",
+    "source_baseline": "soulsbo-main(1).zip; runtime modules sistemas/cartas.py and sistemas/gwent.py",
+    "candidate_effect_family_count": 54,
+    "legacy_generic_definition_count": 59,
+    "active_identity_count": 22,
+    "combo_count": 27,
+    "leader_count": 10
+  },
+  "counts": {
+    "legacy_habilidades": 59,
+    "legacy_unit_skill_definitions": 32,
+    "legacy_tactical_special_definitions": 21,
+    "legacy_relic_definitions": 6,
+    "candidate_effect_families_by_kind": {
+      "unit": 36,
+      "special": 12,
+      "relic": 6
+    },
+    "active_identity_effects": 22,
+    "identity_cards_with_suppressed_generic_field": 16,
+    "filtered_identity_branches_v18": 18,
+    "stale_v75_identity_branches": 6,
+    "unregistered_field_effect_ids": 4,
+    "hidden_gloria_cards": 3,
+    "declared_survivente_without_handler": true,
+    "combos": 27,
+    "combo_tag_card_ids": 72,
+    "combo_tag_card_ids_with_catalog_entry": 67,
+    "orphan_combo_card_ids": 5,
+    "leaders": 10,
+    "faction_passives": 4
+  },
+  "recommendation_counts": {
+    "generic_aliases": {
+      "MERGE_AS_PARAMETERIZED_FAMILY": 29,
+      "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST": 29,
+      "REDESIGN_AS_EXPLICIT_ROUND_END_EFFECT; NEW_HANDLER_REQUIRED": 1
+    },
+    "identity_overrides": {
+      "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE": 5,
+      "MERGE_AS_PARAMETERIZED_FAMILY": 8,
+      "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW": 9
+    },
+    "inactive_branches": {
+      "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA": 9,
+      "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED": 15,
+      "REMOVE_UNREGISTERED_FIELD_EFFECT_FROM_NEW_RUNTIME": 4
+    }
+  },
+  "families": [
+    {
+      "effect_id": "effect.first_round_power",
+      "name": "Ímpeto da Primeira Luz",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_first_round_power",
+      "legacy_aliases": [
+        "primeira_luz",
+        "lei_primeva"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.comeback_power",
+      "name": "Força da Retomada",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_comeback_power",
+      "legacy_aliases": [
+        "retaliacao",
+        "contragolpe",
+        "instinto",
+        "fome_abismo",
+        "last_bell"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.ahead_power",
+      "name": "Ímpeto da Vantagem",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_ahead_power",
+      "legacy_aliases": [
+        "impeto"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.third_round_power",
+      "name": "Último Fôlego",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_third_round_power",
+      "legacy_aliases": [
+        "ultimo_folego"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.sequence_power",
+      "name": "Postura Encadeada",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_sequence_power",
+      "legacy_aliases": [
+        "encadeamento",
+        "adaptacao",
+        "quebra_ritmo",
+        "veil_shift",
+        "pilgrim_duel",
+        "mist_trail"
+      ],
+      "required_params": [
+        "reference_side",
+        "row_relation",
+        "requires_previous_play",
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.tied_score_power",
+      "name": "Concentração",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_tied_score_power",
+      "legacy_aliases": [
+        "sangue_frio"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.ranged_row_power",
+      "name": "Mira Cariana",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_ranged_row_power",
+      "legacy_aliases": [
+        "precisao"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.enemy_bonus_reduction",
+      "name": "Supressão de Bônus",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_enemy_bonus_reduction",
+      "legacy_aliases": [
+        "drenagem",
+        "hollow_thunder",
+        "counterflame",
+        "void_rend",
+        "destined_death"
+      ],
+      "required_params": [
+        "target_scope",
+        "amount",
+        "floor",
+        "only_positive"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.arcane_hunter_power",
+      "name": "Caçador de Feitiços",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_arcane_hunter_power",
+      "legacy_aliases": [
+        "cacador_arcano"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.enemy_field_suppression",
+      "name": "Decreto Soberano",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_enemy_field_suppression",
+      "legacy_aliases": [
+        "decreto_soberano"
+      ],
+      "required_params": [
+        "amount",
+        "floor"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.weather_affinity_power",
+      "name": "Afinidade com a Tempestade",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_weather_affinity_power",
+      "legacy_aliases": [
+        "olho_tempestade",
+        "ancient_mist"
+      ],
+      "required_params": [
+        "weather_scope",
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.late_round_reversal_power",
+      "name": "Paradoxo Eterno",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_late_round_reversal_power",
+      "legacy_aliases": [
+        "paradoxo_eterno"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.same_row_formation_power",
+      "name": "Formação da Fileira",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_same_row_formation_power",
+      "legacy_aliases": [
+        "guardiao_fileira",
+        "dupla_fornalha",
+        "forge_rhythm"
+      ],
+      "required_params": [
+        "mode",
+        "bonus_per_ally",
+        "max_bonus",
+        "minimum_allies",
+        "faction_filter"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.solitary_row_power",
+      "name": "Caçador Solitário",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_solitary_row_power",
+      "legacy_aliases": [
+        "cacador_solitario"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.row_aura_bonus",
+      "name": "Estandarte da Fileira",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_row_aura_bonus",
+      "legacy_aliases": [
+        "estandarte",
+        "grey_watch"
+      ],
+      "required_params": [
+        "bonus",
+        "include_self"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.weather_resistance",
+      "name": "Resistência Climática",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_weather_resistance",
+      "legacy_aliases": [
+        "resistencia_climatica"
+      ],
+      "required_params": [
+        "resistance",
+        "bonus_if_no_weather"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.weather_ward_support",
+      "name": "Selo de Vigília",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_weather_ward_support",
+      "legacy_aliases": [
+        "vigil_seal"
+      ],
+      "required_params": [
+        "weather_resistance",
+        "ally_bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.discard_special_power",
+      "name": "Eco das Cinzas Arcanas",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_discard_special_power",
+      "legacy_aliases": [
+        "eco_arcano",
+        "echo_orb"
+      ],
+      "required_params": [
+        "bonus_per_special",
+        "minimum_specials",
+        "max_bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.death_revenge",
+      "name": "Vingança",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_death_revenge",
+      "legacy_aliases": [
+        "vinganca"
+      ],
+      "required_params": [
+        "ally_bonus"
+      ],
+      "timing": "on_death",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.entry_shield",
+      "name": "Escudo de Ferro",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_entry_shield",
+      "legacy_aliases": [
+        "escudo_ferro"
+      ],
+      "required_params": [
+        "shield_count"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.ally_sacrifice_power",
+      "name": "Sacrifício Devorador",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_ally_sacrifice_power",
+      "legacy_aliases": [
+        "devorar",
+        "v75_blood_price"
+      ],
+      "required_params": [
+        "gain_cap",
+        "fallback_bonus",
+        "minimum_gain",
+        "target_selection"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.revive_from_discard",
+      "name": "Ressurgir",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_revive_from_discard",
+      "legacy_aliases": [
+        "ressurgir"
+      ],
+      "required_params": [
+        "maximum_base_power",
+        "target_selection",
+        "added_bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.round_victory_survivor",
+      "name": "Glória da Sobrevivência",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_round_victory_survivor",
+      "legacy_aliases": [
+        "sobrevivente",
+        "gloria"
+      ],
+      "required_params": [
+        "winner_only",
+        "maximum_survivors"
+      ],
+      "timing": "round_end",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.victory_draw",
+      "name": "Espólios",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_victory_draw",
+      "legacy_aliases": [
+        "espolios"
+      ],
+      "required_params": [
+        "draw_count"
+      ],
+      "timing": "round_end",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.cross_row_presence_power",
+      "name": "Passos entre Fileiras",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_cross_row_presence_power",
+      "legacy_aliases": [
+        "irmandade_veu",
+        "twin_dance",
+        "shadow_paths",
+        "v75_lunar_cartography"
+      ],
+      "required_params": [
+        "mode",
+        "bonus_per_row",
+        "max_bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.formation_or_discard_power",
+      "name": "Círculo de Ressonância",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_formation_or_discard_power",
+      "legacy_aliases": [
+        "circulo_arcano"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.row_pair_blessing",
+      "name": "Bênção de Companheiros",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_row_pair_blessing",
+      "legacy_aliases": [
+        "ash_guardian",
+        "v75_golden_vow"
+      ],
+      "required_params": [
+        "self_bonus",
+        "ally_bonus",
+        "ally_selection"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.discard_advantage_power",
+      "name": "Dízimo do Abismo",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_discard_advantage_power",
+      "legacy_aliases": [
+        "abyss_tithe"
+      ],
+      "required_params": [
+        "discard_bonus",
+        "fallback_bonus",
+        "fallback_condition"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.ruin_omen",
+      "name": "Presságio da Ruína",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_ruin_omen",
+      "legacy_aliases": [
+        "ruin_omen"
+      ],
+      "required_params": [
+        "enemy_bonus_reduction",
+        "enemy_bonus_floor",
+        "self_bonus_if_behind"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.enemy_positive_bonus_power",
+      "name": "Eclipse Devorador",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_enemy_positive_bonus_power",
+      "legacy_aliases": [
+        "devouring_eclipse"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.cross_row_support",
+      "name": "Aliança Lunar",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_cross_row_support",
+      "legacy_aliases": [
+        "veiled_moon",
+        "covering_shot"
+      ],
+      "required_params": [
+        "self_bonus",
+        "ally_bonus",
+        "ally_selection"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.row_status_pressure",
+      "name": "Pressão de Estados",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_row_status_pressure",
+      "legacy_aliases": [
+        "scarlet_bloom",
+        "impaling_spear",
+        "v75_blood_mark",
+        "v75_frost_oracle"
+      ],
+      "required_params": [
+        "status",
+        "target_scope",
+        "marks_per_entry",
+        "threshold_marks",
+        "threshold_bonus_loss",
+        "self_bonus_on_threshold",
+        "reset_marks_on_threshold"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.gravity_reposition",
+      "name": "Gravidade do Flagelo",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_gravity_reposition",
+      "legacy_aliases": [
+        "star_gravity"
+      ],
+      "required_params": [
+        "bonus_loss",
+        "destination"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.frost_storm_momentum",
+      "name": "Tempestade do Tempo",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_frost_storm_momentum",
+      "legacy_aliases": [
+        "time_storm"
+      ],
+      "required_params": [
+        "marks_per_enemy",
+        "max_marks",
+        "self_bonus_per_target",
+        "self_bonus_cap"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.grace_purification",
+      "name": "Regressão Serena",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_grace_purification",
+      "legacy_aliases": [
+        "v75_grace_mender"
+      ],
+      "required_params": [
+        "max_targets",
+        "bonus_per_purified",
+        "fallback"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.gravity_shear",
+      "name": "Cisalhamento Gravitacional",
+      "kind": "unit",
+      "resolution_handler_candidate": "resolve_gravity_shear",
+      "legacy_aliases": [
+        "v75_gravity_shear"
+      ],
+      "required_params": [
+        "amount",
+        "max_targets",
+        "self_bonus_when_full",
+        "bonus_floor"
+      ],
+      "timing": "on_play",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.weather_row",
+      "name": "Tempestade dos Picos",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_weather_row",
+      "legacy_aliases": [
+        "gwent_clima"
+      ],
+      "required_params": [
+        "power_penalty"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.apply_status_marks",
+      "name": "Aplicação de Estados",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_apply_status_marks",
+      "legacy_aliases": [
+        "gwent_nevoa",
+        "gwent_geada",
+        "gwent_chuva",
+        "gwent_sangramento",
+        "gwent_geada_cariana",
+        "gwent_podrida",
+        "gwent_loucura"
+      ],
+      "required_params": [
+        "status",
+        "target_scope",
+        "marks",
+        "mark_cap",
+        "threshold_marks",
+        "threshold_action",
+        "rarity_scaling"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.row_buff",
+      "name": "Bênção de Fileira",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_row_buff",
+      "legacy_aliases": [
+        "gwent_chifre",
+        "gwent_muralha",
+        "gwent_vinculo"
+      ],
+      "required_params": [
+        "bonus",
+        "minimum_allies"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.return_unit_to_hand",
+      "name": "Lágrima Sagrada",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_return_unit_to_hand",
+      "legacy_aliases": [
+        "gwent_medico"
+      ],
+      "required_params": [
+        "maximum_base_power",
+        "target_selection"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.remove_units",
+      "name": "Remoção Tática",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_remove_units",
+      "legacy_aliases": [
+        "gwent_queima",
+        "gwent_execucao"
+      ],
+      "required_params": [
+        "target_scope",
+        "max_targets",
+        "power_limit",
+        "shield_blocks"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.clear_weather",
+      "name": "Lei da Regressão",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_clear_weather",
+      "legacy_aliases": [
+        "gwent_purificar"
+      ],
+      "required_params": [],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.draw_cards",
+      "name": "Passo do Cão de Caça",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_draw_cards",
+      "legacy_aliases": [
+        "gwent_batedor"
+      ],
+      "required_params": [
+        "count"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.grant_shield",
+      "name": "Bênção da Árvore Áurea",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_grant_shield",
+      "legacy_aliases": [
+        "gwent_egide"
+      ],
+      "required_params": [
+        "shield_count",
+        "max_targets"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.revive_to_board",
+      "name": "Chamado dos Mortos",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_revive_to_board",
+      "legacy_aliases": [
+        "gwent_requiem"
+      ],
+      "required_params": [
+        "maximum_base_power",
+        "target_selection",
+        "added_bonus"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.move_unit",
+      "name": "Passo do Lobo",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_move_unit",
+      "legacy_aliases": [
+        "gwent_passo"
+      ],
+      "required_params": [
+        "max_targets",
+        "target_selection"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.purify_frost_buff",
+      "name": "Chama do Gigante",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_purify_frost_buff",
+      "legacy_aliases": [
+        "gwent_chama"
+      ],
+      "required_params": [
+        "bonus_per_unit"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.summon_wolves",
+      "name": "Cinzas dos Lobos Solitários",
+      "kind": "special",
+      "resolution_handler_candidate": "resolve_summon_wolves",
+      "legacy_aliases": [
+        "gwent_invocacao"
+      ],
+      "required_params": [
+        "count",
+        "power_base"
+      ],
+      "timing": "special_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.relic_godrick_rune",
+      "name": "Grande Runa de Godrick",
+      "kind": "relic",
+      "resolution_handler_candidate": "resolve_relic_godrick_rune",
+      "legacy_aliases": [
+        "reliquia_godrick"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "relic_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.relic_unborn_rune",
+      "name": "Grande Runa dos Não Nascidos",
+      "kind": "relic",
+      "resolution_handler_candidate": "resolve_relic_unborn_rune",
+      "legacy_aliases": [
+        "reliquia_renala"
+      ],
+      "required_params": [
+        "bonus"
+      ],
+      "timing": "relic_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.relic_death_rune",
+      "name": "Runa da Morte",
+      "kind": "relic",
+      "resolution_handler_candidate": "resolve_relic_death_rune",
+      "legacy_aliases": [
+        "reliquia_morte"
+      ],
+      "required_params": [
+        "amount",
+        "floor"
+      ],
+      "timing": "relic_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.relic_night_flame_sword",
+      "name": "Espada da Noite e da Chama",
+      "kind": "relic",
+      "resolution_handler_candidate": "resolve_relic_night_flame_sword",
+      "legacy_aliases": [
+        "reliquia_noite_chama"
+      ],
+      "required_params": [
+        "stance",
+        "base_power_loss",
+        "bonus_loss"
+      ],
+      "timing": "relic_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.relic_black_blade",
+      "name": "Lâmina Negra",
+      "kind": "relic",
+      "resolution_handler_candidate": "resolve_relic_black_blade",
+      "legacy_aliases": [
+        "reliquia_lamina_negra"
+      ],
+      "required_params": [
+        "bonus_loss",
+        "shield_blocks_without_consumption"
+      ],
+      "timing": "relic_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    },
+    {
+      "effect_id": "effect.relic_margit_shackles",
+      "name": "Algemas de Margit",
+      "kind": "relic",
+      "resolution_handler_candidate": "resolve_relic_margit_shackles",
+      "legacy_aliases": [
+        "reliquia_algemas"
+      ],
+      "required_params": [
+        "target_selection"
+      ],
+      "timing": "relic_action",
+      "recommendation": "KEEP_OR_MERGE_INTO_CANONICAL_FAMILY"
+    }
+  ],
+  "generic_special_and_relic_aliases": [
+    {
+      "legacy_id": "adaptacao",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Passo do Peregrino",
+      "legacy_description": "Ganha +1 de poder se for jogada em uma fileira diferente da sua última unidade.",
+      "assigned_card_ids": [
+        "magia_selo_vigilia"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.sequence_power",
+      "default_effect_params": {
+        "reference_side": "own",
+        "row_relation": "different",
+        "requires_previous_play": true,
+        "bonus": 1
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "cacador_arcano",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Caçador de Feitiços",
+      "legacy_description": "Ganha +1 de poder se o adversário tiver uma unidade da Lua Negra ou uma unidade com bônus acima de zero.",
+      "assigned_card_ids": [
+        "chefe_maliketh_morte_destinada",
+        "gwent_unidade_invocador",
+        "patente_1",
+        "patente_7"
+      ],
+      "assigned_card_count": 4,
+      "canonical_effect_id": "effect.arcane_hunter_power",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "cacador_solitario",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Caçador Solitário",
+      "legacy_description": "+2 se não houver outra unidade sua na fileira.",
+      "assigned_card_ids": [
+        "gwent_singular_primeiro"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.solitary_row_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "circulo_arcano",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Círculo de Ressonância",
+      "legacy_description": "+2 se houver outra unidade aliada na mesma fileira ou uma carta especial no descarte.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.formation_or_discard_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "contragolpe",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Contragolpe",
+      "legacy_description": "Ganha +2 de poder quando sua pontuação total é menor que a do adversário.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.comeback_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "decreto_soberano",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Decreto Soberano",
+      "legacy_description": "Reduz em 2 o bônus de todas as unidades inimigas, até o limite de -2.",
+      "assigned_card_ids": [
+        "primordial_trono"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.enemy_field_suppression",
+      "default_effect_params": {
+        "amount": 2,
+        "floor": -2
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "devorar",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Devorar",
+      "legacy_description": "Ao entrar, consome a unidade aliada de menor poder efetivo na mesma fileira e recebe bônus igual ao poder dela, até +4.",
+      "assigned_card_ids": [
+        "gwent_unidade_carniceiro_forja"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.ally_sacrifice_power",
+      "default_effect_params": {
+        "gain_cap": 4,
+        "fallback_bonus": 0,
+        "minimum_gain": 1,
+        "target_selection": "weakest_same_row"
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "drenagem",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Selo Enfraquecedor",
+      "legacy_description": "Diminui em 1 o bônus dos inimigos, até o mínimo de -2.",
+      "assigned_card_ids": [
+        "chefe_malenia_lamina_miquella",
+        "covenant_coroa_abismo",
+        "magia_trovao_oco"
+      ],
+      "assigned_card_count": 3,
+      "canonical_effect_id": "effect.enemy_bonus_reduction",
+      "default_effect_params": {
+        "target_scope": "all_enemies",
+        "amount": 1,
+        "floor": -2,
+        "only_positive": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "dupla_fornalha",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Pacto da Fornalha",
+      "legacy_description": "+2 se houver outra unidade aliada na mesma fileira.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.same_row_formation_power",
+      "default_effect_params": {
+        "mode": "if_any",
+        "bonus_per_ally": 2,
+        "max_bonus": 2,
+        "minimum_allies": 1,
+        "faction_filter": "any"
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "eco_arcano",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Eco Arcano",
+      "legacy_description": "+2 se você tiver uma carta especial no descarte.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.discard_special_power",
+      "default_effect_params": {
+        "bonus_per_special": 2,
+        "minimum_specials": 1,
+        "max_bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "encadeamento",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Postura Encadeada",
+      "legacy_description": "Ganha +2 de poder se for jogada na mesma fileira que sua última unidade.",
+      "assigned_card_ids": [
+        "magia_nevoa_antiga",
+        "patente_5"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.sequence_power",
+      "default_effect_params": {
+        "reference_side": "own",
+        "row_relation": "same",
+        "requires_previous_play": true,
+        "bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "escudo_ferro",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Escudo de Ferro",
+      "legacy_description": "Entra com escudo: ignora a primeira remoção sofrida.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.entry_shield",
+      "default_effect_params": {
+        "shield_count": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "espolios",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Espólios",
+      "legacy_description": "Se você vencer a rodada com ela em campo, compra uma carta.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.victory_draw",
+      "default_effect_params": {
+        "draw_count": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "estandarte",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Estandarte",
+      "legacy_description": "Concede +1 às outras unidades aliadas da mesma fileira.",
+      "assigned_card_ids": [
+        "gwent_mitica_coroa"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.row_aura_bonus",
+      "default_effect_params": {
+        "bonus": 1,
+        "include_self": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "fome_abismo",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Fome do Abismo",
+      "legacy_description": "Ganha +2 de poder quando sua pontuação total é menor que a do adversário.",
+      "assigned_card_ids": [
+        "primordial_abismo"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.comeback_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "guardiao_fileira",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Guardião da Fileira",
+      "legacy_description": "+1 para cada outra unidade sua na mesma fileira, até +3.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.same_row_formation_power",
+      "default_effect_params": {
+        "mode": "per_ally",
+        "bonus_per_ally": 1,
+        "max_bonus": 3,
+        "minimum_allies": 1,
+        "faction_filter": "any"
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_batedor",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Passo do Cão de Caça",
+      "legacy_description": "Compra uma carta da reserva, se disponível.",
+      "assigned_card_ids": [
+        "gwent_especial_batedor"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.draw_cards",
+      "default_effect_params": {
+        "count": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_chama",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Chama do Gigante",
+      "legacy_description": "Remove Geada de todas as suas unidades; cada unidade purificada recebe +1 de poder até o fim da rodada.",
+      "assigned_card_ids": [
+        "elden_especial_chama"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.purify_frost_buff",
+      "default_effect_params": {
+        "bonus_per_unit": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_chifre",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Rugido de Godfrey",
+      "legacy_description": "Concede +2 às suas unidades na fileira escolhida até o fim da rodada.",
+      "assigned_card_ids": [
+        "gwent_especial_chifre"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.row_buff",
+      "default_effect_params": {
+        "bonus": 2,
+        "minimum_allies": 0
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_chuva",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Sangue Corrompido",
+      "legacy_description": "Aplica uma marca de Sangramento a todas as unidades inimigas na fileira de Cerco; a segunda marca reduz 2 de bônus (mínimo -2) e consome as marcas.",
+      "assigned_card_ids": [
+        "gwent_especial_chuva"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "sangramento",
+        "target_scope": "enemy_siege_row",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "reduce_bonus_2_and_reset",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_clima",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Tempestade dos Picos",
+      "legacy_description": "Escolha uma fileira. A tempestade reduz em 1 o poder efetivo de todas as unidades dos dois lados nessa fileira enquanto o clima estiver ativo.",
+      "assigned_card_ids": [
+        "gwent_especial_tempestade"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.weather_row",
+      "default_effect_params": {
+        "power_penalty": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_egide",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Bênção da Árvore Áurea",
+      "legacy_description": "Concede escudo a uma unidade sua.",
+      "assigned_card_ids": [
+        "gwent_especial_egide"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.grant_shield",
+      "default_effect_params": {
+        "shield_count": 1,
+        "max_targets": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_execucao",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Lâmina da Morte Destinada",
+      "legacy_description": "Remove uma unidade inimiga escolhida da fileira selecionada se ela tiver poder efetivo 6 ou menos; um escudo pode bloquear a remoção.",
+      "assigned_card_ids": [
+        "gwent_especial_execucao"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.remove_units",
+      "default_effect_params": {
+        "target_scope": "chosen_enemy_row_under_power_limit",
+        "max_targets": 1,
+        "power_limit": 6,
+        "shield_blocks": true
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_geada",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Lua Gélida",
+      "legacy_description": "Aplica 1 marca de Geada a todas as unidades inimigas em campo; raridades Lendárias ou superiores aplicam uma segunda marca.",
+      "assigned_card_ids": [
+        "gwent_especial_geada"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "geada",
+        "target_scope": "all_enemies",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "reduce_effective_power_per_mark",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_geada_cariana",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Geada Cariana",
+      "legacy_description": "Aplica até duas marcas às unidades inimigas da fileira escolhida; cada marca reduz 1 de poder efetivo até o fim da rodada.",
+      "assigned_card_ids": [
+        "elden_especial_geada"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "geada",
+        "target_scope": "chosen_enemy_row",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "reduce_effective_power_per_mark",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_invocacao",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Cinzas dos Lobos Solitários",
+      "legacy_description": "Invoca Lobos Espirituais com 3 de poder na fileira escolhida.",
+      "assigned_card_ids": [
+        "elden_especial_invocacao"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.summon_wolves",
+      "default_effect_params": {
+        "count": 1,
+        "power_base": 3
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_loucura",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Loucura Frenética",
+      "legacy_description": "Cada marca reduz 1 de poder efetivo; a segunda remove todos os bônus positivos da unidade. Marcas expiram no fim da rodada.",
+      "assigned_card_ids": [
+        "elden_especial_loucura"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "loucura",
+        "target_scope": "chosen_enemy_row",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "clear_positive_bonus",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_medico",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Lágrima Sagrada",
+      "legacy_description": "Devolve à sua mão uma unidade do seu descarte com poder-base 4 ou menos; você pode escolher o alvo.",
+      "assigned_card_ids": [
+        "gwent_especial_medico"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.return_unit_to_hand",
+      "default_effect_params": {
+        "maximum_base_power": 4,
+        "target_selection": "chosen_or_last_eligible"
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_muralha",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Bastião de Leyndell",
+      "legacy_description": "Concede +1 às suas unidades na fileira escolhida até o fim da rodada.",
+      "assigned_card_ids": [
+        "gwent_especial_muralha"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.row_buff",
+      "default_effect_params": {
+        "bonus": 1,
+        "minimum_allies": 0
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_nevoa",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Névoa de Sellia",
+      "legacy_description": "Aplica 1 marca de Podridão Escarlate a todas as unidades inimigas da fileira escolhida; raridades Lendárias ou superiores aplicam uma segunda marca.",
+      "assigned_card_ids": [
+        "gwent_especial_nevoa"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "podrida",
+        "target_scope": "chosen_enemy_row",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "corrode_positive_bonus_1",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_passo",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Passo do Lobo",
+      "legacy_description": "Move uma unidade sua para a fileira escolhida.",
+      "assigned_card_ids": [
+        "gwent_especial_passo"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.move_unit",
+      "default_effect_params": {
+        "max_targets": 1,
+        "target_selection": "chosen_or_weakest_movable"
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_podrida",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Podridão Escarlate",
+      "legacy_description": "Cada marca reduz 1 de poder efetivo; a segunda também corrói 1 ponto de bônus positivo, se houver. Marcas expiram no fim da rodada.",
+      "assigned_card_ids": [
+        "elden_especial_podrida"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "podrida",
+        "target_scope": "chosen_enemy_row",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "corrode_positive_bonus_1",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_purificar",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Lei da Regressão",
+      "legacy_description": "Remove todos os efeitos climáticos.",
+      "assigned_card_ids": [
+        "gwent_especial_purificar"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.clear_weather",
+      "default_effect_params": {},
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_queima",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Chama Negra",
+      "legacy_description": "Tenta remover a unidade de maior poder efetivo de cada lado; um escudo pode bloquear cada remoção.",
+      "assigned_card_ids": [
+        "gwent_especial_queima"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.remove_units",
+      "default_effect_params": {
+        "target_scope": "strongest_unit_each_side",
+        "max_targets": 2,
+        "power_limit": 0,
+        "shield_blocks": true
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_requiem",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Chamado dos Mortos",
+      "legacy_description": "Traz do descarte diretamente ao campo uma unidade com poder base 6 ou menos.",
+      "assigned_card_ids": [
+        "gwent_especial_requiem"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.revive_to_board",
+      "default_effect_params": {
+        "maximum_base_power": 6,
+        "target_selection": "chosen_or_strongest_eligible",
+        "added_bonus": 0
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "gwent_sangramento",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Sangramento",
+      "legacy_description": "Marca as unidades inimigas da fileira; a segunda marca reduz o bônus em 2 (mínimo -2) e consome as marcas. Marcas expiram no fim da rodada.",
+      "assigned_card_ids": [
+        "elden_especial_sangramento"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.apply_status_marks",
+      "default_effect_params": {
+        "status": "sangramento",
+        "target_scope": "chosen_enemy_row",
+        "marks": 1,
+        "mark_cap": 2,
+        "threshold_marks": 2,
+        "threshold_action": "reduce_bonus_2_and_reset",
+        "rarity_scaling": false
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "gwent_vinculo",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "special",
+      "legacy_display_name": "Juramento do Crisol",
+      "legacy_description": "Se houver ao menos duas unidades aliadas na fileira escolhida, concede +2 a todas elas até o fim da rodada.",
+      "assigned_card_ids": [
+        "gwent_especial_vinculo"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.row_buff",
+      "default_effect_params": {
+        "bonus": 2,
+        "minimum_allies": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "impeto",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Ímpeto do Lorde",
+      "legacy_description": "Ganha +1 de poder quando sua pontuação total é maior que a do adversário.",
+      "assigned_card_ids": [
+        "chefe_oraculo_ruina",
+        "patente_9"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.ahead_power",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "instinto",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Instinto de Caçador",
+      "legacy_description": "Ganha +2 de poder quando sua pontuação total é menor que a do adversário.",
+      "assigned_card_ids": [
+        "arma_grande_sino",
+        "gwent_unidade_gigante"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.comeback_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "irmandade_veu",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Formação do Véu",
+      "legacy_description": "+2 se houver outra unidade aliada em uma fileira diferente.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.cross_row_presence_power",
+      "default_effect_params": {
+        "mode": "any_other_row",
+        "bonus_per_row": 2,
+        "max_bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "lei_primeva",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Lei Primeva",
+      "legacy_description": "Recebe +2 de poder ao entrar na primeira rodada.",
+      "assigned_card_ids": [
+        "primordial_origem"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.first_round_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "olho_tempestade",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Olho da Tempestade",
+      "legacy_description": "Recebe +2 quando sua fileira estiver sob efeito climático.",
+      "assigned_card_ids": [
+        "chefe_placidusax_lorde_dragao",
+        "primordial_tempestade"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.weather_affinity_power",
+      "default_effect_params": {
+        "weather_scope": "own_row_active",
+        "bonus": 2
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "paradoxo_eterno",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Paradoxo Eterno",
+      "legacy_description": "Recebe +2 na terceira rodada se o adversário venceu a segunda.",
+      "assigned_card_ids": [
+        "gwent_singular_cacador_chefes",
+        "primordial_eternidade"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.late_round_reversal_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "precisao",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Mira Cariana",
+      "legacy_description": "Ganha +1 de poder ao entrar na fileira de Longa Distância.",
+      "assigned_card_ids": [
+        "arma_duas_luas",
+        "gwent_singular_intocavel"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.ranged_row_power",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "primeira_luz",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Graça Dourada",
+      "legacy_description": "Na primeira rodada, ganha +1 de poder ao entrar em campo.",
+      "assigned_card_ids": [
+        "chefe_rei_afogado",
+        "covenant_lua_velada"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.first_round_power",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "quebra_ritmo",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Ruptura de Postura",
+      "legacy_description": "Ganha +1 de poder se o adversário jogou uma unidade na mesma fileira no turno anterior.",
+      "assigned_card_ids": [
+        "chefe_guardiao_cinzas",
+        "chefe_messmer_impalador",
+        "chefe_radahn_flagelo_estrelas",
+        "magia_sol_negro",
+        "patente_10"
+      ],
+      "assigned_card_count": 5,
+      "canonical_effect_id": "effect.sequence_power",
+      "default_effect_params": {
+        "reference_side": "opponent",
+        "row_relation": "same",
+        "requires_previous_play": true,
+        "bonus": 1
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "reliquia_algemas",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "relic",
+      "legacy_display_name": "Algemas de Margit",
+      "legacy_description": "Na fileira escolhida, zera o bônus positivo de uma unidade inimiga (a escolhida ou a de maior bônus); bônus negativos permanecem inalterados.",
+      "assigned_card_ids": [
+        "reliquia_algemas_margit"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.relic_margit_shackles",
+      "default_effect_params": {
+        "target_selection": "chosen_or_highest_bonus"
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "reliquia_godrick",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "relic",
+      "legacy_display_name": "Grande Runa de Godrick",
+      "legacy_description": "Exige ao menos uma unidade aliada em campo. Concede +1 de bônus a todas as unidades aliadas.",
+      "assigned_card_ids": [
+        "reliquia_grande_runa_godrick"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.relic_godrick_rune",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "reliquia_lamina_negra",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "relic",
+      "legacy_display_name": "Lâmina Negra",
+      "legacy_description": "Na fileira escolhida, reduz em 3 o bônus de uma unidade inimiga (a escolhida ou a de maior poder efetivo). Escudo bloqueia o efeito sem consumir a Relíquia.",
+      "assigned_card_ids": [
+        "reliquia_lamina_negra"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.relic_black_blade",
+      "default_effect_params": {
+        "bonus_loss": 3,
+        "shield_blocks_without_consumption": true
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "reliquia_morte",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "relic",
+      "legacy_display_name": "Runa da Morte",
+      "legacy_description": "Em cada fileira, reduz em até 2 o bônus positivo da unidade inimiga que tiver o maior bônus naquela fileira.",
+      "assigned_card_ids": [
+        "reliquia_runa_morte"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.relic_death_rune",
+      "default_effect_params": {
+        "amount": 2,
+        "floor": 0
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "reliquia_noite_chama",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "relic",
+      "legacy_display_name": "Espada da Noite e da Chama",
+      "legacy_description": "Na postura da Noite, aplica Geada a todas as unidades inimigas da fileira escolhida. Na postura da Chama, atinge a unidade de maior poder efetivo: reduz 1 de poder-base e 2 de bônus; Escudo bloqueia o golpe.",
+      "assigned_card_ids": [
+        "reliquia_noite_chama"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.relic_night_flame_sword",
+      "default_effect_params": {
+        "stance": "night",
+        "base_power_loss": 1,
+        "bonus_loss": 2
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "reliquia_renala",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "relic",
+      "legacy_display_name": "Grande Runa dos Não Nascidos",
+      "legacy_description": "Remove Geada e Podridão das unidades aliadas afetadas; cada unidade purificada recebe +1 de bônus.",
+      "assigned_card_ids": [
+        "reliquia_runa_nao_nascidos"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.relic_unborn_rune",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "resistencia_climatica",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Resistência Climática",
+      "legacy_description": "Ignora até 2 pontos de penalidade climática; sem clima ativo ao entrar, recebe +1.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.weather_resistance",
+      "default_effect_params": {
+        "resistance": 2,
+        "bonus_if_no_weather": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "ressurgir",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Ressurgir",
+      "legacy_description": "Se houver uma unidade elegível, traz do descarte a mais forte com poder base 5 ou menos diretamente ao campo.",
+      "assigned_card_ids": [
+        "gwent_unidade_necromante"
+      ],
+      "assigned_card_count": 1,
+      "canonical_effect_id": "effect.revive_from_discard",
+      "default_effect_params": {
+        "maximum_base_power": 5,
+        "target_selection": "strongest_eligible",
+        "added_bonus": 0
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "retaliacao",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Retaliação dos Semideuses",
+      "legacy_description": "Ganha +1 de poder quando sua pontuação total é menor que a do adversário.",
+      "assigned_card_ids": [
+        "covenant_irmandade_ferro",
+        "patente_6",
+        "patente_8"
+      ],
+      "assigned_card_count": 3,
+      "canonical_effect_id": "effect.comeback_power",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "legacy_id": "sangue_frio",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Concentração",
+      "legacy_description": "Ganha +2 de poder quando os dois jogadores estão com a mesma pontuação.",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.tied_score_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "sobrevivente",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Sobrevivente",
+      "legacy_description": "Ao fim da rodada, permanece no campo (a mais forte, se houver várias).",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "canonical_effect_id": "effect.round_victory_survivor",
+      "default_effect_params": {
+        "winner_only": true,
+        "maximum_survivors": 1
+      },
+      "migration_status": "PARAMETERIZED_ALIAS",
+      "proposed_disposition": "REDESIGN_AS_EXPLICIT_ROUND_END_EFFECT; NEW_HANDLER_REQUIRED"
+    },
+    {
+      "legacy_id": "ultimo_folego",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Último Suspiro",
+      "legacy_description": "Na terceira rodada, ganha +1 de poder ao entrar em campo.",
+      "assigned_card_ids": [
+        "chefe_dama_vazio",
+        "gwent_singular_nivel1"
+      ],
+      "assigned_card_count": 2,
+      "canonical_effect_id": "effect.third_round_power",
+      "default_effect_params": {
+        "bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    },
+    {
+      "legacy_id": "vinganca",
+      "legacy_namespace": "HABILIDADES",
+      "legacy_kind": "unit",
+      "legacy_display_name": "Vingança",
+      "legacy_description": "Ao cair, concede +1 às unidades aliadas da mesma fileira.",
+      "assigned_card_ids": [
+        "gwent_unidade_detonador",
+        "gwent_unidade_herdeiro_portao",
+        "gwent_unidade_senhor_cacada"
+      ],
+      "assigned_card_count": 3,
+      "canonical_effect_id": "effect.death_revenge",
+      "default_effect_params": {
+        "ally_bonus": 1
+      },
+      "migration_status": "DIRECT_ALIAS",
+      "proposed_disposition": "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST"
+    }
+  ],
+  "active_identity_card_overrides": [
+    {
+      "card_id": "arma_duas_luas",
+      "legacy_identity_effect_id": "twin_dance",
+      "legacy_display_name": "Dança Espelhada",
+      "legacy_description": "Ganha +1 se você tiver outro aliado em uma fileira diferente.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "precisao",
+      "canonical_effect_id": "effect.cross_row_presence_power",
+      "default_effect_params": {
+        "mode": "any_other_row",
+        "bonus_per_row": 1,
+        "max_bonus": 1
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE"
+    },
+    {
+      "card_id": "arma_grande_sino",
+      "legacy_identity_effect_id": "last_bell",
+      "legacy_display_name": "Sino do Último Bastião",
+      "legacy_description": "Ganha +2 quando sua pontuação total for menor que a do adversário.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "instinto",
+      "canonical_effect_id": "effect.comeback_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "chefe_dama_vazio",
+      "legacy_identity_effect_id": "void_rend",
+      "legacy_display_name": "Fenda do Vazio",
+      "legacy_description": "Ao entrar em campo, tira 2 pontos de bônus da unidade inimiga mais forte. O bônus dela não pode ficar abaixo de -2.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "ultimo_folego",
+      "canonical_effect_id": "effect.enemy_bonus_reduction",
+      "default_effect_params": {
+        "target_scope": "strongest_enemy",
+        "amount": 2,
+        "floor": -2,
+        "only_positive": false
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "chefe_guardiao_cinzas",
+      "legacy_identity_effect_id": "ash_guardian",
+      "legacy_display_name": "Égide das Cinzas",
+      "legacy_description": "Ao entrar em campo, dá +1 de bônus a um aliado da mesma fileira. Se já houver um aliado nessa fileira, esta carta também ganha +1.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "quebra_ritmo",
+      "canonical_effect_id": "effect.row_pair_blessing",
+      "default_effect_params": {
+        "self_bonus": 1,
+        "ally_bonus": 1,
+        "ally_selection": "first_same_row"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "chefe_malenia_lamina_miquella",
+      "legacy_identity_effect_id": "scarlet_bloom",
+      "legacy_display_name": "Flor Escarlate",
+      "legacy_description": "Ao entrar em campo, aplica Podridão Escarlate aos inimigos da fileira. Quem já estiver contaminado recebe uma segunda marca.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "drenagem",
+      "canonical_effect_id": "effect.row_status_pressure",
+      "default_effect_params": {
+        "status": "podrida",
+        "target_scope": "all_enemies_same_row",
+        "marks_per_entry": 1,
+        "threshold_marks": 2,
+        "threshold_bonus_loss": 1,
+        "self_bonus_on_threshold": 0,
+        "reset_marks_on_threshold": false
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "chefe_maliketh_morte_destinada",
+      "legacy_identity_effect_id": "destined_death",
+      "legacy_display_name": "Morte Destinada",
+      "legacy_description": "Ao entrar em campo, tira até 2 pontos de bônus do inimigo mais forte.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "cacador_arcano",
+      "canonical_effect_id": "effect.enemy_bonus_reduction",
+      "default_effect_params": {
+        "target_scope": "strongest_enemy",
+        "amount": 2,
+        "floor": -2,
+        "only_positive": false
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "chefe_messmer_impalador",
+      "legacy_identity_effect_id": "impaling_spear",
+      "legacy_display_name": "Lança do Impalador",
+      "legacy_description": "Ao entrar em campo, marca os inimigos da fileira com Sangramento. A segunda marca causa Hemorragia.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "quebra_ritmo",
+      "canonical_effect_id": "effect.row_status_pressure",
+      "default_effect_params": {
+        "status": "sangramento",
+        "target_scope": "all_enemies_same_row",
+        "marks_per_entry": 1,
+        "threshold_marks": 2,
+        "threshold_bonus_loss": 2,
+        "self_bonus_on_threshold": 0,
+        "reset_marks_on_threshold": true
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "chefe_oraculo_ruina",
+      "legacy_identity_effect_id": "ruin_omen",
+      "legacy_display_name": "Presságio da Ruína",
+      "legacy_description": "Tira 1 ponto de bônus da unidade inimiga mais forte. Também ganha +1 se o adversário estiver vencendo.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "impeto",
+      "canonical_effect_id": "effect.ruin_omen",
+      "default_effect_params": {
+        "enemy_bonus_reduction": 1,
+        "enemy_bonus_floor": -2,
+        "self_bonus_if_behind": 1
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "chefe_placidusax_lorde_dragao",
+      "legacy_identity_effect_id": "time_storm",
+      "legacy_display_name": "Tempestade do Tempo",
+      "legacy_description": "Ao entrar em campo, aplica Geada aos inimigos da fileira e ganha +1 para cada inimigo atingido, até +3.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "olho_tempestade",
+      "canonical_effect_id": "effect.frost_storm_momentum",
+      "default_effect_params": {
+        "marks_per_enemy": 1,
+        "max_marks": 2,
+        "self_bonus_per_target": 1,
+        "self_bonus_cap": 3
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "chefe_radahn_flagelo_estrelas",
+      "legacy_identity_effect_id": "star_gravity",
+      "legacy_display_name": "Gravidade do Flagelo",
+      "legacy_description": "Ao entrar em campo, move o inimigo mais forte para sua fileira e tira 2 pontos de bônus dele.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "quebra_ritmo",
+      "canonical_effect_id": "effect.gravity_reposition",
+      "default_effect_params": {
+        "bonus_loss": 2,
+        "destination": "this_card_row"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "chefe_rei_afogado",
+      "legacy_identity_effect_id": "abyss_tithe",
+      "legacy_display_name": "Dízimo do Abismo",
+      "legacy_description": "Ganha +2 se você tiver uma unidade no descarte. Se não tiver, ganha +1 caso o adversário tenha mais unidades em campo.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "primeira_luz",
+      "canonical_effect_id": "effect.discard_advantage_power",
+      "default_effect_params": {
+        "discard_bonus": 2,
+        "fallback_bonus": 1,
+        "fallback_condition": "opponent_has_more_units"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE"
+    },
+    {
+      "card_id": "covenant_lua_velada",
+      "legacy_identity_effect_id": "veiled_moon",
+      "legacy_display_name": "Aliança Lunar",
+      "legacy_description": "Esta carta ganha +1 e dá +1 de bônus a um aliado em outra fileira.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "primeira_luz",
+      "canonical_effect_id": "effect.cross_row_support",
+      "default_effect_params": {
+        "self_bonus": 1,
+        "ally_bonus": 1,
+        "ally_selection": "weakest_other_row"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "gwent_v75_lua_graviturgista",
+      "legacy_identity_effect_id": "v75_gravity_shear",
+      "legacy_display_name": "Cisalhamento Gravitacional",
+      "legacy_description": "Reduz em 1 o bônus de até dois inimigos com bônus positivo na fileira; se atingir dois, recebe +1.",
+      "legacy_generic_field_suppressed": false,
+      "suppressed_generic_field": null,
+      "canonical_effect_id": "effect.gravity_shear",
+      "default_effect_params": {
+        "amount": 1,
+        "max_targets": 2,
+        "self_bonus_when_full": 1,
+        "bonus_floor": -2
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "gwent_v75_lua_oraculo_geada",
+      "legacy_identity_effect_id": "v75_frost_oracle",
+      "legacy_display_name": "Presságio da Geada",
+      "legacy_description": "Aplica uma marca de Geada ao inimigo mais forte da fileira; se já tinha uma marca, completa a segunda e recebe +1.",
+      "legacy_generic_field_suppressed": false,
+      "suppressed_generic_field": null,
+      "canonical_effect_id": "effect.row_status_pressure",
+      "default_effect_params": {
+        "status": "geada",
+        "target_scope": "strongest_enemy_same_row",
+        "marks_per_entry": 1,
+        "threshold_marks": 2,
+        "threshold_bonus_loss": 0,
+        "self_bonus_on_threshold": 1,
+        "reset_marks_on_threshold": false
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "gwent_v75_ordem_confessora_graca",
+      "legacy_identity_effect_id": "v75_grace_mender",
+      "legacy_display_name": "Regressão Serena",
+      "legacy_description": "Purifica até dois aliados da mesma fileira de estados negativos; cada aliado purificado recebe +1. Se ninguém precisar de purificação, fortalece o aliado mais fraco em +1.",
+      "legacy_generic_field_suppressed": false,
+      "suppressed_generic_field": null,
+      "canonical_effect_id": "effect.grace_purification",
+      "default_effect_params": {
+        "max_targets": 2,
+        "bonus_per_purified": 1,
+        "fallback": "weakest_same_row_then_self"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE"
+    },
+    {
+      "card_id": "gwent_v75_ordem_veterano_juramento",
+      "legacy_identity_effect_id": "v75_golden_vow",
+      "legacy_display_name": "Juramento Dourado",
+      "legacy_description": "Ao entrar, recebe +1; se houver aliado na mesma fileira, o aliado mais fraco também recebe +1.",
+      "legacy_generic_field_suppressed": false,
+      "suppressed_generic_field": null,
+      "canonical_effect_id": "effect.row_pair_blessing",
+      "default_effect_params": {
+        "self_bonus": 1,
+        "ally_bonus": 1,
+        "ally_selection": "weakest_same_row"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "gwent_v75_veu_acolito_sangue",
+      "legacy_identity_effect_id": "v75_blood_mark",
+      "legacy_display_name": "Marca da Dinastia",
+      "legacy_description": "Aplica uma marca de Sangramento ao inimigo mais forte da fileira; a segunda marca provoca Hemorragia e reduz 2 de bônus.",
+      "legacy_generic_field_suppressed": false,
+      "suppressed_generic_field": null,
+      "canonical_effect_id": "effect.row_status_pressure",
+      "default_effect_params": {
+        "status": "sangramento",
+        "target_scope": "strongest_enemy_same_row",
+        "marks_per_entry": 1,
+        "threshold_marks": 2,
+        "threshold_bonus_loss": 2,
+        "self_bonus_on_threshold": 1,
+        "reset_marks_on_threshold": true
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "gwent_v75_veu_carrasco_preco",
+      "legacy_identity_effect_id": "v75_blood_price",
+      "legacy_display_name": "Preço em Sangue",
+      "legacy_description": "Sacrifica o aliado mais fraco da mesma fileira e recebe bônus igual ao seu poder efetivo, até +3; sem aliado, recebe +1.",
+      "legacy_generic_field_suppressed": false,
+      "suppressed_generic_field": null,
+      "canonical_effect_id": "effect.ally_sacrifice_power",
+      "default_effect_params": {
+        "gain_cap": 3,
+        "fallback_bonus": 1,
+        "minimum_gain": 1,
+        "target_selection": "weakest_same_row"
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW"
+    },
+    {
+      "card_id": "magia_nevoa_antiga",
+      "legacy_identity_effect_id": "ancient_mist",
+      "legacy_display_name": "Névoa Ancestral",
+      "legacy_description": "Ganha +2 se houver efeito climático em qualquer fileira.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "encadeamento",
+      "canonical_effect_id": "effect.weather_affinity_power",
+      "default_effect_params": {
+        "weather_scope": "any_row_active",
+        "bonus": 2
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    },
+    {
+      "card_id": "magia_selo_vigilia",
+      "legacy_identity_effect_id": "vigil_seal",
+      "legacy_display_name": "Selo de Vigília",
+      "legacy_description": "Reduz em 1 o dano do clima sofrido por esta carta e dá +1 de bônus a um aliado da mesma fileira.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "adaptacao",
+      "canonical_effect_id": "effect.weather_ward_support",
+      "default_effect_params": {
+        "weather_resistance": 1,
+        "ally_bonus": 1
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE"
+    },
+    {
+      "card_id": "magia_sol_negro",
+      "legacy_identity_effect_id": "devouring_eclipse",
+      "legacy_display_name": "Eclipse Devorador",
+      "legacy_description": "Ganha +2 se algum inimigo tiver bônus acima de zero.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "quebra_ritmo",
+      "canonical_effect_id": "effect.enemy_positive_bonus_power",
+      "default_effect_params": {
+        "bonus": 2
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE"
+    },
+    {
+      "card_id": "magia_trovao_oco",
+      "legacy_identity_effect_id": "hollow_thunder",
+      "legacy_display_name": "Descarga Oca",
+      "legacy_description": "Tira 1 ponto de bônus de cada unidade inimiga na mesma fileira.",
+      "legacy_generic_field_suppressed": true,
+      "suppressed_generic_field": "drenagem",
+      "canonical_effect_id": "effect.enemy_bonus_reduction",
+      "default_effect_params": {
+        "target_scope": "chosen_enemy_row",
+        "amount": 1,
+        "floor": -2,
+        "only_positive": false
+      },
+      "migration_status": "IDENTITY_BECOMES_SINGLE_CANONICAL_EFFECT",
+      "proposed_disposition": "MERGE_AS_PARAMETERIZED_FAMILY"
+    }
+  ],
+  "inactive_identity_branch_decisions": [
+    {
+      "legacy_effect_id": "shadow_paths",
+      "card_id": "chefe_cervo_sombrio",
+      "card_name": "Cavaleiro do Cão de Caça",
+      "current_tags": [
+        "veu_sombrio"
+      ],
+      "candidate_effect_id": "effect.cross_row_presence_power",
+      "candidate_params": {
+        "mode": "per_distinct_other_row",
+        "bonus_per_row": 1,
+        "max_bonus": 2
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "faceless_hunt",
+      "card_id": "chefe_cacador_sem_rosto",
+      "card_name": "Assassina da Faca Negra",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "grey_watch",
+      "card_id": "chefe_vigia_cinzento",
+      "card_name": "Cavaleiro de Leyndell",
+      "current_tags": [],
+      "candidate_effect_id": "effect.row_aura_bonus",
+      "candidate_params": {
+        "bonus": 1,
+        "include_self": false
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "veil_shift",
+      "card_id": "chefe_aparicao_veio",
+      "card_name": "Lâmina Negra Errante",
+      "current_tags": [
+        "veu_sombrio"
+      ],
+      "candidate_effect_id": "effect.sequence_power",
+      "candidate_params": {
+        "reference_side": "own",
+        "row_relation": "different",
+        "requires_previous_play": true,
+        "bonus": 2
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "pilgrim_duel",
+      "card_id": "arma_lamina_peregrino",
+      "card_name": "Duelista da Casa Hoslow",
+      "current_tags": [
+        "peregrino"
+      ],
+      "candidate_effect_id": "effect.sequence_power",
+      "candidate_params": {
+        "reference_side": "opponent",
+        "row_relation": "same",
+        "requires_previous_play": true,
+        "bonus": 2
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "forge_rhythm",
+      "card_id": "arma_martelo_fornalha",
+      "card_name": "Ferreiro de Volcano Manor",
+      "current_tags": [],
+      "candidate_effect_id": "effect.same_row_formation_power",
+      "candidate_params": {
+        "mode": "per_ally",
+        "bonus_per_ally": 1,
+        "max_bonus": 2,
+        "minimum_allies": 1,
+        "faction_filter": "golden_order"
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "tide_resonance",
+      "card_id": "arma_cajado_marulho",
+      "card_name": "Feiticeiro Cariano",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "astral_thread",
+      "card_id": "arma_agulha_astro",
+      "card_name": "Leitora de Estrelas de Sellia",
+      "current_tags": [
+        "astral",
+        "lua_cariana"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "furnace_charge",
+      "card_id": "arma_lanca_fornalha",
+      "card_name": "Lanceiro da Árvore Áurea",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "covering_shot",
+      "card_id": "arma_arco_peregrino",
+      "card_name": "Batedor da Mansão Vulcânica",
+      "current_tags": [
+        "peregrino"
+      ],
+      "candidate_effect_id": "effect.cross_row_support",
+      "candidate_params": {
+        "self_bonus": 0,
+        "ally_bonus": 1,
+        "ally_selection": "weakest_other_row"
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "wandering_ember",
+      "card_id": "magia_brasa_errante",
+      "card_name": "Monge do Fogo",
+      "current_tags": [
+        "chama"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "conductive_spark",
+      "card_id": "magia_fagulha",
+      "card_name": "Aprendiz de Feitiçaria Cariana",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "echo_orb",
+      "card_id": "magia_orbe_eco",
+      "card_name": "Erudito da Academia",
+      "current_tags": [
+        "eco"
+      ],
+      "candidate_effect_id": "effect.discard_special_power",
+      "candidate_params": {
+        "bonus_per_special": 1,
+        "minimum_specials": 1,
+        "max_bonus": 2
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "counterflame",
+      "card_id": "magia_chama_fria",
+      "card_name": "Feiticeira da Lua Gélida",
+      "current_tags": [
+        "chama"
+      ],
+      "candidate_effect_id": "effect.enemy_bonus_reduction",
+      "candidate_params": {
+        "target_scope": "top_two_in_enemy_row",
+        "amount": 1,
+        "floor": -2,
+        "only_positive": false
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "shared_sentinel",
+      "card_id": "covenant_sentinelas",
+      "card_name": "Guardiões de Sellia",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "last_oath",
+      "card_id": "covenant_ultimos",
+      "card_name": "Cavaleiros de sangue juramentados",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "ember_kin",
+      "card_id": "covenant_filhos_brasa",
+      "card_name": "Discípulos do Monge do Fogo",
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "mist_trail",
+      "card_id": "covenant_peregrinos_nevoa",
+      "card_name": "Peregrinos da Cidade Eterna",
+      "current_tags": [],
+      "candidate_effect_id": "effect.sequence_power",
+      "candidate_params": {
+        "reference_side": "own",
+        "row_relation": "different",
+        "requires_previous_play": true,
+        "bonus": 1
+      },
+      "disposition": "ARCHIVE_AS_OPTIONAL_ALIAS",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA",
+      "reason": "Definição filtrada pela transformação V18; reativação só poderá ocorrer por atribuição explícita no novo manifesto de cartas."
+    },
+    {
+      "legacy_effect_id": "v75_crucible_guard",
+      "card_id": "gwent_v75_ordem_guardiao_crisol",
+      "card_name": "Guardião do Crisol Menor",
+      "current_tags": [
+        "v75_crucible_guard"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_STALE_BRANCH",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "A carta atual declara habilidade individual vazia; o efeito só aparece como ramo de identidade sem associação ativa."
+    },
+    {
+      "legacy_effect_id": "v75_golden_standard",
+      "card_id": "gwent_v75_ordem_arauto_estandarte",
+      "card_name": "Arauto do Estandarte Áureo",
+      "current_tags": [
+        "v75_crucible_guard"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_STALE_BRANCH",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "A carta atual declara habilidade individual vazia; o efeito só aparece como ramo de identidade sem associação ativa."
+    },
+    {
+      "legacy_effect_id": "v75_blood_feast",
+      "card_id": "gwent_v75_veu_devota_hemorragia",
+      "card_name": "Devota da Hemorragia",
+      "current_tags": [
+        "v75_blood_feast"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_STALE_BRANCH",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "A carta atual declara habilidade individual vazia; o efeito só aparece como ramo de identidade sem associação ativa."
+    },
+    {
+      "legacy_effect_id": "v75_blood_pursuit",
+      "card_id": "gwent_v75_veu_cacador_sangue",
+      "card_name": "Caçador das Catacumbas de Mohgwyn",
+      "current_tags": [
+        "v75_blood_mark"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_STALE_BRANCH",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "A carta atual declara habilidade individual vazia; o efeito só aparece como ramo de identidade sem associação ativa."
+    },
+    {
+      "legacy_effect_id": "v75_lunar_cartography",
+      "card_id": "gwent_v75_lua_cartografo_lunar",
+      "card_name": "Cartógrafo das Cidades Eternas",
+      "current_tags": [
+        "v75_lunar_paths"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_STALE_BRANCH",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "A carta atual declara habilidade individual vazia; o efeito só aparece como ramo de identidade sem associação ativa."
+    },
+    {
+      "legacy_effect_id": "v75_moon_ward",
+      "card_id": "gwent_v75_lua_guardia",
+      "card_name": "Guardiã do Juramento Lunar",
+      "current_tags": [
+        "v75_lunar_paths"
+      ],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_STALE_BRANCH",
+      "proposed_disposition": "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED",
+      "reason": "A carta atual declara habilidade individual vazia; o efeito só aparece como ramo de identidade sem associação ativa."
+    },
+    {
+      "legacy_effect_id": "devoto",
+      "card_id": null,
+      "card_name": null,
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_UNREGISTERED_FIELD_EFFECT",
+      "proposed_disposition": "REMOVE_UNREGISTERED_FIELD_EFFECT_FROM_NEW_RUNTIME",
+      "reason": "Código legado sem entrada em HABILIDADES e sem associação de identidade ativa; os valores de campo não têm resolução genérica canônica."
+    },
+    {
+      "legacy_effect_id": "legado",
+      "card_id": null,
+      "card_name": null,
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_UNREGISTERED_FIELD_EFFECT",
+      "proposed_disposition": "REMOVE_UNREGISTERED_FIELD_EFFECT_FROM_NEW_RUNTIME",
+      "reason": "Código legado sem entrada em HABILIDADES e sem associação de identidade ativa; os valores de campo não têm resolução genérica canônica."
+    },
+    {
+      "legacy_effect_id": "escolha_ritmo",
+      "card_id": null,
+      "card_name": null,
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_UNREGISTERED_FIELD_EFFECT",
+      "proposed_disposition": "REMOVE_UNREGISTERED_FIELD_EFFECT_FROM_NEW_RUNTIME",
+      "reason": "Código legado sem entrada em HABILIDADES e sem associação de identidade ativa; os valores de campo não têm resolução genérica canônica."
+    },
+    {
+      "legacy_effect_id": "sinergia_faccao",
+      "card_id": null,
+      "card_name": null,
+      "current_tags": [],
+      "candidate_effect_id": null,
+      "candidate_params": {},
+      "disposition": "ARCHIVE_UNREGISTERED_FIELD_EFFECT",
+      "proposed_disposition": "REMOVE_UNREGISTERED_FIELD_EFFECT_FROM_NEW_RUNTIME",
+      "reason": "Código legado sem entrada em HABILIDADES e sem associação de identidade ativa; os valores de campo não têm resolução genérica canônica."
+    }
+  ],
+  "combo_pair_evidence": [
+    {
+      "combo_id": "cinzas_fornalha",
+      "required_tags": [
+        "cinzas",
+        "fornalha"
+      ],
+      "distinct_participant_example": [
+        "chefe_guardiao_cinzas",
+        "gwent_unidade_baluarte"
+      ],
+      "provider_counts": {
+        "cinzas": 2,
+        "fornalha": 3
+      }
+    },
+    {
+      "combo_id": "veu_sombrio",
+      "required_tags": [
+        "veu_sombrio"
+      ],
+      "distinct_participant_example": [
+        "chefe_aparicao_veio",
+        "chefe_cervo_sombrio"
+      ],
+      "provider_counts": {
+        "veu_sombrio": 4
+      }
+    },
+    {
+      "combo_id": "vazio_astral",
+      "required_tags": [
+        "astral",
+        "vazio"
+      ],
+      "distinct_participant_example": [
+        "arma_agulha_astro",
+        "chefe_dama_vazio"
+      ],
+      "provider_counts": {
+        "astral": 5,
+        "vazio": 1
+      }
+    },
+    {
+      "combo_id": "mare_abissal",
+      "required_tags": [
+        "abismo"
+      ],
+      "distinct_participant_example": [
+        "chefe_rei_afogado",
+        "covenant_coroa_abismo"
+      ],
+      "provider_counts": {
+        "abismo": 2
+      }
+    },
+    {
+      "combo_id": "juramento_estandarte",
+      "required_tags": [
+        "estandarte"
+      ],
+      "distinct_participant_example": [
+        "covenant_irmandade_ferro",
+        "gwent_unidade_portaestandarte"
+      ],
+      "provider_counts": {
+        "estandarte": 2
+      }
+    },
+    {
+      "combo_id": "passos_duas_luas",
+      "required_tags": [
+        "duas_luas"
+      ],
+      "distinct_participant_example": [
+        "arma_duas_luas",
+        "covenant_lua_velada"
+      ],
+      "provider_counts": {
+        "duas_luas": 4
+      }
+    },
+    {
+      "combo_id": "eco_convergente",
+      "required_tags": [
+        "astral",
+        "eco"
+      ],
+      "distinct_participant_example": [
+        "arma_agulha_astro",
+        "gwent_unidade_eco"
+      ],
+      "provider_counts": {
+        "astral": 5,
+        "eco": 2
+      }
+    },
+    {
+      "combo_id": "chama_dupla",
+      "required_tags": [
+        "chama"
+      ],
+      "distinct_participant_example": [
+        "magia_brasa_errante",
+        "magia_chama_fria"
+      ],
+      "provider_counts": {
+        "chama": 2
+      }
+    },
+    {
+      "combo_id": "muralha_inabalavel",
+      "required_tags": [
+        "muralha"
+      ],
+      "distinct_participant_example": [
+        "gwent_unidade_herdeiro_portao",
+        "gwent_unidade_sentinela_rubra"
+      ],
+      "provider_counts": {
+        "muralha": 3
+      }
+    },
+    {
+      "combo_id": "banquete_guerra",
+      "required_tags": [
+        "banquete"
+      ],
+      "distinct_participant_example": [
+        "gwent_unidade_carniceiro_forja",
+        "gwent_unidade_intendente"
+      ],
+      "provider_counts": {
+        "banquete": 2
+      }
+    },
+    {
+      "combo_id": "procissao_fantasma",
+      "required_tags": [
+        "fantasmas"
+      ],
+      "distinct_participant_example": [
+        "gwent_unidade_cacadora_fantasma",
+        "gwent_unidade_cantora_lamentos"
+      ],
+      "provider_counts": {
+        "fantasmas": 3
+      }
+    },
+    {
+      "combo_id": "caravana_saqueadora",
+      "required_tags": [
+        "caravana"
+      ],
+      "distinct_participant_example": [
+        "gwent_unidade_contrabandista",
+        "gwent_unidade_saqueadora_veu"
+      ],
+      "provider_counts": {
+        "caravana": 2
+      }
+    },
+    {
+      "combo_id": "ritual_runico",
+      "required_tags": [
+        "runico"
+      ],
+      "distinct_participant_example": [
+        "gwent_unidade_detonador",
+        "gwent_unidade_guardiao_runas"
+      ],
+      "provider_counts": {
+        "runico": 3
+      }
+    },
+    {
+      "combo_id": "eclipse_voraz",
+      "required_tags": [
+        "eclipse_voraz"
+      ],
+      "distinct_participant_example": [
+        "gwent_unidade_bibliotecaria",
+        "gwent_unidade_devorador_mana"
+      ],
+      "provider_counts": {
+        "eclipse_voraz": 2
+      }
+    },
+    {
+      "combo_id": "rota_peregrina",
+      "required_tags": [
+        "peregrino"
+      ],
+      "distinct_participant_example": [
+        "arma_arco_peregrino",
+        "arma_lamina_peregrino"
+      ],
+      "provider_counts": {
+        "peregrino": 2
+      }
+    },
+    {
+      "combo_id": "juramento_erdtree",
+      "required_tags": [
+        "ordem_dourada"
+      ],
+      "distinct_participant_example": [
+        "chefe_guardiao_cinzas",
+        "gwent_unidade_baluarte"
+      ],
+      "provider_counts": {
+        "ordem_dourada": 6
+      }
+    },
+    {
+      "combo_id": "convergencia_lunar",
+      "required_tags": [
+        "lua_cariana"
+      ],
+      "distinct_participant_example": [
+        "arma_agulha_astro",
+        "arma_duas_luas"
+      ],
+      "provider_counts": {
+        "lua_cariana": 5
+      }
+    },
+    {
+      "combo_id": "ritual_dinastia",
+      "required_tags": [
+        "sangue_mohgwyn"
+      ],
+      "distinct_participant_example": [
+        "chefe_rei_afogado",
+        "covenant_coroa_abismo"
+      ],
+      "provider_counts": {
+        "sangue_mohgwyn": 4
+      }
+    },
+    {
+      "combo_id": "v75_juramento_dois_crisol",
+      "required_tags": [
+        "v75_crucible_guard",
+        "v75_erdtree_oath"
+      ],
+      "distinct_participant_example": [
+        "gwent_v75_ordem_arauto_estandarte",
+        "gwent_v75_ordem_confessora_graca"
+      ],
+      "provider_counts": {
+        "v75_crucible_guard": 2,
+        "v75_erdtree_oath": 2
+      }
+    },
+    {
+      "combo_id": "v75_banquete_hemorragia",
+      "required_tags": [
+        "v75_blood_feast",
+        "v75_blood_mark"
+      ],
+      "distinct_participant_example": [
+        "gwent_v75_veu_acolito_sangue",
+        "gwent_v75_veu_carrasco_preco"
+      ],
+      "provider_counts": {
+        "v75_blood_feast": 2,
+        "v75_blood_mark": 2
+      }
+    },
+    {
+      "combo_id": "v75_convergencia_gelida",
+      "required_tags": [
+        "v75_frost_lore",
+        "v75_lunar_paths"
+      ],
+      "distinct_participant_example": [
+        "gwent_v75_lua_cartografo_lunar",
+        "gwent_v75_lua_graviturgista"
+      ],
+      "provider_counts": {
+        "v75_frost_lore": 2,
+        "v75_lunar_paths": 2
+      }
+    },
+    {
+      "combo_id": "fe_gloria",
+      "required_tags": [
+        "fe",
+        "gloria_divina"
+      ],
+      "distinct_participant_example": [
+        "luterano_anjo",
+        "luterano_anjo2"
+      ],
+      "provider_counts": {
+        "fe": 14,
+        "gloria_divina": 4
+      }
+    },
+    {
+      "combo_id": "fe_devocao",
+      "required_tags": [
+        "devocao",
+        "fe"
+      ],
+      "distinct_participant_example": [
+        "luterano_anjo",
+        "luterano_bispo"
+      ],
+      "provider_counts": {
+        "devocao": 2,
+        "fe": 14
+      }
+    },
+    {
+      "combo_id": "fe_evangelho",
+      "required_tags": [
+        "evangelho",
+        "fe"
+      ],
+      "distinct_participant_example": [
+        "luterano_anjo",
+        "luterano_apostolo"
+      ],
+      "provider_counts": {
+        "evangelho": 2,
+        "fe": 14
+      }
+    },
+    {
+      "combo_id": "fe_irmandade",
+      "required_tags": [
+        "fe",
+        "irmandade"
+      ],
+      "distinct_participant_example": [
+        "luterano_anjo",
+        "luterano_irmao"
+      ],
+      "provider_counts": {
+        "fe": 14,
+        "irmandade": 2
+      }
+    },
+    {
+      "combo_id": "fe_soberania",
+      "required_tags": [
+        "fe",
+        "soberania"
+      ],
+      "distinct_participant_example": [
+        "luterano_anjo",
+        "luterano_papa"
+      ],
+      "provider_counts": {
+        "fe": 14,
+        "soberania": 2
+      }
+    },
+    {
+      "combo_id": "fe_sacerdos",
+      "required_tags": [
+        "fe",
+        "sacerdos"
+      ],
+      "distinct_participant_example": [
+        "luterano_anjo",
+        "luterano_sacerdote"
+      ],
+      "provider_counts": {
+        "fe": 14,
+        "sacerdos": 1
+      }
+    }
+  ],
+  "orphan_tag_card_ids": [
+    "gwent_unidade_cruzado",
+    "gwent_unidade_evangelista",
+    "gwent_unidade_missionario",
+    "gwent_unidade_protetor",
+    "gwent_unidade_sacerdote"
+  ],
+  "leader_registry": [
+    {
+      "leader_id": "arquimaga_eclipse",
+      "name": "Rennala",
+      "faction_id": "dark_moon",
+      "legacy_faction_name": "Lua Negra",
+      "legacy_effect_id": "rennala_full_moon",
+      "resolution_handler_candidate": "resolve_leader_rennala_full_moon",
+      "description_current": "Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "bastiao_ancestral",
+      "name": "Morgott",
+      "faction_id": "golden_order",
+      "legacy_faction_name": "Ordem Áurea",
+      "legacy_effect_id": "morgott_omen",
+      "resolution_handler_candidate": "resolve_leader_morgott_omen",
+      "description_current": "Na fileira escolhida, concede Escudo a até 2 aliados mais fortes e +1 de bônus a eles.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "comandante_fornalha",
+      "name": "Godfrey",
+      "faction_id": "golden_order",
+      "legacy_faction_name": "Ordem Áurea",
+      "legacy_effect_id": "godfrey_warlord",
+      "resolution_handler_candidate": "resolve_leader_godfrey_warlord",
+      "description_current": "Concede +2 de bônus a todas as suas unidades de Corpo a Corpo.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "juiz_cerco",
+      "name": "Radagon",
+      "faction_id": "golden_order",
+      "legacy_faction_name": "Ordem Áurea",
+      "legacy_effect_id": "radagon_purification",
+      "resolution_handler_candidate": "resolve_leader_radagon_purification",
+      "description_current": "Remove Sangramento, Geada, Podridão e Loucura de todos os aliados; cada aliado purificado recebe +1 de bônus.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "lider_papa_esquecido",
+      "name": "Papa Esquecido",
+      "faction_id": "the_forgotten",
+      "legacy_faction_name": "Os Esquecidos",
+      "legacy_effect_id": "forgotten_blessing",
+      "resolution_handler_candidate": "resolve_leader_forgotten_blessing",
+      "description_current": "Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "mestre_eclipse",
+      "name": "Astel",
+      "faction_id": "dark_moon",
+      "legacy_faction_name": "Lua Negra",
+      "legacy_effect_id": "astel_gravity",
+      "resolution_handler_candidate": "resolve_leader_astel_gravity",
+      "description_current": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "mestre_veu",
+      "name": "Mohg",
+      "faction_id": "crimson_veil",
+      "legacy_faction_name": "Véu Carmesim",
+      "legacy_effect_id": "mohg_blood_rite",
+      "resolution_handler_candidate": "resolve_leader_mohg_blood_rite",
+      "description_current": "Aplica uma marca de Sangramento aos 2 inimigos mais fortes da fileira escolhida; uma segunda marca causa Hemorragia (-2 de bônus).",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "oraculo_tempestade",
+      "name": "Loretta",
+      "faction_id": "dark_moon",
+      "legacy_faction_name": "Lua Negra",
+      "legacy_effect_id": "loretta_knight",
+      "resolution_handler_candidate": "resolve_leader_loretta_knight",
+      "description_current": "Concede +2 de bônus às 2 unidades aliadas mais fortes de Longa Distância.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "sombra_caminhante",
+      "name": "Rykard",
+      "faction_id": "crimson_veil",
+      "legacy_faction_name": "Véu Carmesim",
+      "legacy_effect_id": "rykard_devour",
+      "resolution_handler_candidate": "resolve_leader_rykard_devour",
+      "description_current": "Sacrifica seu aliado mais fraco na fileira escolhida; os demais aliados dessa fileira recebem +2 de bônus.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    },
+    {
+      "leader_id": "voz_caidos",
+      "name": "Esgar",
+      "faction_id": "crimson_veil",
+      "legacy_faction_name": "Véu Carmesim",
+      "legacy_effect_id": "esgar_blood_priest",
+      "resolution_handler_candidate": "resolve_leader_esgar_blood_priest",
+      "description_current": "Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus.",
+      "uses_per_match": 1,
+      "status": "IMPLEMENTED_IN_LEGACY; NEW_HANDLER_NOT_IMPLEMENTED"
+    }
+  ],
+  "faction_passives": [
+    {
+      "faction_id": "dark_moon",
+      "legacy_faction_name": "Lua Negra",
+      "archetype_name_current": "Feitiçaria e Controle",
+      "archetype_description_current": "Magia lunar, cosmos, gravidade, congelamento e +1 na primeira unidade da Lua Negra jogada em cada rodada.",
+      "passive_id": "faction.first_unit_of_faction_each_round",
+      "trigger": "first_unit_of_this_faction_played_each_round",
+      "bonus": 1,
+      "status": "LEGACY_GLOBAL_RULE; NEW_REGISTRY_CANDIDATE"
+    },
+    {
+      "faction_id": "golden_order",
+      "legacy_faction_name": "Ordem Áurea",
+      "archetype_name_current": "Formação e Resistência",
+      "archetype_description_current": "Proteção de fileira, fortalecimento de aliados e +1 na primeira unidade da Ordem Áurea jogada em cada rodada.",
+      "passive_id": "faction.first_unit_of_faction_each_round",
+      "trigger": "first_unit_of_this_faction_played_each_round",
+      "bonus": 1,
+      "status": "LEGACY_GLOBAL_RULE; NEW_REGISTRY_CANDIDATE"
+    },
+    {
+      "faction_id": "the_forgotten",
+      "legacy_faction_name": "Os Esquecidos",
+      "archetype_name_current": "Fé e Glória",
+      "archetype_description_current": "Devoção, evangelho, irmandade e +1 na primeira unidade dos Esquecidos jogada em cada rodada.",
+      "passive_id": "faction.first_unit_of_faction_each_round",
+      "trigger": "first_unit_of_this_faction_played_each_round",
+      "bonus": 1,
+      "status": "LEGACY_GLOBAL_RULE; NEW_REGISTRY_CANDIDATE"
+    },
+    {
+      "faction_id": "crimson_veil",
+      "legacy_faction_name": "Véu Carmesim",
+      "archetype_name_current": "Sangue e Sacrifício",
+      "archetype_description_current": "Sangramento, sacrifício, heresia e +1 na primeira unidade do Véu Carmesim jogada em cada rodada.",
+      "passive_id": "faction.first_unit_of_faction_each_round",
+      "trigger": "first_unit_of_this_faction_played_each_round",
+      "bonus": 1,
+      "status": "LEGACY_GLOBAL_RULE; NEW_REGISTRY_CANDIDATE"
+    }
+  ],
+  "global_rule_decisions": [
+    {
+      "rule": "FACTION_BOOST",
+      "recommendation": "KEEP_AS_SEPARATE_FACTION_PASSIVE",
+      "reason": "O bônus de +1 na primeira unidade da facção por rodada não é efeito individual e não deve invalidar carta pura."
+    },
+    {
+      "rule": "RARITY_EFFECT_BUDGET",
+      "recommendation": "REMOVE_FROM_NEW_RUNTIME_AFTER_MIGRATION",
+      "reason": "Amplificação automática por raridade cria uma segunda camada de poder não declarada. Poder, efeito e custo devem estar definidos na carta/compilação; raridade não deve alterar o handler silenciosamente."
+    },
+    {
+      "rule": "CARD_IDENTITY_ABILITIES",
+      "recommendation": "REMOVE_AS_PARALLEL_LOOKUP_AFTER_MIGRATION",
+      "reason": "O novo card_id aponta para um único effect_id. Identidade não pode executar habilidade paralela escondida."
+    },
+    {
+      "rule": "CARD_SYNERGY_TAGS",
+      "recommendation": "MOVE_TO_CANONICAL_CARD.combo_tags",
+      "reason": "Tags ficam declaradas junto da carta, não num mapa separado por ID."
+    }
+  ],
+  "not_yet_approved_or_implemented": [
+    "Pontuação EFP e pesos de balanceamento.",
+    "Custo individual e orçamento de deck.",
+    "Fórmula e faixas finais de raridade.",
+    "Quais efeitos candidatos serão realmente atribuídos a cada uma das 137 cartas reescritas.",
+    "Remoção física dos handlers legados, que só ocorrerá após migração e testes do novo motor."
+  ]
+}

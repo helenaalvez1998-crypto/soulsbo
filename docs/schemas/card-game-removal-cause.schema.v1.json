@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-removal-cause.v1.json",
+  "title": "Soulsbo Removal Cause v1",
+  "description": "Closed cause identifiers approved by Group F. Round archive is not a removal cause.",
+  "type": "string",
+  "enum": [
+    "normal_removal",
+    "execution",
+    "sacrifice"
+  ]
+}

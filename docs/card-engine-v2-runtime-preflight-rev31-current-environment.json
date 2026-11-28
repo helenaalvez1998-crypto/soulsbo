@@ -1,0 +1,164 @@
+{
+  "project_root": "<project_root>",
+  "status": "blocked",
+  "passed": 9,
+  "warnings": 0,
+  "blocked": 22,
+  "checks": [
+    {
+      "name": "python",
+      "status": "pass",
+      "detail": "Python 3.13"
+    },
+    {
+      "name": "dependency:discord.py",
+      "status": "block",
+      "detail": "esperado 2.7.1; encontrado ausente"
+    },
+    {
+      "name": "dependency:aiosqlite",
+      "status": "block",
+      "detail": "esperado 0.22.1; encontrado ausente"
+    },
+    {
+      "name": "dependency:python-dotenv",
+      "status": "block",
+      "detail": "esperado 1.2.4; encontrado 1.2.2"
+    },
+    {
+      "name": "dependency:aiohttp",
+      "status": "block",
+      "detail": "esperado 3.14.5; encontrado 3.13.3"
+    },
+    {
+      "name": "dependency:tzdata",
+      "status": "block",
+      "detail": "esperado 2026.6; encontrado 2026.2"
+    },
+    {
+      "name": "dependency:google-genai",
+      "status": "block",
+      "detail": "esperado 2.34.0; encontrado ausente"
+    },
+    {
+      "name": "dependency:requests",
+      "status": "block",
+      "detail": "esperado 2.34.2; encontrado 2.32.5"
+    },
+    {
+      "name": "dependency:beautifulsoup4",
+      "status": "block",
+      "detail": "esperado 4.15.0; encontrado 4.14.3"
+    },
+    {
+      "name": "dependency:Pillow",
+      "status": "block",
+      "detail": "esperado 13.0.0; encontrado 12.3.0"
+    },
+    {
+      "name": "dependency:boto3",
+      "status": "pass",
+      "detail": "versão 1.43.18"
+    },
+    {
+      "name": "dependency:reportlab",
+      "status": "pass",
+      "detail": "versão 4.4.9"
+    },
+    {
+      "name": "file:bot.py",
+      "status": "pass",
+      "detail": "presente"
+    },
+    {
+      "name": "file:requirements.txt",
+      "status": "pass",
+      "detail": "presente"
+    },
+    {
+      "name": "file:site_hub.py",
+      "status": "pass",
+      "detail": "presente"
+    },
+    {
+      "name": "file:site_card_engine_v2.py",
+      "status": "pass",
+      "detail": "presente"
+    },
+    {
+      "name": "file:cogs/card_engine_v2_ui.py",
+      "status": "pass",
+      "detail": "presente"
+    },
+    {
+      "name": "env:DISCORD_TOKEN",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "env:DISCORD_OAUTH_CLIENT_ID",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "env:DISCORD_OAUTH_CLIENT_SECRET",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "env:DISCORD_OAUTH_REDIRECT_URI",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "env:SOULSBOT_WEB_SESSION_SECRET",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "env:SOULSBOT_PUBLIC_URL",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "env:DATA_DIR",
+      "status": "block",
+      "detail": "variável ausente ou com placeholder"
+    },
+    {
+      "name": "session_secret",
+      "status": "block",
+      "detail": "use uma chave aleatória, independente, com pelo menos 32 caracteres"
+    },
+    {
+      "name": "public_url",
+      "status": "block",
+      "detail": "URL pública deve usar HTTPS; HTTP só é permitido em localhost"
+    },
+    {
+      "name": "oauth_redirect",
+      "status": "block",
+      "detail": "callback precisa ser exatamente SOULSBOT_PUBLIC_URL/auth/discord/callback"
+    },
+    {
+      "name": "port",
+      "status": "pass",
+      "detail": "porta válida"
+    },
+    {
+      "name": "data_dir",
+      "status": "block",
+      "detail": "DATA_DIR não configurado"
+    },
+    {
+      "name": "database_persistence",
+      "status": "block",
+      "detail": "DB_PATH não pode ser resolvido"
+    },
+    {
+      "name": "legacy_database",
+      "status": "block",
+      "detail": "DB_PATH não pode ser resolvido"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "document": "Soulsbo Card Engine v2 expanded playable alpha validation",
+    "version": "0.4",
+    "status": "PASS",
+    "runtime_integration": "isolated_alpha_match_controller_only",
+    "production_runtime_integration": false,
+    "production_database_access": false,
+    "catalog_release_id": "alpha-test-only.catalog.v0.3",
+    "generated_at_utc": "2026-11-28T04:18:56.340258+00:00"
+  },
+  "summary": {
+    "tests": 135,
+    "passed": 135,
+    "failed": 0,
+    "skipped": 0
+  },
+  "coverage_groups": {
+    "repository_and_persistence": "tests/card_engine_v2/test_repository.py",
+    "generic_gameplay_resolver": "tests/card_engine_v2/test_gameplay_resolver.py",
+    "playable_best_of_three_match": "tests/card_engine_v2/test_playable_match.py",
+    "normal_sacrifice_turn_action": "tests/card_engine_v2/test_playable_match.py",
+    "deck_fatigue_turn_start_runtime": "tests/card_engine_v2/test_deck_fatigue_runtime.py",
+    "row_combat_and_player_life": "tests/test_combat.py and tests/test_playable_match.py",
+    "schema_and_contract": "tests/card_engine_v2/test_schema.py",
+    "expanded_entry_effects": "tests/card_engine_v2/test_expanded_entry_effects.py",
+    "combos_faction_passives_leaders": "tests/card_engine_v2/test_combo_faction_leaders.py",
+    "deck_fatigue_candidate_reference_only": "tests/card_engine_v2/test_deck_fatigue_candidate.py (historical candidate model)"
+  },
+  "content_scope": {
+    "historical_models": 137,
+    "alpha_allowlist_cards": 27,
+    "blocked_historical_models": 110,
+    "combo_definitions_registered": 27,
+    "combos_reachable_with_current_allowlist_tags": 9,
+    "combos_inert_until_missing_tag_sources_are_added": 18,
+    "faction_passives": 4,
+    "leader_handlers": 10,
+    "entry_effect_families": 12
+  },
+  "scope_limits": [
+    "Tests use disposable local SQLite databases; no production database is accessed.",
+    "No Discord, HTTP, frontend, aiosqlite or multi-host integration is exercised.",
+    "The 27-card allowlist, 27 combo definitions, four faction passives and ten leaders are alpha-only fixtures, not a published catalog.",
+    "Only nine registered combos have all required tags represented in the current 27-card allowlist; 18 remain inert until tag-source cards are added.",
+    "Combo/passive/leader tests use isolated test matches; not every handler has been playtested through a human UI flow.",
+    "The remaining 110 historical models are blocked; the full card catalog, per-unit attack/armor/hit-point rules, all special families and production adapter are incomplete.",
+    "Normal sacrifice is exposed only as an internal alpha controller action; its current cost is turn consumption only, with no energy/resource economy or Discord/HTTP/frontend interaction.",
+    "Deck fatigue is enabled only in the isolated alpha match controller; it is not integrated with Discord, HTTP, frontend or the production game runtime.",
+    "The default alpha setup follows the redesign's four-card initial hand; deterministic legacy simulation fixtures may explicitly override the hand size.",
+    "The alpha harness retains its existing draw of up to two cards at each new round; this draw schedule is a harness rule, not a complete production draw economy.",
+    "Deck fatigue uses a provisional alpha balance policy: 1 damage on the first empty-deck turn, then +1 per later fatigue turn, no cap, per-player match counter, no reset and no discard reshuffle.",
+    "Each player's first turn after the initial deal is fatigue-exempt; subsequent individual turns are checked before the player can act."
+  ],
+  "failures": []
+}

@@ -1,0 +1,62 @@
+{
+  "report_id": "card-game-contract-validation-v1.1",
+  "date": "2026-11-27",
+  "status": "passed_with_declared_scope_limits",
+  "scope": "canonical card/effect-registry data contract only; not runtime integration",
+  "unit_tests": {
+    "command": "python docs/scripts/test-card-contract-v1.py",
+    "passed": 35,
+    "failed": 0,
+    "total": 35
+  },
+  "json_schema": {
+    "draft": "2020-12",
+    "schema_count": 2,
+    "schemas_valid": 2,
+    "example_count": 2,
+    "examples_valid": 2,
+    "command": "python docs/scripts/validate-card-json-schemas-v1.1.py",
+    "optional_dependency": "jsonschema"
+  },
+  "catalog_cli_smoke": {
+    "valid_fixture": {
+      "cards": 4,
+      "pure_units": 3,
+      "pure_ratio": 0.75,
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    "invalid_fixture": {
+      "fault": "ally_bonus exceeds registry maximum",
+      "expected_exit": 1,
+      "actual_exit": 1
+    }
+  },
+  "legacy_snapshot": {
+    "model_count": 137,
+    "sha256_run_1": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+    "sha256_run_2": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+    "deterministic": true
+  },
+  "runtime_hashes_unchanged": {
+    "sistemas/cartas.py": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+    "sistemas/gwent.py": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+    "bot.py": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+    "database.py": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+    "site/app.js": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b"
+  },
+  "not_reexecuted": {
+    "previous_runtime_suite": "251/251 behavioral assertions and 12/12 stateful scenarios",
+    "reason": "No runtime gameplay files were modified in this stage; these remain the last recorded runtime validation and are not claimed as rerun."
+  },
+  "not_implemented": [
+    "new authored card catalogue",
+    "complete approved effect registry",
+    "effect handlers integrated with the runtime",
+    "deck cost formula and budget",
+    "rarity formula and thresholds",
+    "EFP calibration",
+    "new lore and faction assignment for all cards",
+    "retirement of legacy random/procedural card generation"
+  ]
+}

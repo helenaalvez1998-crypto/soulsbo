@@ -1,0 +1,166 @@
+{
+  "decision_register": "card_game_selection_group_D",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "status": "OWNER_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev11.zip",
+  "audit_ref": "docs/card-game-selection-group-D-audit-v0.1.json",
+  "decisions": [
+    {
+      "id": "DSEL-DEC-001",
+      "title": "Separar identidade física, escolha de modo e fileira",
+      "dependencies": [
+        "CI-010"
+      ],
+      "proposal": "Proposta: request usa source_instance_id, target_instance_id/target_instance_ids, choice_id e target_row em campos distintos; nunca reutilizar target_id para modo.",
+      "recommendation": "Adotar o split agora no contrato candidato; compatibilidade legada só por adaptador inequívoco quando existir exatamente uma instância elegível.",
+      "boundary": "Não aprova migração do endpoint existente.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-002",
+      "title": "Ofertas de alvo server-authoritative e revalidadas",
+      "dependencies": [
+        "CI-010",
+        "CI-011"
+      ],
+      "proposal": "Proposta: servidor gera ofertas, métricas e prévia; cliente somente apresenta. Submissão revalida revisão, identidade, zona, fileira, elegibilidade e cardinalidade.",
+      "recommendation": "Adotar; não aceitar listas de candidatos calculadas pelo navegador como fonte de verdade.",
+      "boundary": "Implementação e enforcement de expected_revision dependem do Grupo E.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-003",
+      "title": "Política de seleção declarativa por efeito",
+      "dependencies": [
+        "BUF-003",
+        "BUF-004",
+        "BUF-005",
+        "BUF-006"
+      ],
+      "proposal": "Proposta: cada binding ativo declara lado, zona, row_scope, predicates, métricas, sort, count, fallback, partial, tie-break, protection e costs.",
+      "recommendation": "Adotar o schema candidato; predicados são IDs versionados, não expressões fornecidas pelo cliente.",
+      "boundary": "Parâmetros finais de cada efeito/release continuam em aberto.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-004",
+      "title": "Cardinalidade explícita e independente de raridade",
+      "dependencies": [
+        "BUF-001",
+        "BUF-013"
+      ],
+      "proposal": "Proposta: exact/up_to/all_matching com min/max; target count é parâmetro explícito no efeito/release e nunca deriva de rarity_id.",
+      "recommendation": "Adotar; para up_to 2 com mínimo 1, uma unidade disponível é resultado applied e não partial.",
+      "boundary": "Quantidades finais de Égide/Passo ainda precisam de balanceamento por efeito.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-005",
+      "title": "Seleção manual múltipla e secundários visíveis",
+      "dependencies": [
+        "CI-010",
+        "BUF-013"
+      ],
+      "proposal": "Proposta: manual_set quando a escolha de vários alvos é significativa. manual_primary_auto_fill só se mantido com prévia server-side explícita de todos os secundários antes da confirmação.",
+      "recommendation": "Preferir manual_set; nunca ocultar alvos secundários nem ordenar por array incidental.",
+      "boundary": "A escolha por carta ainda requer revisão de UX/design.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-006",
+      "title": "Fallback e ausência de alvo definidos por efeito",
+      "dependencies": [
+        "RSRX-01",
+        "RSRX-02",
+        "RSRX-06"
+      ],
+      "proposal": "Proposta: on_no_target = reject/consume_no_effect/fallback com fallback nomeado; não existe default global.",
+      "recommendation": "Alvo obrigatório deve rejeitar; Algemas exige bônus positivo; no-op de Chama/Muralha deve ser explicitamente revisto; fallback explícito de Regressão Serena permanece próprio.",
+      "boundary": "RSRX-02/Devorar e regras finais de várias cartas precisam de decisão específica.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-007",
+      "title": "Outcomes distintos por operação e por alvo",
+      "dependencies": [
+        "CI-011"
+      ],
+      "proposal": "Proposta: applied, partial, blocked, consumed_no_effect, rejected; alvos individuais applied/blocked/skipped; rejected é apenas operação.",
+      "recommendation": "Adotar; conflict por revisão/idempotência fica na camada transacional Grupo E, não como outcome de gameplay.",
+      "boundary": "Semântica exata de algumas cartas no-op fica pendente.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-008",
+      "title": "Custos de ação multidimensionais",
+      "dependencies": [
+        "CI-011",
+        "BUF-009",
+        "BUF-010",
+        "RSRX-01",
+        "RSRX-02",
+        "RSRX-06"
+      ],
+      "proposal": "Proposta: separar turno, fonte, ativação de líder/relíquia, carga de proteção e outros consumíveis.",
+      "recommendation": "Adotar; rejeição não consome; blocked/consumed_no_effect consome apenas custos declarados. Preservar Noite/Chama versus Lâmina Negra conforme Grupo C aprovado.",
+      "boundary": "Matriz carta-a-carta de custos precisa ser concluída no registry.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-009",
+      "title": "Desempate determinístico entre grants de proteção",
+      "dependencies": [
+        "CI-008",
+        "CI-009",
+        "BUF-009",
+        "BUF-010"
+      ],
+      "proposal": "Proposta: grants compatíveis, ativos e com charges_remaining>0; mais antigo primeiro por applied_event.sequence ascendente; grant_id lexicográfico como desempate.",
+      "recommendation": "Adotar como default candidato; perfis com prioridade distinta devem codificar prioridade no release versionado.",
+      "boundary": "Não depender da ordem de protection_grants[] no JSON.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-010",
+      "title": "Plano de seleção e resolução atomicamente lógico",
+      "dependencies": [
+        "CI-011"
+      ],
+      "proposal": "Proposta: planejar sem mutação; validar todos alvos/custos/proteção; resolver working copy; validar invariantes; commit único do resultado aceito.",
+      "recommendation": "Adotar; falha inesperada descarta tudo; blocked e consumed_no_effect fazem commit quando custos/eventos assim declararem.",
+      "boundary": "The isolated SQLite alpha provides transaction, CAS and atomic commit primitives. Domain resolver and production integration remain pending.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-011",
+      "title": "Request candidato inclui operação e revisão esperada",
+      "dependencies": [
+        "CI-014"
+      ],
+      "proposal": "Proposta: operation_id UUIDv4 e expected_revision acompanham o request; fingerprint e replay serão persistidos pelo serviço.",
+      "recommendation": "Incluir no schema candidato; stale revision deve produzir conflict sem mutação, mas não o modelar como outcome do motor.",
+      "boundary": "The isolated alpha now persists operation_id and expected_revision with idempotency/CAS; public API integration and production cutover remain unauthorized.",
+      "status": "OWNER_APPROVED"
+    },
+    {
+      "id": "DSEL-DEC-012",
+      "title": "Métrica e prévia da UI derivadas do servidor",
+      "dependencies": [
+        "CI-010",
+        "CI-011"
+      ],
+      "proposal": "Proposta: oferta serializada informa eligibility_metric, display_metric, valor calculado, row scope, ordem e secundários previstos.",
+      "recommendation": "Adotar; cliente não recalcula elegibilidade ou ranking; sempre mostrar a métrica que a regra realmente utiliza.",
+      "boundary": "A camada de apresentação final é validada depois, não neste pacote documental.",
+      "status": "OWNER_APPROVED"
+    }
+  ],
+  "scope_note": "Grupo D aprovado. Os grupos E e F também foram aprovados separadamente; seus limites permanecem: sem integração ao runtime ou migração de produção.",
+  "approval": {
+    "status": "OWNER_APPROVED",
+    "evidence": "User replied \"ok, continua\" immediately after the explicit question asking approval of DSEL-DEC-001 through DSEL-DEC-012.",
+    "scope": "All 12 resolutions in this register, with boundaries retained exactly as stated in each decision.",
+    "runtime_modified": false
+  }
+}

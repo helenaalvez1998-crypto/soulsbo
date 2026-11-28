@@ -1,0 +1,1525 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-card-instance-match.v6.json",
+  "title": "Soulsbo CardInstance Match Envelope v6",
+  "description": "Draft incorporating approved Groups A-F. Group E persistence and migration remain open; not a production schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "match_id",
+    "state_revision",
+    "status",
+    "players",
+    "instances",
+    "operations",
+    "definition_manifest",
+    "events"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 6
+    },
+    "match_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "state_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "active",
+        "finished"
+      ]
+    },
+    "players": {
+      "type": "object",
+      "minProperties": 2,
+      "patternProperties": {
+        "^-?(?:0|[1-9][0-9]*)$": {
+          "$ref": "#/$defs/player"
+        }
+      },
+      "additionalProperties": false
+    },
+    "instances": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$": {
+          "$ref": "#/$defs/card_instance"
+        }
+      },
+      "additionalProperties": false
+    },
+    "operations": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$": {
+          "$ref": "#/$defs/operation_record"
+        }
+      },
+      "additionalProperties": false
+    },
+    "definition_manifest": {
+      "$ref": "#/$defs/definition_manifest"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/domain_event"
+      }
+    }
+  },
+  "$defs": {
+    "uuid4": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "row": {
+      "enum": [
+        "melee",
+        "ranged",
+        "siege"
+      ]
+    },
+    "zone": {
+      "enum": [
+        "hand",
+        "draw_pile",
+        "board",
+        "discard"
+      ]
+    },
+    "player": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "zones",
+        "round_state",
+        "counters"
+      ],
+      "properties": {
+        "zones": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hand",
+            "draw_pile",
+            "board",
+            "discard"
+          ],
+          "properties": {
+            "hand": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            },
+            "draw_pile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            },
+            "board": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            },
+            "discard": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "round_state": {
+          "$ref": "#/$defs/round_state"
+        },
+        "counters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "board_removal_count",
+            "sacrifice_count"
+          ],
+          "properties": {
+            "board_removal_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Projection of successful normal_removal + execution events affecting this player."
+            },
+            "sacrifice_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Projection of successful sacrifice events affecting this player."
+            }
+          }
+        }
+      }
+    },
+    "definition_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "card_id",
+        "kind",
+        "faction_id",
+        "printed_row",
+        "power_base",
+        "rarity_id",
+        "effect_id",
+        "effect_params",
+        "combo_tags",
+        "catalog_release_id",
+        "effect_registry_release_id",
+        "balance_rules_release_id",
+        "ruleset_release_id",
+        "definition_digest",
+        "intrinsic_weather_resistance"
+      ],
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "kind": {
+          "enum": [
+            "unit",
+            "special",
+            "relic"
+          ]
+        },
+        "faction_id": {
+          "enum": [
+            "golden_order",
+            "crimson_veil",
+            "dark_moon",
+            "the_forgotten"
+          ]
+        },
+        "printed_row": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/row"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "power_base": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 15
+        },
+        "rarity_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "description": "Classificação apenas. Conforme BUF-001 aprovado, não pode ser input do resolvedor nem alterar qualquer resultado mecânico."
+        },
+        "effect_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "effect_params": {
+          "type": "object"
+        },
+        "combo_tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "catalog_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "effect_registry_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "balance_rules_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "ruleset_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "definition_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest do snapshot mecânico resolvido, sem seu próprio campo definition_digest."
+        },
+        "intrinsic_weather_resistance": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Resistência climática intrínseca e imutável da definição. Ausência no release de origem é materializada como 0."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unit"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "printed_row": {
+                "$ref": "#/$defs/row"
+              },
+              "power_base": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 15
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "special",
+                  "relic"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "printed_row": {
+                "type": "null"
+              },
+              "power_base": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "runtime_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_row",
+        "last_board_row",
+        "bonus_grants",
+        "protection_grants",
+        "status_applications",
+        "weather_resistance_modifiers",
+        "activated_combo_ids",
+        "effect_state"
+      ],
+      "properties": {
+        "current_row": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/row"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Posição atual; deve ser null fora da zona board."
+        },
+        "last_board_row": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/row"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Projeção persistida da última fileira válida no campo; mantida quando a instância sai do board. Atualiza em movimento e saída do campo; fica null se nunca houve presença no board."
+        },
+        "bonus_grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/bonus_grant"
+          },
+          "description": "Concessões ativas rastreáveis. O bônus total é projeção calculada pelas clamp policies do release; não persistir escalar agregado canônico."
+        },
+        "protection_grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protection_grant"
+          },
+          "description": "Concessões de proteção com cargas restantes; a soma compatível pode ser projetada para a UI."
+        },
+        "status_applications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/status_application"
+          },
+          "description": "Aplicações de estados rastreáveis. Contadores são projeções por status_id; limite de 2 marcas por status é validado semanticamente."
+        },
+        "weather_resistance_modifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/weather_resistance_modifier"
+          },
+          "description": "Modificadores temporários de resistência climática; a resistência efetiva soma o atributo intrínseco aos modificadores ativos e aplica piso 0."
+        },
+        "activated_combo_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "effect_state": {
+          "type": "object"
+        }
+      }
+    },
+    "card_instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "instance_id",
+        "card_id",
+        "exemplar_id",
+        "owner_player_id",
+        "origin_type",
+        "definition_snapshot",
+        "state"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 6
+        },
+        "instance_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "exemplar_id": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "owner_player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        },
+        "origin_type": {
+          "enum": [
+            "deck_exemplar",
+            "catalog_deck",
+            "generated_token",
+            "equipped_relic_activation",
+            "legacy_migration"
+          ]
+        },
+        "definition_snapshot": {
+          "$ref": "#/$defs/definition_snapshot"
+        },
+        "state": {
+          "$ref": "#/$defs/runtime_state"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "origin_type": {
+                "const": "deck_exemplar"
+              }
+            },
+            "required": [
+              "origin_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "exemplar_id": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "origin_type": {
+                "enum": [
+                  "catalog_deck",
+                  "generated_token",
+                  "equipped_relic_activation"
+                ]
+              }
+            },
+            "required": [
+              "origin_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "exemplar_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "definition_snapshot": {
+                "properties": {
+                  "kind": {
+                    "const": "unit"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "definition_snapshot"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state": {},
+              "definition_snapshot": {
+                "properties": {
+                  "printed_row": {
+                    "$ref": "#/$defs/row"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "definition_snapshot": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "special",
+                      "relic"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "definition_snapshot"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state": {
+                "properties": {
+                  "current_row": {
+                    "type": "null"
+                  },
+                  "last_board_row": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "operation_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "fingerprint",
+        "actor",
+        "expected_revision",
+        "result"
+      ],
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "actor": {
+          "$ref": "#/$defs/actor"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "result": {
+          "$ref": "#/$defs/action_result"
+        }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "type",
+            "player_id"
+          ],
+          "properties": {
+            "type": {
+              "const": "player"
+            },
+            "player_id": {
+              "type": "string",
+              "pattern": "^-?(?:0|[1-9][0-9]*)$"
+            }
+          }
+        },
+        {
+          "required": [
+            "type",
+            "system_id"
+          ],
+          "properties": {
+            "type": {
+              "const": "system"
+            },
+            "system_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          }
+        }
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "player",
+            "system"
+          ]
+        },
+        "player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        },
+        "system_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "definition_manifest": {
+      "$ref": "#/$defs/definition_manifest_inline"
+    },
+    "definition_manifest_inline": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://soulsbo.local/schemas/card-game-definition-manifest.v1.json",
+      "title": "Soulsbo Definition Manifest v1",
+      "description": "Manifesto imutável por partida. Release IDs apontam para artefatos publicados; schema_version do envelope não é release de conteúdo.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_version",
+        "canonicalization",
+        "catalog_release_id",
+        "effect_registry_release_id",
+        "balance_rules_release_id",
+        "ruleset_release_id",
+        "artifact_sha256",
+        "definition_digest"
+      ],
+      "properties": {
+        "manifest_version": {
+          "const": 1
+        },
+        "canonicalization": {
+          "const": "RFC8785"
+        },
+        "catalog_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "effect_registry_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "balance_rules_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "ruleset_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifact_sha256": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "catalog",
+            "effect_registry",
+            "balance_rules",
+            "ruleset"
+          ],
+          "properties": {
+            "catalog": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "effect_registry": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "balance_rules": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "ruleset": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "definition_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 de JCS/RFC8785 do objeto manifesto sem o próprio campo definition_digest."
+        }
+      }
+    },
+    "domain_event": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://soulsbo.local/schemas/card-game-domain-event.v2.json",
+      "title": "Soulsbo Domain Event v2",
+      "description": "Append-only causal event. v2 closes removal causes and distinguishes archival transitions.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "operation_id",
+        "sequence",
+        "caused_by_event_ids",
+        "kind",
+        "effect_scope",
+        "source_effect_id",
+        "source_instance_id",
+        "target_instance_ids",
+        "payload"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "operation_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "caused_by_event_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "effect_scope": {
+          "enum": [
+            "direct",
+            "reactive",
+            "system"
+          ]
+        },
+        "source_effect_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "source_instance_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "target_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "effect_scope": {
+                "const": "reactive"
+              }
+            },
+            "required": [
+              "effect_scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "source_effect_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "effect_scope": {
+                "const": "direct"
+              }
+            },
+            "required": [
+              "effect_scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "source_effect_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unit_removed"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "effect_scope": {
+                "const": "direct"
+              },
+              "payload": {
+                "$ref": "#/$defs/removal_event_payload"
+              },
+              "target_instance_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unit_removal_blocked"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "effect_scope": {
+                "const": "direct"
+              },
+              "payload": {
+                "$ref": "#/$defs/removal_blocked_payload"
+              },
+              "target_instance_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unit_archived"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "effect_scope": {
+                "const": "system"
+              },
+              "payload": {
+                "$ref": "#/$defs/round_archive_payload"
+              },
+              "target_instance_ids": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "vengeance_bonus_applied"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "effect_scope": {
+                "const": "reactive"
+              },
+              "source_effect_id": {
+                "const": "effect.vengeance_on_removal"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "rykard_bonus_applied"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "effect_scope": {
+                "const": "direct"
+              },
+              "source_effect_id": {
+                "const": "leader.rykard_devour"
+              }
+            }
+          }
+        }
+      ],
+      "$defs": {
+        "uuid4": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "removal_cause_id": {
+          "enum": [
+            "normal_removal",
+            "execution",
+            "sacrifice"
+          ]
+        },
+        "removal_event_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cause_id",
+            "from_zone",
+            "to_zone",
+            "affected_player_id"
+          ],
+          "properties": {
+            "cause_id": {
+              "$ref": "#/$defs/removal_cause_id"
+            },
+            "from_zone": {
+              "const": "board"
+            },
+            "to_zone": {
+              "const": "discard"
+            },
+            "affected_player_id": {
+              "type": "string",
+              "pattern": "^-?(?:0|[1-9][0-9]*)$"
+            }
+          }
+        },
+        "removal_blocked_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cause_id",
+            "from_zone",
+            "to_zone",
+            "affected_player_id",
+            "protection_grant_id"
+          ],
+          "properties": {
+            "cause_id": {
+              "enum": [
+                "normal_removal",
+                "execution"
+              ]
+            },
+            "from_zone": {
+              "const": "board"
+            },
+            "to_zone": {
+              "const": "board"
+            },
+            "affected_player_id": {
+              "type": "string",
+              "pattern": "^-?(?:0|[1-9][0-9]*)$"
+            },
+            "protection_grant_id": {
+              "$ref": "#/$defs/uuid4"
+            }
+          }
+        },
+        "round_archive_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "transition_id",
+            "from_zone",
+            "to_zone"
+          ],
+          "properties": {
+            "transition_id": {
+              "const": "round_archive"
+            },
+            "from_zone": {
+              "const": "board"
+            },
+            "to_zone": {
+              "const": "discard"
+            }
+          }
+        }
+      }
+    },
+    "expires_on": {
+      "enum": [
+        "board_exit",
+        "zone_exit",
+        "round_close",
+        "permanent_instance"
+      ]
+    },
+    "round_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "last_unit_play_row"
+      ],
+      "properties": {
+        "last_unit_play_row": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/row"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Fileira da última unidade jogada com sucesso pelo participante nesta rodada; movimento, carta especial e retorno não atualizam."
+        }
+      }
+    },
+    "bonus_grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grant_id",
+        "amount",
+        "source_effect_id",
+        "source_instance_id",
+        "applied_event_id",
+        "expires_on",
+        "clamp_policy_id"
+      ],
+      "properties": {
+        "grant_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Delta assinado; interpretação e clamp são definidos pela clamp_policy_id versionada."
+        },
+        "source_effect_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_instance_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid4"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applied_event_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "expires_on": {
+          "$ref": "#/$defs/expires_on"
+        },
+        "clamp_policy_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "protection_grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grant_id",
+        "profile_id",
+        "charges",
+        "source_effect_id",
+        "source_instance_id",
+        "applied_event_id",
+        "expires_on"
+      ],
+      "properties": {
+        "grant_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Perfil definido no ruleset/release; não representa imunidade universal."
+        },
+        "charges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cargas restantes; 0 preserva a trilha do grant já consumido."
+        },
+        "source_effect_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_instance_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid4"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applied_event_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "expires_on": {
+          "$ref": "#/$defs/expires_on"
+        }
+      }
+    },
+    "status_application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "application_id",
+        "status_id",
+        "source_effect_id",
+        "source_instance_id",
+        "applied_event_id",
+        "expires_on"
+      ],
+      "properties": {
+        "application_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "status_id": {
+          "enum": [
+            "status.bleeding",
+            "status.frost",
+            "status.scarlet_rot",
+            "status.madness"
+          ]
+        },
+        "source_effect_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_instance_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid4"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applied_event_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "expires_on": {
+          "$ref": "#/$defs/expires_on"
+        }
+      }
+    },
+    "weather_resistance_modifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modifier_id",
+        "amount",
+        "source_effect_id",
+        "source_instance_id",
+        "applied_event_id",
+        "expires_on"
+      ],
+      "properties": {
+        "modifier_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Modificador assinado; resistência efetiva tem piso zero."
+        },
+        "source_effect_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_instance_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid4"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applied_event_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "expires_on": {
+          "$ref": "#/$defs/expires_on"
+        }
+      }
+    },
+    "action_target_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_instance_id",
+        "outcome"
+      ],
+      "properties": {
+        "target_instance_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "outcome": {
+          "enum": [
+            "applied",
+            "blocked",
+            "skipped"
+          ]
+        },
+        "effect_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "protection_grant_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "action_costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turn_consumed",
+        "source_consumed",
+        "activation_consumed",
+        "protection_grants_consumed",
+        "other_costs"
+      ],
+      "properties": {
+        "turn_consumed": {
+          "type": "boolean"
+        },
+        "source_consumed": {
+          "type": "boolean"
+        },
+        "activation_consumed": {
+          "type": "boolean"
+        },
+        "protection_grants_consumed": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid4"
+          }
+        },
+        "other_costs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cost_id",
+              "amount",
+              "consumed"
+            ],
+            "properties": {
+              "cost_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "amount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "consumed": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "action_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation_id",
+        "outcome",
+        "revision_before",
+        "revision_after",
+        "target_results",
+        "costs",
+        "event_ids"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "operation_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "outcome": {
+          "enum": [
+            "applied",
+            "partial",
+            "blocked",
+            "consumed_no_effect",
+            "rejected"
+          ]
+        },
+        "revision_before": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "revision_after": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "target_results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action_target_result"
+          }
+        },
+        "costs": {
+          "$ref": "#/$defs/action_costs"
+        },
+        "event_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid4"
+          }
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "removal_cause_id": {
+      "enum": [
+        "normal_removal",
+        "execution",
+        "sacrifice"
+      ]
+    },
+    "removal_event_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cause_id",
+        "from_zone",
+        "to_zone",
+        "affected_player_id"
+      ],
+      "properties": {
+        "cause_id": {
+          "$ref": "#/$defs/removal_cause_id"
+        },
+        "from_zone": {
+          "const": "board"
+        },
+        "to_zone": {
+          "const": "discard"
+        },
+        "affected_player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        }
+      }
+    },
+    "removal_blocked_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cause_id",
+        "from_zone",
+        "to_zone",
+        "affected_player_id",
+        "protection_grant_id"
+      ],
+      "properties": {
+        "cause_id": {
+          "enum": [
+            "normal_removal",
+            "execution"
+          ]
+        },
+        "from_zone": {
+          "const": "board"
+        },
+        "to_zone": {
+          "const": "board"
+        },
+        "affected_player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        },
+        "protection_grant_id": {
+          "$ref": "#/$defs/uuid4"
+        }
+      }
+    },
+    "round_archive_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transition_id",
+        "from_zone",
+        "to_zone"
+      ],
+      "properties": {
+        "transition_id": {
+          "const": "round_archive"
+        },
+        "from_zone": {
+          "const": "board"
+        },
+        "to_zone": {
+          "const": "discard"
+        }
+      }
+    }
+  },
+  "$comment": "Draft v0.4. Aprovações A/B/C documentais; grupos D/F/E pendentes. Invariantes entre instâncias e zonas exigem validador semântico além do JSON Schema."
+}

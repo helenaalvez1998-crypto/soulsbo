@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "offer_id": "25d95fd6-f7dc-4fdc-9c54-7b4e8337f7c2",
+  "state_revision": 17,
+  "target_policy_id": "execution.enemy.melee.v1",
+  "selection_mode": "manual_single",
+  "metrics": {
+    "eligibility_metric": "effective_power",
+    "display_metric": "effective_power",
+    "sort_metric": "effective_power",
+    "direction": "ascending"
+  },
+  "target_count": {
+    "minimum_targets": 1,
+    "maximum_targets": 1
+  },
+  "candidates": [
+    {
+      "target_instance_id": "66eebf7c-96c9-4c26-b8dc-e1c850e99d50",
+      "display_name": "Cavaleiro Caído",
+      "current_row": "melee",
+      "base_power": 7,
+      "effective_power": 5,
+      "bonus": 1,
+      "eligibility_value": 5,
+      "display_value": 5,
+      "selection_order": 0
+    }
+  ],
+  "secondary_targets_preview": [],
+  "requires_confirmation": true
+}

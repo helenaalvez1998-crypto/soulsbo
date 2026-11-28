@@ -1,0 +1,134 @@
+{
+  "revision": "31",
+  "date": "2026-11-28",
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev30.zip",
+  "status": "local_validation_pass_external_deployment_blocked",
+  "tests": {
+    "pytest": {
+      "passed": 240,
+      "failed": 0,
+      "parametrized_subtests_passed": 61,
+      "note": "240 passed; pytest also reported 61 parametrized subtests passed."
+    },
+    "official_playable_alpha_v0_5": {
+      "tests": 240,
+      "passed": 240,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "catalog_staging": {
+    "status": "PASS",
+    "historical_models": 137,
+    "alpha_allowed": 27,
+    "blocked": 110,
+    "source_hashes_match": true,
+    "production_database_access": false
+  },
+  "simulations": {
+    "bo3": {
+      "status": "finished",
+      "winner_player_id": "1001",
+      "round_wins": {
+        "1001": 2,
+        "2002": 1
+      },
+      "events": 97,
+      "sqlite_integrity": "ok",
+      "foreign_key_violations": 0,
+      "event_sequence_violations": 0,
+      "state_revision_violations": 0
+    },
+    "combo_faction_leader": {
+      "events": 49,
+      "round_scores": {
+        "1001": 20,
+        "2002": 10
+      },
+      "sqlite_integrity": "ok",
+      "foreign_key_violations": 0,
+      "event_sequence_violations": 0
+    }
+  },
+  "static_checks": {
+    "python_compile": "pass",
+    "node_check_site_app": "pass",
+    "node_check_card_engine_v2": "pass",
+    "shell_syntax_entrypoint": "pass",
+    "compose_yaml_parse": "pass",
+    "workflow_yaml_parse": "pass",
+    "compose_semantic_assertions": "pass",
+    "docker_cli_available": false,
+    "docker_build_executed": false,
+    "reverse_proxy_default_bind": "127.0.0.1",
+    "caddy_reverse_proxy_example": "present; configuration not deployed"
+  },
+  "runtime_preflight_current_environment": {
+    "status": "blocked",
+    "passed": 9,
+    "warnings": 0,
+    "blocked": 22,
+    "blocking_checks": [
+      "dependency:discord.py",
+      "dependency:aiosqlite",
+      "dependency:python-dotenv",
+      "dependency:aiohttp",
+      "dependency:tzdata",
+      "dependency:google-genai",
+      "dependency:requests",
+      "dependency:beautifulsoup4",
+      "dependency:Pillow",
+      "env:DISCORD_TOKEN",
+      "env:DISCORD_OAUTH_CLIENT_ID",
+      "env:DISCORD_OAUTH_CLIENT_SECRET",
+      "env:DISCORD_OAUTH_REDIRECT_URI",
+      "env:SOULSBOT_WEB_SESSION_SECRET",
+      "env:SOULSBOT_PUBLIC_URL",
+      "env:DATA_DIR",
+      "session_secret",
+      "public_url",
+      "oauth_redirect",
+      "data_dir",
+      "database_persistence",
+      "legacy_database"
+    ],
+    "report": "docs/card-engine-v2-runtime-preflight-rev31-current-environment.json"
+  },
+  "legacy_staging_preflight_current_environment": {
+    "ready": false,
+    "passed": 17,
+    "warnings": 2,
+    "blockers": 12,
+    "meaning": "legacy integration preflight; distinct from the stricter runtime_preflight report above"
+  },
+  "external_validation": {
+    "discord_login": "not_run_missing_token_and_staging_guild",
+    "oauth_callback": "not_run_missing_client_credentials_and_public_domain",
+    "real_collection_database": "not_available_in_build_environment",
+    "production_deploy": "not_run_missing_host_and_secrets",
+    "dependency_install": "not_completed_network_dns_pypi_unavailable",
+    "docker_build_executed": false
+  },
+  "protected_legacy_files": {
+    "bot.py": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+    "database.py": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+    "site/app.js": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b",
+    "sistemas/gwent.py": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+    "sistemas/cartas.py": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192"
+  },
+  "diff_vs_rev30": {
+    "modified_files": 15,
+    "added_files": 23,
+    "deleted_files": 0
+  },
+  "important_product_gaps": [
+    "110 historical models remain blocked; 18 combos remain unreachable with the current alpha allowlist.",
+    "CardInstance v0.7/schema 7 remains a draft, not a frozen production contract.",
+    "Energy costs are provisional and have not been playtested by humans.",
+    "Evolution with risk is disabled until per-exemplar levels, attempt ledger and amulet custody are implemented transactionally.",
+    "Betting is disabled until escrow, bilateral acceptance, timeout/cancellation and atomic settlement exist.",
+    "Apostador and Sobrevivente achievements remain tracking_pending.",
+    "No production Discord/OAuth login, live DB migration or deployment was executed."
+  ],
+  "last_validation_rerun": "2026-11-28"
+}

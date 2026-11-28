@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "document": "Buffs cross-interaction audit v0.1",
+    "status": "DIAGNOSTIC ONLY; LEGACY BEHAVIOR, NOT APPROVED DESIGN",
+    "baseline": "soulsbo-main-updated.zip; runtime source preserved from supplied handoff baseline",
+    "method": "Synthetic fixtures invoking sistemas.gwent identity handlers, aplicar_jogada, _aplicar_combo_de_cartas, _poder_efetivo and _remover_unidade; no database, HTTP, Discord, browser or production match used."
+  },
+  "counts": {
+    "assertions": 9,
+    "passed": 9,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "weakest_target_uses_effective_power_weather_and_status",
+      "status": "passed",
+      "effective_power_before": {
+        "high_base_but_debuffed": 5,
+        "lower_base_clean": 6
+      },
+      "selected": "high_base_but_debuffed",
+      "reason": "the 8-power unit falls below the 6-power unit after Geada and current-row weather"
+    },
+    {
+      "case": "grace_mender_cleans_status_targets_and_preserves_shield",
+      "status": "passed",
+      "effective_power_before": {
+        "higher_status": 6,
+        "low_status_shielded": 2,
+        "clean_unit": 2
+      },
+      "purified_targets": [
+        "low_status_shielded",
+        "higher_status"
+      ],
+      "shield_after_purification": 1,
+      "finding": "purification clears statuses and grants buffs; it neither consumes nor depends on shield"
+    },
+    {
+      "case": "star_gravity_source_selection_and_destination_weather",
+      "status": "passed",
+      "source_effective_power": {
+        "high_base_source_debuffed": 7,
+        "highest_effective_source": 9
+      },
+      "selected": "highest_effective_source",
+      "current_row_after": "melee",
+      "base_fileira_after": "siege",
+      "destination_weather_resistance": 1,
+      "effective_power_after_move_and_debuff": 6
+    },
+    {
+      "case": "combo_team_bonus_uses_current_row_after_movement",
+      "status": "passed",
+      "combo": "Juramento da Árvore Áurea",
+      "ally_current_row": "melee",
+      "ally_original_fileira": "ranged",
+      "ally_team_bonus": 1,
+      "played_card_combo_bonus": 2,
+      "finding": "team_bonus selection reads current row; original fileira does not exclude a moved ally"
+    },
+    {
+      "case": "combo_rarity_and_faction_passive_order",
+      "status": "passed",
+      "combo": "juramento_erdtree",
+      "moved_ally_team_bonus": 1,
+      "played_card_bonus": 4,
+      "faction_boost_used": true,
+      "decomposition": {
+        "combo": 2,
+        "rarity": 1,
+        "faction_passive": 1
+      }
+    },
+    {
+      "case": "passo_changes_row_buff_scope_not_last_row",
+      "status": "passed",
+      "moved_row": "melee",
+      "base_fileira": "ranged",
+      "last_row_after_movement": "siege",
+      "bonus_from_following_same_row_buff": 2,
+      "finding": "movement changes current-row targeting but does not rewrite the player's last played row"
+    },
+    {
+      "case": "blood_price_shield_status_weather_cross",
+      "status": "passed",
+      "victim_effective_power_before_sacrifice": 2,
+      "victim_removed_despite_shield": true,
+      "discarded_statuses_after_removal": {
+        "geada": 0,
+        "sangramento": 0,
+        "podrida": 0,
+        "loucura": 0
+      },
+      "discarded_shield_field_present": false,
+      "card_gain": 2,
+      "finding": "Blood Price uses effective power, then sacrifice bypasses shield and central removal clears statuses"
+    },
+    {
+      "case": "shielded_vengeance_failed_removal_no_trigger",
+      "status": "passed",
+      "message": "vengeance_shielded resistiu graças ao escudo.",
+      "victim_still_on_board": true,
+      "ally_bonus": 0,
+      "removals_counted": 0,
+      "finding": "Vengeance is downstream of successful removal, not a failed attempt"
+    },
+    {
+      "case": "combo_team_bonus_current_row_scope",
+      "status": "passed",
+      "same_row_ally_bonus": 1,
+      "other_row_ally_bonus": 0,
+      "enemy_side_not_in_combo_resolver_input": true,
+      "finding": "team_bonus is scoped to pre-existing allies on the played card's current row"
+    }
+  ],
+  "limits": [
+    "Assertions cover selected cross-interactions and do not exhaust all 54 candidate effect families, identities, combos, leaders or rarities.",
+    "Results describe current legacy behavior only; they do not approve retaining the same behavior in the rebuilt engine.",
+    "No full competitive simulation, HTTP dispatch, production database, Discord runtime or browser interaction was performed.",
+    "The audit does not settle BUF-001 through BUF-014; it adds evidence for interaction boundaries and target-selection dependencies."
+  ]
+}

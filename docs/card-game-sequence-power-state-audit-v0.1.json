@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "document": "Sequence power and last_row state audit v0.1",
+    "status": "READ_ONLY_LEGACY_AUDIT; CANDIDATE_NOT_APPROVED",
+    "engine": "sistemas.gwent.aplicar_jogada, _remover_unidade, _resolve_round",
+    "baseline": "soulsbo-main-updated.zip",
+    "method": "Synthetic in-memory fixtures exercising the three active generic sequence skills and player last_row lifecycle. No persistent state or runtime source is changed."
+  },
+  "counts": {
+    "assertions": 10,
+    "passed": 10,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "encadeamento_same_row_uses_previous_play",
+      "status": "passed",
+      "previous_last_row": "melee",
+      "played_row": "melee",
+      "bonus": 2,
+      "last_row_after": "melee"
+    },
+    {
+      "case": "encadeamento_different_row_no_bonus",
+      "status": "passed",
+      "previous_last_row": "ranged",
+      "played_row": "melee",
+      "bonus": 0,
+      "last_row_after": "melee"
+    },
+    {
+      "case": "adaptacao_other_row_uses_previous_play",
+      "status": "passed",
+      "previous_last_row": "ranged",
+      "played_row": "melee",
+      "bonus": 1,
+      "last_row_after": "melee"
+    },
+    {
+      "case": "adaptacao_without_previous_play_no_bonus",
+      "status": "passed",
+      "previous_last_row": null,
+      "played_row": "melee",
+      "bonus": 0,
+      "last_row_after": "melee"
+    },
+    {
+      "case": "quebra_ritmo_matches_opponent_previous_play",
+      "status": "passed",
+      "opponent_last_row": "melee",
+      "played_row": "melee",
+      "bonus": 1
+    },
+    {
+      "case": "quebra_ritmo_different_opponent_row_no_bonus",
+      "status": "passed",
+      "opponent_last_row": "ranged",
+      "played_row": "melee",
+      "bonus": 0
+    },
+    {
+      "case": "movement_preserves_last_play_row_and_changes_next_sequence_result",
+      "status": "passed",
+      "original_unit_row_after_move": "ranged",
+      "stored_last_unit_play_row_after_move": "melee",
+      "next_adaptacao_played_row": "ranged",
+      "next_adaptacao_bonus": 1,
+      "last_row_after_next_unit_play": "ranged"
+    },
+    {
+      "case": "special_action_does_not_update_last_play_row",
+      "status": "passed",
+      "special_selected_row": "ranged",
+      "last_unit_play_row_after_special": "melee"
+    },
+    {
+      "case": "removal_does_not_clear_last_play_row",
+      "status": "passed",
+      "removed_unit": "removed_last_play",
+      "last_row_after_removal": "melee",
+      "removal_event": "removed_last_play caiu."
+    },
+    {
+      "case": "round_transition_resets_last_play_row",
+      "status": "passed",
+      "round_after_resolution": 2,
+      "player_1_last_row": null,
+      "player_2_last_row": null
+    }
+  ],
+  "limits": [
+    "Covers the three active generic sequence skills encadeamento, adaptacao and quebra_ritmo; archived identity aliases veil_shift, pilgrim_duel and mist_trail are not reactivated or tested as active card abilities.",
+    "Tests the existing last_row player field, not a proposed canonical schema or a complete 12-card game sequence.",
+    "Fixtures are synthetic and do not assess balance, frequency of trigger conditions, UI copy, persisted-match migrations or production behavior.",
+    "Results describe legacy behavior only; they do not approve preserving this behavior in the replacement engine."
+  ]
+}

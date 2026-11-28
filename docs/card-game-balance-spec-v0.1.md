@@ -183,3 +183,13 @@ Para especial: `row=null`, `power_base=null`, mas `effect_id` obrigatório. Unid
 | Data | Versão | Alteração | Situação |
 |---|---|---|---|
 | 2026-11-27 | 0.1 | Primeira proposta de EFP, custo, teto, raridade, pureza, geração determinística e diretriz de facções/lore. | Proposta não aprovada; sem alteração funcional. |
+
+
+> **ATUALIZAÇÃO 2026-11-27 — contrato estrutural separado:** o modelo estrutural novo foi documentado em `card-game-canonical-model-v1.md` e implementado como validador em `sistemas/card_contract.py`. Isso não aprova as fórmulas numéricas desta especificação. EFP, custo, raridade, orçamento 32, leader_load e cortes de raridade seguem não aprovados e não entram no runtime. A interpretação estrutural atual separa unidades, especiais e relíquias; unidades têm poder 1–15 e special/relic usam `power_base=null`.
+
+
+## Adendo de aprovação — raridade classificatória (2026-11-27)
+
+O proprietário aprovou BUF-001, Alternativa A, no Grupo B. Para o novo sistema, a raridade é classificação apenas e não altera magnitude, elegibilidade/limiares, quantidade ou seleção de alvos, duração ou qualquer saída mecânica. `RARITY_EFFECT_BUDGET` não será dependência do novo resolvedor. Valores mecânicos devem ser parâmetros explícitos de efeito ou regras versionadas.
+
+**Escopo limitado:** esta aprovação não aprova as fórmulas numéricas de EFP, custo, orçamento 32, `leader_load`, cortes de raridade, scores ou distribuição apresentados neste documento. Todos esses itens permanecem propostas até simulação e aprovação específicas. O motor legado permanece inalterado e pode continuar demonstrando o comportamento histórico até a migração autorizada.

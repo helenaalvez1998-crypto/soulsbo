@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "policy_id": "execution.enemy.melee.v1",
+  "selection_mode": "manual_single",
+  "target_side": "enemies",
+  "source_zone": "board",
+  "row_scope": {
+    "mode": "selected_row",
+    "row_basis": "current_row"
+  },
+  "eligibility_predicates": [
+    {
+      "predicate_id": "effective_power_lte",
+      "params": {
+        "threshold_param": "max_effective_power"
+      }
+    },
+    {
+      "predicate_id": "protection_profile_does_not_block",
+      "params": {
+        "category": "execution"
+      }
+    }
+  ],
+  "eligibility_metric": "effective_power",
+  "display_metric": "effective_power",
+  "sort": {
+    "metric": "effective_power",
+    "direction": "ascending",
+    "tie_breaker": "source_sequence_then_instance_id"
+  },
+  "target_count": {
+    "mode": "exact",
+    "minimum_targets": 1,
+    "maximum_targets": 1
+  },
+  "on_no_target": "reject",
+  "on_partial_targets": "reject_below_minimum",
+  "secondary_selection": "none",
+  "protection_resolution_policy_id": "protection.execution.default.v1",
+  "cost_policy_id": "cost.execution.v1"
+}

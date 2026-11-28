@@ -1,0 +1,126 @@
+{
+  "status": "ILLUSTRATIVE_POLICY_EXAMPLE_NOT_A_MATCH_SCHEMA",
+  "transition": "successful_removal_or_sacrifice",
+  "before": {
+    "zone": "board",
+    "current_row": "ranged",
+    "bonus": 2,
+    "shield_grants": [
+      {
+        "grant_id": "grant-1",
+        "charges": 1,
+        "profile_id": "protection.standard_removal",
+        "expires_on": "round_close",
+        "source_effect_id": "effect.example_guard",
+        "source_instance_id": "instance-source-guard",
+        "applied_event_id": "event-shield-grant-1"
+      }
+    ],
+    "statuses": {
+      "status.frost": 1,
+      "status.scarlet_rot": 0,
+      "status.bleeding": 0,
+      "status.madness": 0
+    },
+    "intrinsic_weather_resistance": 0,
+    "weather_resistance_modifiers": [
+      {
+        "modifier_id": "wr-1",
+        "source_effect_id": "unit.vigil_seal",
+        "amount": 1,
+        "expires_on": "round_close"
+      }
+    ],
+    "combo_activation_ids": [
+      "combo.example"
+    ],
+    "bonus_grants": [
+      {
+        "grant_id": "bonus-grant-1",
+        "amount": 2,
+        "source_effect_id": "effect.example_power_boost",
+        "source_instance_id": "instance-source-example",
+        "applied_event_id": "event-bonus-grant-1",
+        "clamp_policy_id": "clamp.no_clamp",
+        "expires_on": "round_close"
+      }
+    ],
+    "status_applications": [
+      {
+        "application_id": "status-mark-1",
+        "status_id": "status.frost",
+        "source_effect_id": "effect.example_frost",
+        "source_instance_id": "instance-source-frost",
+        "applied_event_id": "event-status-mark-1",
+        "expires_on": "round_close"
+      }
+    ]
+  },
+  "after_proposed_transition": {
+    "zone": "discard",
+    "last_board_row": "ranged",
+    "bonus": 2,
+    "shield_grants": [],
+    "statuses": {
+      "status.frost": 0,
+      "status.scarlet_rot": 0,
+      "status.bleeding": 0,
+      "status.madness": 0
+    },
+    "intrinsic_weather_resistance": 0,
+    "weather_resistance_modifiers": [
+      {
+        "modifier_id": "wr-1",
+        "source_effect_id": "unit.vigil_seal",
+        "amount": 1,
+        "expires_on": "round_close"
+      }
+    ],
+    "combo_activation_ids": [],
+    "bonus_grants": [
+      {
+        "grant_id": "bonus-grant-1",
+        "amount": 2,
+        "source_effect_id": "effect.example_power_boost",
+        "source_instance_id": "instance-source-example",
+        "applied_event_id": "event-bonus-grant-1",
+        "clamp_policy_id": "clamp.no_clamp",
+        "expires_on": "round_close"
+      }
+    ],
+    "status_applications": []
+  },
+  "notes": [
+    "Bonus remains until its declared round_close expiry in this proposal; this does not mean bonus is permanent.",
+    "Weather modifier is retained only because this example says it expires at round_close, not board_exit.",
+    "A blocked removal would not move zones or clear statuses; it would only consume a matching protection charge.",
+    "Exact shape is illustrative and must not be copied into the v0.3 schema before Group C approval.",
+    "bonus is an aggregate projection backed by sourced grants or an unambiguous event-ledger replay; status counters are projections of sourced applications.",
+    "round_close runs after the immutable score/result snapshot and expires matching grants in every zone, including discard, hand and draw_pile, even on terminal closure.",
+    "shield_charges/status counters are projections; grant/application records carry provenance and expiry in the proposed model."
+  ],
+  "round_close_example": {
+    "event_kind": "round_closed",
+    "timing": "after_immutable_round_result_snapshot",
+    "instance_zone": "discard",
+    "before": {
+      "bonus": 2,
+      "bonus_grants": [
+        {
+          "grant_id": "bonus-grant-1",
+          "amount": 2,
+          "source_effect_id": "effect.example_power_boost",
+          "source_instance_id": "instance-source-example",
+          "applied_event_id": "event-bonus-grant-1",
+          "clamp_policy_id": "clamp.no_clamp",
+          "expires_on": "round_close"
+        }
+      ]
+    },
+    "after": {
+      "bonus": 0,
+      "bonus_grants": []
+    },
+    "rule": "Expire only grants tagged round_close; zone does not exempt an instance."
+  }
+}

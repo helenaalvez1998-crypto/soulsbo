@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "document": "Soulsbo Card Engine v2 isolated alpha validation",
+    "version": "0.1",
+    "status": "PASS",
+    "runtime_integration": false,
+    "production_database_access": false,
+    "generated_at_utc": "2026-11-28T02:02:18.551623+00:00"
+  },
+  "summary": {
+    "tests": 62,
+    "passed": 62,
+    "failed": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "SQLite tests use temporary dedicated files and independent local connections.",
+    "No aiosqlite, Discord, HTTP, frontend, production database or multi-host environment was exercised.",
+    "The domain handler is a pure callback; the real card/effect catalog is not integrated.",
+    "The schema validation tests are skipped when the optional jsonschema package is unavailable."
+  ],
+  "failures": []
+}

@@ -1,0 +1,101 @@
+{
+  "document": "Soulsbo Card Engine v2 Discord alpha integration validation",
+  "version": "0.1",
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev27.zip",
+  "resulting_revision": "rev28",
+  "status": "PASS_WITH_RUNTIME_LIMITATIONS",
+  "implementation": {
+    "existing_jogo_panel_entry_added": true,
+    "deck_builder_ui": true,
+    "saved_deck_listing_ui": true,
+    "direct_challenge_invites": true,
+    "opponent_own_deck_selection": true,
+    "match_action_ui": true,
+    "special_effect_ui": [
+      "gwent_egide",
+      "gwent_execucao",
+      "gwent_clima",
+      "gwent_geada_cariana"
+    ],
+    "sacrifice_and_pass_actions": true,
+    "persistent_my_matches_resume": true,
+    "candidate_target_pagination": true,
+    "manual_card_abilities_in_catalog": 0,
+    "invites_persist_across_restart": false,
+    "matches_and_decks_persist_across_restart": true
+  },
+  "security": {
+    "player_identity_source": "Discord Interaction.user.id",
+    "opponent_identity_confirmed_by_invite_interaction": true,
+    "gateway_checks_participation_before_view_or_action": true,
+    "player_safe_projection_only": true,
+    "opponent_hand_hidden": true,
+    "ui_direct_sqlite_access": false,
+    "legacy_collection_writes": false,
+    "client_shuffle_seed_accepted": false,
+    "discord_id_ascii_validation": true,
+    "match_ids_within_json_interoperable_integer_range": true,
+    "internal_sql_error_details_exposed_to_player": false
+  },
+  "persistent_storage": {
+    "matches_path": "DATA_DIR/card_engine_v2/matches.sqlite3",
+    "decks_path": "DATA_DIR/card_engine_v2/decks.sqlite3",
+    "legacy_database_write": false,
+    "match_list_returns_full_state": false,
+    "match_list_limited_to": 25
+  },
+  "automated_validation": {
+    "py_compile": "PASS",
+    "unit_test_count": 200,
+    "unit_tests_passed": 200,
+    "unit_tests_failed": 0,
+    "ui_validation": "static_ast_contract_only_including_generic_error_response_guard",
+    "gateway_validation": "executed_against_temporary_sqlite_and_fake_legacy_inventory",
+    "catalog_staging": {
+      "status": "PASS",
+      "historical_models": 137,
+      "alpha_allowlist": 27,
+      "blocked": 110
+    },
+    "bo3_simulation": {
+      "status": "finished",
+      "winner_player_id": "1001",
+      "round_wins": {
+        "1001": 2,
+        "2002": 1
+      },
+      "events": 97,
+      "sqlite_integrity": "ok",
+      "foreign_key_violations": 0
+    },
+    "combo_faction_leader_simulation": {
+      "round_winner_player_id": "1001",
+      "round_scores": {
+        "1001": 20,
+        "2002": 10
+      },
+      "events": 49,
+      "sqlite_integrity": "ok",
+      "foreign_key_violations": 0
+    },
+    "sqlite_integrity": "PASS",
+    "official_alpha_suite": "PASS_200_OF_200"
+  },
+  "environment_limitations": {
+    "discord_py_installed": false,
+    "aiosqlite_installed": false,
+    "discord_token_available": false,
+    "live_discord_gateway_test": "NOT_RUN",
+    "bot_runtime_import": "NOT_RUN",
+    "deployment": "NOT_PERFORMED"
+  },
+  "known_limitations": [
+    "Discord component callbacks were syntax-compiled and checked statically, but could not be imported/dispatched because discord.py==2.7.1 is absent in this environment.",
+    "The bot/database runtime was not imported because aiosqlite==0.22.1 is absent.",
+    "No real Discord token, test guild, two test accounts or staging DB connection was provided.",
+    "Invitations live in process memory for ten minutes and are lost on bot restart; decks and matches are persistent.",
+    "Player views require manual refresh to observe opponent actions; there is no push update.",
+    "Deck editing/deletion UI, chat, ranked queue, spectator, AI, HTTP and website frontend are not included.",
+    "Only the existing 27-card alpha allowlist and four implemented special effects are exposed."
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "audit": "manual_target_ui_parity_v0.1",
+  "date": "2026-11-27",
+  "status": "READ_ONLY_LEGACY_AUDIT; CANDIDATE_NOT_APPROVED",
+  "scope": "opcoes_de_alvo, target_id, UI picker, relic options and special-card resolution",
+  "passed": 12,
+  "failed": 0,
+  "cases": [
+    {
+      "id": "TUI-001",
+      "title": "Resumo de alvo sem identidade física",
+      "status": "PASS",
+      "expected_scope": "Contrato de serialização e identificação",
+      "observed_fields": [
+        "bonus",
+        "escudo",
+        "geada",
+        "id",
+        "loucura",
+        "nome",
+        "poder",
+        "podrida",
+        "row",
+        "sangramento"
+      ],
+      "note": "O contrato público da opção não carrega uma identidade física de exemplar."
+    },
+    {
+      "id": "TUI-002",
+      "title": "IDs repetidos colapsam a seleção manual",
+      "status": "PASS",
+      "expected_scope": "Desambiguação de exemplar",
+      "picker_options": [
+        "Cópia A",
+        "Cópia B"
+      ],
+      "submitted_target_id": "same-id",
+      "resolved_copy": "Cópia A",
+      "note": "O backend resolve o primeiro ID elegível na ordem do tabuleiro; não há como enviar uma das duas cópias de forma inequívoca."
+    },
+    {
+      "id": "TUI-003",
+      "title": "Execução mostra valor bruto, valida poder efetivo",
+      "status": "PASS",
+      "expected_scope": "Paridade semântica do seletor",
+      "eligibility_metric": "effective_power",
+      "effective_power": 6,
+      "picker_display_value": 9,
+      "weather": 3,
+      "note": "A unidade é elegível por poder efetivo 6, mas o seletor apresenta 9 (poder-base + bônus), sem explicitar o desconto climático/estados."
+    },
+    {
+      "id": "TUI-004",
+      "title": "Filtro de fileira no frontend e revalidação no motor",
+      "status": "PASS",
+      "expected_scope": "Paridade de filtro UI/backend",
+      "server_options_before_ui_filter": [
+        "melee_target",
+        "ranged_target"
+      ],
+      "client_row_filter": "same row for Execução; different row for Passo",
+      "out_of_row_submission": "O alvo escolhido não está nessa fileira ou excede poder efetivo 6.",
+      "note": "A filtragem visual é local no frontend; o motor repete a validação da fileira na submissão."
+    },
+    {
+      "id": "TUI-005",
+      "title": "Automático da Lágrima Sagrada usa último descarte elegível",
+      "status": "PASS",
+      "expected_scope": "Fallback automático",
+      "eligible_in_discard_order": [
+        "discard_first",
+        "discard_second",
+        "discard_last"
+      ],
+      "automatic_choice": "discard_last",
+      "note": "O botão Automático envia target_id vazio; para Lágrima Sagrada, o motor escolhe candidates[-1], não maior/menor poder."
+    },
+    {
+      "id": "TUI-006",
+      "title": "Automático do Réquiem usa maior poder-base",
+      "status": "PASS",
+      "expected_scope": "Fallback automático",
+      "automatic_choice": "discard_strong",
+      "selection_metric": "highest base power",
+      "note": "O automático do Réquiem usa maior poder-base; difere do automático da Lágrima Sagrada."
+    },
+    {
+      "id": "TUI-007",
+      "title": "Poder-base de elegibilidade é exibido como poder + bônus",
+      "status": "PASS",
+      "expected_scope": "Paridade semântica do seletor",
+      "eligibility_metric": "base_power",
+      "base_power": 4,
+      "picker_display_value": 9,
+      "note": "Lágrima Sagrada testa poder-base <= 4, mas o seletor apresenta poder-base + bônus (9 neste caso), sem explicar qual métrica define a elegibilidade."
+    },
+    {
+      "id": "TUI-008",
+      "title": "Égide pede um alvo e protege múltiplos",
+      "status": "PASS",
+      "expected_scope": "Alvo manual versus alvos secundários",
+      "picker_label": "Escolha a unidade que receberá o escudo",
+      "manual_choice": "manual_low",
+      "actually_shielded": [
+        "manual_low",
+        "auto_high"
+      ],
+      "count": 2,
+      "note": "Rara protege duas: a escolhida primeiro e depois a maior elegível por poder efetivo. A UI só pede uma escolha manual."
+    },
+    {
+      "id": "TUI-009",
+      "title": "Passo pede um alvo e move secundários por ordem do tabuleiro",
+      "status": "PASS",
+      "expected_scope": "Alvo manual versus alvos secundários",
+      "picker_label": "Escolha a unidade que será movida para a fileira de destino",
+      "manual_choice": "manual_low",
+      "actually_moved": [
+        "manual_low",
+        "first_in_board"
+      ],
+      "not_moved_despite_higher_power": "highest_power",
+      "note": "Rara move duas: a unidade escolhida e depois a primeira elegível na ordem original do tabuleiro, não a segunda mais fraca/forte."
+    },
+    {
+      "id": "TUI-010",
+      "title": "Opções de relíquia do servidor não são consumidas pelo frontend",
+      "status": "PASS",
+      "expected_scope": "Contrato API/frontend",
+      "server_options_require_target": true,
+      "server_rows": {
+        "melee": [
+          {
+            "id": "enemy",
+            "nome": "enemy",
+            "poder": 5,
+            "bonus": 0,
+            "row": "melee",
+            "escudo": 0,
+            "sangramento": 0,
+            "geada": 0,
+            "podrida": 0,
+            "loucura": 0
+          }
+        ],
+        "ranged": [],
+        "siege": []
+      },
+      "frontend_reads_relic_options": false,
+      "note": "O endpoint publica relic_options, mas app.js reconstrói a lista a partir de opponent.board e filtra a fileira localmente."
+    },
+    {
+      "id": "TUI-011",
+      "title": "Escudo bloqueia Lâmina Negra sem consumir a relíquia",
+      "status": "PASS",
+      "expected_scope": "Proteção e custo de ativação",
+      "shield_after": 0,
+      "relic_used": false,
+      "note": "Escudo é consumido; a Relíquia continua disponível. O seletor inclui alvo protegido e mostra o indicador de Escudo."
+    },
+    {
+      "id": "TUI-012",
+      "title": "Algemas podem consumir-se sem reduzir bônus positivo",
+      "status": "PASS",
+      "expected_scope": "Elegibilidade e semântica de alvo",
+      "target_bonus_before_after": [
+        0,
+        0
+      ],
+      "relic_used": true,
+      "note": "Algemas aceita qualquer inimigo da fileira; com bônus zero, não muda o alvo, mas consome a Relíquia."
+    }
+  ],
+  "runtime_modified": false
+}

@@ -1,0 +1,208 @@
+{
+  "version": "0.1",
+  "group": "E",
+  "status": "passed",
+  "scope": "static source audit plus isolated SQLite DDL/concurrency/rollback/backup experiments; no production DB or runtime changes",
+  "checks": 24,
+  "passed": 24,
+  "failed": 0,
+  "environment": {
+    "sqlite_version": "3.46.1",
+    "aiosqlite_runtime_executed": false,
+    "production_database_accessed": false,
+    "http_handler_executed": false
+  },
+  "cases": [
+    {
+      "id": "E-AUD-001",
+      "case": "match_table_contains_json_snapshot",
+      "status": "passed",
+      "detail": [
+        "created_at",
+        "creator_id",
+        "id",
+        "opponent_id",
+        "state_json",
+        "status",
+        "updated_at"
+      ]
+    },
+    {
+      "id": "E-AUD-002",
+      "case": "match_table_has_no_revision_column",
+      "status": "passed",
+      "detail": [
+        "created_at",
+        "creator_id",
+        "id",
+        "opponent_id",
+        "state_json",
+        "status",
+        "updated_at"
+      ]
+    },
+    {
+      "id": "E-AUD-003",
+      "case": "no_durable_match_operation_event_or_outbox_table",
+      "status": "passed",
+      "detail": {
+        "related_tables_found": []
+      }
+    },
+    {
+      "id": "E-AUD-004",
+      "case": "no_schema_migration_ledger",
+      "status": "passed",
+      "detail": []
+    },
+    {
+      "id": "E-AUD-005",
+      "case": "legacy_new_state_has_no_new_envelope_metadata",
+      "status": "passed",
+      "detail": {
+        "absent_keys": [
+          "schema_version",
+          "state_revision",
+          "definition_manifest",
+          "operations",
+          "events"
+        ]
+      }
+    },
+    {
+      "id": "E-AUD-006",
+      "case": "legacy_event_log_is_bounded_presentation_history",
+      "status": "passed",
+      "detail": "event_log is truncated to the latest 20 messages; not an append-only domain ledger"
+    },
+    {
+      "id": "E-AUD-007",
+      "case": "action_handler_runs_inside_database_transaction",
+      "status": "passed",
+      "detail": "match row is read and state is changed within Database.transaction()"
+    },
+    {
+      "id": "E-AUD-008",
+      "case": "action_handler_does_not_accept_operation_id_or_expected_revision",
+      "status": "passed",
+      "detail": "current request fields: action/card_id/row/card_ids/target_id"
+    },
+    {
+      "id": "E-AUD-009",
+      "case": "action_update_has_no_compare_and_swap_predicate",
+      "status": "passed",
+      "detail": "UPDATE is keyed by match id only; serialization is currently supplied by BEGIN IMMEDIATE"
+    },
+    {
+      "id": "E-AUD-010",
+      "case": "database_wrapper_uses_begin_immediate",
+      "status": "passed",
+      "detail": "write transaction acquires SQLite reserved lock before reading match state"
+    },
+    {
+      "id": "E-AUD-011",
+      "case": "database_wrapper_has_process_local_writer_lock",
+      "status": "passed",
+      "detail": "writer lock serializes tasks using one Database instance, not independent processes by itself"
+    },
+    {
+      "id": "E-AUD-012",
+      "case": "sqlite_connection_uses_wal_and_busy_timeout",
+      "status": "passed",
+      "detail": {
+        "journal_mode": "WAL for file-backed DB",
+        "busy_timeout_ms": 10000
+      }
+    },
+    {
+      "id": "E-AUD-013",
+      "case": "schema_changes_are_incremental_but_unversioned",
+      "status": "passed",
+      "detail": "connect() introspects columns and runs CREATE/ALTER statements, then commits; no migration ID/checksum ledger"
+    },
+    {
+      "id": "E-AUD-014",
+      "case": "match_rewards_have_composite_uniqueness",
+      "status": "passed",
+      "detail": "one reward record per match and participant"
+    },
+    {
+      "id": "E-AUD-015",
+      "case": "drop_events_have_unique_event_key",
+      "status": "passed",
+      "detail": "stable drop event key prevents duplicate drops"
+    },
+    {
+      "id": "E-AUD-016",
+      "case": "match_rewards_guarded_inside_same_transaction",
+      "status": "passed",
+      "detail": "ranking/economy updates and reward rows are written in the enclosing match transaction"
+    },
+    {
+      "id": "E-AUD-017",
+      "case": "turn_notification_is_scheduled_inside_transaction",
+      "status": "passed",
+      "detail": "asyncio.create_task is called before transaction context exits; no durable outbox record exists"
+    },
+    {
+      "id": "E-AUD-018",
+      "case": "patent_sync_is_after_commit_without_outbox",
+      "status": "passed",
+      "detail": "patent synchronization runs after the transaction and is only logged on failure"
+    },
+    {
+      "id": "E-AUD-019",
+      "case": "snapshot_tool_uses_read_only_sqlite_backup_api",
+      "status": "passed",
+      "detail": "backup helper opens source read-only and checks source/destination quick_check"
+    },
+    {
+      "id": "E-AUD-020",
+      "case": "sqlite_rollback_reverts_snapshot_and_reward_together",
+      "status": "passed",
+      "detail": {
+        "state_json_after_rollback": "{\"v\":0}",
+        "reward_rows_after_rollback": 0
+      }
+    },
+    {
+      "id": "E-AUD-021",
+      "case": "sqlite_reward_unique_constraint_rejects_duplicate",
+      "status": "passed",
+      "detail": "PRIMARY KEY(match_id,user_id) enforced by SQLite"
+    },
+    {
+      "id": "E-AUD-022",
+      "case": "sqlite_drop_event_key_rejects_duplicate",
+      "status": "passed",
+      "detail": "PRIMARY KEY(event_key) enforced by SQLite"
+    },
+    {
+      "id": "E-AUD-023",
+      "case": "sqlite_begin_immediate_serializes_independent_connections",
+      "status": "passed",
+      "detail": {
+        "a_acquired_lock": true,
+        "blocked_before_a_commit": true,
+        "a_before": "{\"v\":0}",
+        "b_read_after_lock": "{\"v\":1}",
+        "final_state": "{\"v\":2}",
+        "thread_errors": []
+      }
+    },
+    {
+      "id": "E-AUD-024",
+      "case": "sqlite_backup_api_produces_consistent_snapshot",
+      "status": "passed",
+      "detail": {
+        "quick_check": "ok",
+        "backup_state": "{\"v\":2}"
+      }
+    }
+  ],
+  "limitations": [
+    "The package contains no production database, credentials or live match rows; existing match population and data quality cannot be inventoried.",
+    "aiosqlite and discord.py are not instantiated by this stdlib-only harness; wrapper behavior is audited statically and SQLite lock semantics are tested with independent sqlite3 connections.",
+    "No migration, schema change, action handler, API request, Discord notification, patent synchronization or production replay was executed."
+  ]
+}

@@ -1,0 +1,385 @@
+{
+  "metadata": {
+    "document": "CardInstance v0.4 contract validation",
+    "date": "2026-11-27",
+    "status": "PASS",
+    "scope": "JSON Schema Draft 2020-12, example validation, cross-document invariants, and isolated in-memory lifecycle semantics.",
+    "does_not_test": [
+      "legacy runtime integration",
+      "SQLite/production DB",
+      "HTTP",
+      "Discord",
+      "concurrent CAS/locking",
+      "snapshot migration",
+      "browser/UI",
+      "production matches"
+    ]
+  },
+  "summary": {
+    "passed": 72,
+    "failed": 0,
+    "total": 72
+  },
+  "checks": [
+    {
+      "name": "01_schema_is_draft_2020_12",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "02_schema_version_is_four",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "03_example_matches_schema",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "04_example_manifest_present",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "05_example_state_revision_nonnegative",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "06_example_status_valid",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "07_all_players_have_round_state",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "08_instance_keys_are_uuid4",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "09_instance_key_matches_record",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "10_each_instance_has_v4_schema",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "11_repeated_card_models_are_distinct_instances",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "12_every_instance_occurs_in_exactly_one_zone",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "13_zone_owner_matches_instance_owner",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "14_all_board_instances_are_units",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "15_board_instances_have_current_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "16_non_board_instances_have_null_current_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "17_all_definitions_have_intrinsic_weather_resistance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "18_legacy_weather_resistance_scalar_absent",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "19_bonus_is_grant_projection_not_scalar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "20_protection_is_grant_projection_not_scalar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "21_statuses_are_applications_not_counters",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "22_weather_modifiers_are_a_list",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "23_every_bonus_grant_has_event_reference",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "24_bonus_grant_source_matches_event",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "25_grant_ids_are_unique_per_instance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "26_protection_grants_support_zero_remaining_charges",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "27_status_ids_are_known_registry_keys",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "28_player_sequence_is_separate_from_instances",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "29_special_and_relic_rows_are_null",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "30_rarity_is_present_only_as_snapshot_classification",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "31_movement_updates_current_and_last_board_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "32_movement_preserves_grants_status_and_protection",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "33_movement_does_not_change_last_unit_play_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "34_successful_board_exit_nulls_current_row_and_preserves_last_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "35_successful_board_exit_clears_status_and_protection",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "36_board_exit_expires_only_board_exit_weather",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "37_board_exit_preserves_round_close_bonus_until_expiry",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "38_block_consumes_exactly_one_compatible_charge",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "39_block_does_not_change_zone_or_clean_state",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "40_sacrifice_bypasses_shield_and_exits_board",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "41_round_close_expires_grants_in_all_zones",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "42_round_close_preserves_permanent_instance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "43_round_close_expires_statuses_and_clears_combos_all_zones",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "71_round_close_expires_protection_grants_but_keeps_permanent",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "72_round_close_expires_weather_modifiers_but_keeps_board_exit_and_permanent",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "44_terminal_round_also_executes_round_close",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "45_score_snapshot_precedes_expiration",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "46_round_close_resets_last_unit_play_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "47_weather_effective_is_intrinsic_plus_active_modifiers_with_floor_zero",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "48_hand_recovery_preserves_only_nonexpired_modifiers_without_entry_hook",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "49_purification_removes_only_declared_status_ids",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "50_ressurgir_resets_bonus_and_uses_last_board_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "51_requiem_uses_last_board_row_before_requested_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "52_esgar_preserves_active_bonus_and_adds_separate_plus_one",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "53_esgar_rejects_missing_requested_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "54_standard_shield_profile_is_not_universal",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "55_rarity_does_not_change_effect_output",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "56_reactive_source_is_independent_of_external_effect",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "57_all_weather_modifiers_reference_existing_events",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "58_weather_modifier_source_matches_event",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "59_protection_and_status_applications_reference_events",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "60_protection_and_status_sources_match_events",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "61_group_c_approval_covers_exactly_ten_decisions",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "62_group_c_approval_does_not_freeze_contract_or_runtime",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "63_vigil_seal_duration_is_board_exit",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "64_round_close_does_not_expire_board_exit_or_permanent_grants",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "65_resurrection_falls_back_to_valid_requested_row",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "66_resurrection_uses_melee_as_final_fallback",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "67_status_threshold_and_numeric_caps_are_not_frozen_by_schema",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "68_board_to_discard_expires_board_exit_and_zone_exit",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "69_discard_to_hand_expires_zone_exit_but_keeps_other_valid_modifiers",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "70_action_cost_on_block_is_effect_specific",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}

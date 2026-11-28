@@ -1,0 +1,231 @@
+{
+  "document": "CardInstance v0.3 / Group B approval validation",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev8.zip",
+  "status": "PASS",
+  "passed": 42,
+  "failed": 0,
+  "runtime_modified": false,
+  "production_database_used": false,
+  "cases": [
+    {
+      "case": "match_schema_draft_2020_12",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "manifest_schema_draft_2020_12",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "event_schema_draft_2020_12",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "v3_example_matches_full_schema",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "manifest_digest_recomputes",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "manifest_has_four_release_ids",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "manifest_contains_four_artifact_hashes",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "schema_version_is_structural",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "each_instance_digest_recomputes",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "instance_release_ids_match_manifest",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "same_card_id_can_have_multiple_instances",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "all_instance_ids_are_uuid4",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "zone_registry_and_owner_invariants",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "full_semantic_invariants",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "operation_id_is_uuid4",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "operation_fingerprint_is_sha256",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "expected_revision_equals_revision_before",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "event_ids_are_uuid4_and_distinct",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "events_reference_existing_operations",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "event_source_instances_resolve",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "operation_and_event_id_namespaces_are_distinct",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "operation_event_ids_match_stream",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "event_sequence_strictly_increasing",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "causal_parents_exist",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "causal_parents_precede_children",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "vengeance_is_separate_reactive_event",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "vengeance_causally_follows_removal",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "reactive_event_has_own_source_instance",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "rarity_metadata_not_copied_to_vengeance_event",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "no_rarity_execution_parameter_in_any_event",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "effect_parameters_have_no_rarity_execution_input",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "group_B_approval_record_is_owner_approved",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "BUF_001_option_A_is_approved",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "BUF_002_reactive_boundary_is_approved",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "BUF_012_active_binding_rule_is_approved",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "RSRX_03_shield_and_cause_dependency_are_recorded",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "RSRX_05_causal_separation_only_is_recorded",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "rykard_reactive_and_direct_outputs_are_distinct_ordered_events",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "shield_block_does_not_create_removal_or_vengeance",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "same_key_same_fingerprint_is_idempotent",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "same_key_different_fingerprint_conflicts",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "case": "stale_expected_revision_is_rejected",
+      "status": "passed",
+      "detail": ""
+    }
+  ],
+  "limitations": [
+    "synthetic fixture only",
+    "does not resolve real immutable release artifacts",
+    "does not execute a new runtime",
+    "does not test DB transactions or true concurrent requests",
+    "does not close Groups C/D/F/E",
+    "does not approve numerical balance formulas"
+  ]
+}

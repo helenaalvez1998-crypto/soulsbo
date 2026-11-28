@@ -1,0 +1,874 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-instance-match.v3.json",
+  "title": "Soulsbo Match CardInstance Contract v0.3 (Groups A and B approved; C/D/F/E open)",
+  "description": "Envelope candidato atualizado após aprovações dos Grupos A e B. Não integrado. Estado/duração, seleção/atomicidade, causas completas de remoção e persistência/migração seguem em aberto.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "match_id",
+    "state_revision",
+    "status",
+    "players",
+    "instances",
+    "operations",
+    "definition_manifest",
+    "events"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 3
+    },
+    "match_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "state_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "active",
+        "finished"
+      ]
+    },
+    "players": {
+      "type": "object",
+      "minProperties": 2,
+      "patternProperties": {
+        "^-?(?:0|[1-9][0-9]*)$": {
+          "$ref": "#/$defs/player"
+        }
+      },
+      "additionalProperties": false
+    },
+    "instances": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$": {
+          "$ref": "#/$defs/card_instance"
+        }
+      },
+      "additionalProperties": false
+    },
+    "operations": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$": {
+          "$ref": "#/$defs/operation_record"
+        }
+      },
+      "additionalProperties": false
+    },
+    "definition_manifest": {
+      "$ref": "#/$defs/definition_manifest"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/domain_event"
+      }
+    }
+  },
+  "$defs": {
+    "uuid4": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "row": {
+      "enum": [
+        "melee",
+        "ranged",
+        "siege"
+      ]
+    },
+    "zone": {
+      "enum": [
+        "hand",
+        "draw_pile",
+        "board",
+        "discard"
+      ]
+    },
+    "player": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "zones"
+      ],
+      "properties": {
+        "zones": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hand",
+            "draw_pile",
+            "board",
+            "discard"
+          ],
+          "properties": {
+            "hand": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            },
+            "draw_pile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            },
+            "board": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            },
+            "discard": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uuid4"
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "definition_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "card_id",
+        "kind",
+        "faction_id",
+        "printed_row",
+        "power_base",
+        "rarity_id",
+        "effect_id",
+        "effect_params",
+        "combo_tags",
+        "catalog_release_id",
+        "effect_registry_release_id",
+        "balance_rules_release_id",
+        "ruleset_release_id",
+        "definition_digest"
+      ],
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "kind": {
+          "enum": [
+            "unit",
+            "special",
+            "relic"
+          ]
+        },
+        "faction_id": {
+          "enum": [
+            "golden_order",
+            "crimson_veil",
+            "dark_moon",
+            "the_forgotten"
+          ]
+        },
+        "printed_row": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/row"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "power_base": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 15
+        },
+        "rarity_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "effect_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "effect_params": {
+          "type": "object"
+        },
+        "combo_tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "catalog_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "effect_registry_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "balance_rules_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "ruleset_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "definition_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest do snapshot mecânico resolvido, sem seu próprio campo definition_digest."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unit"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "printed_row": {
+                "$ref": "#/$defs/row"
+              },
+              "power_base": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 15
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "special",
+                  "relic"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "printed_row": {
+                "type": "null"
+              },
+              "power_base": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "runtime_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_row",
+        "bonus",
+        "shield_charges",
+        "statuses",
+        "weather_resistance",
+        "activated_combo_ids",
+        "effect_state"
+      ],
+      "properties": {
+        "current_row": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/row"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bonus": {
+          "type": "integer"
+        },
+        "shield_charges": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "statuses": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status.bleeding",
+            "status.frost",
+            "status.scarlet_rot",
+            "status.madness"
+          ],
+          "properties": {
+            "status.bleeding": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "status.frost": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "status.scarlet_rot": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "status.madness": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            }
+          }
+        },
+        "weather_resistance": {
+          "type": "integer",
+          "minimum": 0,
+          "deprecated": true,
+          "description": "Placeholder legado/deprecated. Origem e duração dependem do Grupo C; não deve ser tratado como política aprovada."
+        },
+        "activated_combo_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "effect_state": {
+          "type": "object"
+        }
+      }
+    },
+    "card_instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "instance_id",
+        "card_id",
+        "exemplar_id",
+        "owner_player_id",
+        "origin_type",
+        "definition_snapshot",
+        "state"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "instance_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "exemplar_id": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "owner_player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        },
+        "origin_type": {
+          "enum": [
+            "deck_exemplar",
+            "catalog_deck",
+            "generated_token",
+            "equipped_relic_activation",
+            "legacy_migration"
+          ]
+        },
+        "definition_snapshot": {
+          "$ref": "#/$defs/definition_snapshot"
+        },
+        "state": {
+          "$ref": "#/$defs/runtime_state"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "origin_type": {
+                "const": "deck_exemplar"
+              }
+            },
+            "required": [
+              "origin_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "exemplar_id": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "origin_type": {
+                "enum": [
+                  "catalog_deck",
+                  "generated_token",
+                  "equipped_relic_activation"
+                ]
+              }
+            },
+            "required": [
+              "origin_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "exemplar_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "definition_snapshot": {
+                "properties": {
+                  "kind": {
+                    "const": "unit"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "definition_snapshot"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state": {
+                "properties": {
+                  "current_row": {
+                    "$ref": "#/$defs/row"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "definition_snapshot": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "special",
+                      "relic"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "definition_snapshot"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state": {
+                "properties": {
+                  "current_row": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "operation_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "fingerprint",
+        "actor",
+        "expected_revision",
+        "revision_before",
+        "revision_after",
+        "result",
+        "event_ids"
+      ],
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/uuid4"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "actor": {
+          "$ref": "#/$defs/actor"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "revision_before": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "revision_after": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "result": {
+          "type": "object",
+          "required": [
+            "status",
+            "payload"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "payload": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": true
+        },
+        "event_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid4"
+          }
+        }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "type",
+            "player_id"
+          ],
+          "properties": {
+            "type": {
+              "const": "player"
+            },
+            "player_id": {
+              "type": "string",
+              "pattern": "^-?(?:0|[1-9][0-9]*)$"
+            }
+          }
+        },
+        {
+          "required": [
+            "type",
+            "system_id"
+          ],
+          "properties": {
+            "type": {
+              "const": "system"
+            },
+            "system_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          }
+        }
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "player",
+            "system"
+          ]
+        },
+        "player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        },
+        "system_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "definition_manifest": {
+      "$ref": "#/$defs/definition_manifest_inline"
+    },
+    "definition_manifest_inline": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://soulsbo.local/schemas/card-game-definition-manifest.v1.json",
+      "title": "Soulsbo Definition Manifest v1",
+      "description": "Manifesto imutável por partida. Release IDs apontam para artefatos publicados; schema_version do envelope não é release de conteúdo.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_version",
+        "canonicalization",
+        "catalog_release_id",
+        "effect_registry_release_id",
+        "balance_rules_release_id",
+        "ruleset_release_id",
+        "artifact_sha256",
+        "definition_digest"
+      ],
+      "properties": {
+        "manifest_version": {
+          "const": 1
+        },
+        "canonicalization": {
+          "const": "RFC8785"
+        },
+        "catalog_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "effect_registry_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "balance_rules_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "ruleset_release_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifact_sha256": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "catalog",
+            "effect_registry",
+            "balance_rules",
+            "ruleset"
+          ],
+          "properties": {
+            "catalog": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "effect_registry": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "balance_rules": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "ruleset": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "definition_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 de JCS/RFC8785 do objeto manifesto sem o próprio campo definition_digest."
+        }
+      }
+    },
+    "domain_event": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://soulsbo.local/schemas/card-game-domain-event.v1.json",
+      "title": "Soulsbo Domain Event v1",
+      "description": "Evento de domínio append-only, ordenado e causalmente ligado a uma operação lógica.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "operation_id",
+        "sequence",
+        "caused_by_event_ids",
+        "kind",
+        "effect_scope",
+        "source_effect_id",
+        "source_instance_id",
+        "target_instance_ids",
+        "payload"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "operation_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "caused_by_event_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "effect_scope": {
+          "enum": [
+            "direct",
+            "reactive",
+            "system"
+          ]
+        },
+        "source_effect_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "source_instance_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "target_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "effect_scope": {
+                "const": "reactive"
+              }
+            },
+            "required": [
+              "effect_scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "source_effect_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "effect_scope": {
+                "const": "direct"
+              }
+            },
+            "required": [
+              "effect_scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "source_effect_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

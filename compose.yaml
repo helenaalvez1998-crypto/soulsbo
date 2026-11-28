@@ -1,0 +1,41 @@
+services:
+  soulsbo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: soulsbo:local
+    container_name: soulsbo
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env
+    environment:
+      PORT: "8080"
+      DATA_DIR: /data
+      DB_PATH: /data/colizeu.db
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${HOST_PORT:-8080}:8080"
+    volumes:
+      - soulsbo-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 45s
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json,sqlite3,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:8080/api/status', timeout=4)); assert d.get('status') == 'online' and d.get('discord_connected') is True; c=sqlite3.connect('file:/data/colizeu.db?mode=ro', uri=True, timeout=3); assert c.execute('PRAGMA quick_check').fetchone()[0] == 'ok'; c.close()"
+      interval: 30s
+      timeout: 6s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  soulsbo-data:
+    name: soulsbo-data

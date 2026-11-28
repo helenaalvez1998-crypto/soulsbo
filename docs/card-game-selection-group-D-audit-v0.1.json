@@ -1,0 +1,265 @@
+{
+  "audit": "card_game_selection_group_D",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "status": "READ_ONLY_LEGACY_AUDIT; RESOLUTIONS_CANDIDATE_NOT_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev11.zip",
+  "total": 23,
+  "passed": 23,
+  "failed": 0,
+  "cases": [
+    {
+      "id": "DSEL-001",
+      "title": "Rejeição de alvo inválido sem mutação",
+      "status": "PASS",
+      "scope": "Aplicar uma operação em working copy e descartar todo o plano quando a validação falha.",
+      "error": "O alvo escolhido não está nessa fileira ou excede poder efetivo 6.",
+      "input_snapshot_unchanged": true,
+      "source_card_still_in_hand": true,
+      "turn_cost": "not committed"
+    },
+    {
+      "id": "DSEL-002",
+      "title": "Ausência de alvo obrigatório rejeita sem consumir carta",
+      "status": "PASS",
+      "scope": "Sem alvo obrigatório, nenhuma carta, recurso ou turno é consumido.",
+      "error": "Não há unidade elegível (poder 6 ou menos) no descarte.",
+      "policy_observed": "reject",
+      "source_consumed": false
+    },
+    {
+      "id": "DSEL-003",
+      "title": "Alvo é revalidado no servidor",
+      "status": "PASS",
+      "scope": "A oferta visual não autoriza um alvo fora do escopo no momento da submissão.",
+      "offered_ids": [
+        "melee_target",
+        "ranged_target"
+      ],
+      "submitted_id": "ranged_target",
+      "server_rejected_stale_or_out_of_scope_choice": true
+    },
+    {
+      "id": "DSEL-004",
+      "title": "Resumo público não carrega identidade física",
+      "status": "PASS",
+      "scope": "O legado usa id de modelo; o contrato futuro deve usar instance_id.",
+      "public_option_fields": [
+        "bonus",
+        "escudo",
+        "geada",
+        "id",
+        "loucura",
+        "nome",
+        "poder",
+        "podrida",
+        "row",
+        "sangramento"
+      ],
+      "legacy_key": "id",
+      "physical_instance_key_present": false
+    },
+    {
+      "id": "DSEL-005",
+      "title": "Fallback automático da Execução",
+      "status": "PASS",
+      "scope": "A Execução automática escolhe o menor poder efetivo elegível na fileira.",
+      "automatic_policy": "min(effective_power) within selected current row",
+      "removed_target": "weak_effective",
+      "other_row_excluded": true
+    },
+    {
+      "id": "DSEL-006",
+      "title": "Fallback automático da Égide",
+      "status": "PASS",
+      "scope": "A Égide automática escolhe o maior poder efetivo entre aliados protegíveis.",
+      "automatic_policy": "max(effective_power) among protectable allies",
+      "selected_target": "strong"
+    },
+    {
+      "id": "DSEL-007",
+      "title": "Fallback automático do Passo",
+      "status": "PASS",
+      "scope": "O Passo automático escolhe o menor poder efetivo entre aliados móveis.",
+      "automatic_policy": "min(effective_power) among movable allies",
+      "moved_target": "weak"
+    },
+    {
+      "id": "DSEL-008",
+      "title": "Quantidade de alvos da Égide depende de raridade no legado",
+      "status": "PASS",
+      "scope": "Evidência de conflito com BUF-001; nova cardinalidade precisa ser parâmetro explícito, não raridade.",
+      "common_targets": [
+        "a"
+      ],
+      "rare_targets": [
+        "a",
+        "b"
+      ],
+      "conflict": "target cardinality depends on rarity in legacy; incompatible with approved BUF-001"
+    },
+    {
+      "id": "DSEL-009",
+      "title": "Quantidade de alvos do Passo depende de raridade no legado",
+      "status": "PASS",
+      "scope": "Evidência de conflito com BUF-001; alvo secundário precisa ser declarado e mostrado.",
+      "common_rows": {
+        "manual": "melee",
+        "secondary": "siege"
+      },
+      "rare_rows": {
+        "manual": "melee",
+        "secondary": "melee"
+      },
+      "conflict": "secondary target count depends on rarity in legacy; incompatible with approved BUF-001"
+    },
+    {
+      "id": "DSEL-010",
+      "title": "Efeito de até dois alvos aceita um único alvo",
+      "status": "PASS",
+      "scope": "Contagem máxima e mínima são conceitos separados; uma política up_to pode aceitar um alvo.",
+      "leader": "Morgott",
+      "maximum_targets": 2,
+      "available_targets": 1,
+      "outcome": "applied_to_available_target",
+      "source": "synthetic fixture"
+    },
+    {
+      "id": "DSEL-011",
+      "title": "Líder sem alvo elegível é rejeitado",
+      "status": "PASS",
+      "scope": "Rejeição preserva uso do líder e snapshot de entrada.",
+      "outcome": "rejected",
+      "leader_used": false,
+      "input_snapshot_unchanged": true
+    },
+    {
+      "id": "DSEL-012",
+      "title": "Chama sem Geada é consumida sem efeito",
+      "status": "PASS",
+      "scope": "Há efeitos legados de consumo válido sem mudança no alvo.",
+      "outcome": "consumed_no_effect",
+      "source_card_consumed": true,
+      "target_state_changed": false,
+      "legacy_note": "No aliado tinha Geada; a especial ainda foi descartada."
+    },
+    {
+      "id": "DSEL-013",
+      "title": "Muralha em fileira vazia é consumida sem efeito",
+      "status": "PASS",
+      "scope": "No-op pode ser aceito em alguns handlers; não é comportamento universal.",
+      "outcome": "consumed_no_effect",
+      "source_card_consumed": true,
+      "target_state_changed": false,
+      "empty_row": "melee"
+    },
+    {
+      "id": "DSEL-014",
+      "title": "Algemas em bônus zero consome a relíquia",
+      "status": "PASS",
+      "scope": "O legado aceita alvo sem bônus positivo e consome a ativação.",
+      "outcome": "consumed_no_effect",
+      "bonus_before_after": [
+        0,
+        0
+      ],
+      "relic_activation_consumed": true,
+      "turn_cost_consumed": true
+    },
+    {
+      "id": "DSEL-015",
+      "title": "Lâmina Negra bloqueada separa escudo, relíquia e turno",
+      "status": "PASS",
+      "scope": "O escudo e o turno são consumidos; a ativação de uso único da relíquia não.",
+      "outcome": "blocked",
+      "protection_charge_consumed": true,
+      "relic_activation_consumed": false,
+      "turn_cost_consumed": true
+    },
+    {
+      "id": "DSEL-016",
+      "title": "Noite/Chama bloqueada consome ativação",
+      "status": "PASS",
+      "scope": "O escudo, o turno e a ativação são consumidos quando a Chama é bloqueada.",
+      "outcome": "blocked",
+      "protection_charge_consumed": true,
+      "relic_activation_consumed": true,
+      "turn_cost_consumed": true
+    },
+    {
+      "id": "DSEL-017",
+      "title": "Execução bloqueada consome carta e turno",
+      "status": "PASS",
+      "scope": "Bloqueio é resultado aceito da ação, não rejeição da operação.",
+      "outcome": "blocked",
+      "protection_charge_consumed": true,
+      "source_card_consumed": true,
+      "turn_cost_consumed": true,
+      "target_zone_unchanged": true
+    },
+    {
+      "id": "DSEL-018",
+      "title": "Área pode produzir resultado misto",
+      "status": "PASS",
+      "scope": "Resultados devem ser registrados por alvo; status global pode ser partial.",
+      "outcome": "partial_mixed",
+      "blocked_target": "p1_shielded_max",
+      "applied_target_removed": "p2_unshielded_max",
+      "source_card_consumed": true
+    },
+    {
+      "id": "DSEL-019",
+      "title": "Campo target_id mistura identidade e escolha de modo",
+      "status": "PASS",
+      "scope": "O novo request separa target_instance_id de choice_id/mode_id.",
+      "same_field_usage": [
+        "unit/model target id",
+        "mode choice noite"
+      ],
+      "recommended_split": [
+        "selection.target_instance_id",
+        "selection.choice_id"
+      ]
+    },
+    {
+      "id": "DSEL-020",
+      "title": "Frontend reconstrói opções de relíquia",
+      "status": "PASS",
+      "scope": "A fonte de verdade de candidatos deve ser o servidor; cliente só apresenta.",
+      "server_serializes_relic_options": true,
+      "frontend_consumes_them": false,
+      "frontend_source": "opponent.board + client-side row filter"
+    },
+    {
+      "id": "DSEL-021",
+      "title": "A API só persiste resultado sem erro dentro de transação",
+      "status": "PASS",
+      "scope": "Há atomicidade local do update de snapshot no endpoint atual; replay/idempotência cross-process pertencem ao Grupo E.",
+      "db_transaction": "BEGIN IMMEDIATE",
+      "error_path_before_state_update": true,
+      "state_update_after_successful_resolver_only": true,
+      "scope_limit": "single current implementation path; does not prove cross-process idempotency"
+    },
+    {
+      "id": "DSEL-022",
+      "title": "API não envia operation_id nem expected_revision",
+      "status": "PASS",
+      "scope": "O bloqueio de clique no browser não substitui idempotência persistente nem revisão esperada.",
+      "operation_id_in_request": false,
+      "expected_revision_in_request": false,
+      "client_duplicate_click_guard": true,
+      "classification": "Group E persistence/idempotency gap, not resolved by client guard"
+    },
+    {
+      "id": "DSEL-023",
+      "title": "V4 não declara desempate entre grants compatíveis",
+      "status": "PASS",
+      "scope": "A escolha de uma carga de proteção entre várias grants precisa de política versionada.",
+      "protection_grants_exist": true,
+      "grant_selection_order_defined": false,
+      "group_C_gap_confirmed_for_group_D": true
+    }
+  ],
+  "scope_note": "Fixtures chamam funções reais do runtime legado e verificações estáticas pontuais de frontend/API/DB. Não são testes de browser real, rede, banco concorrente, replay, integração nem produção. Casos de raridade registram conflito legado com BUF-001 aprovado; não aprovam esse comportamento.",
+  "runtime_modified": false
+}

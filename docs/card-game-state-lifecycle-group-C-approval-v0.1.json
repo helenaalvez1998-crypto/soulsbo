@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "document": "State lifecycle and duration — Group C owner approval",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev10.zip",
+    "status": "OWNER_APPROVED",
+    "approval_evidence": "aprovo",
+    "runtime_integration": false,
+    "contract_frozen": false,
+    "approved_scope": "All ten recommended resolutions in the Group C review: CI-008, CI-009, BUF-008, BUF-009, BUF-010, BUF-011, BUF-014, RSRX-07, RSRX-08, RSRX-10."
+  },
+  "decisions": [
+    {"id":"CI-008","status":"OWNER_APPROVED","approved_resolution":"Emit round_close after immutable score/result snapshot; expire only round_close grants in every zone, including terminal round; preserve permanent_instance grants."},
+    {"id":"CI-009","status":"OWNER_APPROVED","approved_resolution":"Store intrinsic_weather_resistance in DefinitionSnapshot and source/event/expiry-tracked weather_resistance_modifiers on the instance; legacy scalar is non-canonical."},
+    {"id":"BUF-008","status":"OWNER_APPROVED","approved_resolution":"Keep printed_row immutable; current_row null outside board; persist last_board_row; keep player/round last_unit_play_row and update only after successful unit play."},
+    {"id":"BUF-009","status":"OWNER_APPROVED","approved_resolution":"Default protection blocks unit_removal and execution; sacrifice bypasses; statuses/debuffs are not blocked by default; preserve Noite/Chama and Lâmina Negra as explicit effect-specific exceptions."},
+    {"id":"BUF-010","status":"OWNER_APPROVED","approved_resolution":"Consume exactly one compatible protection charge on block; keep action_cost_on_block separate; Noite/Chama consumes activation, Lâmina Negra does not."},
+    {"id":"BUF-011","status":"OWNER_APPROVED","approved_resolution":"vigil_seal creates a weather resistance modifier expiring on board_exit; inactive generic resistencia_climatica branch remains excluded unless rebound and verified."},
+    {"id":"BUF-014","status":"OWNER_APPROVED","approved_resolution":"Represent bonus as traceable grants with signed amount, source, applied_event_id, expiry and per-effect/release clamp_policy_id; no implicit global floor/ceiling."},
+    {"id":"RSRX-07","status":"OWNER_APPROVED","approved_resolution":"Ressurgir/Réquiem use reset_to_zero; Esgar uses previous_bonus_plus_one with the +1 as separate grant/event; Lágrima Sagrada is hand recovery, not resurrection."},
+    {"id":"RSRX-08","status":"OWNER_APPROVED","approved_resolution":"Ressurgir/Réquiem use last_board_row, then valid requested row, then melee; Esgar forces a valid requested row and rejects missing/invalid row."},
+    {"id":"RSRX-10","status":"OWNER_APPROVED","approved_resolution":"Return to board clears status applications and protection grants; applies effect-specific bonus/row policy; preserves intrinsic resistance and still-active round_close/permanent_instance grants; does not replay on-play, faction passive or combo hooks."}
+  ],
+  "not_approved_by_this_record": [
+    "Final negative-status stack caps, threshold transitions and repeated-trigger policy for Malenia/Oracle of Frost.",
+    "Final Vengeance-eligible removal causes (Group F).",
+    "Complete target selection, fallback, partial-target and operation outcome semantics (Group D).",
+    "Real persistence, concurrency, CAS/locks and legacy snapshot migration (Group E).",
+    "Final numeric balance values and concrete clamp_policy_id assignments for every effect."
+  ]
+}

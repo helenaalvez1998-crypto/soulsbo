@@ -1,0 +1,101 @@
+{
+  "audit": "target_selection_row_scope",
+  "version": "0.1",
+  "status": "READ_ONLY_LEGACY_AUDIT; CANDIDATE_NOT_APPROVED",
+  "total": 15,
+  "passed": 15,
+  "failed": 0,
+  "cases": [
+    {
+      "id": "TGT-001",
+      "title": "Poder efetivo",
+      "status": "PASS",
+      "observation": "Poder efetivo usa bônus, clima e estados; o cap agregado de estados é 3 e o piso é 1."
+    },
+    {
+      "id": "TGT-002",
+      "title": "Maior poder global",
+      "status": "PASS",
+      "observation": "Fenda do Vazio procura o maior poder efetivo em todo o campo inimigo, não apenas na fileira escolhida."
+    },
+    {
+      "id": "TGT-003",
+      "title": "Desempate de máximo",
+      "status": "PASS",
+      "observation": "Em empate de max(), vence a primeira instância na ordem atual do tabuleiro."
+    },
+    {
+      "id": "TGT-004",
+      "title": "Menor aliado na mesma fileira",
+      "status": "PASS",
+      "observation": "Juramento Dourado filtra pela row corrente e escolhe o menor poder efetivo entre aliados dessa fileira."
+    },
+    {
+      "id": "TGT-005",
+      "title": "Marca por fileira corrente",
+      "status": "PASS",
+      "observation": "Marca da Dinastia usa row corrente, não fileira-base, e escolhe o maior poder efetivo."
+    },
+    {
+      "id": "TGT-006",
+      "title": "Cisalhamento por bônus",
+      "status": "PASS",
+      "observation": "Cisalhamento filtra bônus positivo e ranqueia pelo bônus bruto, não pelo poder efetivo."
+    },
+    {
+      "id": "TGT-007",
+      "title": "Sacrifício pelo menor poder efetivo",
+      "status": "PASS",
+      "observation": "Preço em Sangue escolhe a unidade mais fraca por poder efetivo na fileira corrente e limita o ganho a +3."
+    },
+    {
+      "id": "TGT-008",
+      "title": "Purificação com seleção",
+      "status": "PASS",
+      "observation": "Regressão Serena filtra unidades com status na fileira e escolhe até duas de menor poder efetivo."
+    },
+    {
+      "id": "TGT-009",
+      "title": "Fallback da purificação",
+      "status": "PASS",
+      "observation": "Sem status elegível, Regressão Serena fortalece o aliado mais fraco da fileira corrente."
+    },
+    {
+      "id": "TGT-010",
+      "title": "Fallback sem aliados",
+      "status": "PASS",
+      "observation": "Sem status elegível nem aliado na fileira, o próprio portador recebe +1."
+    },
+    {
+      "id": "TGT-011",
+      "title": "Gravidade e posição corrente",
+      "status": "PASS",
+      "observation": "Gravidade do Flagelo seleciona o maior poder efetivo global, move a unidade e mantém a referência fileira-base separada."
+    },
+    {
+      "id": "TGT-012",
+      "title": "Alvos de Morgott",
+      "status": "PASS",
+      "observation": "Morgott seleciona até dois aliados sem escudo na fileira escolhida em ordem decrescente de poder efetivo."
+    },
+    {
+      "id": "TGT-013",
+      "title": "Alvos de Mohg",
+      "status": "PASS",
+      "observation": "Mohg escolhe os dois inimigos mais fortes da fileira escolhida por poder efetivo."
+    },
+    {
+      "id": "TGT-014",
+      "title": "Alvos de Astel",
+      "status": "PASS",
+      "observation": "Astel aplica Geada a no máximo três inimigos de maior poder efetivo na fileira escolhida."
+    },
+    {
+      "id": "TGT-015",
+      "title": "Alvos de Loretta",
+      "status": "PASS",
+      "observation": "Loretta exige Longa Distância e fortalece as duas unidades de maior poder efetivo nessa fileira."
+    }
+  ],
+  "scope_note": "Fixtures sintéticas chamam funções reais do motor; não validam partidas completas, UI, persistência ou balanceamento."
+}

@@ -13,7 +13,7 @@ from typing import Any
 
 from levels import PATENTES
 
-VERSAO_ARTES = 33
+VERSAO_ARTES = 32
 
 
 RARIDADES = ("Comum", "Rara", "Épica", "Lendária", "Mítica", "Primordial", "Singular")
@@ -106,10 +106,6 @@ HABILIDADES: dict[str, dict[str, str]] = {
     "ressurgir": {"nome": "Ressurgir", "texto": "Se houver uma unidade elegível, traz do descarte a mais forte com poder base 5 ou menos diretamente ao campo."},
     "devorar": {"nome": "Devorar", "texto": "Ao entrar, consome a unidade aliada de menor poder efetivo na mesma fileira e recebe bônus igual ao poder dela, até +4."},
     "sobrevivente": {"nome": "Sobrevivente", "texto": "Ao fim da rodada, permanece no campo (a mais forte, se houver várias)."},
-    "gloria": {"nome": "Glória", "texto": "Se você vencer a rodada com ela em campo, permanece no campo para a próxima (a mais forte, se houver várias)."},
-    "legado": {"nome": "Herança da Vitória", "texto": "Se você venceu a rodada anterior, entra com +2 de bônus."},
-    "devoto": {"nome": "Devoção", "texto": "Ganha +1 de bônus se houver outro aliado da mesma facção em campo."},
-    "sinergia_faccao": {"nome": "Fé Compartilhada", "texto": "Ganha +1 de bônus para cada aliado da mesma facção em campo."},
     "espolios": {"nome": "Espólios", "texto": "Se você vencer a rodada com ela em campo, compra uma carta."},
     "gwent_egide": {"nome": "Bênção da Árvore Áurea", "texto": "Concede escudo a uma unidade sua."},
     "gwent_requiem": {"nome": "Chamado dos Mortos", "texto": "Traz do descarte diretamente ao campo uma unidade com poder base 6 ou menos."},
@@ -420,20 +416,6 @@ _LUTERANO_CARTAS = []
 
 _CARTAS_BASE = [*_CARTAS_BASE, *CARTAS_EXPANSAO_V75, *_LUTERANO_CARTAS]
 
-# Nomes e lore v2 (universo Elden Ring / Dark Souls) vivem em sistemas/nomes_lore.py.
-# A descrição NUNCA descreve mecânica: o efeito vem de gwent.preparar_carta().
-from sistemas.nomes_lore import NOMES_LORE
-
-
-def _aplicar_nome_lore(_c: "Carta") -> "Carta":
-    _nome, _lore = NOMES_LORE.get(_c.id, (None, _c.descricao))
-    return Carta(_c.id, _nome or _c.nome, _c.categoria, _c.faccao, _c.poder, _c.raridade,
-                 CUSTO_RARIDADE.get(_c.raridade, _c.custo), _c.habilidade, _lore, _c.jogo_origem, _c.fileira)
-
-
-_CARTAS_BASE = [_aplicar_nome_lore(_c) for _c in _CARTAS_BASE]
-CARTAS_PRIMORDIAIS = [_aplicar_nome_lore(_c) for _c in CARTAS_PRIMORDIAIS]
-
 CARTAS_POR_ID: dict[str, Carta] = {c.id: c for c in [*_CARTAS_BASE, *CARTAS_PRIMORDIAIS]}
 
 
@@ -489,7 +471,12 @@ def carta_jogo(nome_jogo: str, marco: str) -> Carta:
         "Véu Carmesim": "Combatente do Véu Carmesim, habituado a emboscadas, precisão e pressão sobre o adversário.",
         "Lua Negra": "Estudioso da Lua Negra, dedicado à feitiçaria, à observação dos astros e ao controle do campo.",
     }
-    descricao = descricoes[faccao]
+    descricao = descricoes[faccao] + " Papel tático: " + {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}[fileira] + "."
+    if habilidade:
+        nome_habilidade = HABILIDADES.get(habilidade, {}).get("nome", "técnica especial")
+        descricao += f" Habilidade: {nome_habilidade}."
+    else:
+        descricao += " Sem habilidade especial; seu valor vem do poder-base e dos bônus de combate."
     descricao += " Recompensa por domínio completo." if marco == "platina" else " Recompensa por conquista."
 
     return Carta(
@@ -535,7 +522,7 @@ def carta_patente(indice: int, nivel_minimo: int, nome_patente: str) -> Carta:
         raridade=raridade,
         custo=CUSTO_RARIDADE[raridade],
         habilidade=habilidade,
-        descricao=f"Recompensa por alcançar o nível {nivel_minimo}.",
+        descricao=(f"Recompensa por alcançar o nível {nivel_minimo}. Papel tático: " + {"melee": "Corpo a corpo", "ranged": "Longa distância", "siege": "Cerco"}[fileira] + ". " + (HABILIDADES.get(habilidade, {}).get("texto", "") if habilidade else "Esta carta não tem habilidade especial; seu efeito vem do poder e dos bônus recebidos em combate.")),
         fileira=fileira,
     )
 

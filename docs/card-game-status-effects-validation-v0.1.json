@@ -1,0 +1,96 @@
+{
+  "report_version": "0.1",
+  "date": "2026-11-27",
+  "status": "CANDIDATE_FOR_REVIEW_NOT_APPROVED",
+  "scope": "Auditoria dos quatro estados negativos e construção de registry/resolvedor de referência sem integração ao runtime legado.",
+  "counts": {
+    "statuses": 4,
+    "applications": 15,
+    "applications_by_source_kind": {
+      "special": 7,
+      "unit_identity": 5,
+      "leader": 2,
+      "relic": 1
+    },
+    "cleansers": 5,
+    "cleansers_by_source_kind": {
+      "leader": 2,
+      "unit_identity": 1,
+      "special": 1,
+      "relic": 1
+    }
+  },
+  "tests": {
+    "status_candidate": {
+      "command": "python docs/scripts/test-card-status-candidate-v0.1.py",
+      "passed": 41,
+      "failed": 0
+    },
+    "canonical_contract": {
+      "command": "python docs/scripts/test-card-contract-v1.py",
+      "passed": 35,
+      "failed": 0
+    },
+    "effect_catalog": {
+      "command": "python docs/scripts/test-effect-catalog-candidate-v0.1.py",
+      "passed": 23,
+      "failed": 0
+    },
+    "effect_semantic_audit": {
+      "command": "python docs/scripts/test-effect-semantic-audit-v0.1.py",
+      "passed": 11,
+      "failed": 0
+    },
+    "legacy_behavior": {
+      "command": "python docs/scripts/summarize-card-game-behavior-v0.3.py",
+      "suites": 8,
+      "assertions_passed": 251,
+      "assertions_failed": 0,
+      "scope_note": "Asserts agregados das oito suites; suites podem cobrir áreas diferentes e não devem ser interpretadas como 251 cartas/efeitos distintos."
+    },
+    "stateful_matches": {
+      "command": "python docs/scripts/assert-full-match-stateful-v0.1.py",
+      "scenarios_passed": 12,
+      "scenarios_failed": 0
+    }
+  },
+  "schema_validation": {
+    "draft": "2020-12",
+    "schema_valid": true,
+    "registry_valid": true
+  },
+  "runtime_unchanged_this_stage": {
+    "sistemas/gwent.py": true,
+    "sistemas/cartas.py": true,
+    "bot.py": true,
+    "database.py": true,
+    "site/app.js": true
+  },
+  "runtime_sha256": {
+    "sistemas/gwent.py": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+    "sistemas/cartas.py": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+    "bot.py": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+    "database.py": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+    "site/app.js": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b"
+  },
+  "implementation_status": {
+    "candidate_resolver": "sistemas/card_status_candidate.py",
+    "connected_to_legacy_runtime": false,
+    "legacy_handlers_deleted": false,
+    "database_or_api_changed": false,
+    "frontend_or_images_changed": false
+  },
+  "known_findings": [
+    "Podridão de Malenia pode repetir corrosão de bônus quando o alvo já está no limite de duas marcas.",
+    "Oráculo da Geada pode receber bônus repetido quando o alvo já está no limite de duas marcas.",
+    "A amplificação genérica por raridade pode adicionar uma segunda alteração de bônus após a consequência do estado.",
+    "A ordem do tabuleiro pode definir quais alvos recebem marcas extras de estados por raridade.",
+    "Snapshot terminal pode conservar contadores de estado após encerramento da última rodada."
+  ],
+  "limitations": [
+    "A regra proposta ainda precisa de aprovação do proprietário antes de virar regra oficial.",
+    "Os testes do resolvedor novo são unitários/sintéticos; não provam equilíbrio competitivo.",
+    "O módulo candidato não é importado pelo motor legado.",
+    "As suites do motor legado verificam regressões existentes e reproduzem explicitamente alguns comportamentos problemáticos; sua aprovação não significa que esses comportamentos devam ser mantidos."
+  ]
+}

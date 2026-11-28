@@ -1,0 +1,4347 @@
+{
+  "metadata": {
+    "document": "Auditoria de equivalência semântica do catálogo candidato v0.1",
+    "status": "READ_ONLY_SOURCE_AUDIT; CANDIDATE NOT APPROVED; NOT CONNECTED TO RUNTIME",
+    "generated_at": "2026-11-27",
+    "sources": {
+      "sistemas/cartas.py": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+      "sistemas/gwent.py": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+      "data/card_game/legacy-effect-aliases-v0.1.json": "af7206ffb206e467ed6388a7ef0207fae86cfc29aa8dfb0955f398fb001eadc5",
+      "data/card_game/effect-registry-candidate.v1.json": "a3cba2a3b71854fdabf55ed893e4864d46722d733e9b6d9897ddedea7053b737"
+    }
+  },
+  "counts": {
+    "candidate_families": 54,
+    "generic_aliases": 59,
+    "direct_play_branch_aliases": 56,
+    "lifecycle_hook_aliases": 2,
+    "generic_aliases_without_handler": 1,
+    "active_identity_overrides": 22,
+    "active_identity_branches_found": 22,
+    "high_risk_families": 18,
+    "medium_risk_families": 6,
+    "low_risk_families": 30
+  },
+  "families": [
+    {
+      "effect_id": "effect.first_round_power",
+      "candidate_name": "Ímpeto da Primeira Luz",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_first_round_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "lei_primeva",
+          "label": "Lei Primeva",
+          "card_ids": [
+            "primordial_origem"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1830
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "primeira_luz",
+          "label": "Graça Dourada",
+          "card_ids": [
+            "chefe_rei_afogado",
+            "covenant_lua_velada"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1829
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.comeback_power",
+      "candidate_name": "Força da Retomada",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_comeback_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 5,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "contragolpe",
+          "label": "Contragolpe",
+          "card_ids": [],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1836
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "fome_abismo",
+          "label": "Fome do Abismo",
+          "card_ids": [
+            "primordial_abismo"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1834
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "instinto",
+          "label": "Instinto de Caçador",
+          "card_ids": [
+            "arma_grande_sino",
+            "gwent_unidade_gigante"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1834
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "retaliacao",
+          "label": "Retaliação dos Semideuses",
+          "card_ids": [
+            "covenant_irmandade_ferro",
+            "patente_6",
+            "patente_8"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1835
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "last_bell",
+          "label": "Sino do Último Bastião",
+          "card_ids": [
+            "arma_grande_sino"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            471
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.ahead_power",
+      "candidate_name": "Ímpeto da Vantagem",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_ahead_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "impeto",
+          "label": "Ímpeto do Lorde",
+          "card_ids": [
+            "chefe_oraculo_ruina",
+            "patente_9"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1837
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.third_round_power",
+      "candidate_name": "Último Fôlego",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_third_round_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "ultimo_folego",
+          "label": "Último Suspiro",
+          "card_ids": [
+            "chefe_dama_vazio",
+            "gwent_singular_nivel1"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1831
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.sequence_power",
+      "candidate_name": "Postura Encadeada",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_sequence_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 6,
+      "distinct_parameter_shapes": [
+        [
+          "bonus",
+          "reference_side",
+          "requires_previous_play",
+          "row_relation"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "reference_side",
+        "row_relation"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "adaptacao",
+          "label": "Passo do Peregrino",
+          "card_ids": [
+            "magia_selo_vigilia"
+          ],
+          "params": {
+            "reference_side": "own",
+            "row_relation": "different",
+            "requires_previous_play": true,
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1840
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "encadeamento",
+          "label": "Postura Encadeada",
+          "card_ids": [
+            "magia_nevoa_antiga",
+            "patente_5"
+          ],
+          "params": {
+            "reference_side": "own",
+            "row_relation": "same",
+            "requires_previous_play": true,
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1839
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "quebra_ritmo",
+          "label": "Ruptura de Postura",
+          "card_ids": [
+            "chefe_guardiao_cinzas",
+            "chefe_messmer_impalador",
+            "chefe_radahn_flagelo_estrelas",
+            "magia_sol_negro",
+            "patente_10"
+          ],
+          "params": {
+            "reference_side": "opponent",
+            "row_relation": "same",
+            "requires_previous_play": true,
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1845
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "veil_shift",
+          "label": "Lâmina Negra Errante",
+          "card_ids": [
+            "chefe_aparicao_veio"
+          ],
+          "params": {
+            "reference_side": "own",
+            "row_relation": "different",
+            "requires_previous_play": true,
+            "bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            458
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "pilgrim_duel",
+          "label": "Duelista da Casa Hoslow",
+          "card_ids": [
+            "arma_lamina_peregrino"
+          ],
+          "params": {
+            "reference_side": "opponent",
+            "row_relation": "same",
+            "requires_previous_play": true,
+            "bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            460
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "mist_trail",
+          "label": "Peregrinos da Cidade Eterna",
+          "card_ids": [
+            "covenant_peregrinos_nevoa"
+          ],
+          "params": {
+            "reference_side": "own",
+            "row_relation": "different",
+            "requires_previous_play": true,
+            "bonus": 1
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            525
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.tied_score_power",
+      "candidate_name": "Concentração",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_tied_score_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "sangue_frio",
+          "label": "Concentração",
+          "card_ids": [],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1838
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.ranged_row_power",
+      "candidate_name": "Mira Cariana",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_ranged_row_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "precisao",
+          "label": "Mira Cariana",
+          "card_ids": [
+            "arma_duas_luas",
+            "gwent_singular_intocavel"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1833
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.enemy_bonus_reduction",
+      "candidate_name": "Supressão de Bônus",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_enemy_bonus_reduction",
+      "timing": "on_play",
+      "duration": "persistent_until_changed",
+      "targeting": "enemy_units",
+      "legacy_alias_count": 5,
+      "distinct_parameter_shapes": [
+        [
+          "amount",
+          "floor",
+          "only_positive",
+          "target_scope"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "target_scope"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "drenagem",
+          "label": "Selo Enfraquecedor",
+          "card_ids": [
+            "chefe_malenia_lamina_miquella",
+            "covenant_coroa_abismo",
+            "magia_trovao_oco"
+          ],
+          "params": {
+            "target_scope": "all_enemies",
+            "amount": 1,
+            "floor": -2,
+            "only_positive": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1847
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "void_rend",
+          "label": "Fenda do Vazio",
+          "card_ids": [
+            "chefe_dama_vazio"
+          ],
+          "params": {
+            "target_scope": "strongest_enemy",
+            "amount": 2,
+            "floor": -2,
+            "only_positive": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            443
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "destined_death",
+          "label": "Morte Destinada",
+          "card_ids": [
+            "chefe_maliketh_morte_destinada"
+          ],
+          "params": {
+            "target_scope": "strongest_enemy",
+            "amount": 2,
+            "floor": -2,
+            "only_positive": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            536
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "hollow_thunder",
+          "label": "Descarga Oca",
+          "card_ids": [
+            "magia_trovao_oco"
+          ],
+          "params": {
+            "target_scope": "chosen_enemy_row",
+            "amount": 1,
+            "floor": -2,
+            "only_positive": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            485
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "counterflame",
+          "label": "Feiticeira da Lua Gélida",
+          "card_ids": [
+            "magia_chama_fria"
+          ],
+          "params": {
+            "target_scope": "top_two_in_enemy_row",
+            "amount": 1,
+            "floor": -2,
+            "only_positive": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            495
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.arcane_hunter_power",
+      "candidate_name": "Caçador de Feitiços",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_arcane_hunter_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "cacador_arcano",
+          "label": "Caçador de Feitiços",
+          "card_ids": [
+            "chefe_maliketh_morte_destinada",
+            "gwent_unidade_invocador",
+            "patente_1",
+            "patente_7"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1841
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.enemy_field_suppression",
+      "candidate_name": "Decreto Soberano",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_enemy_field_suppression",
+      "timing": "on_play",
+      "duration": "persistent_until_changed",
+      "targeting": "all_enemy_units",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "amount",
+          "floor"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "decreto_soberano",
+          "label": "Decreto Soberano",
+          "card_ids": [
+            "primordial_trono"
+          ],
+          "params": {
+            "amount": 2,
+            "floor": -2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1850
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.weather_affinity_power",
+      "candidate_name": "Afinidade com a Tempestade",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_weather_affinity_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "bonus",
+          "weather_scope"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "olho_tempestade",
+          "label": "Olho da Tempestade",
+          "card_ids": [
+            "chefe_placidusax_lorde_dragao",
+            "primordial_tempestade"
+          ],
+          "params": {
+            "weather_scope": "own_row_active",
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1846
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "ancient_mist",
+          "label": "Névoa Ancestral",
+          "card_ids": [
+            "magia_nevoa_antiga"
+          ],
+          "params": {
+            "weather_scope": "any_row_active",
+            "bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            487
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.late_round_reversal_power",
+      "candidate_name": "Paradoxo Eterno",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_late_round_reversal_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "paradoxo_eterno",
+          "label": "Paradoxo Eterno",
+          "card_ids": [
+            "gwent_singular_cacador_chefes",
+            "primordial_eternidade"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1832
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.same_row_formation_power",
+      "candidate_name": "Formação da Fileira",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_same_row_formation_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 3,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_per_ally",
+          "faction_filter",
+          "max_bonus",
+          "minimum_allies",
+          "mode"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "faction_filter",
+        "mode"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "dupla_fornalha",
+          "label": "Pacto da Fornalha",
+          "card_ids": [],
+          "params": {
+            "mode": "if_any",
+            "bonus_per_ally": 2,
+            "max_bonus": 2,
+            "minimum_allies": 1,
+            "faction_filter": "any"
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1891
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "guardiao_fileira",
+          "label": "Guardião da Fileira",
+          "card_ids": [],
+          "params": {
+            "mode": "per_ally",
+            "bonus_per_ally": 1,
+            "max_bonus": 3,
+            "minimum_allies": 1,
+            "faction_filter": "any"
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1853
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "forge_rhythm",
+          "label": "Ferreiro de Volcano Manor",
+          "card_ids": [
+            "arma_martelo_fornalha"
+          ],
+          "params": {
+            "mode": "per_ally",
+            "bonus_per_ally": 1,
+            "max_bonus": 2,
+            "minimum_allies": 1,
+            "faction_filter": "golden_order"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            462
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.solitary_row_power",
+      "candidate_name": "Caçador Solitário",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_solitary_row_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "cacador_solitario",
+          "label": "Caçador Solitário",
+          "card_ids": [
+            "gwent_singular_primeiro"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1855
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.row_aura_bonus",
+      "candidate_name": "Estandarte da Fileira",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_row_aura_bonus",
+      "timing": "on_play",
+      "duration": "until_round_end",
+      "targeting": "allied_units_same_row",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "bonus",
+          "include_self"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "estandarte",
+          "label": "Estandarte",
+          "card_ids": [
+            "gwent_mitica_coroa"
+          ],
+          "params": {
+            "bonus": 1,
+            "include_self": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1858
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "grey_watch",
+          "label": "Cavaleiro de Leyndell",
+          "card_ids": [
+            "chefe_vigia_cinzento"
+          ],
+          "params": {
+            "bonus": 1,
+            "include_self": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            456
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.weather_resistance",
+      "candidate_name": "Resistência Climática",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_weather_resistance",
+      "timing": "on_play",
+      "duration": "while_on_board",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_if_no_weather",
+          "resistance"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "resistencia_climatica",
+          "label": "Resistência Climática",
+          "card_ids": [],
+          "params": {
+            "resistance": 2,
+            "bonus_if_no_weather": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1862
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.weather_ward_support",
+      "candidate_name": "Selo de Vigília",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_weather_ward_support",
+      "timing": "on_play",
+      "duration": "while_on_board",
+      "targeting": "self_and_one_same_row_ally",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "ally_bonus",
+          "weather_resistance"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "MEDIUM",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "vigil_seal",
+          "label": "Selo de Vigília",
+          "card_ids": [
+            "magia_selo_vigilia"
+          ],
+          "params": {
+            "weather_resistance": 1,
+            "ally_bonus": 1
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            482
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.discard_special_power",
+      "candidate_name": "Eco das Cinzas Arcanas",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_discard_special_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_per_special",
+          "max_bonus",
+          "minimum_specials"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "eco_arcano",
+          "label": "Eco Arcano",
+          "card_ids": [],
+          "params": {
+            "bonus_per_special": 2,
+            "minimum_specials": 1,
+            "max_bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1866
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "echo_orb",
+          "label": "Erudito da Academia",
+          "card_ids": [
+            "magia_orbe_eco"
+          ],
+          "params": {
+            "bonus_per_special": 1,
+            "minimum_specials": 1,
+            "max_bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            493
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.death_revenge",
+      "candidate_name": "Vingança",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_death_revenge",
+      "timing": "on_death",
+      "duration": "immediate",
+      "targeting": "allied_units_same_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "ally_bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "vinganca",
+          "label": "Vingança",
+          "card_ids": [
+            "gwent_unidade_detonador",
+            "gwent_unidade_herdeiro_portao",
+            "gwent_unidade_senhor_cacada"
+          ],
+          "params": {
+            "ally_bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": []
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.entry_shield",
+      "candidate_name": "Escudo de Ferro",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_entry_shield",
+      "timing": "on_play",
+      "duration": "until_first_block",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "shield_count"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "escudo_ferro",
+          "label": "Escudo de Ferro",
+          "card_ids": [],
+          "params": {
+            "shield_count": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1869
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.ally_sacrifice_power",
+      "candidate_name": "Sacrifício Devorador",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_ally_sacrifice_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "weakest_allied_unit_same_row",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "fallback_bonus",
+          "gain_cap",
+          "minimum_gain",
+          "target_selection"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "devorar",
+          "label": "Devorar",
+          "card_ids": [
+            "gwent_unidade_carniceiro_forja"
+          ],
+          "params": {
+            "gain_cap": 4,
+            "fallback_bonus": 0,
+            "minimum_gain": 1,
+            "target_selection": "weakest_same_row"
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1871
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "v75_blood_price",
+          "label": "Preço em Sangue",
+          "card_ids": [
+            "gwent_v75_veu_carrasco_preco"
+          ],
+          "params": {
+            "gain_cap": 3,
+            "fallback_bonus": 1,
+            "minimum_gain": 1,
+            "target_selection": "weakest_same_row"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            594
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.revive_from_discard",
+      "candidate_name": "Ressurgir",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_revive_from_discard",
+      "timing": "on_play",
+      "duration": "immediate",
+      "targeting": "strongest_eligible_unit_from_discard",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "added_bonus",
+          "maximum_base_power",
+          "target_selection"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "MEDIUM",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "ressurgir",
+          "label": "Ressurgir",
+          "card_ids": [
+            "gwent_unidade_necromante"
+          ],
+          "params": {
+            "maximum_base_power": 5,
+            "target_selection": "strongest_eligible",
+            "added_bonus": 0
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1879
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.round_victory_survivor",
+      "candidate_name": "Glória da Sobrevivência",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_round_victory_survivor",
+      "timing": "round_end",
+      "duration": "next_round_board_presence",
+      "targeting": "strongest_tagged_unit",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "maximum_survivors",
+          "winner_only"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "MEDIUM",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "sobrevivente",
+          "label": "Sobrevivente",
+          "card_ids": [],
+          "params": {
+            "winner_only": true,
+            "maximum_survivors": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": []
+        },
+        {
+          "source_type": "HIDDEN_LIFECYCLE_HOOK",
+          "legacy_id": "gloria",
+          "label": "Glória (hook de fim de rodada)",
+          "card_ids": [
+            "luterano_anjo",
+            "luterano_anjo2",
+            "luterano_vigia"
+          ],
+          "params": {
+            "winner_only": true,
+            "maximum_survivors": 1
+          },
+          "source_path": "sistemas/cartas.py:card.habilidade",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_resolve_round",
+          "handler_lines": [
+            1168
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.victory_draw",
+      "candidate_name": "Espólios",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_victory_draw",
+      "timing": "round_end",
+      "duration": "immediate",
+      "targeting": "owner_draw_pile",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "draw_count"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "espolios",
+          "label": "Espólios",
+          "card_ids": [],
+          "params": {
+            "draw_count": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": []
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.cross_row_presence_power",
+      "candidate_name": "Passos entre Fileiras",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_cross_row_presence_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 3,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_per_row",
+          "max_bonus",
+          "mode"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "mode"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "irmandade_veu",
+          "label": "Formação do Véu",
+          "card_ids": [],
+          "params": {
+            "mode": "any_other_row",
+            "bonus_per_row": 2,
+            "max_bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1893
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "twin_dance",
+          "label": "Dança Espelhada",
+          "card_ids": [
+            "arma_duas_luas"
+          ],
+          "params": {
+            "mode": "any_other_row",
+            "bonus_per_row": 1,
+            "max_bonus": 1
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            469
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "shadow_paths",
+          "label": "Cavaleiro do Cão de Caça",
+          "card_ids": [
+            "chefe_cervo_sombrio"
+          ],
+          "params": {
+            "mode": "per_distinct_other_row",
+            "bonus_per_row": 1,
+            "max_bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            445
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.formation_or_discard_power",
+      "candidate_name": "Círculo de Ressonância",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_formation_or_discard_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "circulo_arcano",
+          "label": "Círculo de Ressonância",
+          "card_ids": [],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1895
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.row_pair_blessing",
+      "candidate_name": "Bênção de Companheiros",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_row_pair_blessing",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self_and_one_same_row_ally",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "ally_bonus",
+          "ally_selection",
+          "self_bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "ally_selection"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "ash_guardian",
+          "label": "Égide das Cinzas",
+          "card_ids": [
+            "chefe_guardiao_cinzas"
+          ],
+          "params": {
+            "self_bonus": 1,
+            "ally_bonus": 1,
+            "ally_selection": "first_same_row"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            439
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "v75_golden_vow",
+          "label": "Juramento Dourado",
+          "card_ids": [
+            "gwent_v75_ordem_veterano_juramento"
+          ],
+          "params": {
+            "self_bonus": 1,
+            "ally_bonus": 1,
+            "ally_selection": "weakest_same_row"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            550
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.discard_advantage_power",
+      "candidate_name": "Dízimo do Abismo",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_discard_advantage_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "discard_bonus",
+          "fallback_bonus",
+          "fallback_condition"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "abyss_tithe",
+          "label": "Dízimo do Abismo",
+          "card_ids": [
+            "chefe_rei_afogado"
+          ],
+          "params": {
+            "discard_bonus": 2,
+            "fallback_bonus": 1,
+            "fallback_condition": "opponent_has_more_units"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            447
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.ruin_omen",
+      "candidate_name": "Presságio da Ruína",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_ruin_omen",
+      "timing": "on_play",
+      "duration": "persistent_until_changed",
+      "targeting": "strongest_enemy_and_self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "enemy_bonus_floor",
+          "enemy_bonus_reduction",
+          "self_bonus_if_behind"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "ruin_omen",
+          "label": "Presságio da Ruína",
+          "card_ids": [
+            "chefe_oraculo_ruina"
+          ],
+          "params": {
+            "enemy_bonus_reduction": 1,
+            "enemy_bonus_floor": -2,
+            "self_bonus_if_behind": 1
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            449
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.enemy_positive_bonus_power",
+      "candidate_name": "Eclipse Devorador",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_enemy_positive_bonus_power",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "devouring_eclipse",
+          "label": "Eclipse Devorador",
+          "card_ids": [
+            "magia_sol_negro"
+          ],
+          "params": {
+            "bonus": 2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            489
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.cross_row_support",
+      "candidate_name": "Aliança Lunar",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_cross_row_support",
+      "timing": "on_play",
+      "duration": "permanent_bonus",
+      "targeting": "self_and_weakest_ally_other_row",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "ally_bonus",
+          "ally_selection",
+          "self_bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "veiled_moon",
+          "label": "Aliança Lunar",
+          "card_ids": [
+            "covenant_lua_velada"
+          ],
+          "params": {
+            "self_bonus": 1,
+            "ally_bonus": 1,
+            "ally_selection": "weakest_other_row"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            498
+          ]
+        },
+        {
+          "source_type": "ARCHIVED_IDENTITY_BRANCH_CANDIDATE",
+          "legacy_id": "covering_shot",
+          "label": "Batedor da Mansão Vulcânica",
+          "card_ids": [
+            "arma_arco_peregrino"
+          ],
+          "params": {
+            "self_bonus": 0,
+            "ally_bonus": 1,
+            "ally_selection": "weakest_other_row"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES (filtered/inactive)",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            478
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.row_status_pressure",
+      "candidate_name": "Pressão de Estados",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_row_status_pressure",
+      "timing": "on_play",
+      "duration": "until_round_end_or_threshold",
+      "targeting": "enemy_units_same_row",
+      "legacy_alias_count": 4,
+      "distinct_parameter_shapes": [
+        [
+          "marks_per_entry",
+          "reset_marks_on_threshold",
+          "self_bonus_on_threshold",
+          "status",
+          "target_scope",
+          "threshold_bonus_loss",
+          "threshold_marks"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "status",
+        "target_scope"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "scarlet_bloom",
+          "label": "Flor Escarlate",
+          "card_ids": [
+            "chefe_malenia_lamina_miquella"
+          ],
+          "params": {
+            "status": "podrida",
+            "target_scope": "all_enemies_same_row",
+            "marks_per_entry": 1,
+            "threshold_marks": 2,
+            "threshold_bonus_loss": 1,
+            "self_bonus_on_threshold": 0,
+            "reset_marks_on_threshold": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            527
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "impaling_spear",
+          "label": "Lança do Impalador",
+          "card_ids": [
+            "chefe_messmer_impalador"
+          ],
+          "params": {
+            "status": "sangramento",
+            "target_scope": "all_enemies_same_row",
+            "marks_per_entry": 1,
+            "threshold_marks": 2,
+            "threshold_bonus_loss": 2,
+            "self_bonus_on_threshold": 0,
+            "reset_marks_on_threshold": true
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            538
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "v75_frost_oracle",
+          "label": "Presságio da Geada",
+          "card_ids": [
+            "gwent_v75_lua_oraculo_geada"
+          ],
+          "params": {
+            "status": "geada",
+            "target_scope": "strongest_enemy_same_row",
+            "marks_per_entry": 1,
+            "threshold_marks": 2,
+            "threshold_bonus_loss": 0,
+            "self_bonus_on_threshold": 1,
+            "reset_marks_on_threshold": false
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            608
+          ]
+        },
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "v75_blood_mark",
+          "label": "Marca da Dinastia",
+          "card_ids": [
+            "gwent_v75_veu_acolito_sangue"
+          ],
+          "params": {
+            "status": "sangramento",
+            "target_scope": "strongest_enemy_same_row",
+            "marks_per_entry": 1,
+            "threshold_marks": 2,
+            "threshold_bonus_loss": 2,
+            "self_bonus_on_threshold": 1,
+            "reset_marks_on_threshold": true
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            582
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.gravity_reposition",
+      "candidate_name": "Gravidade do Flagelo",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_gravity_reposition",
+      "timing": "on_play",
+      "duration": "persistent_until_changed",
+      "targeting": "strongest_enemy",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_loss",
+          "destination"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "star_gravity",
+          "label": "Gravidade do Flagelo",
+          "card_ids": [
+            "chefe_radahn_flagelo_estrelas"
+          ],
+          "params": {
+            "bonus_loss": 2,
+            "destination": "this_card_row"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            533
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.frost_storm_momentum",
+      "candidate_name": "Tempestade do Tempo",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_frost_storm_momentum",
+      "timing": "on_play",
+      "duration": "until_round_end",
+      "targeting": "enemy_units_same_row_and_self",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "marks_per_enemy",
+          "max_marks",
+          "self_bonus_cap",
+          "self_bonus_per_target"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "time_storm",
+          "label": "Tempestade do Tempo",
+          "card_ids": [
+            "chefe_placidusax_lorde_dragao"
+          ],
+          "params": {
+            "marks_per_enemy": 1,
+            "max_marks": 2,
+            "self_bonus_per_target": 1,
+            "self_bonus_cap": 3
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            544
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.grace_purification",
+      "candidate_name": "Regressão Serena",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_grace_purification",
+      "timing": "on_play",
+      "duration": "until_round_end",
+      "targeting": "up_to_two_same_row_allies",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_per_purified",
+          "fallback",
+          "max_targets"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "MEDIUM",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "v75_grace_mender",
+          "label": "Regressão Serena",
+          "card_ids": [
+            "gwent_v75_ordem_confessora_graca"
+          ],
+          "params": {
+            "max_targets": 2,
+            "bonus_per_purified": 1,
+            "fallback": "weakest_same_row_then_self"
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            562
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.gravity_shear",
+      "candidate_name": "Cisalhamento Gravitacional",
+      "kind": "unit",
+      "candidate_resolution_handler_name_only": "resolve_gravity_shear",
+      "timing": "on_play",
+      "duration": "persistent_until_changed",
+      "targeting": "up_to_two_positive_bonus_enemies_same_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "amount",
+          "bonus_floor",
+          "max_targets",
+          "self_bonus_when_full"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "CARD_IDENTITY_ABILITIES",
+          "legacy_id": "v75_gravity_shear",
+          "label": "Cisalhamento Gravitacional",
+          "card_ids": [
+            "gwent_v75_lua_graviturgista"
+          ],
+          "params": {
+            "amount": 1,
+            "max_targets": 2,
+            "self_bonus_when_full": 1,
+            "bonus_floor": -2
+          },
+          "source_path": "sistemas/gwent.py:CARD_IDENTITY_ABILITIES",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "_aplicar_habilidade_identidade",
+          "handler_lines": [
+            618
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.weather_row",
+      "candidate_name": "Tempestade dos Picos",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_weather_row",
+      "timing": "special_action",
+      "duration": "until_round_end",
+      "targeting": "chosen_row_both_sides",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "power_penalty"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_clima",
+          "label": "Tempestade dos Picos",
+          "card_ids": [
+            "gwent_especial_tempestade"
+          ],
+          "params": {
+            "power_penalty": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1567
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.apply_status_marks",
+      "candidate_name": "Aplicação de Estados",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_apply_status_marks",
+      "timing": "special_action",
+      "duration": "until_round_end_or_threshold",
+      "targeting": "enemy_scope_from_params",
+      "legacy_alias_count": 7,
+      "distinct_parameter_shapes": [
+        [
+          "mark_cap",
+          "marks",
+          "rarity_scaling",
+          "status",
+          "target_scope",
+          "threshold_action",
+          "threshold_marks"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "status",
+        "target_scope",
+        "threshold_action"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_chuva",
+          "label": "Sangue Corrompido",
+          "card_ids": [
+            "gwent_especial_chuva"
+          ],
+          "params": {
+            "status": "sangramento",
+            "target_scope": "enemy_siege_row",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "reduce_bonus_2_and_reset",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1583
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_geada",
+          "label": "Lua Gélida",
+          "card_ids": [
+            "gwent_especial_geada"
+          ],
+          "params": {
+            "status": "geada",
+            "target_scope": "all_enemies",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "reduce_effective_power_per_mark",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1592
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_geada_cariana",
+          "label": "Geada Cariana",
+          "card_ids": [
+            "elden_especial_geada"
+          ],
+          "params": {
+            "status": "geada",
+            "target_scope": "chosen_enemy_row",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "reduce_effective_power_per_mark",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1697
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_loucura",
+          "label": "Loucura Frenética",
+          "card_ids": [
+            "elden_especial_loucura"
+          ],
+          "params": {
+            "status": "loucura",
+            "target_scope": "chosen_enemy_row",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "clear_positive_bonus",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1729
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_nevoa",
+          "label": "Névoa de Sellia",
+          "card_ids": [
+            "gwent_especial_nevoa"
+          ],
+          "params": {
+            "status": "podrida",
+            "target_scope": "chosen_enemy_row",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "corrode_positive_bonus_1",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1575
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_podrida",
+          "label": "Podridão Escarlate",
+          "card_ids": [
+            "elden_especial_podrida"
+          ],
+          "params": {
+            "status": "podrida",
+            "target_scope": "chosen_enemy_row",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "corrode_positive_bonus_1",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1712
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_sangramento",
+          "label": "Sangramento",
+          "card_ids": [
+            "elden_especial_sangramento"
+          ],
+          "params": {
+            "status": "sangramento",
+            "target_scope": "chosen_enemy_row",
+            "marks": 1,
+            "mark_cap": 2,
+            "threshold_marks": 2,
+            "threshold_action": "reduce_bonus_2_and_reset",
+            "rarity_scaling": false
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1680
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.row_buff",
+      "candidate_name": "Bênção de Fileira",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_row_buff",
+      "timing": "special_action",
+      "duration": "until_round_end",
+      "targeting": "allied_units_chosen_row",
+      "legacy_alias_count": 3,
+      "distinct_parameter_shapes": [
+        [
+          "bonus",
+          "minimum_allies"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "MEDIUM",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_chifre",
+          "label": "Rugido de Godfrey",
+          "card_ids": [
+            "gwent_especial_chifre"
+          ],
+          "params": {
+            "bonus": 2,
+            "minimum_allies": 0
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1598
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_muralha",
+          "label": "Bastião de Leyndell",
+          "card_ids": [
+            "gwent_especial_muralha"
+          ],
+          "params": {
+            "bonus": 1,
+            "minimum_allies": 0
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1654
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_vinculo",
+          "label": "Juramento do Crisol",
+          "card_ids": [
+            "gwent_especial_vinculo"
+          ],
+          "params": {
+            "bonus": 2,
+            "minimum_allies": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1639
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.return_unit_to_hand",
+      "candidate_name": "Lágrima Sagrada",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_return_unit_to_hand",
+      "timing": "special_action",
+      "duration": "immediate",
+      "targeting": "own_discard_to_hand",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "maximum_base_power",
+          "target_selection"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_medico",
+          "label": "Lágrima Sagrada",
+          "card_ids": [
+            "gwent_especial_medico"
+          ],
+          "params": {
+            "maximum_base_power": 4,
+            "target_selection": "chosen_or_last_eligible"
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1604
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.remove_units",
+      "candidate_name": "Remoção Tática",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_remove_units",
+      "timing": "special_action",
+      "duration": "immediate",
+      "targeting": "enemy_or_both_sides",
+      "legacy_alias_count": 2,
+      "distinct_parameter_shapes": [
+        [
+          "max_targets",
+          "power_limit",
+          "shield_blocks",
+          "target_scope"
+        ]
+      ],
+      "varying_semantic_parameters": [
+        "power_limit",
+        "target_scope"
+      ],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_execucao",
+          "label": "Lâmina da Morte Destinada",
+          "card_ids": [
+            "gwent_especial_execucao"
+          ],
+          "params": {
+            "target_scope": "chosen_enemy_row_under_power_limit",
+            "max_targets": 1,
+            "power_limit": 6,
+            "shield_blocks": true
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1623
+          ]
+        },
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_queima",
+          "label": "Chama Negra",
+          "card_ids": [
+            "gwent_especial_queima"
+          ],
+          "params": {
+            "target_scope": "strongest_unit_each_side",
+            "max_targets": 2,
+            "power_limit": 0,
+            "shield_blocks": true
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1616
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.clear_weather",
+      "candidate_name": "Lei da Regressão",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_clear_weather",
+      "timing": "special_action",
+      "duration": "immediate",
+      "targeting": "all_weather_rows",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        []
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_purificar",
+          "label": "Lei da Regressão",
+          "card_ids": [
+            "gwent_especial_purificar"
+          ],
+          "params": {},
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1621
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.draw_cards",
+      "candidate_name": "Passo do Cão de Caça",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_draw_cards",
+      "timing": "special_action",
+      "duration": "immediate",
+      "targeting": "own_draw_pile",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "count"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_batedor",
+          "label": "Passo do Cão de Caça",
+          "card_ids": [
+            "gwent_especial_batedor"
+          ],
+          "params": {
+            "count": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1647
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.grant_shield",
+      "candidate_name": "Bênção da Árvore Áurea",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_grant_shield",
+      "timing": "special_action",
+      "duration": "until_first_block",
+      "targeting": "one_allied_unit",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "max_targets",
+          "shield_count"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_egide",
+          "label": "Bênção da Árvore Áurea",
+          "card_ids": [
+            "gwent_especial_egide"
+          ],
+          "params": {
+            "shield_count": 1,
+            "max_targets": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1748
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.revive_to_board",
+      "candidate_name": "Chamado dos Mortos",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_revive_to_board",
+      "timing": "special_action",
+      "duration": "immediate",
+      "targeting": "own_discard_to_board",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "added_bonus",
+          "maximum_base_power",
+          "target_selection"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "MEDIUM",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_requiem",
+          "label": "Chamado dos Mortos",
+          "card_ids": [
+            "gwent_especial_requiem"
+          ],
+          "params": {
+            "maximum_base_power": 6,
+            "target_selection": "chosen_or_strongest_eligible",
+            "added_bonus": 0
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1762
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.move_unit",
+      "candidate_name": "Passo do Lobo",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_move_unit",
+      "timing": "special_action",
+      "duration": "persistent_until_changed",
+      "targeting": "one_allied_unit_to_chosen_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "max_targets",
+          "target_selection"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_passo",
+          "label": "Passo do Lobo",
+          "card_ids": [
+            "gwent_especial_passo"
+          ],
+          "params": {
+            "max_targets": 1,
+            "target_selection": "chosen_or_weakest_movable"
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1780
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.purify_frost_buff",
+      "candidate_name": "Chama do Gigante",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_purify_frost_buff",
+      "timing": "special_action",
+      "duration": "until_round_end",
+      "targeting": "allied_units_with_frost",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_per_unit"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_chama",
+          "label": "Chama do Gigante",
+          "card_ids": [
+            "elden_especial_chama"
+          ],
+          "params": {
+            "bonus_per_unit": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1660
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.summon_wolves",
+      "candidate_name": "Cinzas dos Lobos Solitários",
+      "kind": "special",
+      "candidate_resolution_handler_name_only": "resolve_summon_wolves",
+      "timing": "special_action",
+      "duration": "until_round_end_or_board_clear",
+      "targeting": "chosen_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "count",
+          "power_base"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "gwent_invocacao",
+          "label": "Cinzas dos Lobos Solitários",
+          "card_ids": [
+            "elden_especial_invocacao"
+          ],
+          "params": {
+            "count": 1,
+            "power_base": 3
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1669
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.relic_godrick_rune",
+      "candidate_name": "Grande Runa de Godrick",
+      "kind": "relic",
+      "candidate_resolution_handler_name_only": "resolve_relic_godrick_rune",
+      "timing": "relic_action",
+      "duration": "persistent_until_changed",
+      "targeting": "all_allied_units",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "reliquia_godrick",
+          "label": "Grande Runa de Godrick",
+          "card_ids": [
+            "reliquia_grande_runa_godrick"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1516
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.relic_unborn_rune",
+      "candidate_name": "Grande Runa dos Não Nascidos",
+      "kind": "relic",
+      "candidate_resolution_handler_name_only": "resolve_relic_unborn_rune",
+      "timing": "relic_action",
+      "duration": "immediate",
+      "targeting": "allied_units_with_frost_or_rot",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "reliquia_renala",
+          "label": "Grande Runa dos Não Nascidos",
+          "card_ids": [
+            "reliquia_runa_nao_nascidos"
+          ],
+          "params": {
+            "bonus": 1
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1521
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.relic_death_rune",
+      "candidate_name": "Runa da Morte",
+      "kind": "relic",
+      "candidate_resolution_handler_name_only": "resolve_relic_death_rune",
+      "timing": "relic_action",
+      "duration": "persistent_until_changed",
+      "targeting": "highest_positive_bonus_enemy_per_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "amount",
+          "floor"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "LOW",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "reliquia_morte",
+          "label": "Runa da Morte",
+          "card_ids": [
+            "reliquia_runa_morte"
+          ],
+          "params": {
+            "amount": 2,
+            "floor": 0
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1529
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.relic_night_flame_sword",
+      "candidate_name": "Espada da Noite e da Chama",
+      "kind": "relic",
+      "candidate_resolution_handler_name_only": "resolve_relic_night_flame_sword",
+      "timing": "relic_action",
+      "duration": "immediate",
+      "targeting": "chosen_enemy_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "base_power_loss",
+          "bonus_loss",
+          "stance"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "reliquia_noite_chama",
+          "label": "Espada da Noite e da Chama",
+          "card_ids": [
+            "reliquia_noite_chama"
+          ],
+          "params": {
+            "stance": "night",
+            "base_power_loss": 1,
+            "bonus_loss": 2
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1537
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.relic_black_blade",
+      "candidate_name": "Lâmina Negra",
+      "kind": "relic",
+      "candidate_resolution_handler_name_only": "resolve_relic_black_blade",
+      "timing": "relic_action",
+      "duration": "persistent_until_changed",
+      "targeting": "one_enemy_in_chosen_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "bonus_loss",
+          "shield_blocks_without_consumption"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "reliquia_lamina_negra",
+          "label": "Lâmina Negra",
+          "card_ids": [
+            "reliquia_lamina_negra"
+          ],
+          "params": {
+            "bonus_loss": 3,
+            "shield_blocks_without_consumption": true
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1549
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    },
+    {
+      "effect_id": "effect.relic_margit_shackles",
+      "candidate_name": "Algemas de Margit",
+      "kind": "relic",
+      "candidate_resolution_handler_name_only": "resolve_relic_margit_shackles",
+      "timing": "relic_action",
+      "duration": "persistent_until_changed",
+      "targeting": "one_enemy_in_chosen_row",
+      "legacy_alias_count": 1,
+      "distinct_parameter_shapes": [
+        [
+          "target_selection"
+        ]
+      ],
+      "varying_semantic_parameters": [],
+      "review_priority": "HIGH",
+      "aliases": [
+        {
+          "source_type": "HABILIDADES",
+          "legacy_id": "reliquia_algemas",
+          "label": "Algemas de Margit",
+          "card_ids": [
+            "reliquia_algemas_margit"
+          ],
+          "params": {
+            "target_selection": "chosen_or_highest_bonus"
+          },
+          "source_path": "sistemas/cartas.py",
+          "handler_path": "sistemas/gwent.py",
+          "handler_function": "aplicar_jogada",
+          "handler_lines": [
+            1561
+          ]
+        }
+      ],
+      "candidate_warning": "O nome de handler é proposta; não há implementação nova associada."
+    }
+  ],
+  "generic_execution_coverage": [
+    {
+      "legacy_id": "adaptacao",
+      "assigned_card_ids": [
+        "magia_selo_vigilia"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1840
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "cacador_arcano",
+      "assigned_card_ids": [
+        "chefe_maliketh_morte_destinada",
+        "gwent_unidade_invocador",
+        "patente_1",
+        "patente_7"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1841
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "cacador_solitario",
+      "assigned_card_ids": [
+        "gwent_singular_primeiro"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1855
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "circulo_arcano",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1895
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "contragolpe",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1836
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "decreto_soberano",
+      "assigned_card_ids": [
+        "primordial_trono"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1850
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "devorar",
+      "assigned_card_ids": [
+        "gwent_unidade_carniceiro_forja"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1871
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "drenagem",
+      "assigned_card_ids": [
+        "chefe_malenia_lamina_miquella",
+        "covenant_coroa_abismo",
+        "magia_trovao_oco"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1847
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "dupla_fornalha",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1891
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "eco_arcano",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1866
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "encadeamento",
+      "assigned_card_ids": [
+        "magia_nevoa_antiga",
+        "patente_5"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1839
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "escudo_ferro",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1869
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "espolios",
+      "assigned_card_ids": [],
+      "classification": "LIFECYCLE_HOOK",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_resolve_round",
+          "lines": [
+            1159
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "estandarte",
+      "assigned_card_ids": [
+        "gwent_mitica_coroa"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1858
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "fome_abismo",
+      "assigned_card_ids": [
+        "primordial_abismo"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1834
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "guardiao_fileira",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1853
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_batedor",
+      "assigned_card_ids": [
+        "gwent_especial_batedor"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1647
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_chama",
+      "assigned_card_ids": [
+        "elden_especial_chama"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1660
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_chifre",
+      "assigned_card_ids": [
+        "gwent_especial_chifre"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1598
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_chuva",
+      "assigned_card_ids": [
+        "gwent_especial_chuva"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1583
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_clima",
+      "assigned_card_ids": [
+        "gwent_especial_tempestade"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1567
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_egide",
+      "assigned_card_ids": [
+        "gwent_especial_egide"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1748
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_execucao",
+      "assigned_card_ids": [
+        "gwent_especial_execucao"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1623
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_geada",
+      "assigned_card_ids": [
+        "gwent_especial_geada"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1592
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_geada_cariana",
+      "assigned_card_ids": [
+        "elden_especial_geada"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1697
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_invocacao",
+      "assigned_card_ids": [
+        "elden_especial_invocacao"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1669
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_loucura",
+      "assigned_card_ids": [
+        "elden_especial_loucura"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1729
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_medico",
+      "assigned_card_ids": [
+        "gwent_especial_medico"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1604
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_muralha",
+      "assigned_card_ids": [
+        "gwent_especial_muralha"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1654
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_nevoa",
+      "assigned_card_ids": [
+        "gwent_especial_nevoa"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1575
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_passo",
+      "assigned_card_ids": [
+        "gwent_especial_passo"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1780
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_podrida",
+      "assigned_card_ids": [
+        "elden_especial_podrida"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1712
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_purificar",
+      "assigned_card_ids": [
+        "gwent_especial_purificar"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1621
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_queima",
+      "assigned_card_ids": [
+        "gwent_especial_queima"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1616
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_requiem",
+      "assigned_card_ids": [
+        "gwent_especial_requiem"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1762
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_sangramento",
+      "assigned_card_ids": [
+        "elden_especial_sangramento"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1680
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "gwent_vinculo",
+      "assigned_card_ids": [
+        "gwent_especial_vinculo"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1639
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "impeto",
+      "assigned_card_ids": [
+        "chefe_oraculo_ruina",
+        "patente_9"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1837
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "instinto",
+      "assigned_card_ids": [
+        "arma_grande_sino",
+        "gwent_unidade_gigante"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1834
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "irmandade_veu",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1893
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "lei_primeva",
+      "assigned_card_ids": [
+        "primordial_origem"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1830
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "olho_tempestade",
+      "assigned_card_ids": [
+        "chefe_placidusax_lorde_dragao",
+        "primordial_tempestade"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1846
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "paradoxo_eterno",
+      "assigned_card_ids": [
+        "gwent_singular_cacador_chefes",
+        "primordial_eternidade"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1832
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "precisao",
+      "assigned_card_ids": [
+        "arma_duas_luas",
+        "gwent_singular_intocavel"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1833
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "primeira_luz",
+      "assigned_card_ids": [
+        "chefe_rei_afogado",
+        "covenant_lua_velada"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1829
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "quebra_ritmo",
+      "assigned_card_ids": [
+        "chefe_guardiao_cinzas",
+        "chefe_messmer_impalador",
+        "chefe_radahn_flagelo_estrelas",
+        "magia_sol_negro",
+        "patente_10"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1845
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "reliquia_algemas",
+      "assigned_card_ids": [
+        "reliquia_algemas_margit"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1561
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "reliquia_godrick",
+      "assigned_card_ids": [
+        "reliquia_grande_runa_godrick"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1516
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "reliquia_lamina_negra",
+      "assigned_card_ids": [
+        "reliquia_lamina_negra"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1549
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "reliquia_morte",
+      "assigned_card_ids": [
+        "reliquia_runa_morte"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1529
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "reliquia_noite_chama",
+      "assigned_card_ids": [
+        "reliquia_noite_chama"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1537
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "reliquia_renala",
+      "assigned_card_ids": [
+        "reliquia_runa_nao_nascidos"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1521
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "resistencia_climatica",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1862
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "ressurgir",
+      "assigned_card_ids": [
+        "gwent_unidade_necromante"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1879
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "retaliacao",
+      "assigned_card_ids": [
+        "covenant_irmandade_ferro",
+        "patente_6",
+        "patente_8"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1835
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "sangue_frio",
+      "assigned_card_ids": [],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1838
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "sobrevivente",
+      "assigned_card_ids": [],
+      "classification": "NO_CURRENT_HANDLER_FOUND",
+      "evidence": []
+    },
+    {
+      "legacy_id": "ultimo_folego",
+      "assigned_card_ids": [
+        "chefe_dama_vazio",
+        "gwent_singular_nivel1"
+      ],
+      "classification": "DIRECT_PLAY_BRANCH",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "aplicar_jogada",
+          "lines": [
+            1831
+          ]
+        }
+      ]
+    },
+    {
+      "legacy_id": "vinganca",
+      "assigned_card_ids": [
+        "gwent_unidade_detonador",
+        "gwent_unidade_herdeiro_portao",
+        "gwent_unidade_senhor_cacada"
+      ],
+      "classification": "LIFECYCLE_HOOK",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_remover_unidade",
+          "lines": [
+            1015
+          ]
+        }
+      ]
+    }
+  ],
+  "identity_execution_coverage": [
+    {
+      "card_id": "arma_duas_luas",
+      "identity_effect_id": "twin_dance",
+      "resolver_effect_key": "twin_dance",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            469
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "arma_grande_sino",
+      "identity_effect_id": "last_bell",
+      "resolver_effect_key": "last_bell",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            471
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_dama_vazio",
+      "identity_effect_id": "void_rend",
+      "resolver_effect_key": "void_rend",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            443
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_guardiao_cinzas",
+      "identity_effect_id": "ash_guardian",
+      "resolver_effect_key": "ash_guardian",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            439
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_malenia_lamina_miquella",
+      "identity_effect_id": "scarlet_bloom",
+      "resolver_effect_key": "scarlet_bloom",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            527
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_maliketh_morte_destinada",
+      "identity_effect_id": "destined_death",
+      "resolver_effect_key": "destined_death",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            536
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_messmer_impalador",
+      "identity_effect_id": "impaling_spear",
+      "resolver_effect_key": "impaling_spear",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            538
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_oraculo_ruina",
+      "identity_effect_id": "ruin_omen",
+      "resolver_effect_key": "ruin_omen",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            449
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_placidusax_lorde_dragao",
+      "identity_effect_id": "time_storm",
+      "resolver_effect_key": "time_storm",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            544
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_radahn_flagelo_estrelas",
+      "identity_effect_id": "star_gravity",
+      "resolver_effect_key": "star_gravity",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            533
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "chefe_rei_afogado",
+      "identity_effect_id": "abyss_tithe",
+      "resolver_effect_key": "abyss_tithe",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            447
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "covenant_lua_velada",
+      "identity_effect_id": "veiled_moon",
+      "resolver_effect_key": "veiled_moon",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            498
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "gwent_v75_lua_graviturgista",
+      "identity_effect_id": "v75_gravity_shear",
+      "resolver_effect_key": "v75_gravity_shear",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            618
+          ]
+        }
+      ],
+      "generic_field_suppressed": false
+    },
+    {
+      "card_id": "gwent_v75_lua_oraculo_geada",
+      "identity_effect_id": "v75_frost_oracle",
+      "resolver_effect_key": "v75_frost_oracle",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            608
+          ]
+        }
+      ],
+      "generic_field_suppressed": false
+    },
+    {
+      "card_id": "gwent_v75_ordem_confessora_graca",
+      "identity_effect_id": "v75_grace_mender",
+      "resolver_effect_key": "v75_grace_mender",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            562
+          ]
+        }
+      ],
+      "generic_field_suppressed": false
+    },
+    {
+      "card_id": "gwent_v75_ordem_veterano_juramento",
+      "identity_effect_id": "v75_golden_vow",
+      "resolver_effect_key": "v75_golden_vow",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            550
+          ]
+        }
+      ],
+      "generic_field_suppressed": false
+    },
+    {
+      "card_id": "gwent_v75_veu_acolito_sangue",
+      "identity_effect_id": "v75_blood_mark",
+      "resolver_effect_key": "v75_blood_mark",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            582
+          ]
+        }
+      ],
+      "generic_field_suppressed": false
+    },
+    {
+      "card_id": "gwent_v75_veu_carrasco_preco",
+      "identity_effect_id": "v75_blood_price",
+      "resolver_effect_key": "v75_blood_price",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            594
+          ]
+        }
+      ],
+      "generic_field_suppressed": false
+    },
+    {
+      "card_id": "magia_nevoa_antiga",
+      "identity_effect_id": "ancient_mist",
+      "resolver_effect_key": "ancient_mist",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            487
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "magia_selo_vigilia",
+      "identity_effect_id": "vigil_seal",
+      "resolver_effect_key": "vigil_seal",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            482
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "magia_sol_negro",
+      "identity_effect_id": "devouring_eclipse",
+      "resolver_effect_key": "devouring_eclipse",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            489
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    },
+    {
+      "card_id": "magia_trovao_oco",
+      "identity_effect_id": "hollow_thunder",
+      "resolver_effect_key": "hollow_thunder",
+      "classification": "ACTIVE_IDENTITY_BRANCH_FOUND",
+      "evidence": [
+        {
+          "file": "sistemas/gwent.py",
+          "function": "_aplicar_habilidade_identidade",
+          "lines": [
+            485
+          ]
+        }
+      ],
+      "generic_field_suppressed": true
+    }
+  ],
+  "hidden_lifecycle_aliases": [
+    {
+      "legacy_id": "gloria",
+      "source": "_resolve_round() in sistemas/gwent.py",
+      "assigned_card_ids": [
+        "luterano_anjo",
+        "luterano_anjo2",
+        "luterano_vigia"
+      ],
+      "assigned_card_count": 3,
+      "candidate_effect_id": "effect.round_victory_survivor",
+      "disposition": "REGISTER_EXPLICITLY; CURRENTLY HIDDEN OUTSIDE HABILIDADES",
+      "proposed_disposition": "REDESIGN_AS_EXPLICIT_ROUND_END_EFFECT; REVIEW_SOBREVIVENTE_DECLARATION_SEPARATELY",
+      "source_evidence": [
+        1168
+      ],
+      "implementation_status": "HOOK_IMPLEMENTED"
+    },
+    {
+      "legacy_id": "sobrevivente",
+      "source": "HABILIDADES in sistemas/cartas.py",
+      "assigned_card_ids": [],
+      "assigned_card_count": 0,
+      "candidate_effect_id": "effect.round_victory_survivor",
+      "disposition": "ARCHIVE_UNIMPLEMENTED_TEXT; NO_AUTOMATIC_MIGRATION",
+      "proposed_disposition": "KEEP_AS_UNIMPLEMENTED_LEGACY_TEXT; DO_NOT_MIGRATE_WITHOUT_NEW_RULE_APPROVAL",
+      "source_evidence": [],
+      "implementation_status": "DECLARED_WITHOUT_HOOK"
+    }
+  ],
+  "unmapped_fields": [
+    {
+      "legacy_field_id": "devoto",
+      "source_card_ids": [],
+      "identity_resolver_branch_lines": [
+        504
+      ],
+      "current_card_identity_binding": false,
+      "classification": "BRANCH_EXISTS_BUT_NO_ACTIVE_CARD_IDENTITY_BINDING",
+      "source_reason": "Effect code exists only inside identity resolver; no active card-ID mapping dispatches it."
+    },
+    {
+      "legacy_field_id": "legado",
+      "source_card_ids": [],
+      "identity_resolver_branch_lines": [
+        501
+      ],
+      "current_card_identity_binding": false,
+      "classification": "BRANCH_EXISTS_BUT_NO_ACTIVE_CARD_IDENTITY_BINDING",
+      "source_reason": "Effect code exists only inside identity resolver; no active card-ID mapping dispatches it. It also relies on legado_vitoria being set during round resolution."
+    },
+    {
+      "legacy_field_id": "escolha_ritmo",
+      "source_card_ids": [],
+      "identity_resolver_branch_lines": [
+        509
+      ],
+      "current_card_identity_binding": false,
+      "classification": "BRANCH_EXISTS_BUT_NO_ACTIVE_CARD_IDENTITY_BINDING",
+      "source_reason": "No active identity mapping or HABILIDADES entry points to this branch; its implementation merely grants +1 and does not model the described row choice/retention."
+    },
+    {
+      "legacy_field_id": "sinergia_faccao",
+      "source_card_ids": [],
+      "identity_resolver_branch_lines": [
+        512
+      ],
+      "current_card_identity_binding": false,
+      "classification": "BRANCH_EXISTS_BUT_NO_ACTIVE_CARD_IDENTITY_BINDING",
+      "source_reason": "Effect code exists only inside identity resolver; no active card-ID mapping dispatches it."
+    }
+  ],
+  "manual_findings": [
+    {
+      "finding_id": "SEM-001",
+      "priority": "HIGH",
+      "subject": "effect.sequence_power",
+      "finding": "O bônus só deve ocorrer quando existe uma referência de jogada anterior válida. O registry v0.1 não expressava essa pré-condição.",
+      "source_evidence": "sistemas/gwent.py:aplicar_jogada — encadeamento/adaptacao/quebra_ritmo; _aplicar_habilidade_identidade — veil_shift/pilgrim_duel/mist_trail",
+      "candidate_change": "Adicionado requires_previous_play:boolean obrigatório e verdadeiro em todos os aliases; texto agora explicita que é necessária uma jogada anterior.",
+      "status": "FIXED_IN_CANDIDATE_V0.1; NOT_RUNTIME"
+    },
+    {
+      "finding_id": "SEM-002",
+      "priority": "HIGH",
+      "subject": "effect.apply_status_marks / effect.row_status_pressure",
+      "finding": "O nome de família comum não significa efeito idêntico. Geada, Podridão, Sangramento e Loucura têm escopo, limiar, ação secundária, reset e duração diferentes.",
+      "source_evidence": "sistemas/gwent.py:aplicar_jogada e _aplicar_habilidade_identidade; params preservam status/target_scope/threshold_action/reset",
+      "candidate_change": "Manter só como abstração técnica parametrizada; cada combinação de status e consequência exige teste específico e texto próprio.",
+      "status": "OPEN_REQUIRES_BEHAVIOR_TESTS"
+    },
+    {
+      "finding_id": "SEM-003",
+      "priority": "HIGH",
+      "subject": "effect.remove_units",
+      "finding": "Chama Negra seleciona a unidade mais forte de cada lado; Execução escolhe alvo inimigo na fileira com limite de poder. Não são a mesma regra de seleção.",
+      "source_evidence": "sistemas/gwent.py:aplicar_jogada special dispatch; _remover_unidade centraliza escudo/remoção",
+      "candidate_change": "Exigir escopo de seleção, lado, limite e política de escudo explícitos no futuro handler; remover sentinela ambígua power_limit=0 ou declarar flag `has_power_limit`.",
+      "status": "OPEN_REQUIRES_HANDLER_DESIGN"
+    },
+    {
+      "finding_id": "SEM-004",
+      "priority": "HIGH",
+      "subject": "effect.ally_sacrifice_power",
+      "finding": "Devorar e Preço em Sangue diferem no teto do ganho e no bônus de fallback quando não há vítima. Sacrifício também ignora escudo por escolha do helper legado.",
+      "source_evidence": "sistemas/gwent.py:aplicar_jogada; _remover_unidade(causa='sacrificio')",
+      "candidate_change": "Manter parâmetros gain_cap/fallback_bonus/minimum_gain; criar teste explícito para escudo, gatilho de Vingança e descarte da vítima.",
+      "status": "OPEN_REQUIRES_BEHAVIOR_TESTS"
+    },
+    {
+      "finding_id": "SEM-005",
+      "priority": "HIGH",
+      "subject": "effect.cross_row_support / effect.row_pair_blessing",
+      "finding": "Efeitos de suporte variam entre fortalecer apenas aliado e fortalecer a própria carta mais um aliado; seleção varia entre primeiro aliado e aliado mais fraco.",
+      "source_evidence": "sistemas/gwent.py:_aplicar_habilidade_identidade",
+      "candidate_change": "Manter self_bonus, ally_bonus e ally_selection explícitos; ordem dos empates para alvo mais fraco deve ser determinística e documentada.",
+      "status": "OPEN_REQUIRES_TARGETING_RULE"
+    },
+    {
+      "finding_id": "SEM-006",
+      "priority": "MEDIUM",
+      "subject": "effect.round_victory_survivor",
+      "finding": "Glória tem hook funcional: se o jogador vencer uma rodada não final, conserva no campo a mais forte entre as cartas com habilidade gloria; bônus/escudo/status são limpos. Sobrevivente só tem texto declarado, sem handler e sem carta atribuída no snapshot efetivo.",
+      "source_evidence": "sistemas/gwent.py:_resolve_round; sistemas/cartas.py:HABILIDADES['sobrevivente']",
+      "candidate_change": "Não declarar os dois como comportamento equivalente comprovado. Desenhar uma única regra nova explicitamente e decidir se mantém a retenção da mais forte.",
+      "status": "REQUIRES_PRODUCT_RULE_APPROVAL"
+    },
+    {
+      "finding_id": "SEM-007",
+      "priority": "HIGH",
+      "subject": "effect.sequence_power",
+      "finding": "As variantes própria/mesma, própria/diferente e adversária/mesma usam referências distintas; o estado last_row é reiniciado ao fim de cada rodada.",
+      "source_evidence": "sistemas/gwent.py:aplicar_jogada e _resolve_round",
+      "candidate_change": "`reference_side`, `row_relation` e `requires_previous_play` devem ser obrigatórios; nenhum handler deve inferir referência de valor nulo.",
+      "status": "FIXED_IN_CANDIDATE_V0.1; NOT_RUNTIME"
+    }
+  ],
+  "limitations": [
+    "Os números de linha são evidência de localização no código-fonte atual e mudam se o arquivo for editado.",
+    "A classificação de risco é uma prioridade de revisão, não prova automática de equivalência semântica.",
+    "O relatório não executa partidas nem handlers novos; o registry candidato ainda não tem implementação runtime.",
+    "Os nomes de resolution_handler são rótulos propostos, não funções presentes no código."
+  ]
+}

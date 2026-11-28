@@ -53,10 +53,11 @@
       "discarded": true
     },
     {
-      "case": "sobrevivente_keeps_strongest_round_end",
+      "case": "sobrevivente_missing_round_end_hook",
       "status": "passed",
       "declared_effect": "survive round end",
-      "actual": "kept (hook implemented v0.1 deck-budget step)"
+      "actual": "discarded",
+      "missing_hook_confirmed": true
     }
   ],
   "limitations": [

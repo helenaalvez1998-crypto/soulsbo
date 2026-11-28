@@ -1,0 +1,82 @@
+{
+  "validation": "card_game_selection_group_D",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "status": "PASS",
+  "audit": {
+    "script": "docs/scripts/audit-card-game-selection-group-D-v0.1.py",
+    "result": "docs/card-game-selection-group-D-audit-v0.1.json",
+    "total": 23,
+    "passed": 23,
+    "failed": 0
+  },
+  "candidate_contract_validation": {
+    "script": "docs/scripts/validate-card-game-selection-group-D-v0.1.py",
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "checks": [
+      "four Draft 2020-12 schemas valid",
+      "four examples validate",
+      "12 decisions unique, OWNER_APPROVED and matched to formal approval evidence",
+      "target policy rejects rarity input",
+      "offer includes server metrics and state revision",
+      "result keeps per-target outcome separate from costs"
+    ],
+    "status": "OWNER_APPROVED",
+    "approval_ref": "docs/card-game-selection-group-D-approval-v0.1.json"
+  },
+  "regressions": [
+    {
+      "name": "target_selection_row_scope",
+      "passed": 15,
+      "failed": 0,
+      "script": "docs/scripts/audit-target-selection-row-scope-v0.1.py"
+    },
+    {
+      "name": "manual_target_ui_parity",
+      "passed": 12,
+      "failed": 0,
+      "script": "docs/scripts/audit-manual-target-ui-parity-v0.1.py"
+    },
+    {
+      "name": "card_instance_v0.5",
+      "passed": 28,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-card-instance-v0.5.py"
+    },
+    {
+      "name": "group_A_identity",
+      "passed": 30,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-identity-group-A-v0.1.py"
+    },
+    {
+      "name": "group_B_snapshot_causality",
+      "passed": 20,
+      "failed": 0,
+      "script": "docs/scripts/audit-card-game-snapshot-causality-group-B-v0.1.py"
+    },
+    {
+      "name": "group_C_state_lifecycle",
+      "passed": 43,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-state-lifecycle-group-C-v0.1.py"
+    },
+    {
+      "name": "group_F_removal_causes",
+      "passed": 29,
+      "failed": 0,
+      "script": "docs/scripts/audit-card-game-removal-causes-group-F-v0.1.py"
+    },
+    {
+      "name": "cross_decision_matrix",
+      "passed": 272,
+      "failed": 0,
+      "script": "docs/scripts/validate-card-game-cross-decision-review-v0.1.py"
+    }
+  ],
+  "scope_note": "Suites have separate scope and must not be summed as integrated coverage. They include legacy runtime fixtures and static/document-contract checks; they do not establish browser, network, multi-process concurrency, persistence replay, integrated runtime or production correctness.",
+  "runtime_modified": false,
+  "group_D_decisions_status": "OWNER_APPROVED"
+}

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-domain-event.v1.json",
+  "title": "Soulsbo Domain Event v1",
+  "description": "Evento de domínio append-only, ordenado e causalmente ligado a uma operação lógica.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "operation_id",
+    "sequence",
+    "caused_by_event_ids",
+    "kind",
+    "effect_scope",
+    "source_effect_id",
+    "source_instance_id",
+    "target_instance_ids",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "operation_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "caused_by_event_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "effect_scope": {
+      "enum": [
+        "direct",
+        "reactive",
+        "system"
+      ]
+    },
+    "source_effect_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_instance_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "target_instance_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "effect_scope": {
+            "const": "reactive"
+          }
+        },
+        "required": [
+          "effect_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_effect_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_scope": {
+            "const": "direct"
+          }
+        },
+        "required": [
+          "effect_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_effect_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

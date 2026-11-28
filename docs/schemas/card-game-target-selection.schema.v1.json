@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-target-selection.v1.json",
+  "title": "Soulsbo physical target selection v1 (Group A approved)",
+  "description": "Fragmento de contrato de seleção por identidade física. Não define elegibilidade, custos, fallback parcial ou atomicidade do efeito.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "target_instance_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "target_instance_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    }
+  },
+  "required": [
+    "schema_version"
+  ],
+  "oneOf": [
+    {
+      "required": [
+        "target_instance_id"
+      ],
+      "not": {
+        "required": [
+          "target_instance_ids"
+        ]
+      }
+    },
+    {
+      "required": [
+        "target_instance_ids"
+      ],
+      "not": {
+        "required": [
+          "target_instance_id"
+        ]
+      }
+    }
+  ]
+}

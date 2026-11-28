@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "status": "CANDIDATE_NOT_APPROVED_NOT_CONNECTED_TO_RUNTIME",
+  "generated_at_utc": "2026-11-27T20:02:04.885947+00:00",
+  "validation": {
+    "json_schema_draft_2020_12_valid": true,
+    "contract_validator_valid": true,
+    "contract_errors": [],
+    "structural_tests": 23,
+    "structural_tests_passed": 23,
+    "structural_tests_failed": 0,
+    "test_command_exit_code": 0,
+    "test_output_tail": "test_16_identity_cards_keep_only_identity_effect_in_new_model (__main__.EffectCatalogCandidateTests.test_16_identity_cards_keep_only_identity_effect_in_new_model) ... ok\ntest_22_active_identity_overrides_are_unique_and_complete (__main__.EffectCatalogCandidateTests.test_22_active_identity_overrides_are_unique_and_complete) ... ok\ntest_27_combos_have_unique_priorities_and_minimum_two (__main__.EffectCatalogCandidateTests.test_27_combos_have_unique_priorities_and_minimum_two) ... ok\ntest_alias_source_names_descriptions_and_card_assignments_match_legacy (__main__.EffectCatalogCandidateTests.test_alias_source_names_descriptions_and_card_assignments_match_legacy) ... ok\ntest_all_59_habilidades_have_exactly_one_migration_alias (__main__.EffectCatalogCandidateTests.test_all_59_habilidades_have_exactly_one_migration_alias) ... ok\ntest_all_generic_alias_targets_and_default_params_validate (__main__.EffectCatalogCandidateTests.test_all_generic_alias_targets_and_default_params_validate) ... ok\ntest_all_ten_leaders_are_mapped (__main__.EffectCatalogCandidateTests.test_all_ten_leaders_are_mapped) ... ok\ntest_artifact_remains_candidate_not_approved (__main__.EffectCatalogCandidateTests.test_artifact_remains_candidate_not_approved) ... ok\ntest_candidate_effect_family_count_is_54 (__main__.EffectCatalogCandidateTests.test_candidate_effect_family_count_is_54) ... ok\ntest_candidate_family_types_are_36_units_12_specials_6_relics (__main__.EffectCatalogCandidateTests.test_candidate_family_types_are_36_units_12_specials_6_relics) ... ok\ntest_each_legacy_entry_has_keep_merge_redesign_or_remove_disposition (__main__.EffectCatalogCandidateTests.test_each_legacy_entry_has_keep_merge_redesign_or_remove_disposition) ... ok\ntest_effect_ids_are_unique_and_names_are_nonempty (__main__.EffectCatalogCandidateTests.test_effect_ids_are_unique_and_names_are_nonempty) ... ok\ntest_every_combo_has_distinct_card_pair_covering_all_required_tags (__main__.EffectCatalogCandidateTests.test_every_combo_has_distinct_card_pair_covering_all_required_tags) ... ok\ntest_every_template_placeholder_is_a_declared_parameter (__main__.EffectCatalogCandidateTests.test_every_template_placeholder_is_a_declared_parameter) ... ok\ntest_five_orphan_combo_ids_are_explicitly_excluded (__main__.EffectCatalogCandidateTests.test_five_orphan_combo_ids_are_explicitly_excluded) ... ok\ntest_four_faction_passives_are_separate_from_individual_effects (__main__.EffectCatalogCandidateTests.test_four_faction_passives_are_separate_from_individual_effects) ... ok\ntest_hidden_gloria_and_survivente_are_explicitly_mapped (__main__.EffectCatalogCandidateTests.test_hidden_gloria_and_survivente_are_explicitly_mapped) ... ok\ntest_identity_alias_targets_and_params_validate (__main__.EffectCatalogCandidateTests.test_identity_alias_targets_and_params_validate) ... ok\ntest_lifecycle_gloria_is_not_treated_as_proven_equivalent_to_unimplemented_survivente (__main__.EffectCatalogCandidateTests.test_lifecycle_gloria_is_not_treated_as_proven_equivalent_to_unimplemented_survivente) ... ok\ntest_registry_matches_draft_2020_12_schema (__main__.EffectCatalogCandidateTests.test_registry_matches_draft_2020_12_schema) ... ok\ntest_registry_passes_runtime_contract_validator (__main__.EffectCatalogCandidateTests.test_registry_passes_runtime_contract_validator) ... ok\ntest_sequence_power_requires_an_explicit_previous_play (__main__.EffectCatalogCandidateTests.test_sequence_power_requires_an_explicit_previous_play) ... ok\ntest_stale_branch_counts_are_18_v18_6_v75_and_4_unregistered (__main__.EffectCatalogCandidateTests.test_stale_branch_counts_are_18_v18_6_v75_and_4_unregistered) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 0.011s\n\nOK\n",
+    "semantic_audit_script_exit_code": 0,
+    "semantic_audit_script_passed": true,
+    "semantic_audit_output_tail": "{\n  \"ok\": true,\n  \"counts\": {\n    \"candidate_families\": 54,\n    \"generic_aliases\": 59,\n    \"direct_play_branch_aliases\": 56,\n    \"lifecycle_hook_aliases\": 2,\n    \"generic_aliases_without_handler\": 1,\n    \"active_identity_overrides\": 22,\n    \"active_identity_branches_found\": 22,\n    \"high_risk_families\": 18,\n    \"medium_risk_families\": 6,\n    \"low_risk_families\": 30\n  },\n  \"report\": \"docs/card-game-effect-semantic-audit-v0.1.md\"\n}\n",
+    "semantic_audit_tests": 11,
+    "semantic_audit_tests_passed": 11,
+    "semantic_audit_tests_failed": 0,
+    "semantic_audit_test_exit_code": 0,
+    "semantic_audit_test_output_tail": "test_all_22_active_identity_cards_have_resolver_branch_evidence (__main__.EffectSemanticAuditTests.test_all_22_active_identity_cards_have_resolver_branch_evidence) ... ok\ntest_all_54_candidate_families_are_in_semantic_report (__main__.EffectSemanticAuditTests.test_all_54_candidate_families_are_in_semantic_report) ... ok\ntest_archived_candidate_aliases_are_included_in_family_review (__main__.EffectSemanticAuditTests.test_archived_candidate_aliases_are_included_in_family_review) ... ok\ntest_generic_dispatch_coverage_is_56_direct_2_lifecycle_1_missing (__main__.EffectSemanticAuditTests.test_generic_dispatch_coverage_is_56_direct_2_lifecycle_1_missing) ... ok\ntest_gloria_is_implemented_and_sobrevivente_has_no_hook (__main__.EffectSemanticAuditTests.test_gloria_is_implemented_and_sobrevivente_has_no_hook) ... ok\ntest_manual_finding_priority_matches_family_review_priority (__main__.EffectSemanticAuditTests.test_manual_finding_priority_matches_family_review_priority) ... ok\ntest_priority_counts_are_complete (__main__.EffectSemanticAuditTests.test_priority_counts_are_complete) ... ok\ntest_semantic_risk_labels_are_review_priority_not_approval (__main__.EffectSemanticAuditTests.test_semantic_risk_labels_are_review_priority_not_approval) ... ok\ntest_sequence_family_requires_previous_play_explicitly (__main__.EffectSemanticAuditTests.test_sequence_family_requires_previous_play_explicitly) ... ok\ntest_source_hashes_are_recorded (__main__.EffectSemanticAuditTests.test_source_hashes_are_recorded) ... ok\ntest_unmapped_fields_have_code_branches_but_no_active_binding (__main__.EffectSemanticAuditTests.test_unmapped_fields_have_code_branches_but_no_active_binding) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.000s\n\nOK\n",
+    "all_checks_passed": true
+  },
+  "counts": {
+    "candidate_effect_families": 54,
+    "candidate_unit_effect_families": 36,
+    "candidate_special_effect_families": 12,
+    "candidate_relic_effect_families": 6,
+    "legacy_habilidades_total": 59,
+    "legacy_unit_skill_definitions": 32,
+    "legacy_tactical_special_definitions": 21,
+    "legacy_relic_definitions": 6,
+    "generic_special_relic_aliases_mapped": 59,
+    "parameterized_aliases": 30,
+    "direct_aliases": 29,
+    "generic_unit_effects_without_current_card_assignment": 11,
+    "active_identity_overrides": 22,
+    "identity_cards_with_suppressed_generic_field": 16,
+    "hidden_gloria_cards": 3,
+    "filtered_v18_identity_branches": 18,
+    "stale_v75_identity_branches": 6,
+    "unregistered_legacy_field_effects": 4,
+    "combos": 27,
+    "combo_pair_evidence": 27,
+    "orphan_combo_card_ids": 5,
+    "leaders": 10,
+    "faction_passives": 4,
+    "semantic_audit_candidate_families": 54,
+    "semantic_audit_high_risk_families": 18,
+    "semantic_audit_medium_risk_families": 6,
+    "semantic_audit_low_risk_families": 30,
+    "semantic_audit_generic_direct_handlers": 56,
+    "semantic_audit_generic_lifecycle_hooks": 2,
+    "semantic_audit_generic_missing_handlers": 1
+  },
+  "unassigned_unit_effect_ids": [
+    "circulo_arcano",
+    "contragolpe",
+    "dupla_fornalha",
+    "eco_arcano",
+    "escudo_ferro",
+    "espolios",
+    "guardiao_fileira",
+    "irmandade_veu",
+    "resistencia_climatica",
+    "sangue_frio",
+    "sobrevivente"
+  ],
+  "stale_disposition_counts": {
+    "ARCHIVE_AS_OPTIONAL_ALIAS": 9,
+    "ARCHIVE_DO_NOT_REACTIVATE_AUTOMATICALLY": 9,
+    "ARCHIVE_STALE_BRANCH": 6,
+    "ARCHIVE_UNREGISTERED_FIELD_EFFECT": 4
+  },
+  "recommendation_counts": {
+    "generic_aliases": {
+      "MERGE_AS_PARAMETERIZED_FAMILY": 29,
+      "KEEP_AS_CANDIDATE_PENDING_BEHAVIOR_TEST": 29,
+      "REDESIGN_AS_EXPLICIT_ROUND_END_EFFECT; NEW_HANDLER_REQUIRED": 1
+    },
+    "identity_overrides": {
+      "KEEP_AS_SINGLE_CARD_EFFECT_CANDIDATE": 5,
+      "MERGE_AS_PARAMETERIZED_FAMILY": 8,
+      "REDESIGN_OR_SPLIT_AFTER_BEHAVIOR_REVIEW": 9
+    },
+    "inactive_branches": {
+      "REMOVE_FROM_NEW_RUNTIME; PRESERVE_OPTIONAL_ALIAS_METADATA": 9,
+      "REMOVE_FROM_NEW_RUNTIME_UNLESS_EXPLICITLY_REASSIGNED": 15,
+      "REMOVE_UNREGISTERED_FIELD_EFFECT_FROM_NEW_RUNTIME": 4
+    }
+  },
+  "scope": {
+    "runtime_files_changed": false,
+    "new_handlers_implemented": false,
+    "card_assignments_in_new_catalog_approved": false,
+    "efp_cost_rarity_approved": false,
+    "combo_policy_imported_from_approved_current_runtime": true,
+    "source_catalog_card_count": 137,
+    "active_identity_source_count": 22
+  },
+  "sha256": {
+    "registry": "a3cba2a3b71854fdabf55ed893e4864d46722d733e9b6d9897ddedea7053b737",
+    "alias_map": "af7206ffb206e467ed6388a7ef0207fae86cfc29aa8dfb0955f398fb001eadc5",
+    "decision_json": "ad44640617c6db352c3fa6214dad965bf33134654a68241ea0dff0d6041a04f8",
+    "builder_script": "ff32b65a1c904643bb8afd720c359e09833a330cf5ab0eae88a9e35247aa4a46",
+    "test_script": "669d280b423c56e0a2138b9761cd0ed3186a206a4bc397e9c76a330331bba757",
+    "semantic_audit_script": "164e3e97d27af37c6f0c94e160d7366124d869cbf6296aed8d812452cc691fa6",
+    "semantic_audit_test_script": "5e85e832d964fa3b7aea810c83562fb6e1308177facdeea317d6159bf889b666",
+    "semantic_audit_json": "b73deb97fe810652d6dd91960b0e80ec11edfc5e3206afdeab3e76b19e370881"
+  }
+}

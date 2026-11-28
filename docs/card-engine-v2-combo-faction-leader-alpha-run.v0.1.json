@@ -1,0 +1,222 @@
+{
+  "actions": [
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": true,
+        "energy_remaining": 0,
+        "energy_spent": 1,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A plays Godwyn; first Golden Order unit receives faction passive +1",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "revision": 1,
+      "step": 1
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": true,
+        "energy_remaining": 0,
+        "energy_spent": 1,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "B plays Grey Watcher",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "revision": 2,
+      "step": 2
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": true,
+        "energy_remaining": 0,
+        "energy_spent": 1,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A plays Dragon Knight; Muralha combo grants +2 to activator and +1 to prior same-row ally",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "revision": 3,
+      "step": 3
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": true,
+        "energy_remaining": 0,
+        "energy_spent": 1,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "B plays Fornalha Lancer",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "revision": 4,
+      "step": 4
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": true,
+        "energy_remaining": 0,
+        "energy_spent": 1,
+        "leader_activation_consumed": true,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A activates Godfrey; all A melee units receive +2",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "revision": 5,
+      "step": 5
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": false,
+        "energy_remaining": 1,
+        "energy_spent": 0,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "B passes",
+      "outcome": "applied",
+      "player_id": "2002",
+      "reason_code": null,
+      "revision": 6,
+      "step": 6
+    },
+    {
+      "costs": {
+        "activation_consumed": false,
+        "energy_cost_configured": false,
+        "energy_remaining": 1,
+        "energy_spent": 0,
+        "other_costs": [],
+        "protection_grants_consumed": [],
+        "source_consumed": false,
+        "turn_consumed": true
+      },
+      "label": "A passes and closes the round",
+      "outcome": "applied",
+      "player_id": "1001",
+      "reason_code": null,
+      "revision": 7,
+      "step": 7
+    }
+  ],
+  "catalog_release_id": "alpha-test-only.catalog.v0.3",
+  "combo_ids_activated": [
+    "muralha_inabalavel"
+  ],
+  "energy_cost_fixture": "uniform_1_for_mechanics_simulation_only; not_a_balance_validation",
+  "event_count": 49,
+  "event_counts": {
+    "card_combo_activated": 1,
+    "combat_row_resolved": 3,
+    "deck_fatigue_applied": 6,
+    "faction_passive_applied": 1,
+    "leader_activated": 1,
+    "leader_bonus_applied": 1,
+    "player_damage_applied": 7,
+    "player_energy_gained": 7,
+    "player_energy_spent": 5,
+    "player_passed": 2,
+    "round_closed": 1,
+    "round_score_frozen": 1,
+    "round_started": 1,
+    "turn_action_completed": 4,
+    "unit_archived": 4,
+    "unit_played": 4
+  },
+  "leaders": {
+    "1001": "comandante_fornalha",
+    "2002": null
+  },
+  "player_a_state": {
+    "faction_passive_used": false,
+    "last_unit_play_row": null,
+    "synergy_used": {}
+  },
+  "player_factions": {
+    "1001": "golden_order",
+    "2002": null
+  },
+  "production_database_access": false,
+  "round_history": [
+    {
+      "damage_by_player": {
+        "1001": 0,
+        "2002": 10
+      },
+      "life_by_player": {
+        "1001": 14,
+        "2002": 7
+      },
+      "round_number": 1,
+      "row_power_by_player": {
+        "1001": {
+          "melee": 20,
+          "ranged": 0,
+          "siege": 0
+        },
+        "2002": {
+          "melee": 10,
+          "ranged": 0,
+          "siege": 0
+        }
+      },
+      "scores": {
+        "1001": 20,
+        "2002": 10
+      },
+      "winner_player_id": "1001"
+    }
+  ],
+  "round_scores": {
+    "1001": 20,
+    "2002": 10
+  },
+  "round_winner": "1001",
+  "runtime_integration": false,
+  "scenario": "combo_faction_passive_leader_sequence_alpha",
+  "sqlite_integrity": {
+    "event_sequence_violations": 0,
+    "foreign_key_violations": 0,
+    "integrity_check": "ok",
+    "ok": true,
+    "quick_check": "ok",
+    "row_counts": {
+      "card_engine_v2_legacy_archive": 0,
+      "cartas_gwent_match_events": 49,
+      "cartas_gwent_match_operations": 7,
+      "cartas_gwent_match_rewards": 0,
+      "cartas_gwent_matches": 1,
+      "cartas_gwent_outbox": 0
+    },
+    "state_revision_violations": 0
+  }
+}

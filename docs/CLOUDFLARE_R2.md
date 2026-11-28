@@ -57,3 +57,8 @@ Para habilitar a distribuição pela CDN:
 Se preferir isolar os arquivos de cartas em outro bucket, defina `R2_PUBLIC_CARDS_BUCKET_NAME` e `R2_PUBLIC_CARDS_BASE_URL` juntos, e conceda acesso a esse bucket ao token. As variáveis `R2_PUBLIC_CARDS_ACCOUNT_ID`, `R2_PUBLIC_CARDS_ACCESS_KEY_ID` e `R2_PUBLIC_CARDS_SECRET_ACCESS_KEY` são opcionais; vazias, reutilizam as credenciais `R2_*` existentes.
 
 Use um domínio customizado do Cloudflare para a CDN. O endereço `r2.dev` serve para testes, mas não oferece os mesmos recursos de cache/CDN do domínio customizado. Se o R2 não estiver configurado, o sistema continua usando o cache persistente em disco compartilhado pela instância. A rota antiga `/api/gwent/cards/.../image` permanece como compatibilidade; os novos payloads do site e do Gwent usam a rota pública.
+
+
+## Auditoria de produção somente leitura
+
+Para inventariar objetos sem baixar ou alterar arquivos, use [`card-game-production-audit-runbook-v0.1.md`](card-game-production-audit-runbook-v0.1.md) e `scripts/inventory-r2-readonly-v0.1.py`. O script usa apenas a operação S3 `ListObjectsV2`, não imprime segredos nem grava object keys brutas no relatório; usa hashes SHA-256 para reconciliar com `cartas_atelie_submissoes.image_key`. Ele enumera o bucket primário e, se configurado em bucket separado, o bucket `R2_PUBLIC_CARDS_BUCKET_NAME`. O prefixo `cards/` representa cache/CDN, enquanto `atelier/submissions/` contém arquivos originais de submissão; não confundir os dois.

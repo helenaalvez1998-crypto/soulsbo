@@ -1,0 +1,495 @@
+{
+  "schema_version": 6,
+  "match_id": 2026112701,
+  "status": "active",
+  "players": {
+    "1001": {
+      "zones": {
+        "hand": [
+          "00000000-0000-4000-8000-000000000001"
+        ],
+        "draw_pile": [],
+        "board": [
+          "00000000-0000-4000-8000-000000000003"
+        ],
+        "discard": [
+          "00000000-0000-4000-8000-000000000005"
+        ]
+      },
+      "round_state": {
+        "last_unit_play_row": "ranged"
+      },
+      "counters": {
+        "board_removal_count": 0,
+        "sacrifice_count": 0
+      }
+    },
+    "2002": {
+      "zones": {
+        "hand": [],
+        "draw_pile": [],
+        "board": [
+          "00000000-0000-4000-8000-000000000002"
+        ],
+        "discard": [
+          "00000000-0000-4000-8000-000000000004"
+        ]
+      },
+      "round_state": {
+        "last_unit_play_row": "melee"
+      },
+      "counters": {
+        "board_removal_count": 1,
+        "sacrifice_count": 0
+      }
+    }
+  },
+  "instances": {
+    "00000000-0000-4000-8000-000000000001": {
+      "schema_version": 6,
+      "instance_id": "00000000-0000-4000-8000-000000000001",
+      "card_id": "wolf_guardian",
+      "exemplar_id": 501,
+      "owner_player_id": "1001",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "intrinsic_weather_resistance": 0,
+        "definition_digest": "b8eb0fb7333271749be19dc295a7cf6eec100555b58b96e0898e4409894fde41"
+      },
+      "state": {
+        "current_row": null,
+        "activated_combo_ids": [],
+        "effect_state": {},
+        "last_board_row": null,
+        "bonus_grants": [],
+        "protection_grants": [],
+        "status_applications": [],
+        "weather_resistance_modifiers": []
+      }
+    },
+    "00000000-0000-4000-8000-000000000002": {
+      "schema_version": 6,
+      "instance_id": "00000000-0000-4000-8000-000000000002",
+      "card_id": "survivor_guard",
+      "exemplar_id": null,
+      "owner_player_id": "2002",
+      "origin_type": "catalog_deck",
+      "definition_snapshot": {
+        "card_id": "survivor_guard",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "intrinsic_weather_resistance": 0,
+        "definition_digest": "e04d0c7e0373b46d984e5042a480b69622e765273c88d8d06428fe94ffc35ceb"
+      },
+      "state": {
+        "current_row": "melee",
+        "activated_combo_ids": [],
+        "effect_state": {},
+        "last_board_row": "melee",
+        "bonus_grants": [
+          {
+            "grant_id": "00000000-0000-4000-8000-000000000031",
+            "amount": 1,
+            "source_effect_id": "unit.vengeance_on_removal",
+            "source_instance_id": "00000000-0000-4000-8000-000000000004",
+            "applied_event_id": "00000000-0000-4000-8000-000000000013",
+            "expires_on": "round_close",
+            "clamp_policy_id": "example-only.clamp.vengeance"
+          }
+        ],
+        "protection_grants": [],
+        "status_applications": [],
+        "weather_resistance_modifiers": []
+      }
+    },
+    "00000000-0000-4000-8000-000000000003": {
+      "schema_version": 6,
+      "instance_id": "00000000-0000-4000-8000-000000000003",
+      "card_id": "wolf_guardian",
+      "exemplar_id": 503,
+      "owner_player_id": "1001",
+      "origin_type": "deck_exemplar",
+      "definition_snapshot": {
+        "card_id": "wolf_guardian",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "ranged",
+        "power_base": 6,
+        "rarity_id": "rare",
+        "effect_id": null,
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "intrinsic_weather_resistance": 1,
+        "definition_digest": "234ab57e2e1b7e46c95a301718d8b4beb186cc73b223189a2e3f7dd2a4e2b148"
+      },
+      "state": {
+        "current_row": "ranged",
+        "activated_combo_ids": [],
+        "effect_state": {},
+        "last_board_row": "ranged",
+        "bonus_grants": [],
+        "protection_grants": [
+          {
+            "grant_id": "00000000-0000-4000-8000-000000000033",
+            "profile_id": "example.protection.standard",
+            "charges": 1,
+            "source_effect_id": "example.effect.shield",
+            "source_instance_id": null,
+            "applied_event_id": "00000000-0000-4000-8000-000000000023",
+            "expires_on": "round_close"
+          }
+        ],
+        "status_applications": [
+          {
+            "application_id": "00000000-0000-4000-8000-000000000034",
+            "status_id": "status.frost",
+            "source_effect_id": "example.effect.frost",
+            "source_instance_id": null,
+            "applied_event_id": "00000000-0000-4000-8000-000000000024",
+            "expires_on": "round_close"
+          }
+        ],
+        "weather_resistance_modifiers": [
+          {
+            "modifier_id": "00000000-0000-4000-8000-000000000032",
+            "amount": 1,
+            "source_effect_id": "relic.vigil_seal",
+            "source_instance_id": null,
+            "applied_event_id": "00000000-0000-4000-8000-000000000022",
+            "expires_on": "board_exit"
+          }
+        ]
+      }
+    },
+    "00000000-0000-4000-8000-000000000004": {
+      "schema_version": 6,
+      "instance_id": "00000000-0000-4000-8000-000000000004",
+      "card_id": "vengeful_warrior",
+      "exemplar_id": null,
+      "owner_player_id": "2002",
+      "origin_type": "catalog_deck",
+      "definition_snapshot": {
+        "card_id": "vengeful_warrior",
+        "kind": "unit",
+        "faction_id": "golden_order",
+        "printed_row": "melee",
+        "power_base": 5,
+        "rarity_id": "rare",
+        "effect_id": "effect.vengeance_on_removal",
+        "effect_params": {
+          "bonus_delta": 1
+        },
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "intrinsic_weather_resistance": 0,
+        "definition_digest": "de0979957f8ce1e1fb7eba794e7cdaf89ed92223306d1cd0bcad27a3517c7e86"
+      },
+      "state": {
+        "current_row": null,
+        "activated_combo_ids": [],
+        "effect_state": {},
+        "last_board_row": "melee",
+        "bonus_grants": [],
+        "protection_grants": [],
+        "status_applications": [],
+        "weather_resistance_modifiers": []
+      }
+    },
+    "00000000-0000-4000-8000-000000000005": {
+      "schema_version": 6,
+      "instance_id": "00000000-0000-4000-8000-000000000005",
+      "card_id": "chama_negra",
+      "exemplar_id": null,
+      "owner_player_id": "1001",
+      "origin_type": "catalog_deck",
+      "definition_snapshot": {
+        "card_id": "chama_negra",
+        "kind": "special",
+        "faction_id": "crimson_veil",
+        "printed_row": null,
+        "power_base": null,
+        "rarity_id": "epic",
+        "effect_id": "special.remove_units",
+        "effect_params": {},
+        "combo_tags": [],
+        "catalog_release_id": "example-only.catalog.2026-11-27",
+        "effect_registry_release_id": "example-only.effects.2026-11-27",
+        "balance_rules_release_id": "example-only.balance.2026-11-27",
+        "ruleset_release_id": "example-only.ruleset.2026-11-27",
+        "intrinsic_weather_resistance": 0,
+        "definition_digest": "4e058780a7443bf546c86ca9976dceb75d1d1f0ea423febbbfc05b31238534e9"
+      },
+      "state": {
+        "current_row": null,
+        "activated_combo_ids": [],
+        "effect_state": {},
+        "last_board_row": null,
+        "bonus_grants": [],
+        "protection_grants": [],
+        "status_applications": [],
+        "weather_resistance_modifiers": []
+      }
+    }
+  },
+  "operations": {
+    "00000000-0000-4000-8000-000000000010": {
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "fingerprint": "70dab33de62998add36316c25426ca81ba3f1f526ac9efbab25a85e32d569d91",
+      "actor": {
+        "type": "player",
+        "player_id": "1001"
+      },
+      "expected_revision": 0,
+      "result": {
+        "schema_version": 1,
+        "operation_id": "00000000-0000-4000-8000-000000000010",
+        "outcome": "applied",
+        "revision_before": 0,
+        "revision_after": 1,
+        "target_results": [
+          {
+            "target_instance_id": "00000000-0000-4000-8000-000000000004",
+            "outcome": "applied",
+            "effect_id": "special.remove_units"
+          }
+        ],
+        "costs": {
+          "turn_consumed": true,
+          "source_consumed": true,
+          "activation_consumed": false,
+          "protection_grants_consumed": [],
+          "other_costs": []
+        },
+        "event_ids": [
+          "00000000-0000-4000-8000-000000000011",
+          "00000000-0000-4000-8000-000000000012",
+          "00000000-0000-4000-8000-000000000013",
+          "00000000-0000-4000-8000-000000000014"
+        ]
+      }
+    },
+    "00000000-0000-4000-8000-000000000020": {
+      "operation_id": "00000000-0000-4000-8000-000000000020",
+      "fingerprint": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "actor": {
+        "type": "system",
+        "system_id": "example.fixture"
+      },
+      "expected_revision": 1,
+      "result": {
+        "schema_version": 1,
+        "operation_id": "00000000-0000-4000-8000-000000000020",
+        "outcome": "applied",
+        "revision_before": 1,
+        "revision_after": 2,
+        "target_results": [
+          {
+            "target_instance_id": "00000000-0000-4000-8000-000000000003",
+            "outcome": "applied",
+            "effect_id": "relic.vigil_seal"
+          }
+        ],
+        "costs": {
+          "turn_consumed": false,
+          "source_consumed": false,
+          "activation_consumed": false,
+          "protection_grants_consumed": [],
+          "other_costs": []
+        },
+        "event_ids": [
+          "00000000-0000-4000-8000-000000000021",
+          "00000000-0000-4000-8000-000000000022",
+          "00000000-0000-4000-8000-000000000023",
+          "00000000-0000-4000-8000-000000000024"
+        ]
+      }
+    }
+  },
+  "state_revision": 2,
+  "definition_manifest": {
+    "manifest_version": 1,
+    "canonicalization": "RFC8785",
+    "catalog_release_id": "example-only.catalog.2026-11-27",
+    "effect_registry_release_id": "example-only.effects.2026-11-27",
+    "balance_rules_release_id": "example-only.balance.2026-11-27",
+    "ruleset_release_id": "example-only.ruleset.2026-11-27",
+    "artifact_sha256": {
+      "catalog": "13ec370b6c93cd6b9f8c82fee839bdcc673f5569eec4b314919ce76840754a7f",
+      "effect_registry": "e9a1519f430a64572ae8222742ad9d3519f42034ca8cc64c21efef917987285e",
+      "balance_rules": "b225997815389cf302519e9978c1c5a08ea82d47430a303eeb57a843cc460706",
+      "ruleset": "ddd33262b2ed21094637e8d969b54a84c2272c236e40eaaea1e710412420143c"
+    },
+    "definition_digest": "b960fc5926771e22a92c97cf123dba76fedbfe3ba4d4fcf0fa6696a2f01423f9"
+  },
+  "events": [
+    {
+      "event_id": "00000000-0000-4000-8000-000000000011",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 1,
+      "caused_by_event_ids": [],
+      "kind": "operation_started",
+      "effect_scope": "system",
+      "source_effect_id": null,
+      "source_instance_id": null,
+      "target_instance_ids": [],
+      "payload": {}
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000012",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 2,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000011"
+      ],
+      "kind": "unit_removed",
+      "effect_scope": "direct",
+      "source_effect_id": "special.remove_units",
+      "source_instance_id": "00000000-0000-4000-8000-000000000005",
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000004"
+      ],
+      "payload": {
+        "cause_id": "normal_removal",
+        "from_zone": "board",
+        "to_zone": "discard",
+        "affected_player_id": "2002"
+      }
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000013",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 3,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000012"
+      ],
+      "kind": "vengeance_bonus_applied",
+      "effect_scope": "reactive",
+      "source_effect_id": "effect.vengeance_on_removal",
+      "source_instance_id": "00000000-0000-4000-8000-000000000004",
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000002"
+      ],
+      "payload": {
+        "parameter_source": "source_effect_definition",
+        "bonus_delta": 1
+      }
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000021",
+      "operation_id": "00000000-0000-4000-8000-000000000020",
+      "sequence": 5,
+      "caused_by_event_ids": [],
+      "kind": "operation_started",
+      "effect_scope": "system",
+      "source_effect_id": null,
+      "source_instance_id": null,
+      "target_instance_ids": [],
+      "payload": {}
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000022",
+      "operation_id": "00000000-0000-4000-8000-000000000020",
+      "sequence": 6,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000021"
+      ],
+      "kind": "weather_resistance_granted",
+      "effect_scope": "direct",
+      "source_effect_id": "relic.vigil_seal",
+      "source_instance_id": null,
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "payload": {
+        "amount": 1,
+        "expires_on": "board_exit"
+      }
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000023",
+      "operation_id": "00000000-0000-4000-8000-000000000020",
+      "sequence": 7,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000021"
+      ],
+      "kind": "protection_granted",
+      "effect_scope": "direct",
+      "source_effect_id": "example.effect.shield",
+      "source_instance_id": null,
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "payload": {
+        "profile_id": "example.protection.standard",
+        "charges": 1,
+        "expires_on": "round_close"
+      }
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000024",
+      "operation_id": "00000000-0000-4000-8000-000000000020",
+      "sequence": 8,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000021"
+      ],
+      "kind": "status_applied",
+      "effect_scope": "direct",
+      "source_effect_id": "example.effect.frost",
+      "source_instance_id": null,
+      "target_instance_ids": [
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "payload": {
+        "status_id": "status.frost",
+        "expires_on": "round_close"
+      }
+    },
+    {
+      "event_id": "00000000-0000-4000-8000-000000000014",
+      "operation_id": "00000000-0000-4000-8000-000000000010",
+      "sequence": 4,
+      "caused_by_event_ids": [
+        "00000000-0000-4000-8000-000000000011"
+      ],
+      "kind": "action_source_consumed",
+      "effect_scope": "system",
+      "source_effect_id": null,
+      "source_instance_id": "00000000-0000-4000-8000-000000000005",
+      "target_instance_ids": [],
+      "payload": {
+        "from_zone": "hand",
+        "to_zone": "discard"
+      }
+    }
+  ]
+}

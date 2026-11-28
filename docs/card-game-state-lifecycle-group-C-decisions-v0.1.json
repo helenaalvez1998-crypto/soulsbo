@@ -1,0 +1,322 @@
+{
+  "metadata": {
+    "document": "State lifecycle and duration — Group C",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev9.zip",
+    "status": "OWNER_APPROVED",
+    "runtime_integration": false,
+    "contract_freeze": false,
+    "scope": "Owner-approved design decisions for CI-008/009, BUF-008/009/010/011/014, RSRX-07/08/10. Runtime integration and contract freeze remain false.",
+    "approval_record": "docs/card-game-state-lifecycle-group-C-approval-v0.1.json"
+  },
+  "counts": {
+    "decisions": 10,
+    "transition_policies": 7,
+    "legacy_findings": 12
+  },
+  "decisions": [
+    {
+      "id": "CI-008",
+      "title": "Políticas explícitas de limpeza por transição",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "successful_removal clears shield and four statuses but preserves bonus, weather_resist and combo_ativado",
+        "round close clears bonus/shield/status/combo only for board units copied during that branch",
+        "terminal round returns before cleanup"
+      ],
+      "recommendation": "Toda transição de zona/estado referencia uma transition_policy_id versionada. Bônus, proteção e marcas são projeções de concessões/aplicações com origem, applied_event_id e expires_on. A limpeza não depende de deepcopy, ordem de append ou de a instância ainda estar no board.",
+      "proposed_policy": "Emitir round_close após congelar o snapshot imutável de resultado; expirar apenas grants/statuses/modifiers declarados round_close em todas as zonas, inclusive descarte/mão/pilha e fechamento terminal. Remoção bem-sucedida limpa grants de escudo e estados transitórios; remoção bloqueada consome apenas a proteção compatível e não muda zona; movimento preserva estado; retorno usa políticas específicas por efeito.",
+      "dependencies": [
+        "CI-009",
+        "BUF-008",
+        "BUF-009",
+        "BUF-010",
+        "BUF-011",
+        "BUF-014",
+        "RSRX-07",
+        "RSRX-08",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Emitir round_close depois do snapshot imutável de pontuação/resultado e aplicá-lo a todas as instâncias em todas as zonas, inclusive no encerramento terminal. Expirar somente grants marcados round_close; não apagar grants explicitamente permanentes. Bônus de unidade removida sobrevive no descarte até esse evento se a concessão ainda estiver ativa.",
+      "approved_resolution": "Emitir round_close depois do snapshot imutável de pontuação/resultado e aplicá-lo a todas as instâncias em todas as zonas, inclusive no encerramento terminal. Expirar somente grants marcados round_close; não apagar grants explicitamente permanentes. Bônus de unidade removida sobrevive no descarte até esse evento se a concessão ainda estiver ativa.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "CI-009",
+      "title": "Separação de resistência climática intrínseca e temporária",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "legacy state has scalar weather_resist",
+        "effective power subtracts max(0, weather_level - weather_resist)",
+        "removal and round cleanup do not clear weather_resist"
+      ],
+      "recommendation": "DefinitionSnapshot contém intrinsic_weather_resistance; Instance.state contém weather_resistance_modifiers com source_effect_id, source_instance_id, amount, applied_event_id e expires_on. Poder efetivo soma somente modificadores ainda ativos ao valor intrínseco.",
+      "dependencies": [
+        "CI-005",
+        "CI-008",
+        "BUF-011",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Manter intrinsic_weather_resistance no DefinitionSnapshot (padrão 0 quando ausente) e weather_resistance_modifiers na instância, cada um com origem, amount, applied_event_id e expires_on. Não persistir novo escalar sem origem.",
+      "approved_resolution": "Manter intrinsic_weather_resistance no DefinitionSnapshot (padrão 0 quando ausente) e weather_resistance_modifiers na instância, cada um com origem, amount, applied_event_id e expires_on. Não persistir novo escalar sem origem.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "BUF-008",
+      "title": "Fileira impressa, posição atual e histórico de sequência",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "row changes on movement and drives weather/row effects",
+        "fileira/printed row is retained separately",
+        "player.last_row is updated by successful unit play and reset at round transition; movement/special/return do not update it"
+      ],
+      "recommendation": "Keep printed_row immutable in DefinitionSnapshot; current_row represents live board position; last_board_row retains the last valid board position while outside board if needed for revival; last_unit_play_row is player/round state and changes only on successful unit play.",
+      "dependencies": [
+        "CI-005",
+        "CI-008",
+        "RSRX-08",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Manter printed_row imutável; current_row nulo fora do board; last_board_row como projeção persistida da última posição válida e atualizada em cada movimento/saída do board; last_unit_play_row como estado do jogador/rodada atualizado somente por jogada bem-sucedida de unidade.",
+      "approved_resolution": "Manter printed_row imutável; current_row nulo fora do board; last_board_row como projeção persistida da última posição válida e atualizada em cada movimento/saída do board; last_unit_play_row como estado do jogador/rodada atualizado somente por jogada bem-sucedida de unidade.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "BUF-009",
+      "title": "Categorias que um escudo pode bloquear",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "central removal blocks normal removal/execution and consumes one shield charge",
+        "sacrifice bypasses shield",
+        "status applications do not generally consult shield",
+        "two relic branches consult shield for direct debuffs; other debuffs do not"
+      ],
+      "recommendation": "Shield is not universal immunity. The incoming effect declares a protection_category and whether it consults protection. The standard shield profile blocks unit_removal and execution; sacrifice explicitly bypasses. Status applications and bonus reductions ignore it unless the effect explicitly opts into a shield profile.",
+      "dependencies": [
+        "CI-008",
+        "CI-011",
+        "BUF-010",
+        "RSRX-03",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Perfil padrão do escudo bloqueia unit_removal e execution; sacrifice faz bypass. Status e debuffs não são bloqueados por padrão. Preservar Noite/Chama e Lâmina Negra como categorias explícitas e específicas de efeito para paridade, sem generalizar suas exceções.",
+      "approved_resolution": "Perfil padrão do escudo bloqueia unit_removal e execution; sacrifice faz bypass. Status e debuffs não são bloqueados por padrão. Preservar Noite/Chama e Lâmina Negra como categorias explícitas e específicas de efeito para paridade, sem generalizar suas exceções.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "BUF-010",
+      "title": "Resolver central de proteção e consumo em bloqueio",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "shield checking is split between _remover_unidade and local relic handlers",
+        "blocked Noite/Chama consumes the relic activation",
+        "blocked Lâmina Negra consumes shield but does not consume the relic activation"
+      ],
+      "recommendation": "Um único serviço de proteção avalia profile/category e consome uma carga compatível exatamente uma vez. Cada protection grant registra grant_id, profile_id, charges, source_effect_id/source_instance_id, applied_event_id e expires_on. O incoming effect declara separadamente action_cost_on_block = consume ou refund.",
+      "dependencies": [
+        "CI-008",
+        "CI-011",
+        "CI-014",
+        "BUF-009",
+        "RSRX-03"
+      ],
+      "recommended_resolution": "Ao bloquear categoria compatível, consumir exatamente uma carga do grant de proteção correspondente. Separar custo da ação: reliquia_noite_chama consome a ativação quando bloqueada; reliquia_lamina_negra devolve/não consome a ativação quando bloqueada, reproduzindo a diferença legada.",
+      "approved_resolution": "Ao bloquear categoria compatível, consumir exatamente uma carga do grant de proteção correspondente. Separar custo da ação: reliquia_noite_chama consome a ativação quando bloqueada; reliquia_lamina_negra devolve/não consome a ativação quando bloqueada, reproduzindo a diferença legada.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "BUF-011",
+      "title": "Duração de resistência climática",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "vigil_seal writes weather_resist=1",
+        "legacy generic resistencia_climatica branch writes 2 but must not be treated as active without an active catalog binding",
+        "weather_resist survives removal and nonterminal round cleanup"
+      ],
+      "recommendation": "Tratar vigil_seal como modificador com origem, evento de aplicação e expiração explícita; as opções candidatas são board_exit, round_close ou permanent_instance. Não inferir permanência pelo escalar legado.",
+      "dependencies": [
+        "CI-005",
+        "CI-008",
+        "CI-009",
+        "CI-012",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Recomendação de design: vigil_seal cria modificador expires_on=board_exit (enquanto a unidade permanece no campo). A escolha substitui a persistência acidental do escalar legado e evita que o buff sobreviva à remoção sem regra explícita.",
+      "approved_resolution": "Recomendação de design: vigil_seal cria modificador expires_on=board_exit (enquanto a unidade permanece no campo). A escolha substitui a persistência acidental do escalar legado e evita que o buff sobreviva à remoção sem regra explícita.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "BUF-014",
+      "title": "Piso/teto de bônus explícitos",
+      "status": "OWNER_APPROVED",
+      "priority": "P1",
+      "legacy_evidence": [
+        "different effects use floors -2, 0, or no clamp",
+        "bonus is an aggregate scalar; BonusTrackedDict records heuristic source strings but not canonical domain event ids",
+        "board round cleanup resets bonus but removed discard instances are not traversed"
+      ],
+      "recommendation": "Cada efeito declara bonus_delta/operação tipada e clamp_policy_id versionado. O bonus agregado é uma projeção respaldada por bonus_grants rastreáveis ou reconstruível pelo ledger causal; cada grant carrega grant_id, amount, source_effect_id/source_instance_id, applied_event_id, clamp_policy_id e expires_on. Sem piso/teto global oculto.",
+      "dependencies": [
+        "CI-005",
+        "CI-008",
+        "RSRX-05",
+        "RSRX-06",
+        "RSRX-07"
+      ],
+      "recommended_resolution": "Manter bonus como projeção agregada respaldada por bonus_grants ou replay inequívoco do ledger. Cada grant registra amount/delta, origem, applied_event_id, clamp_policy_id e expires_on. Cada efeito/release define clamp; não há piso/teto global implícito.",
+      "approved_resolution": "Manter bonus como projeção agregada respaldada por bonus_grants ou replay inequívoco do ledger. Cada grant registra amount/delta, origem, applied_event_id, clamp_policy_id e expires_on. Cada efeito/release define clamp; não há piso/teto global implícito.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "RSRX-07",
+      "title": "Política de bônus ao ressuscitar",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "Ressurgir resets bonus to zero",
+        "Réquiem resets bonus to zero",
+        "Esgar adds one to the prior bonus value"
+      ],
+      "recommendation": "Declare bonus_policy per resurrection effect: Ressurgir and Réquiem = reset_to_zero; Esgar = previous_bonus_plus_one. Do not make this a universal resurrection behavior. Source events must record reset/addition independently.",
+      "dependencies": [
+        "BUF-014",
+        "CI-008",
+        "CI-012",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Ressurgir e Réquiem entram com bonus_policy=reset_to_zero. Esgar usa previous_bonus_plus_one para preservar o comportamento legado; o +1 deve ser evento/grant separado e só bônus ainda ativo antes do retorno entra no valor anterior.",
+      "approved_resolution": "Ressurgir e Réquiem entram com bonus_policy=reset_to_zero. Esgar usa previous_bonus_plus_one para preservar o comportamento legado; o +1 deve ser evento/grant separado e só bônus ainda ativo antes do retorno entra no valor anterior.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "RSRX-08",
+      "title": "Política de fileira ao retornar",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "Ressurgir and Requiem preserve a valid existing row and use a fallback when invalid",
+        "Esgar forces the chosen row",
+        "movement changes row but does not change last_unit_play_row"
+      ],
+      "recommendation": "Declare row_policy per effect: Ressurgir and Réquiem = preserve_last_board_row_else_requested_row_else_melee; Esgar = force_requested_row. All requested rows are validated against melee/ranged/siege.",
+      "dependencies": [
+        "BUF-008",
+        "CI-008",
+        "CI-010",
+        "RSRX-10"
+      ],
+      "recommended_resolution": "Ressurgir/Réquiem usam last_board_row válida; se ausente/inválida, usam a row solicitada se válida; por último, melee. Esgar usa force_requested_row e rejeita contexto ausente/inválido em vez de escolher uma fileira silenciosamente.",
+      "approved_resolution": "Ressurgir/Réquiem usam last_board_row válida; se ausente/inválida, usam a row solicitada se válida; por último, melee. Esgar usa force_requested_row e rejeita contexto ausente/inválido em vez de escolher uma fileira silenciosamente.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    },
+    {
+      "id": "RSRX-10",
+      "title": "Estado completo após retorno ao campo",
+      "status": "OWNER_APPROVED",
+      "priority": "P0",
+      "legacy_evidence": [
+        "successful removal clears shield and four statuses but preserves bonus/weather_resist/combo marker",
+        "Ressurgir/Réquiem do not explicitly clear stale status fields",
+        "Esgar clears shield/status and adds one to existing bonus",
+        "resurrection does not re-run on-play, faction passive or combo on arrival"
+      ],
+      "recommendation": "On return to board, always clear transient status marks and protection grants; apply effect-specific bonus_policy and row_policy; retain only intrinsic resistance and unexpired modifiers; do not re-run on-play hooks, faction passive or combo. Combo eligibility may participate in future plays as already observed.",
+      "dependencies": [
+        "CI-008",
+        "CI-009",
+        "BUF-008",
+        "BUF-009",
+        "BUF-010",
+        "BUF-011",
+        "BUF-014",
+        "RSRX-07",
+        "RSRX-08"
+      ],
+      "recommended_resolution": "No retorno ao campo, limpar todas as marcas de status e concessões de proteção; aplicar bonus_policy e row_policy do efeito; preservar resistência intrínseca, grants round_close ainda ativos e permanent_instance; board_exit já foi expirado quando a instância saiu do campo. Não repetir hooks on-play, passiva de facção nem combo na chegada.",
+      "approved_resolution": "No retorno ao campo, limpar todas as marcas de status e concessões de proteção; aplicar bonus_policy e row_policy do efeito; preservar resistência intrínseca, grants round_close ainda ativos e permanent_instance; board_exit já foi expirado quando a instância saiu do campo. Não repetir hooks on-play, passiva de facção nem combo na chegada.",
+      "owner_approved": true,
+      "resolved_choice": "Resolved by owner approval of the recommended_resolution; see formal approval record."
+    }
+  ],
+  "transition_policies": [
+    {
+      "transition": "move_within_board",
+      "zone_change": false,
+      "proposed": "Update current_row only. Preserve bonus projection, protection grants, statuses and unexpired modifiers. Do not update last_unit_play_row."
+    },
+    {
+      "transition": "removal_blocked_by_protection",
+      "zone_change": false,
+      "proposed": "Consume one matching protection charge. Preserve zone, bonus, statuses, row and unrelated modifiers. Emit blocked event; no removal/Vingança. Source action cost follows the incoming effect policy."
+    },
+    {
+      "transition": "successful_removal_or_sacrifice",
+      "zone_change": true,
+      "proposed": "Move exact instance to discard; clear transient statuses and protection grants; preserve current-round bonus projection until its declared expiry; expire only modifiers whose policy says board_exit; preserve intrinsic resistance; no automatic cleanup by object-copy behavior."
+    },
+    {
+      "transition": "recover_discard_to_hand",
+      "zone_change": true,
+      "proposed": "Move same instance to hand; do not replay on-play/passive/combo. Preserve remaining modifiers according to their explicit expires_on policy; no additional normalization beyond valid removal policy."
+    },
+    {
+      "transition": "resurrect_discard_to_board",
+      "zone_change": true,
+      "proposed": "Move same instance to board; clear transient statuses/protection grants; use per-effect bonus_policy and row_policy; retain intrinsic resistance and only unexpired modifiers; do not replay entry hooks."
+    },
+    {
+      "transition": "round_close",
+      "zone_change": true,
+      "proposed": "After fixing score/result snapshot, expire round_close statuses, shields, bonus deltas and modifiers across all instances in all zones; clear round-level combo markers and last_unit_play_row; perform on nonterminal and terminal closure."
+    },
+    {
+      "transition": "purification",
+      "zone_change": false,
+      "proposed": "Remove only status_ids listed by the purifier definition. Bonus grants, shields and weather modifiers remain unless the same effect declares separate outputs."
+    }
+  ],
+  "legacy_findings": [
+    "_poder_efetivo uses current row, scalar weather_resist, a combined control-state cap of 3 and a power floor of 1.",
+    "_remover_unidade returns early on shield block before clearing states; successful removal clears escudo and four status counters but preserves bonus/weather_resist/combo_ativado.",
+    "Sacrifice bypasses the shield check and uses the same successful-removal cleanup path.",
+    "Normal round close resets bonus, shield, four status counters and combo_ativado for board units archived or kept by Glória; it does not traverse instances already in discard/hand/draw_pile.",
+    "Final round branch sets finished state and returns before nonterminal cleanup; current board state may retain temporary fields in terminal snapshot.",
+    "weather_resist is scalar; vigil_seal sets 1. The generic resistencia_climatica handler sets 2 but approved BUF-012 prevents treating an unbound legacy branch as an active new capability.",
+    "Shield blocks removal/execution centrally and sacrifice bypasses; status applications generally ignore shield. Relic Noite/Chama and Lâmina Negra have local shield checks with different action-cost results on block.",
+    "Ressurgir/Réquiem reset bonus and remove shield but do not explicitly clear statuses; Esgar forces row, adds +1 to saved bonus, removes shield and clears four states.",
+    "Lágrima Sagrada returns the same discard object to hand without additional normalization; the successful removal path has already cleared shield/status but preserves bonus/weather_resist.",
+    "BonusTrackedDict tracks heuristic source text for bonus mutations with a maximum of 100 records; it is not the approved append-only domain-event ledger and does not encode expiry policy.",
+    "printed_row is present in CardInstance v0.3 DefinitionSnapshot; instance state has current_row, while player-level last_unit_play_row semantics come from the separate sequence audit.",
+    "Status candidate v0.1 models four counters and round_close expiry but has no per-application source/expiry records and still reads weather_resistance as a scalar."
+  ],
+  "guardrails": {
+    "group_A_approved": true,
+    "group_B_approved": true,
+    "rarity_is_classificatory": true,
+    "group_C_approved": true,
+    "runtime_modified": false,
+    "schema_frozen": false,
+    "migration_authorized": false
+  },
+  "recommended_path": {
+    "status": "OWNER_APPROVED",
+    "summary": "Owner-approved: global round_close after result snapshot; sourced grants/applications; intrinsic and temporary weather resistance separated; explicit shield categories and action cost; per-effect resurrection bonus/row/entry policies.",
+    "explicit_design_change": "Owner-approved rule: vigil_seal expires on board_exit. This intentionally replaces accidental persistence in the legacy scalar."
+  }
+}

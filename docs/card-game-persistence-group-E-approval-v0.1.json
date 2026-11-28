@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "document": "Card game persistence Group E owner approval",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev14.zip",
+    "status": "OWNER_APPROVED",
+    "owner_response": "ok, faça",
+    "approval_scope": "E-001 through E-010; isolated Card Engine v2 implementation and temporary/dedicated SQLite tests",
+    "production_migration_authorized": false,
+    "legacy_runtime_integration_authorized": false
+  },
+  "approved_decisions": [
+    {"id": "E-001", "status": "OWNER_APPROVED", "rule": "Monotonic state_revision per match, mirrored in persisted row and state envelope; requests carry expected_revision."},
+    {"id": "E-002", "status": "OWNER_APPROVED", "rule": "BEGIN IMMEDIATE plus explicit compare-and-swap update in the same transaction; local single-host SQLite WAL only."},
+    {"id": "E-003", "status": "OWNER_APPROVED", "rule": "Durable operation ledger unique by match_id and operation_id, request fingerprint, replay on identical request and conflict on different fingerprint."},
+    {"id": "E-004", "status": "OWNER_APPROVED", "rule": "Atomic commit for snapshot, revision, operation ledger, events, projections/counters, rewards and outbox."},
+    {"id": "E-005", "status": "OWNER_APPROVED", "rule": "Append-only event journal with strict per-match sequence; human-readable event_log is not the source of truth."},
+    {"id": "E-006", "status": "OWNER_APPROVED", "rule": "Transactional outbox with at-least-once delivery, lease, retry, dead-letter and consumer idempotency key."},
+    {"id": "E-007", "status": "OWNER_APPROVED", "rule": "Checksummed migration ledger; checksum mismatch is a hard failure."},
+    {"id": "E-008", "status": "OWNER_APPROVED", "rule": "Immutable SQLite Backup API backup, quick_check, integrity_check, SHA-256 and source snapshot preservation."},
+    {"id": "E-009", "status": "OWNER_APPROVED", "rule": "Existing active/pending matches remain on legacy engine; finished legacy matches read-only; new v2 matches only after integrated gates; never invent missing provenance."},
+    {"id": "E-010", "status": "OWNER_APPROVED", "rule": "Deterministic one-time snapshot migration plan with dry-run, persisted UUIDv4 occurrence mapping, provenance preservation when available, invariant checks and rollback."}
+  ],
+  "explicit_exclusions": [
+    "No production database migration or schema alteration is authorized by this approval.",
+    "No runtime, bot, HTTP, Discord, frontend or legacy engine integration is authorized yet.",
+    "No cutover or conversion of active matches is authorized.",
+    "No multi-host use of SQLite WAL is authorized."
+  ]
+}

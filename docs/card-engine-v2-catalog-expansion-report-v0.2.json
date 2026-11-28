@@ -1,0 +1,462 @@
+{
+  "artifact_type": "soulsbo_card_engine_v2_catalog_expansion_report",
+  "version": "0.2",
+  "status": "PASS_ALPHA_ONLY_NOT_RELEASE_APPROVED",
+  "generated_at_utc": "2026-11-28T02:41:30.441323+00:00",
+  "catalog_release": {
+    "manifest_version": 1,
+    "canonicalization": "RFC8785",
+    "catalog_release_id": "alpha-test-only.catalog.v0.2",
+    "effect_registry_release_id": "alpha-test-only.effects.v0.2",
+    "balance_rules_release_id": "alpha-test-only.balance.v0.1",
+    "ruleset_release_id": "alpha-test-only.ruleset.v0.1",
+    "artifact_sha256": {
+      "catalog": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+      "alpha_allowlist": "3dcf1062bf3aeadfde108fb57dc692e80269152831b2a1b61c6eba8bfa5a0e3e",
+      "effect_registry": "cee60c46706aec704b86a1797b7bb7a143df4e04bbc7f88c63f19433f8e229d7",
+      "balance_rules": "6297bb30e5c5f506371b92477353823aa897edd9947ec802080d30e8934c6b89",
+      "ruleset": "ddf100598b23eada2c8efcc856269844191aeabeebc9aa1c19187a15bbb9471d",
+      "legacy_aliases": "af7206ffb206e467ed6388a7ef0207fae86cfc29aa8dfb0955f398fb001eadc5"
+    },
+    "definition_digest": "9dc9bdff1fbf0a125f455bb3836deced84b715085622c79896826594f3670636"
+  },
+  "summary": {
+    "historical_model_count": 137,
+    "alpha_allowed_card_count": 24,
+    "newly_added_alpha_card_count": 14,
+    "blocked_staging_only_count": 113,
+    "implemented_new_entry_effect_family_count": 12,
+    "all_historical_models_rebuilt": false,
+    "production_catalog_ready": false
+  },
+  "newly_added_alpha_card_ids": [
+    "arma_duas_luas",
+    "arma_grande_sino",
+    "chefe_dama_vazio",
+    "chefe_maliketh_morte_destinada",
+    "chefe_oraculo_ruina",
+    "chefe_rei_afogado",
+    "gwent_singular_primeiro",
+    "magia_nevoa_antiga",
+    "magia_selo_vigilia",
+    "magia_sol_negro",
+    "magia_trovao_oco",
+    "patente_1",
+    "patente_10",
+    "patente_9"
+  ],
+  "card_definitions": [
+    {
+      "card_id": "arma_cajado_marulho",
+      "kind": "unit",
+      "printed_row": "ranged",
+      "power_base": 6,
+      "effect_id": null,
+      "effect_params": {},
+      "definition_digest": "abcaf52b894fb23ea1aacff479dd761ff6914c1e82c4027b72d40a59802c394f"
+    },
+    {
+      "card_id": "arma_duas_luas",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 7,
+      "effect_id": "effect.cross_row_presence_power",
+      "effect_params": {
+        "mode": "any_other_row",
+        "bonus_per_row": 1,
+        "max_bonus": 1
+      },
+      "definition_digest": "81de56c59d9546a40165ba0a4a1f40ffc200197939d742142c300550d2cf6f7f"
+    },
+    {
+      "card_id": "arma_grande_sino",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 8,
+      "effect_id": "effect.comeback_power",
+      "effect_params": {
+        "bonus": 2
+      },
+      "definition_digest": "95c81698bda555e2ced0ec3ee16f8879698397b72b2ffc1bea75f14447e92a3b"
+    },
+    {
+      "card_id": "arma_lanca_fornalha",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 5,
+      "effect_id": null,
+      "effect_params": {},
+      "definition_digest": "dbd72c045fe50d8d14ffb3d037aa8eb40bdef3b419e35622d8c40e032f7e7c23"
+    },
+    {
+      "card_id": "arma_martelo_fornalha",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 6,
+      "effect_id": null,
+      "effect_params": {},
+      "definition_digest": "d013bac3a12ae256a345b57af37210a62e4af2c24c890db61fe7052c4c89c88c"
+    },
+    {
+      "card_id": "chefe_dama_vazio",
+      "kind": "unit",
+      "printed_row": "siege",
+      "power_base": 6,
+      "effect_id": "effect.enemy_bonus_reduction",
+      "effect_params": {
+        "target_scope": "strongest_enemy",
+        "amount": 2,
+        "floor": -2,
+        "only_positive": false
+      },
+      "definition_digest": "8f115a6718d219dccbc3a1605a84c4b1e91b30661b23124cba6738d96a63d888"
+    },
+    {
+      "card_id": "chefe_maliketh_morte_destinada",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 8,
+      "effect_id": "effect.enemy_bonus_reduction",
+      "effect_params": {
+        "target_scope": "strongest_enemy",
+        "amount": 2,
+        "floor": -2,
+        "only_positive": false
+      },
+      "definition_digest": "d2201218db48c27678c30a29da581abaa6dfac2886fb82b62455c5fb63857579"
+    },
+    {
+      "card_id": "chefe_oraculo_ruina",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 7,
+      "effect_id": "effect.ruin_omen",
+      "effect_params": {
+        "enemy_bonus_reduction": 1,
+        "enemy_bonus_floor": -2,
+        "self_bonus_if_behind": 1
+      },
+      "definition_digest": "7e25e1a9838c66e8c57ff9f74510a6fe8cae6811a0abbaac2f1e2cbdea666c1d"
+    },
+    {
+      "card_id": "chefe_rei_afogado",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 7,
+      "effect_id": "effect.discard_advantage_power",
+      "effect_params": {
+        "discard_bonus": 2,
+        "fallback_bonus": 1,
+        "fallback_condition": "opponent_has_more_units"
+      },
+      "definition_digest": "c1f77df72b7f7e14ec5f3be65b8559edd87e1c5593d15ea47c41dc81290d705f"
+    },
+    {
+      "card_id": "chefe_vigia_cinzento",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 5,
+      "effect_id": null,
+      "effect_params": {},
+      "definition_digest": "4ee9cafc1c3a6596955aaa6684475294faa37752c4ce7b236e1ac0e817b448e7"
+    },
+    {
+      "card_id": "elden_especial_geada",
+      "kind": "special",
+      "printed_row": null,
+      "power_base": null,
+      "effect_id": "gwent_geada_cariana",
+      "effect_params": {
+        "status_id": "status.frost",
+        "marks_per_target": 1,
+        "maximum_marks": 2
+      },
+      "definition_digest": "362debfd098b35d3335447c4be17e6ab65c0c93e156e03857d894b812f503821"
+    },
+    {
+      "card_id": "gwent_especial_egide",
+      "kind": "special",
+      "printed_row": null,
+      "power_base": null,
+      "effect_id": "gwent_egide",
+      "effect_params": {
+        "charges": 1,
+        "expires_on": "round_close"
+      },
+      "definition_digest": "a53e304a2fa70c018a16d821e1c00540b1d458d8cdd35ab36c8a64cd4d204494"
+    },
+    {
+      "card_id": "gwent_especial_execucao",
+      "kind": "special",
+      "printed_row": null,
+      "power_base": null,
+      "effect_id": "gwent_execucao",
+      "effect_params": {
+        "maximum_effective_power": 6
+      },
+      "definition_digest": "e22052aa5d44cdcb1b4f9c905598efe4869fb70619dab3c3d1d6d288b171dbf3"
+    },
+    {
+      "card_id": "gwent_especial_tempestade",
+      "kind": "special",
+      "printed_row": null,
+      "power_base": null,
+      "effect_id": "gwent_clima",
+      "effect_params": {
+        "penalty": 1
+      },
+      "definition_digest": "97ef855702bc3d07c368d6675d546f982cf7b57eddd0f37c7e760317dd00e2c7"
+    },
+    {
+      "card_id": "gwent_singular_primeiro",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 10,
+      "effect_id": "effect.solitary_row_power",
+      "effect_params": {
+        "bonus": 2
+      },
+      "definition_digest": "aea77c8d0f7990d4bc44445b99f2026741c8e953a020b1b9b99994bccf8cae99"
+    },
+    {
+      "card_id": "gwent_unidade_herdeiro_portao",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 6,
+      "effect_id": "effect.vengeance_on_removal",
+      "effect_params": {
+        "bonus_delta": 1
+      },
+      "definition_digest": "bedb4dd13e67f1668321c0d0a190cd60438abd458544c9abfe268a4d5f8353c9"
+    },
+    {
+      "card_id": "gwent_v75_ordem_veterano_juramento",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 4,
+      "effect_id": "v75_golden_vow",
+      "effect_params": {
+        "self_bonus": 1,
+        "weakest_same_row_ally_bonus": 1
+      },
+      "definition_digest": "14705cd3fd483cd5d55620bf307aea5f29337c585bd2e4f7e8b9a37863a69dc6"
+    },
+    {
+      "card_id": "magia_nevoa_antiga",
+      "kind": "unit",
+      "printed_row": "siege",
+      "power_base": 7,
+      "effect_id": "effect.weather_affinity_power",
+      "effect_params": {
+        "weather_scope": "any_row_active",
+        "bonus": 2
+      },
+      "definition_digest": "6277af28d8f504562f741be45b3c0215367318babf270517e12ff519be8eef40"
+    },
+    {
+      "card_id": "magia_selo_vigilia",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 5,
+      "effect_id": "effect.weather_ward_support",
+      "effect_params": {
+        "weather_resistance": 1,
+        "ally_bonus": 1
+      },
+      "definition_digest": "6a957d6ead30fc7cec28161480ef33477b2b6524c9c1bfdbe1c91d70d7897688"
+    },
+    {
+      "card_id": "magia_sol_negro",
+      "kind": "unit",
+      "printed_row": "melee",
+      "power_base": 8,
+      "effect_id": "effect.enemy_positive_bonus_power",
+      "effect_params": {
+        "bonus": 2
+      },
+      "definition_digest": "60af0b9cbf2d7fa0c847a7f93005830d88305251785594897ae3d1ab0b7c10ab"
+    },
+    {
+      "card_id": "magia_trovao_oco",
+      "kind": "unit",
+      "printed_row": "ranged",
+      "power_base": 6,
+      "effect_id": "effect.enemy_bonus_reduction",
+      "effect_params": {
+        "target_scope": "chosen_enemy_row",
+        "amount": 1,
+        "floor": -2,
+        "only_positive": false
+      },
+      "definition_digest": "039a5a384d2c4817b62f6637b40bcf06b9f24e9c6645359b496311cd8d378989"
+    },
+    {
+      "card_id": "patente_1",
+      "kind": "unit",
+      "printed_row": "ranged",
+      "power_base": 3,
+      "effect_id": "effect.arcane_hunter_power",
+      "effect_params": {
+        "bonus": 1
+      },
+      "definition_digest": "7d26dc419134d9dd58357b46d0e2d9b054f3b561028582b365a75c99cc168839"
+    },
+    {
+      "card_id": "patente_10",
+      "kind": "unit",
+      "printed_row": "siege",
+      "power_base": 6,
+      "effect_id": "effect.sequence_power",
+      "effect_params": {
+        "reference_side": "opponent",
+        "row_relation": "same",
+        "requires_previous_play": true,
+        "bonus": 1
+      },
+      "definition_digest": "a2c38ddf3cd7f990136bd667780694fd7decb6b3e9399b1923cc2c84287a74ef"
+    },
+    {
+      "card_id": "patente_9",
+      "kind": "unit",
+      "printed_row": "siege",
+      "power_base": 8,
+      "effect_id": "effect.ahead_power",
+      "effect_params": {
+        "bonus": 1
+      },
+      "definition_digest": "3bc2a6e2b7a984a42d8121696793a8e04537fa243e1904fd1bfaf0b6d6a57bb7"
+    }
+  ],
+  "implemented_entry_effect_families": [
+    {
+      "effect_id": "effect.ahead_power",
+      "source_card_ids": [
+        "patente_9"
+      ]
+    },
+    {
+      "effect_id": "effect.arcane_hunter_power",
+      "source_card_ids": [
+        "patente_1"
+      ]
+    },
+    {
+      "effect_id": "effect.comeback_power",
+      "source_card_ids": [
+        "arma_grande_sino"
+      ]
+    },
+    {
+      "effect_id": "effect.cross_row_presence_power",
+      "source_card_ids": [
+        "arma_duas_luas"
+      ]
+    },
+    {
+      "effect_id": "effect.discard_advantage_power",
+      "source_card_ids": [
+        "chefe_rei_afogado"
+      ]
+    },
+    {
+      "effect_id": "effect.enemy_bonus_reduction",
+      "source_card_ids": [
+        "chefe_dama_vazio",
+        "chefe_maliketh_morte_destinada",
+        "magia_trovao_oco"
+      ]
+    },
+    {
+      "effect_id": "effect.enemy_positive_bonus_power",
+      "source_card_ids": [
+        "magia_sol_negro"
+      ]
+    },
+    {
+      "effect_id": "effect.ruin_omen",
+      "source_card_ids": [
+        "chefe_oraculo_ruina"
+      ]
+    },
+    {
+      "effect_id": "effect.sequence_power",
+      "source_card_ids": [
+        "patente_10"
+      ]
+    },
+    {
+      "effect_id": "effect.solitary_row_power",
+      "source_card_ids": [
+        "gwent_singular_primeiro"
+      ]
+    },
+    {
+      "effect_id": "effect.weather_affinity_power",
+      "source_card_ids": [
+        "magia_nevoa_antiga"
+      ]
+    },
+    {
+      "effect_id": "effect.weather_ward_support",
+      "source_card_ids": [
+        "magia_selo_vigilia"
+      ]
+    }
+  ],
+  "staging_summary": {
+    "historical_model_count": 137,
+    "alpha_test_only_count": 24,
+    "blocked_staging_only_count": 113,
+    "not_rebuilt_count": 137,
+    "faction_unreviewed_count": 137,
+    "legacy_cost_mismatch_count": 19
+  },
+  "playable_match_regression": {
+    "status": "finished",
+    "winner_player_id": "1001",
+    "round_wins": {
+      "1001": 2,
+      "2002": 1
+    },
+    "operation_count": 16,
+    "event_count": 48,
+    "sqlite_integrity": {
+      "event_sequence_violations": 0,
+      "foreign_key_violations": 0,
+      "integrity_check": "ok",
+      "ok": true,
+      "quick_check": "ok",
+      "row_counts": {
+        "card_engine_v2_legacy_archive": 0,
+        "cartas_gwent_match_events": 48,
+        "cartas_gwent_match_operations": 16,
+        "cartas_gwent_match_rewards": 0,
+        "cartas_gwent_matches": 1,
+        "cartas_gwent_outbox": 0
+      },
+      "state_revision_violations": 0
+    }
+  },
+  "test_validation": {
+    "tests": 97,
+    "passed": 97,
+    "failed": 0,
+    "skipped": 0
+  },
+  "source_artifacts": {
+    "catalog-legacy-baseline-v0.1.json": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+    "card-engine-v2-alpha-catalog.v0.2.json": "3dcf1062bf3aeadfde108fb57dc692e80269152831b2a1b61c6eba8bfa5a0e3e",
+    "card-engine-v2-alpha-effects.v0.2.json": "cee60c46706aec704b86a1797b7bb7a143df4e04bbc7f88c63f19433f8e229d7",
+    "card-engine-v2-legacy-catalog-staging.v0.1.json": "dc58a0ad808a541b0289afbc282f56b7d5816ac8877789ab027111a1effbc1dc",
+    "card-engine-v2-playable-alpha-validation-v0.3.json": "551626699d5aaad278e9ed888292e73cc86047e5f7c07829648f08299443f69c",
+    "card-engine-v2-playable-match-alpha-run.v0.2.json": "728a92276e0708a0b415b372a84a0823b826d8fcf85d701dc29cb9d16aa86e04"
+  },
+  "limitations": [
+    "O arquivo com 137 cartas é um staging histórico para revisão, não um catálogo executável.",
+    "Somente os 24 IDs explícitos são aceitos pela alpha isolada; os outros 113 permanecem bloqueados.",
+    "Os 137 registros históricos continuam exigindo reconstrução de definição e revisão de facção conforme o snapshot de origem.",
+    "Esta expansão não implementa as 54 famílias candidatas completas, 27 combos, líderes ou passivas de facção.",
+    "Custos de deck, texto, atribuição de facção e status de publicação não são aprovados por esta allowlist alpha.",
+    "Discord, HTTP, frontend, banco de produção, runtime legado e migração de produção permanecem desconectados e inalterados."
+  ]
+}

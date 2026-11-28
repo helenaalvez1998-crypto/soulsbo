@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-domain-event.v2.json",
+  "title": "Soulsbo Domain Event v2",
+  "description": "Append-only causal event. v2 closes removal causes and distinguishes archival transitions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "operation_id",
+    "sequence",
+    "caused_by_event_ids",
+    "kind",
+    "effect_scope",
+    "source_effect_id",
+    "source_instance_id",
+    "target_instance_ids",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "operation_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "caused_by_event_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "effect_scope": {
+      "enum": [
+        "direct",
+        "reactive",
+        "system"
+      ]
+    },
+    "source_effect_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_instance_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "target_instance_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "effect_scope": {
+            "const": "reactive"
+          }
+        },
+        "required": [
+          "effect_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_effect_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_scope": {
+            "const": "direct"
+          }
+        },
+        "required": [
+          "effect_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_effect_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "unit_removed"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effect_scope": {
+            "const": "direct"
+          },
+          "payload": {
+            "$ref": "#/$defs/removal_event_payload"
+          },
+          "target_instance_ids": {
+            "minItems": 1,
+            "maxItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "unit_removal_blocked"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effect_scope": {
+            "const": "direct"
+          },
+          "payload": {
+            "$ref": "#/$defs/removal_blocked_payload"
+          },
+          "target_instance_ids": {
+            "minItems": 1,
+            "maxItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "unit_archived"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effect_scope": {
+            "const": "system"
+          },
+          "payload": {
+            "$ref": "#/$defs/round_archive_payload"
+          },
+          "target_instance_ids": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "vengeance_bonus_applied"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effect_scope": {
+            "const": "reactive"
+          },
+          "source_effect_id": {
+            "const": "effect.vengeance_on_removal"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "rykard_bonus_applied"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effect_scope": {
+            "const": "direct"
+          },
+          "source_effect_id": {
+            "const": "leader.rykard_devour"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuid4": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "removal_cause_id": {
+      "enum": [
+        "normal_removal",
+        "execution",
+        "sacrifice"
+      ]
+    },
+    "removal_event_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cause_id",
+        "from_zone",
+        "to_zone",
+        "affected_player_id"
+      ],
+      "properties": {
+        "cause_id": {
+          "$ref": "#/$defs/removal_cause_id"
+        },
+        "from_zone": {
+          "const": "board"
+        },
+        "to_zone": {
+          "const": "discard"
+        },
+        "affected_player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        }
+      }
+    },
+    "removal_blocked_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cause_id",
+        "from_zone",
+        "to_zone",
+        "affected_player_id",
+        "protection_grant_id"
+      ],
+      "properties": {
+        "cause_id": {
+          "enum": [
+            "normal_removal",
+            "execution"
+          ]
+        },
+        "from_zone": {
+          "const": "board"
+        },
+        "to_zone": {
+          "const": "board"
+        },
+        "affected_player_id": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)$"
+        },
+        "protection_grant_id": {
+          "$ref": "#/$defs/uuid4"
+        }
+      }
+    },
+    "round_archive_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transition_id",
+        "from_zone",
+        "to_zone"
+      ],
+      "properties": {
+        "transition_id": {
+          "const": "round_archive"
+        },
+        "from_zone": {
+          "const": "board"
+        },
+        "to_zone": {
+          "const": "discard"
+        }
+      }
+    }
+  }
+}

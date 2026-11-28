@@ -32,8 +32,7 @@ def _dados_habilidade_visual(card: dict[str, Any]) -> tuple[str, str]:
         # Usa exatamente o mesmo texto preparado para a partida, inclusive os ajustes de raridade.
         from .gwent import preparar_carta
         prepared = preparar_carta(card)
-        tem_efeito = bool(prepared.get("habilidade") or prepared.get("habilidade_identidade"))
-        return (str(prepared.get("habilidade_nome") or "Habilidade") if tem_efeito else "Sem habilidade"), str(prepared.get("habilidade_texto") or "Sem habilidade especial.")
+        return str(prepared.get("habilidade_nome") or "Habilidade"), str(prepared.get("habilidade_texto") or "Sem habilidade especial.")
     except Exception:
         ability = HABILIDADES.get(str(card.get("habilidade", "")), {})
         return str(ability.get("nome") or "Tática"), str(ability.get("texto") or "Sem habilidade especial.")
@@ -333,44 +332,6 @@ def _draw_ruins(draw: ImageDraw.ImageDraw, box, accent, rng: random.Random):
     draw.polygon([(x1, y2), (x1 + width * .18, horizon), (x1 + width * .42, y2)], fill=(13, 18, 25, 230))
     draw.polygon([(x2, y2), (x2 - width * .22, horizon), (x2 - width * .48, y2)], fill=(11, 16, 24, 230))
 
-
-
-def _aplicar_acabamento_profissional(art: Image.Image, accent, metal, top, seed: int) -> Image.Image:
-    """Acabamento profissional: rim light, vinheta, profundidade e grão sutil."""
-    w, h = art.size
-    rng = random.Random(seed ^ 0x50524F46)
-    # Rim light nas bordas (luz de contorno)
-    rim = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    rd = ImageDraw.Draw(rim, "RGBA")
-    for i in range(6, 0, -1):
-        r = int(min(w, h) * (0.46 - i * 0.03))
-        rd.ellipse((w//2 - r, h//2 - r, w//2 + r, h//2 + r),
-                   outline=(*metal, 18 + i * 6), width=max(1, w//120))
-    art = Image.alpha_composite(art, rim)
-    # Vignette profissional (escurece cantos)
-    vig = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    vd = ImageDraw.Draw(vig, "RGBA")
-    for i in range(12, 0, -1):
-        pad = int(min(w, h) * (0.02 + i * 0.025))
-        vd.rectangle((pad, pad, w - pad, h - pad), outline=(0, 0, 0, int(12 + i * 8)))
-    art = Image.alpha_composite(art, vig)
-    # Grão sutil
-    grain = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    gd = ImageDraw.Draw(grain, "RGBA")
-    for _ in range(w * h // 180):
-        x = rng.randint(0, w - 1); y = rng.randint(0, h - 1)
-        v = rng.randint(0, 255)
-        gd.point((x, y), fill=(v, v, v, rng.randint(8, 22)))
-    art = Image.alpha_composite(art, grain)
-    # Highlight central (luz de topo)
-    hl = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    hd = ImageDraw.Draw(hl, "RGBA")
-    for i in range(8, 0, -1):
-        r = int(min(w, h) * (0.18 + i * 0.04))
-        hd.ellipse((w//2 - r, int(h * 0.15) - r, w//2 + r, int(h * 0.15) + r),
-                   fill=(*accent, int(4 + i * 3)))
-    art = Image.alpha_composite(art, hl)
-    return art
 
 
 def _draw_unique_scene(art: Image.Image, card: dict[str, Any], rng: random.Random,
@@ -1142,9 +1103,6 @@ def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = 
 
     # Camada de cenário exclusiva fica atrás do personagem/motivo principal.
     _draw_unique_scene(art, card, rng, accent, metal, top)
-
-    # Acabamento profissional: rim light, vinheta, profundidade e grão sutil
-    art = _aplicar_acabamento_profissional(art, accent, metal, top, seed)
 
     # Motivo narrativo individual: o ID define a família visual e o nome/descrição
     # refinam o tema. Tudo é vetorial, determinístico e não depende de assets externos.

@@ -1,0 +1,85 @@
+{
+  "artifact": "card-engine-v2-energy-economy-alpha-v0.1",
+  "revision": 24,
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev23.zip",
+  "ruleset": "alpha-test-only.ruleset.v0.4",
+  "status": "PASS",
+  "runtime_scope": "isolated_card_engine_v2_alpha",
+  "energy_policy": {
+    "gain_per_player_turn_start": 1,
+    "maximum_energy": 5,
+    "persists_across_rounds": true,
+    "first_player_initial_energy": 1,
+    "second_player_initial_energy": 0,
+    "cost_maps": {
+      "card_energy_cost_by_card_id": 0,
+      "leader_activation_energy_cost_by_leader_id": 0
+    },
+    "unpriced_alpha_actions": "allowed_without_energy_charge",
+    "rarity_used_as_cost_input": false,
+    "legacy_deck_cost_used_as_energy_input": false
+  },
+  "tests": {
+    "test_file": "tests/card_engine_v2/test_energy_economy.py",
+    "passed": 10,
+    "failed": 0,
+    "cases": [
+      "starting energy and first turn gain",
+      "energy carry-over between rounds and cap",
+      "unpriced alpha cards remain playable",
+      "insufficient energy rejects without consuming card or state",
+      "explicit card payment and idempotent replay",
+      "explicit special payment",
+      "explicit leader payment",
+      "runtime persistence after SQLite repository reopen",
+      "catalog rejects unknown IDs and boolean costs",
+      "runtime rejects energy above cap with transaction rollback"
+    ]
+  },
+  "full_suite": {
+    "command": "python docs/scripts/test-card-engine-v2-playable-alpha-v0.5.py",
+    "passed": 145,
+    "failed": 0,
+    "skipped": 0,
+    "status": "PASS"
+  },
+  "compile": {
+    "command": "python -m py_compile sistemas/card_engine_v2/*.py docs/scripts/*.py tests/card_engine_v2/*.py",
+    "status": "PASS"
+  },
+  "external_validations": {
+    "legacy_catalog_staging": {
+      "status": "PASS",
+      "historical_models": 137,
+      "alpha_allowlisted": 27,
+      "blocked": 110
+    },
+    "playable_bo3_simulation": {
+      "status": "PASS",
+      "result": "Player A 2-1 Player B",
+      "events": 87,
+      "deck_fatigue_ticks": 6,
+      "sqlite_integrity": "ok"
+    },
+    "combo_faction_leader_simulation": {
+      "status": "PASS",
+      "result": "Player A 20-10 Player B",
+      "events": 44,
+      "sqlite_integrity": "ok"
+    }
+  },
+  "compatibility": {
+    "card_instance_schema": 7,
+    "sql_ddl_or_migrations_changed": false,
+    "legacy_core_files_changed": false,
+    "discord_http_frontend_integration": false,
+    "human_playtests": false
+  },
+  "notes": [
+    "Cost maps intentionally remain empty; no production energy prices were invented.",
+    "Rarity-derived execution parameters are prohibited by approved decision BUF-001.",
+    "deck_cost_legacy is not an approved per-turn energy-cost contract.",
+    "Sacrifice and pass do not spend energy in this alpha tranche.",
+    "No generic active-card-ability activation endpoint exists yet."
+  ]
+}

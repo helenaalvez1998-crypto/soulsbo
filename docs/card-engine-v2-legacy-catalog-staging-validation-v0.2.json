@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "artifact": "card-engine-v2-legacy-catalog-staging.v0.2.json",
+  "checks": {
+    "review_only_status": true,
+    "all_137_historical_ids_present_once": true,
+    "allowlist_matches_alpha_catalog": true,
+    "27_alpha_models_only": true,
+    "110_models_blocked": true,
+    "blocked_models_have_blockers": true,
+    "source_hashes_match": true,
+    "staging_summary_matches_expected": true
+  },
+  "summary": {
+    "historical_model_count": 137,
+    "alpha_test_only_count": 27,
+    "blocked_staging_only_count": 110,
+    "not_rebuilt_count": 137,
+    "faction_unreviewed_count": 137,
+    "legacy_cost_mismatch_count": 19
+  },
+  "source_sha256": {
+    "catalog-legacy-baseline-v0.1.json": "df383e6aa10634cf4a0c5d00594e2cbc9f1edb071c95da2ce3119096375297c2",
+    "card-engine-v2-alpha-catalog.v0.3.json": "4a3296f3f666d4bf01c20abe58da1b78bb2a35fa95c29be212460ed0ccfe89ab",
+    "card-engine-v2-legacy-catalog-staging.v0.2.json": "1c4088665c576d73e7a549e2ff2c6e675c62526aa53cf64a681610278fb3f07b"
+  },
+  "runtime_integration": false,
+  "production_database_access": false
+}

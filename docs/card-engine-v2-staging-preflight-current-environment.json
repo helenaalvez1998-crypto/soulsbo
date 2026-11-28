@@ -1,0 +1,177 @@
+{
+  "tool": "card_engine_v2_staging_preflight",
+  "version": "0.1",
+  "ready": false,
+  "summary": {
+    "passed": 17,
+    "warnings": 2,
+    "blockers": 12
+  },
+  "database": {
+    "path_configured": false,
+    "read_only_schema_check": "arquivo SQLite não encontrado no caminho configurado"
+  },
+  "checks": [
+    {
+      "name": "python",
+      "status": "pass",
+      "detail": "Python 3.13 atende ao mínimo 3.11"
+    },
+    {
+      "name": "dependency:discord.py",
+      "status": "block",
+      "detail": "pacote ausente; requirements exige 2.7.1"
+    },
+    {
+      "name": "dependency:aiosqlite",
+      "status": "block",
+      "detail": "pacote ausente; requirements exige 0.22.1"
+    },
+    {
+      "name": "dependency:aiohttp",
+      "status": "block",
+      "detail": "versão 3.13.3 encontrada; requirements exige 3.14.5"
+    },
+    {
+      "name": "dependency:python-dotenv",
+      "status": "block",
+      "detail": "versão 1.2.2 encontrada; requirements exige 1.2.4"
+    },
+    {
+      "name": "file:bot.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:database.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:site_hub.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:site_card_engine_v2.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:cogs/painel_jogo.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:cogs/card_engine_v2_ui.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:sistemas/card_engine_v2/discord_gateway.py",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:site/card-engine-v2.html",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "file:site/assets/card-engine-v2.js",
+      "status": "pass",
+      "detail": "arquivo presente"
+    },
+    {
+      "name": "wiring:bot_extension_panel",
+      "status": "pass",
+      "detail": "referência de integração presente"
+    },
+    {
+      "name": "wiring:discord_v2_button",
+      "status": "pass",
+      "detail": "referência de integração presente"
+    },
+    {
+      "name": "wiring:site_v2_routes",
+      "status": "pass",
+      "detail": "referência de integração presente"
+    },
+    {
+      "name": "wiring:oauth_callback",
+      "status": "pass",
+      "detail": "referência de integração presente"
+    },
+    {
+      "name": "secret:DISCORD_TOKEN",
+      "status": "block",
+      "detail": "token não configurado"
+    },
+    {
+      "name": "secret:DISCORD_OAUTH_CLIENT_ID",
+      "status": "block",
+      "detail": "client ID OAuth ausente ou inválido"
+    },
+    {
+      "name": "secret:DISCORD_OAUTH_CLIENT_SECRET",
+      "status": "block",
+      "detail": "client secret OAuth não configurado"
+    },
+    {
+      "name": "secret:SOULSBOT_WEB_SESSION_SECRET",
+      "status": "block",
+      "detail": "chave de sessão ausente ou menor que 32 caracteres"
+    },
+    {
+      "name": "secret:session_key_separation",
+      "status": "pass",
+      "detail": "chave de sessão separada dos demais segredos"
+    },
+    {
+      "name": "url:SOULSBOT_PUBLIC_URL",
+      "status": "block",
+      "detail": "URL pública ausente ou inválida; use HTTPS (HTTP só em localhost)"
+    },
+    {
+      "name": "url:DISCORD_OAUTH_REDIRECT_URI",
+      "status": "block",
+      "detail": "callback precisa ser exatamente SOULSBOT_PUBLIC_URL/auth/discord/callback e estar registrada no Discord Developer Portal"
+    },
+    {
+      "name": "storage:DATA_DIR",
+      "status": "pass",
+      "detail": "diretório persistente existe e passou teste de escrita/remoção"
+    },
+    {
+      "name": "storage:card_engine_v2",
+      "status": "warn",
+      "detail": "diretório v2 será criado na primeira inicialização"
+    },
+    {
+      "name": "database:collection_schema",
+      "status": "block",
+      "detail": "arquivo SQLite não encontrado no caminho configurado"
+    },
+    {
+      "name": "storage:persistence_across_redeploy",
+      "status": "warn",
+      "detail": "confirmar no painel da hospedagem que DATA_DIR está montado em volume persistente; teste local não prova retenção após deploy"
+    },
+    {
+      "name": "discord:token_probe",
+      "status": "block",
+      "detail": "não há token para validar a conexão Discord"
+    },
+    {
+      "name": "discord:privileged_intents_code",
+      "status": "pass",
+      "detail": "código solicita message_content, members e presences; habilitar os três intents no Developer Portal"
+    }
+  ],
+  "security": {
+    "secrets_printed": false,
+    "database_opened_read_only": true,
+    "database_rows_or_user_ids_exported": false,
+    "writes_to_application_database": false
+  }
+}

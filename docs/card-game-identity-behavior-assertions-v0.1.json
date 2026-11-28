@@ -7,7 +7,7 @@
     "method": "One positive assertion for each active mapping plus selected negative/limit cases; Common rarity isolates identity behavior from rarity amplification."
   },
   "counts": {
-    "active_identity_effects": 29,
+    "active_identity_effects": 22,
     "positive_assertions": 22,
     "negative_or_limit_assertions": 11,
     "total_assertions": 33,

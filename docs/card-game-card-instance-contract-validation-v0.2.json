@@ -1,0 +1,171 @@
+{
+  "metadata": {
+    "document": "CardInstance v0.2 validation",
+    "version": "0.2",
+    "date": "2026-11-27",
+    "status": "GROUP_A_APPROVED_CONTRACT_DRAFT_NOT_FROZEN",
+    "schemas": [
+      "docs/schemas/card-game-card-instance-match.schema.v2.json",
+      "docs/schemas/card-game-target-selection.schema.v1.json"
+    ],
+    "harness": "docs/scripts/validate-card-game-card-instance-v0.2.py",
+    "scope": "Draft 2020-12 schemas, synthetic invariants, target selection and static DDL evidence; no runtime/DB integration"
+  },
+  "summary": {
+    "passed": 30,
+    "failed": 0,
+    "total": 30
+  },
+  "cases": [
+    {
+      "id": "CI20-01",
+      "description": "v2 example validates against Draft 2020-12 match schema",
+      "passed": true
+    },
+    {
+      "id": "CI20-02",
+      "description": "single physical target uses target_instance_id",
+      "passed": true
+    },
+    {
+      "id": "CI20-03",
+      "description": "multiple physical targets use unique target_instance_ids",
+      "passed": true
+    },
+    {
+      "id": "CI20-04",
+      "description": "duplicate target_instance_ids are rejected",
+      "passed": true
+    },
+    {
+      "id": "CI20-05",
+      "description": "legacy target_id is not accepted by the new target selector schema",
+      "passed": true
+    },
+    {
+      "id": "CI20-06",
+      "description": "single and multiple selector forms cannot be mixed",
+      "passed": true
+    },
+    {
+      "id": "CI20-07",
+      "description": "example satisfies global identity, zone, ownership and provenance invariants",
+      "passed": true
+    },
+    {
+      "id": "CI20-08",
+      "description": "same card_id is valid across distinct physical instances",
+      "passed": true
+    },
+    {
+      "id": "CI20-09",
+      "description": "example assigns globally distinct exemplar IDs to collection-backed instances",
+      "passed": true
+    },
+    {
+      "id": "CI20-10",
+      "description": "ordered zone arrays preserve list order",
+      "passed": true
+    },
+    {
+      "id": "CI20-11",
+      "description": "registry key and embedded instance_id must match",
+      "passed": true
+    },
+    {
+      "id": "CI20-12",
+      "description": "one physical instance cannot occur in two zones",
+      "passed": true
+    },
+    {
+      "id": "CI20-13",
+      "description": "registry entries cannot be orphaned from all zones",
+      "passed": true
+    },
+    {
+      "id": "CI20-14",
+      "description": "owner must match the participant whose zone contains the instance",
+      "passed": true
+    },
+    {
+      "id": "CI20-15",
+      "description": "a collection exemplar cannot be reused and must match owner/model",
+      "passed": true
+    },
+    {
+      "id": "CI20-16",
+      "description": "unknown exemplar IDs are rejected",
+      "passed": true
+    },
+    {
+      "id": "CI20-17",
+      "description": "generated token cannot claim collection provenance",
+      "passed": true
+    },
+    {
+      "id": "CI20-18",
+      "description": "instance card_id must match frozen definition snapshot",
+      "passed": true
+    },
+    {
+      "id": "CI20-19",
+      "description": "non-UUIDv4 instance IDs are rejected by schema",
+      "passed": true
+    },
+    {
+      "id": "CI20-20",
+      "description": "deck_exemplar requires positive exemplar_id",
+      "passed": true
+    },
+    {
+      "id": "CI20-21",
+      "description": "board rejects special/relic instances",
+      "passed": true
+    },
+    {
+      "id": "CI20-22",
+      "description": "owner approval record contains exactly the eight Group A decisions",
+      "passed": true
+    },
+    {
+      "id": "CI20-23",
+      "description": "current DDL supports global exemplar PK and owner/model validation",
+      "passed": true
+    },
+    {
+      "id": "CI20-24",
+      "description": "metric ties use persisted zone order then instance_id fallback",
+      "passed": true
+    },
+    {
+      "id": "CI20-25",
+      "description": "weakest metric selection follows the same deterministic tie rule",
+      "passed": true
+    },
+    {
+      "id": "CI20-26",
+      "description": "runtime file is present for integrity comparison: sistemas/gwent.py",
+      "passed": true
+    },
+    {
+      "id": "CI20-27",
+      "description": "runtime file is present for integrity comparison: sistemas/cartas.py",
+      "passed": true
+    },
+    {
+      "id": "CI20-28",
+      "description": "runtime file is present for integrity comparison: bot.py",
+      "passed": true
+    },
+    {
+      "id": "CI20-29",
+      "description": "runtime file is present for integrity comparison: database.py",
+      "passed": true
+    },
+    {
+      "id": "CI20-30",
+      "description": "runtime file is present for integrity comparison: site/app.js",
+      "passed": true
+    }
+  ]
+}

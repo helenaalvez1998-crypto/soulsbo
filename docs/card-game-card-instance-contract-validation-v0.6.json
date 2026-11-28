@@ -1,0 +1,111 @@
+{
+  "version": "v0.6",
+  "status": "passed",
+  "checks": 24,
+  "passed": 24,
+  "failed": 0,
+  "script": "docs/scripts/validate-card-game-card-instance-v0.6.py",
+  "schema": "docs/schemas/card-game-card-instance-match.schema.v6.json",
+  "example": "docs/examples/card-instance-match.example.v6.json",
+  "cases": [
+    {
+      "case": "test_event_schema_v2_id",
+      "status": "passed"
+    },
+    {
+      "case": "test_expected_revision_is_still_bound_to_result",
+      "status": "passed"
+    },
+    {
+      "case": "test_f_register_has_five_approved_decisions",
+      "status": "passed"
+    },
+    {
+      "case": "test_group_e_blocks_persistence_integration",
+      "status": "passed"
+    },
+    {
+      "case": "test_group_e_remains_pending",
+      "status": "passed"
+    },
+    {
+      "case": "test_group_f_approval_exists",
+      "status": "passed"
+    },
+    {
+      "case": "test_instance_version_is_six",
+      "status": "passed"
+    },
+    {
+      "case": "test_invalid_removal_cause_is_rejected",
+      "status": "passed"
+    },
+    {
+      "case": "test_legacy_baixas_projection_is_sum",
+      "status": "passed"
+    },
+    {
+      "case": "test_match_schema_is_valid",
+      "status": "passed"
+    },
+    {
+      "case": "test_operation_event_references_are_valid",
+      "status": "passed"
+    },
+    {
+      "case": "test_player_counter_semantics_are_documented",
+      "status": "passed"
+    },
+    {
+      "case": "test_player_counters_are_nonnegative_projections",
+      "status": "passed"
+    },
+    {
+      "case": "test_removal_causes_are_closed",
+      "status": "passed"
+    },
+    {
+      "case": "test_root_version_is_six",
+      "status": "passed"
+    },
+    {
+      "case": "test_round_archive_is_not_a_removal_cause",
+      "status": "passed"
+    },
+    {
+      "case": "test_rykard_and_vengeance_sources_remain_independent",
+      "status": "passed"
+    },
+    {
+      "case": "test_sacrifice_cannot_be_a_shield_blocked_cause",
+      "status": "passed"
+    },
+    {
+      "case": "test_standalone_domain_event_schema_is_valid",
+      "status": "passed"
+    },
+    {
+      "case": "test_standalone_removal_cause_schema_is_valid_and_closed",
+      "status": "passed"
+    },
+    {
+      "case": "test_unit_removed_event_has_canonical_cause_payload",
+      "status": "passed"
+    },
+    {
+      "case": "test_v6_example_matches_schema",
+      "status": "passed"
+    },
+    {
+      "case": "test_vengeance_event_uses_canonical_id",
+      "status": "passed"
+    },
+    {
+      "case": "test_vengeance_instance_uses_canonical_id",
+      "status": "passed"
+    }
+  ],
+  "limits": [
+    "Schema/fixture validation only; no runtime, HTTP, aiosqlite, production DB or migration was executed."
+  ]
+}

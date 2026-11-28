@@ -64,7 +64,7 @@ const cardSigil = value => {
     : key.includes('Especial') ? '◇' : '✦');
 };
 const RARITY_POWER = {'Comum':0,'Rara':1,'Épica':2,'Lendária':3,'Mítica':4,'Primordial':5,'Singular':6};
-const rarityPower = card => Number.isFinite(Number(card?.potencia_raridade)) ? Number(card.potencia_raridade) : 0;
+const rarityPower = card => Number.isFinite(Number(card?.potencia_raridade)) ? Number(card.potencia_raridade) : (RARITY_POWER[card?.raridade] ?? 0);
 const rarityPowerMarkup = card => `<span class=\"v54-rarity-power\" title=\"Potência da raridade: amplia habilidades; não é poder de ataque\"><i>✦</i> Potência ${rarityPower(card)}</span>`;
 const cardInsigniaMarkup = card => {
   const category = card.categoria === 'Especial' ? 'Especial' : 'Unidade';
@@ -329,9 +329,7 @@ function renderGwentBuilder() {
   const upgradeCost = {Comum:10, Rara:20, 'Épica':40, 'Lendária':80, 'Mítica':150, 'Primordial':250};
   const specialCount = selected.filter(card => card.categoria === 'Especial').length;
   const unitCount = selected.length - specialCount;
-  const GWENT_BUDGET = 36;
-  const deckCost = selected.reduce((sum, card) => sum + Number(card.custo || 0), 0);
-  $('#gwent-deck-count').textContent = `${selected.length}/12 cartas · ${unitCount} unidades · ${specialCount} especiais · custo ${deckCost}/${GWENT_BUDGET}`;
+  $('#gwent-deck-count').textContent = `${selected.length}/12 cartas · ${unitCount} unidades · ${specialCount} especiais`;
   const cardTile = (card, inDeck = false) => inDeck
     ? `<button type="button" class="gwent-card-tile gwent-deck-mini is-selected" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-deck-mini-name">${escapeHTML(card.nome || 'Carta')}</span></button>`
     : `<button type="button" class="gwent-card-tile" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-card-tile-hint">VER CARTA</span></button>`;
@@ -363,9 +361,7 @@ function renderGwentBuilder() {
     || (JSON.stringify(gwentDeckIds) === JSON.stringify(gwentSavedIds) && !configChanged);
   const resetButton = $('#gwent-reset-deck');
   if (resetButton) resetButton.disabled = selected.length === 0 && gwentSavedIds.length === 0;
-  $('#gwent-deck-status').textContent = deckCost > GWENT_BUDGET
-    ? `Custo do deck acima do limite (${deckCost}/${GWENT_BUDGET}). A Relíquia equipada também conta.`
-    : selected.length === 12 && unitCount < 8
+  $('#gwent-deck-status').textContent = selected.length === 12 && unitCount < 8
     ? 'Inclua pelo menos 8 unidades no deck.'
     : specialCount > 4 ? 'O limite é de 4 cartas especiais por deck.'
     : selected.length === 12 && !factionMatches
@@ -450,8 +446,8 @@ function openGwentCollectionCardModal(cardId) {
         </header>
         <section class="gwent-collection-power">
           <div><small>PODER-BASE</small><strong>${special ? '—' : number(card.poder)}</strong></div>
-          <div><small>PODER MÁXIMO (APRIMORAMENTO)</small><strong>${special ? '—' : number(card.max_power || card.poder)}</strong></div>
-          <div><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 3</strong></div>
+          <div><small>PODER MÁXIMO</small><strong>${special ? '—' : number(card.max_power || card.poder)}</strong></div>
+          <div><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></div>
         </section>
         <section class="gwent-collection-section gwent-collection-effect">
           <small>EFEITO DE COMBATE</small>
@@ -1658,9 +1654,9 @@ function gwentSimpleExample(card) {
   const skill = String(card?.habilidade || '');
   const examples = {
     devoto: 'Exemplo: você já tem duas unidades dos Esquecidos no campo e joga outra carta dos Esquecidos com Devoto. Ela recebe +1. Com apenas uma aliada da mesma facção, não recebe o bônus.',
-    gloria: 'Exemplo: o Mensageiro Cinzento está no campo e você vence a rodada. Ele permanece para a próxima. Se a NARA vencer, ele vai para o descarte.',
-    legado: 'Exemplo: você vence a primeira rodada. Ao jogar o Peregrino do Santuário Perdido na segunda, ele entra com +2 de poder. Se você perdeu a rodada anterior, esse bônus não ativa.',
-    sinergia_faccao: 'Exemplo: você tem três unidades dos Esquecidos no campo e joga o Cavaleiro Peregrino das Cinzas. Ele ganha +3 de poder, porque já havia três aliados da mesma facção.',
+    gloria: 'Exemplo: o Anjo Esquecido está no campo e você vence a rodada. Ele permanece para a próxima. Se a NARA vencer, ele vai para o descarte.',
+    legado: 'Exemplo: você vence a primeira rodada. Ao jogar o Missionário Esquecido na segunda, ele entra com +2 de poder. Se você perdeu a rodada anterior, esse bônus não ativa.',
+    sinergia_faccao: 'Exemplo: você tem três unidades dos Esquecidos no campo e joga o Cruzado Esquecido. Ele ganha +3 de poder, porque já havia três aliados da mesma facção.',
     lei_primeva: 'Exemplo: se jogar esta unidade na primeira rodada, ela recebe +2. Se jogar nas rodadas seguintes, esse bônus especial não acontece.',
     decreto_soberano: 'Exemplo: um inimigo com +3 de bônus passa a ter +1; outro com +1 passa a ter -1. A habilidade não reduz ninguém abaixo de -2 de bônus.',
     olho_tempestade: 'Exemplo: se a fileira onde esta unidade está tiver chuva, ela recebe +2. Sem clima naquela fileira, não recebe esse bônus.',
@@ -2691,7 +2687,7 @@ function openGwentBoardCardModal(cardId) {
             <span>CLIQUE PARA DETALHAR</span>
           </button>
           <article><small>ESCUDO</small><strong>${number(shield)}</strong></article>
-          <article class="gwent-rarity-potency"><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 3</strong></article>
+          <article class="gwent-rarity-potency"><small>POTÊNCIA DA RARIDADE</small><strong>${number(rarityBudget)} / 6</strong></article>
         </div>
         <section class="gwent-bonus-breakdown" id="gwent-bonus-breakdown" hidden>
           <div class="gwent-bonus-breakdown-heading"><div><small>RASTREIO DE COMBATE</small><strong>Origem do bônus ${signedBonus(bonus)}</strong></div><span>DETALHAMENTO</span></div>

@@ -1,0 +1,82 @@
+{
+  "document": "Soulsbo Card Engine v2 — exact physical exemplar provenance validation",
+  "version": "0.2",
+  "status": "PASS",
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev26.zip",
+  "resulting_revision": "rev27",
+  "runtime_scope": "isolated_alpha_application_and_match_controller",
+  "production_database_access": false,
+  "legacy_database_writes": false,
+  "summary": {
+    "automated_tests": 188,
+    "passed": 188,
+    "failed": 0,
+    "skipped": 0,
+    "historical_models": 137,
+    "alpha_allowlist_cards": 27,
+    "blocked_historical_models": 110,
+    "registered_combos": 27,
+    "reachable_combos": 9,
+    "inactive_combos": 18,
+    "faction_passives": 4,
+    "leader_handlers": 10,
+    "entry_effect_families": 12
+  },
+  "identity_contract": {
+    "card_id": "catalog model identity",
+    "exemplar_id": "global cartas_exemplares.id physical-copy identity",
+    "instance_id": "server-generated UUIDv4 match occurrence identity",
+    "one_exemplar_per_deck_slot": true,
+    "maximum_uses_of_same_exemplar_across_two_players": 1,
+    "global_duplicate_exemplar_ids_rejected": true,
+    "live_ownership_rechecked_at_matchmaking": true,
+    "application_accepts_client_shuffle_seed": false,
+    "shuffle_randomness": "server_system_random"
+  },
+  "exemplar_snapshot": {
+    "power_base": "current exemplar power, frozen at match creation and used mechanically during that match",
+    "rarity_id": "display classification only; excluded from power, effects, targeting and energy costs",
+    "primordial_rarity_supported": true
+  },
+  "saved_deck_repository": {
+    "schema_version": 2,
+    "migrates_schema_v1": true,
+    "legacy_rows_receive_empty_exemplar_ids": true,
+    "fabricates_missing_exemplar_ids": false,
+    "old_decks_without_provenance_rejected_from_matchmaking": true
+  },
+  "player_view": {
+    "own_hand_contains_physical_exemplar_metadata": true,
+    "opponent_hand_hidden": true,
+    "opponent_physical_exemplar_ids_hidden": true,
+    "privileged_view_without_viewer_exists_for_internal_tests": true,
+    "production_authentication_transport_connected": false,
+    "opponent_hand_contents_hidden": true
+  },
+  "official_validation": {
+    "py_compile": "PASS",
+    "legacy_catalog_staging": "PASS",
+    "bo3_simulation": {
+      "status": "finished",
+      "winner_player_id": "1001",
+      "score": "2-1",
+      "events": 97,
+      "sqlite_integrity_check": "ok",
+      "foreign_key_violations": 0
+    },
+    "combo_faction_leader_simulation": {
+      "winner_player_id": "1001",
+      "score": "20-10",
+      "events": 49,
+      "sqlite_integrity_check": "ok",
+      "foreign_key_violations": 0
+    }
+  },
+  "limitations": [
+    "No Discord, HTTP, website/frontend or production authentication integration is implemented.",
+    "The caller of view_match_for_player must pass a player ID derived from authenticated principal; this revision does not implement authentication.",
+    "There is no distributed transaction across the legacy collection database and the isolated Card Engine v2 databases.",
+    "The 110 blocked historical card models remain unavailable in the alpha catalog.",
+    "No human playtest or release balance sign-off was performed."
+  ]
+}

@@ -1,0 +1,207 @@
+{
+  "audit": "card_game_removal_causes_group_F",
+  "version": "0.1",
+  "date": "2026-11-27",
+  "status": "READ_ONLY_LEGACY_AUDIT; RESOLUTIONS_CANDIDATE_NOT_APPROVED",
+  "baseline": "soulsbo-main-continuity-2026-11-27-rev12.zip",
+  "total": 29,
+  "passed": 29,
+  "failed": 0,
+  "runtime_modified": false,
+  "groups_D_status": "OWNER_APPROVED",
+  "cases": [
+    {
+      "id": "F-001",
+      "title": "normal removal triggers Vengeance after success",
+      "test_method": "test_01_default_normal_removal_triggers_vengeance_after_success",
+      "status": "PASS"
+    },
+    {
+      "id": "F-002",
+      "title": "execution triggers Vengeance after success",
+      "test_method": "test_02_execution_cause_triggers_vengeance_after_success",
+      "status": "PASS"
+    },
+    {
+      "id": "F-003",
+      "title": "sacrifice triggers Vengeance in legacy",
+      "test_method": "test_03_sacrifice_cause_triggers_vengeance_in_legacy",
+      "status": "PASS"
+    },
+    {
+      "id": "F-004",
+      "title": "shield-blocked normal removal does not trigger Vengeance",
+      "test_method": "test_04_shield_blocks_normal_removal_without_vengeance",
+      "status": "PASS"
+    },
+    {
+      "id": "F-005",
+      "title": "shield-blocked execution does not trigger Vengeance",
+      "test_method": "test_05_shield_blocks_execution_without_vengeance",
+      "status": "PASS"
+    },
+    {
+      "id": "F-006",
+      "title": "sacrifice bypasses shield and triggers Vengeance",
+      "test_method": "test_06_sacrifice_bypasses_shield_and_triggers_vengeance",
+      "status": "PASS"
+    },
+    {
+      "id": "F-007",
+      "title": "non-board target has no trigger or counter change",
+      "test_method": "test_07_non_board_target_does_not_trigger_or_increment",
+      "status": "PASS"
+    },
+    {
+      "id": "F-008",
+      "title": "Vengeance targets only remaining allies in same row",
+      "test_method": "test_08_vengeance_only_affects_remaining_allies_in_same_row",
+      "status": "PASS"
+    },
+    {
+      "id": "F-009",
+      "title": "non-Vengeance victim does not trigger",
+      "test_method": "test_09_non_vengeance_unit_does_not_trigger",
+      "status": "PASS"
+    },
+    {
+      "id": "F-010",
+      "title": "one successful removal triggers once",
+      "test_method": "test_10_one_successful_removal_triggers_once",
+      "status": "PASS"
+    },
+    {
+      "id": "F-011",
+      "title": "separate Vengeance victims trigger independently",
+      "test_method": "test_11_two_distinct_vengeance_victims_trigger_independently",
+      "status": "PASS"
+    },
+    {
+      "id": "F-012",
+      "title": "legacy counter counts effect removal",
+      "test_method": "test_12_legacy_counter_counts_successful_effect_removal",
+      "status": "PASS"
+    },
+    {
+      "id": "F-013",
+      "title": "legacy counter counts execution",
+      "test_method": "test_13_legacy_counter_counts_successful_execution",
+      "status": "PASS"
+    },
+    {
+      "id": "F-014",
+      "title": "legacy counter counts sacrifice",
+      "test_method": "test_14_legacy_counter_counts_successful_sacrifice",
+      "status": "PASS"
+    },
+    {
+      "id": "F-015",
+      "title": "candidate registry has three explicit removal causes",
+      "test_method": "test_15_only_three_removal_causes_are_declared_in_candidate_registry",
+      "status": "PASS"
+    },
+    {
+      "id": "F-016",
+      "title": "active special bindings use central removal routes",
+      "test_method": "test_16_active_black_flame_and_execution_catalog_bindings_exist",
+      "status": "PASS"
+    },
+    {
+      "id": "F-017",
+      "title": "active Devour and Blood Price bindings use sacrifice",
+      "test_method": "test_17_active_devour_and_blood_price_bindings_exist",
+      "status": "PASS"
+    },
+    {
+      "id": "F-018",
+      "title": "Rykard leader is active and uses sacrifice",
+      "test_method": "test_18_rykard_is_active_leader_and_routes_through_sacrifice",
+      "status": "PASS"
+    },
+    {
+      "id": "F-019",
+      "title": "Devour handler ordering",
+      "test_method": "test_19_devour_real_handler_triggers_vengeance_then_gain",
+      "status": "PASS"
+    },
+    {
+      "id": "F-020",
+      "title": "Blood Price handler triggers Vengeance",
+      "test_method": "test_20_blood_price_real_identity_handler_triggers_vengeance",
+      "status": "PASS"
+    },
+    {
+      "id": "F-021",
+      "title": "Rykard +1 then +2 stacking",
+      "test_method": "test_21_rykard_real_handler_stacks_vengeance_then_direct_bonus",
+      "status": "PASS"
+    },
+    {
+      "id": "F-022",
+      "title": "round archive is not removal and does not increment bajas",
+      "test_method": "test_22_round_archive_does_not_call_removal_or_increment_baixas",
+      "status": "PASS"
+    },
+    {
+      "id": "F-023",
+      "title": "terminal round is not removal",
+      "test_method": "test_23_terminal_round_returns_without_board_removal_or_vengeance",
+      "status": "PASS"
+    },
+    {
+      "id": "F-024",
+      "title": "Noite/Chama relic is not removal",
+      "test_method": "test_24_relic_flame_is_power_and_bonus_reduction_not_removal",
+      "status": "PASS"
+    },
+    {
+      "id": "F-025",
+      "title": "Black Blade relic is not removal",
+      "test_method": "test_25_black_blade_is_bonus_reduction_not_removal",
+      "status": "PASS"
+    },
+    {
+      "id": "F-026",
+      "title": "unknown legacy cause is not rejected",
+      "test_method": "test_26_unknown_legacy_cause_is_not_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "F-027",
+      "title": "legacy Vengeance uses habilidade string",
+      "test_method": "test_27_legacy_vengeance_check_uses_habilidade_string",
+      "status": "PASS"
+    },
+    {
+      "id": "F-028",
+      "title": "candidate/example effect ID naming mismatch",
+      "test_method": "test_28_candidate_and_example_use_different_vengeance_effect_ids",
+      "status": "PASS"
+    },
+    {
+      "id": "F-029",
+      "title": "baixas is not death-only",
+      "test_method": "test_29_legacy_baixas_is_not_a_death_only_counter",
+      "status": "PASS"
+    }
+  ],
+  "source_references": {
+    "central_removal": "sistemas/gwent.py:_remover_unidade",
+    "round_archive": "sistemas/gwent.py:_resolve_round",
+    "active_call_sites": [
+      598,
+      1433,
+      1620,
+      1638,
+      1876
+    ],
+    "candidate_registry": "data/card_game/removal-resurrection-registry-candidate.v1.json",
+    "legacy_tests": "docs/scripts/test-card-removal-resurrection-candidate-v0.1.py"
+  },
+  "limitations": [
+    "Fixtures are synthetic in-memory states; no HTTP, database, Discord, R2 or production environment was exercised.",
+    "The 29 passing cases reproduce behavior and source facts; they do not approve the recommended new-game rules.",
+    "Vengeance trigger policy for sacrifice, counters, additive Rykard balance and effect ID canonicalization remain owner decisions in Group F."
+  ],
+  "failures": []
+}

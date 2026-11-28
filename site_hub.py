@@ -820,6 +820,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/forja", forja_page)
     app.router.add_get("/transmutacao", transmutacao_page)
     app.router.add_get("/evolucao", evolucao_page)
+    app.router.add_get("/apostas", apostas_page)
     app.router.add_get("/api/gwent/transmutacao", transmutacao_list)
     app.router.add_post("/api/gwent/transmutacao/preview", transmutacao_preview)
     app.router.add_post("/api/gwent/transmutacao/execute", transmutacao_execute)
@@ -835,234 +836,75 @@ def registrar_rotas(bot, app: web.Application) -> None:
     app.router.add_get("/api/gwent/forja", forja_list)
     app.router.add_post("/api/gwent/forja", forja_action)
 
-    # ── Evolução com Risco (Forja das Almas) ──────────────────────────────
+    # ── Evolução com Risco: desabilitada até existir persistência transacional real.
     async def evolucao_list(request: web.Request) -> web.Response:
-        """Lista cartas disponíveis para evolução com risco."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        if not bot._api_origin_ok(request):
-            return web.json_response({"error": "Origem não autorizada."}, status=403)
-        try:
-            from sistemas.evolucao_risk import (
-                EVOLUTION_LEVELS, AMULETO_PROTECAO, get_evolution_config,
-                get_max_level_for_rarity,
-            )
-            # Lista exemplares do usuário que podem ser evoluídos
-            rows = await bot.db.all(
-                "SELECT e.id as exemplar_id, e.card_id, e.rarity, e.power, e.level as evolucao_level, c.nome "
-                "FROM cartas_exemplares e JOIN cartas_colecao c ON e.card_id=c.id "
-                "WHERE e.user_id=? AND e.evolucao_level < ? "
-                "ORDER BY e.rarity DESC, e.power DESC LIMIT 100", (uid, 6),
-            )
-            if rows:
-                for r in rows:
-                    nivel_atual = int(r["evolucao_level"] or 0)
-                    config = get_evolution_config(nivel_atual + 1) if nivel_atual < 5 else None
-                    r["proximo_nivel"] = nivel_atual + 1 if config else None
-                    r["max_nivel_raridade"] = get_max_level_for_rarity(r["rarity"]) or 5
-                    if config:
-                        r["chance_sucesso"] = config["success_rate"]
-                        r["risco_perda"] = config["risk_loss"]
-                        r["custo_denarios"] = config["cost_denarios"]
-                        r["custo_fragmentos"] = config["cost_fragmentos"]
-                    else:
-                        r["chance_sucesso"] = 0
-                        r["risco_perda"] = False
-                        r["custo_denarios"] = 0
-                        r["custo_fragmentos"] = 0
-            return web.json_response({"cartas": rows or []}, headers={"Cache-Control": "no-store"})
-        except Exception as exc:
-            return web.json_response({"error": str(exc)}, status=500)
+        return web.json_response(
+            {
+                "error": "A evolução com risco está temporariamente indisponível.",
+                "reason": "O inventário atual não persiste nível individual nem consumo de amuleto com segurança.",
+                "alternative": "/forja",
+            },
+            status=503,
+            headers={"Cache-Control": "no-store"},
+        )
 
     async def evolucao_execute(request: web.Request) -> web.Response:
-        """Executa tentativa de evolução com risco."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
         if not bot._api_origin_ok(request):
             return web.json_response({"error": "Origem não autorizada."}, status=403)
-        try:
-            body = await request.json()
-            exemplar_id = int(body.get("exemplar_id"))
-            usar_amuleto = bool(body.get("usar_amuleto", False))
-        except (ValueError, TypeError, AttributeError):
-            return web.json_response({"error": "Dados inválidos."}, status=400)
-        try:
-            from sistemas.evolucao_risk import simulate_evolution_roll, calculate_evolved_power
-            # Obter dados da carta
-            row = await bot.db.one(
-                "SELECT e.id, e.card_id, e.rarity, e.power, e.level as evolucao_level "
-                "FROM cartas_exemplares e WHERE e.id=? AND e.user_id=?", (exemplar_id, uid),
-            )
-            if not row:
-                return web.json_response({"error": "Carta não encontrada."}, status=404)
-            nivel_atual = int(row["evolucao_level"] or 0)
-            config = get_evolution_config(nivel_atual + 1) if nivel_atual < 5 else None
-            if not config:
-                return web.json_response({"error": "Carta já no nível máximo."}, status=400)
-            # Verificar custos
-            denarios = await bot.db.one("SELECT denarios FROM users WHERE user_id=?", (uid,))
-            # Para simplificar, verificar apenas se tem saldo mínimo
-            sucesso = simulate_evolution_roll(config["success_rate"])
-            if sucesso:
-                novo_poder = calculate_evolved_power({"poder": int(row["power"]), "rarity": row["rarity"]}, nivel_atual + 1)
-                # TODO: efetuar atualização real no banco
-                return web.json_response({
-                    "sucesso": True,
-                    "novo_nivel": nivel_atual + 1,
-                    "novo_poder": novo_poder,
-                    "mensagem": f"Evolução bem-sucedida! Nível {nivel_atual + 1}."
-                })
-            else:
-                if config["risk_loss"]:
-                    return web.json_response({
-                        "sucesso": False,
-                        "carta_perdida": True,
-                        "mensagem": "A evolução falhou e a carta foi consumida pelas Cinzas.",
-                    })
-                else:
-                    return web.json_response({
-                        "sucesso": False,
-                        "carta_perdida": False,
-                        "mensagem": "A evolução falhou, mas a carta foi preservada.",
-                    })
-        except Exception as exc:
-            return web.json_response({"error": str(exc)}, status=500)
+        return web.json_response(
+            {"error": "Tentativas de evolução com risco estão desabilitadas para proteger os exemplares."},
+            status=503,
+            headers={"Cache-Control": "no-store"},
+        )
 
     async def evolucao_proteger(request: web.Request) -> web.Response:
-        """Aplica amuleto de proteção antes da evolução."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        if not bot._api_origin_ok(request):
-            return web.json_response({"error": "Origem não autorizada."}, status=403)
-        return web.json_response({
-            "amuleto": AMULETO_PROTECAO,
-            "descricao": "Protege contra perda de carta em caso de falha na evolução.",
-        })
+        return web.json_response(
+            {"error": "O inventário de amuletos ainda não está integrado; nenhum item foi consumido."},
+            status=503,
+            headers={"Cache-Control": "no-store"},
+        )
 
-    # Evolução com Risco (Forja das Almas)
     app.router.add_get("/api/gwent/evolucao", evolucao_list)
     app.router.add_post("/api/gwent/evolucao", evolucao_execute)
     app.router.add_post("/api/gwent/evolucao/protecao", evolucao_proteger)
 
-    # ── Apostas com Cartas (Wager) ───────────────────────────────────────
+    # ── Apostas: bloqueadas enquanto não houver escrow, aceitação e liquidação atômica.
     async def apostas_list_cartas(request: web.Request) -> web.Response:
-        """Lista cartas disponíveis para apostas."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        rows = await bot.db.all(
-            "SELECT e.id as exemplar_id, c.nome, c.rarity, e.power "
-            "FROM cartas_exemplares e JOIN cartas_colecao c ON e.card_id=c.id "
-            "WHERE e.user_id=? AND e.evolucao_level > 0 LIMIT 50", (uid,)
-        )
-        return web.json_response({"cartas": rows or []}, headers={"Cache-Control": "no-store"})
+        return web.json_response({"error": "Apostas ainda não estão disponíveis."}, status=503,
+                                 headers={"Cache-Control": "no-store"})
 
     async def apostas_list_torneios(request: web.Request) -> web.Response:
-        """Lista torneios de apostas ativos."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        # Simples - retorna dados básicos
-        return web.json_response({
-            "torneios": [],
-            "mensagem": "Consulte o bot Discord para torneios ativos"
-        }, headers={"Cache-Control": "no-store"})
+        return web.json_response({"torneios": [], "disponivel": False,
+                                  "mensagem": "Torneios serão liberados após a implementação de custódia e liquidação."},
+                                 headers={"Cache-Control": "no-store"})
 
     async def apostas_denarios(request: web.Request) -> web.Response:
-        """Registra aposta de Denários em partida."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        try:
-            body = await request.json()
-            oponente_id = int(body.get("oponente_id", 0))
-            valor_denarios = int(body.get("valor_denarios", 0))
-            tipo = body.get("tipo", "casual")  # casual, rankeada
-
-            if valor_denarios <= 0:
-                return web.json_response({"error": "Valor inválido."}, status=400)
-
-            # Verificar saldo
-            user = await bot.db.one("SELECT denarios FROM users WHERE user_id=?", (uid,))
-            if not user or user["denarios"] < valor_denarios:
-                return web.json_response({"error": "Saldo insuficiente."}, status=400)
-
-            # Registrar aposta
-            await bot.db.execute(
-                "INSERT INTO apostas_denarios (user_id, oponente_id, valor_denarios, tipo, status) "
-                "VALUES (?, ?, ?, ?, 'pendente')",
-                (uid, oponente_id, valor_denarios, tipo)
-            )
-
-            # Descontar do saldo
-            await bot.db.execute(
-                "UPDATE users SET denarios = denarios - ? WHERE user_id=?",
-                (valor_denarios, uid)
-            )
-
-            return web.json_response({
-                "sucesso": True,
-                "valor_denarios": valor_denarios,
-                "mensagem": f"Sua aposta de {valor_denarios} Denários foi registrada!"
-            })
-        except (ValueError, TypeError, AttributeError) as e:
-            return web.json_response({"error": str(e)}, status=400)
+        return web.json_response({"error": "Apostas em Denários estão desabilitadas; nenhum saldo foi alterado."},
+                                 status=503, headers={"Cache-Control": "no-store"})
 
     async def apostas_cartas(request: web.Request) -> web.Response:
-        """Registra aposta de carta em partida."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        try:
-            body = await request.json()
-            oponente_id = int(body.get("oponente_id", 0))
-            exemplar_id = int(body.get("exemplar_id", 0))
-            tipo = body.get("tipo", "casual")
-
-            if exemplar_id <= 0:
-                return web.json_response({"error": "Dados inválidos."}, status=400)
-
-            # Verificar se jogador tem a carta
-            row = await bot.db.one(
-                "SELECT rarity FROM cartas_exemplares WHERE id=? AND user_id=?",
-                (exemplar_id, uid)
-            )
-            if not row:
-                return web.json_response({"error": "Carta não encontrada."}, status=404)
-
-            # Registrar aposta de carta
-            await bot.db.execute(
-                "INSERT INTO apostas_cartas (user_id, oponente_id, exemplar_id, tipo, carta_rarity) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (uid, oponente_id, exemplar_id, tipo, row["rarity"])
-            )
-
-            return web.json_response({
-                "sucesso": True,
-                "mensagem": "Sua carta foi registrada na aposta!"
-            })
-        except (ValueError, TypeError, AttributeError) as e:
-            return web.json_response({"error": str(e)}, status=400)
+        return web.json_response({"error": "Apostas com cartas estão desabilitadas; nenhum exemplar foi reservado."},
+                                 status=503, headers={"Cache-Control": "no-store"})
 
     async def apostas_torneio(request: web.Request) -> web.Response:
-        """Criar ou participar de torneio de apostas."""
-        uid = auth(request)
-        if uid is None:
+        if auth(request) is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        try:
-            body = await request.json()
-            torneio_tipo = body.get("tipo", "ranked")
-            valor_entrada = int(body.get("valor_entrada", 0))
-
-            return web.json_response({
-                "sucesso": True,
-                "mensagem": f"Torneio {torneio_tipo} criado com entrada de {valor_entrada} Denários!"
-            })
-        except (ValueError, TypeError) as e:
-            return web.json_response({"error": str(e)}, status=400)
+        return web.json_response({"error": "Torneios ainda não estão implementados."}, status=503,
+                                 headers={"Cache-Control": "no-store"})
 
     async def catalogo_cartas_page(request: web.Request) -> web.Response:
         page = Path(__file__).resolve().parent / "site" / "catalogo-cartas.html"
@@ -1081,8 +923,6 @@ def registrar_rotas(bot, app: web.Application) -> None:
             for carta in CARTAS_POR_ID.values():
                 data = carta.para_dict()
                 public_image_version = etag_carta_base(preparar_payload_carta_base(carta))
-                from sistemas.gwent import preparar_carta as _prep_gwent
-                prep = _prep_gwent(data)
                 habilidade_id = str(data.get("habilidade") or "")
                 habilidade = HABILIDADES.get(habilidade_id, {})
                 fileira_raw = str(data.get("fileira") or carta.fileira)
@@ -1106,11 +946,10 @@ def registrar_rotas(bot, app: web.Application) -> None:
                     "fileira": fileira_labels.get(fileira_raw.casefold(), fileira_raw),
                     "raridade": str(carta.raridade),
                     "poder": int(carta.poder),
-                    "custo": int(prep["custo"]),
-                    "habilidade": str(prep["habilidade_nome"] if (prep["habilidade"] or prep["habilidade_identidade"]) else "Sem habilidade"),
-                    "habilidade_texto": str(prep["habilidade_texto"]),
+                    "custo": int(carta.custo),
+                    "habilidade": str(habilidade.get("nome") or habilidade_id or "Sem habilidade"),
+                    "habilidade_texto": str(habilidade.get("texto") or carta.descricao or ""),
                     "descricao": str(carta.descricao or ""),
-                    "combos": [{"nome": x["nome"], "descricao": x["descricao"]} for x in prep["combos_compativeis"]],
                     "no_pacote": str(carta.id) in ids_pacote,
                     "expansao_v75": str(carta.id) in ids_expansao_v75,
                 })
@@ -1135,32 +974,68 @@ def registrar_rotas(bot, app: web.Application) -> None:
         return web.FileResponse(page)
 
     async def conquistas_page(request: web.Request) -> web.Response:
-        """Informa que a interface de conquistas ainda não está implementada."""
-        return web.Response(
-            text="A página de conquistas ainda não está disponível.",
-            status=501,
-            content_type="text/plain",
-        )
+        page = Path(__file__).resolve().parent / "site" / "conquistas.html"
+        if not page.is_file():
+            return web.Response(text="Página de conquistas indisponível.", status=503)
+        return web.FileResponse(page, headers={"Cache-Control": "no-store"})
 
     async def conquistas_list(request: web.Request) -> web.Response:
-        """Endpoint reservado para a listagem de conquistas."""
-        if auth(request) is None:
+        uid = auth(request)
+        if uid is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        return web.json_response(
-            {"error": "O sistema de listagem de conquistas ainda não está implementado."},
-            status=501,
-            headers={"Cache-Control": "no-store"},
-        )
+        try:
+            from sistemas.card_game_achievements import get_user_achievements
+            v2_stats = {"played": 0, "wins": 0, "losses": 0, "draws": 0}
+            gateway = getattr(bot, "card_engine_v2_shared_gateway", None)
+            if gateway is not None:
+                try:
+                    v2_stats = await gateway.application.get_competitive_stats_for_player(uid)
+                except Exception:
+                    import logging
+                    logging.getLogger("site_hub").exception(
+                        "Não foi possível agregar estatísticas do Card Engine v2 para conquistas."
+                    )
+            payload = await get_user_achievements(bot.db, uid, v2_match_stats=v2_stats, persist=False)
+            return web.json_response(payload, headers={"Cache-Control": "no-store"})
+        except Exception:
+            import logging
+            logging.getLogger("site_hub").exception("Falha ao calcular conquistas do usuário.")
+            return web.json_response({"error": "Não foi possível carregar suas conquistas."}, status=500,
+                                     headers={"Cache-Control": "no-store"})
 
     async def conquistas_registrar(request: web.Request) -> web.Response:
-        """Endpoint reservado para registrar progresso de conquistas."""
-        if auth(request) is None:
+        uid = auth(request)
+        if uid is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
-        return web.json_response(
-            {"error": "O registro de conquistas ainda não está implementado."},
-            status=501,
-            headers={"Cache-Control": "no-store"},
-        )
+        if not bot._api_origin_ok(request):
+            return web.json_response({"error": "Origem não autorizada."}, status=403)
+        try:
+            body = await request.json() if request.can_read_body else {}
+        except Exception:
+            return web.json_response(
+                {"error": "Corpo inválido; envie um objeto JSON vazio para sincronizar."},
+                status=400,
+                headers={"Cache-Control": "no-store"},
+            )
+        if body != {}:
+            return web.json_response(
+                {"error": "Progresso não pode ser enviado pelo cliente; envie um objeto vazio para sincronizar."},
+                status=400,
+                headers={"Cache-Control": "no-store"},
+            )
+        try:
+            from sistemas.card_game_achievements import get_user_achievements
+            v2_stats = {"played": 0, "wins": 0, "losses": 0, "draws": 0}
+            gateway = getattr(bot, "card_engine_v2_shared_gateway", None)
+            if gateway is not None:
+                v2_stats = await gateway.application.get_competitive_stats_for_player(uid)
+            payload = await get_user_achievements(bot.db, uid, v2_match_stats=v2_stats, persist=True)
+            return web.json_response(payload, headers={"Cache-Control": "no-store"})
+        except Exception:
+            import logging
+            logging.getLogger("site_hub").exception("Falha ao sincronizar conquistas do usuário.")
+            return web.json_response({"error": "Não foi possível sincronizar suas conquistas."}, status=500,
+                                     headers={"Cache-Control": "no-store"})
 
     # Registrar endpoints de apostas somente após declarar todos os handlers.
     app.router.add_get("/api/gwent/apostas/cartas", apostas_list_cartas)
@@ -1186,3 +1061,7 @@ def registrar_rotas(bot, app: web.Application) -> None:
 
     app.router.add_get("/linhagens", linhagens_page)
     app.router.add_post("/api/gwent/linhagens", linhagens_execute)
+
+    # Interface privada do Card Engine v2; usa a sessão Discord já assinada.
+    from site_card_engine_v2 import registrar_rotas as registrar_card_engine_v2
+    registrar_card_engine_v2(bot, app)

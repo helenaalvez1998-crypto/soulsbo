@@ -1,0 +1,6 @@
+# Execute no host que tenha Caddy e encaminhe TLS público para o container local.
+# Defina SOULSBOT_DOMAIN no ambiente do serviço Caddy antes de carregar este arquivo.
+{$SOULSBOT_DOMAIN} {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8080
+}

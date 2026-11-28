@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "document": "Soulsbo Card Engine v2 playable alpha validation",
+    "version": "0.2",
+    "status": "PASS",
+    "runtime_integration": false,
+    "production_database_access": false,
+    "generated_at_utc": "2026-11-28T02:25:00.941905+00:00"
+  },
+  "summary": {
+    "tests": 78,
+    "passed": 78,
+    "failed": 0,
+    "skipped": 0
+  },
+  "coverage_groups": {
+    "repository_and_persistence": "tests/test_repository.py",
+    "generic_gameplay_resolver": "tests/test_gameplay_resolver.py",
+    "playable_best_of_three_match": "tests/test_playable_match.py",
+    "schema_and_contract": "tests/test_schema.py"
+  },
+  "scope_limits": [
+    "Tests use disposable local SQLite databases and local independent connections.",
+    "No production database, aiosqlite, Discord, HTTP, frontend or multi-host infrastructure was used.",
+    "The match uses an explicit 10-card alpha allowlist, not the full production catalog.",
+    "The controller does not yet implement all catalog effects, leaders, combos, damage or full turn/cost systems."
+  ],
+  "failures": []
+}

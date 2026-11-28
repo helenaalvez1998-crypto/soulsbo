@@ -1,0 +1,205 @@
+{
+  "metadata": {
+    "document": "Group B — snapshot and causality audit v0.1",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev7.zip",
+    "status": "READ_ONLY_AUDIT; DESIGN_CANDIDATE_NOT_APPROVED",
+    "method": "Static inspection of legacy engine/DB/catalog artifacts plus synthetic match fixtures invoking legacy aplicar_jogada and validating a proposed causal-event envelope.",
+    "runtime_modified": false,
+    "production_database_used": false,
+    "scope": [
+      "CI-005",
+      "CI-011",
+      "BUF-001",
+      "BUF-002",
+      "BUF-012",
+      "RSRX-03",
+      "RSRX-05"
+    ]
+  },
+  "passed": 20,
+  "failed": 0,
+  "cases": [
+    {
+      "case": "legacy_catalog_baseline_is_historical_not_runtime_authority",
+      "status": "passed",
+      "snapshot_type": "legacy_catalog_baseline",
+      "baseline_status": "historical_snapshot_not_runtime_source_of_truth",
+      "source_hash_count": 4
+    },
+    {
+      "case": "source_hashes_are_provenance_not_definition_manifest",
+      "status": "passed",
+      "hashes_are_source_provenance": true,
+      "missing_release_fields": [
+        "balance_rules_release_id",
+        "catalog_release_id",
+        "definition_digest",
+        "effect_registry_release_id",
+        "ruleset_manifest_digest"
+      ]
+    },
+    {
+      "case": "effect_registry_is_candidate_without_immutable_release_metadata",
+      "status": "passed",
+      "schema_version": 1,
+      "effect_count": 54,
+      "release_metadata_present": false
+    },
+    {
+      "case": "balance_rules_are_future_compiler_output_not_current_release",
+      "status": "passed",
+      "balance_rules_version": "future compiler output described by spec",
+      "approved_release_artifact_found": false
+    },
+    {
+      "case": "v2_example_uses_placeholder_version_labels",
+      "status": "passed",
+      "version_labels": [
+        {
+          "catalog_version": "soulsbo-catalog-v1",
+          "balance_rules_version": "balance-v0.2"
+        }
+      ],
+      "interpretation": "example placeholders, not evidence of published releases"
+    },
+    {
+      "case": "legacy_engine_does_not_build_definition_snapshot",
+      "status": "passed",
+      "definition_snapshot_in_legacy_engine": false,
+      "manifest_in_novo_estado": false
+    },
+    {
+      "case": "novo_estado_has_no_catalog_or_ruleset_manifest",
+      "status": "passed",
+      "manifest_fields_in_match_constructor": [],
+      "match_state_fields": [
+        "match_id",
+        "status",
+        "phase",
+        "round",
+        "players",
+        "weather",
+        "rounds",
+        "event_log"
+      ]
+    },
+    {
+      "case": "aplicar_jogada_has_no_operation_or_causal_context_parameters",
+      "status": "passed",
+      "legacy_signature": "def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,\n                    action: str = \"play\", row: str | None = None,\n                    card_ids: list[str] | None = None,\n                    target_id: str | None = None",
+      "operation_id_supported": false,
+      "causal_event_fields_found": false
+    },
+    {
+      "case": "event_log_is_short_descriptive_text_not_causal_ledger",
+      "status": "passed",
+      "event_log_type": "bounded list of descriptive strings",
+      "retention": 20,
+      "causal_links": false
+    },
+    {
+      "case": "rarity_amplifier_uses_global_bonus_delta_scan_and_python_object_identity",
+      "status": "passed",
+      "scan_scope": "both player boards plus played card",
+      "tracking_key": "id(unit)",
+      "effect_source_attribution": false
+    },
+    {
+      "case": "removal_triggers_vengeance_synchronously_without_event_context",
+      "status": "passed",
+      "trigger": "synchronous inside _remover_unidade",
+      "bonus_delta": 1,
+      "causal_event_record": false
+    },
+    {
+      "case": "chama_negra_calls_removal_before_global_rarity_pass",
+      "status": "passed",
+      "sequence": [
+        "Chama Negra selects strongest units",
+        "_remover_unidade triggers Vingança synchronously",
+        "rarity amplifier scans all bonus deltas"
+      ],
+      "causal_attribution": "not represented"
+    },
+    {
+      "case": "rykard_is_sacrifice_then_vengeance_then_direct_plus_two",
+      "status": "passed",
+      "sequence": [
+        "leader selects weakest ally",
+        "sacrifice removal",
+        "reactive Vingança if victim has it",
+        "Rykard +2 to surviving allies in selected row"
+      ],
+      "rarity_budget_on_leader_action": false
+    },
+    {
+      "case": "match_table_persists_state_json_without_revision_or_idempotency_ledger",
+      "status": "passed",
+      "match_columns": [
+        "id",
+        "creator_id",
+        "opponent_id",
+        "status",
+        "state_json",
+        "created_at",
+        "updated_at"
+      ],
+      "revision_or_idempotency_columns": [],
+      "persisted_state_container": "state_json"
+    },
+    {
+      "case": "chama_negra_runtime_reproduces_indirect_rarity_amplification",
+      "status": "passed",
+      "observed_survivor_bonuses": {
+        "first": 2,
+        "second": 1
+      },
+      "vengeance_only_expected": {
+        "first": 1,
+        "second": 1
+      },
+      "interpretation": "rarity budget is applied to a Vingança delta that is not directly produced by Chama Negra"
+    },
+    {
+      "case": "rykard_runtime_reproduces_plus_three_composition",
+      "status": "passed",
+      "survivor_bonuses": {
+        "ally_a": 3,
+        "ally_b": 3
+      },
+      "composition": {
+        "reactive_vengeance": 1,
+        "direct_rykard_bonus": 2,
+        "total": 3
+      }
+    },
+    {
+      "case": "candidate_causal_event_graph_is_well_formed",
+      "status": "passed",
+      "event_count": 4,
+      "operation_id_distinct_from_event_ids": true,
+      "manifest_fields": [
+        "catalog_release_id",
+        "effect_registry_release_id",
+        "balance_rules_release_id",
+        "definition_digest"
+      ],
+      "rarity_scope": "direct_effect_outputs_only"
+    },
+    {
+      "case": "reject_causal_event_with_missing_parent",
+      "status": "passed",
+      "invalid_parent_rejected": true
+    },
+    {
+      "case": "reject_causal_cycle",
+      "status": "passed",
+      "causal_cycle_rejected": true
+    },
+    {
+      "case": "reject_reactive_event_inheriting_source_rarity",
+      "status": "passed",
+      "implicit_rarity_inheritance_rejected": true
+    }
+  ]
+}

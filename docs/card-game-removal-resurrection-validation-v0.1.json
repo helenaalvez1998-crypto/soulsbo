@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "document": "Removal, sacrifice and resurrection candidate validation v0.1",
+    "status": "CANDIDATE_FOR_REVIEW_NOT_APPROVED",
+    "runtime_integration": false,
+    "scope": "Independent candidate resolver tests plus controlled evidence against current legacy engine; not a production match/API test."
+  },
+  "counts": {
+    "tests": 49,
+    "passed": 49,
+    "failed": 0
+  },
+  "source_references": {
+    "central_removal": "sistemas/gwent.py:995-1021",
+    "target_options": "sistemas/gwent.py:1041-1078",
+    "rykard_and_esgar": "sistemas/gwent.py:1427-1448",
+    "sacred_teardrop_and_black_flame": "sistemas/gwent.py:1604-1620",
+    "destined_death_execution": "sistemas/gwent.py:1623-1638",
+    "requiem": "sistemas/gwent.py:1762-1779",
+    "devour_and_ressurgir": "sistemas/gwent.py:1871-1889",
+    "blood_price_identity": "sistemas/gwent.py:594-601"
+  },
+  "artifact_sha256": {
+    "data/card_game/removal-resurrection-registry-candidate.v1.json": "9a19475bcea415417dfd4e8ba264a4b207da88577bcf39a3277b7853a098eedc",
+    "data/card_game/removal-resurrection-registry.schema.v1.json": "1bd7685f26f75d285dd71db9cffa1a1070b604803bbb9e3db96ced3403a42c88",
+    "sistemas/card_removal_resurrection_candidate.py": "16614a0baaaa1933412c00e9d69563fd4d682c99f456eb3ca7cbd481018f25b1",
+    "docs/scripts/test-card-removal-resurrection-candidate-v0.1.py": "4fd281540ef44a6baa8ac1c66cfc6431dda3545b5a5d707a9cc1f6d5d64439d0",
+    "sistemas/gwent.py": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+    "sistemas/cartas.py": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+    "bot.py": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+    "database.py": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+    "site/app.js": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b"
+  },
+  "limitations": [
+    "The candidate resolver is not imported by sistemas.gwent.",
+    "Legacy assertions use synthetic in-memory match states and do not verify database, HTTP, Discord, R2 or production behavior.",
+    "The new card contract and instance_id migration are not yet integrated into the collection/deck persistence layer.",
+    "Power limits and no-target policies remain design decisions for approval."
+  ],
+  "failures": []
+}

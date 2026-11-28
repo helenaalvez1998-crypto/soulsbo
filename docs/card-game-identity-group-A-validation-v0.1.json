@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "document": "Card-game physical identity Group A validation",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev5.zip",
+    "status": "OWNER_APPROVED",
+    "approval_record": "docs/card-game-identity-group-A-approval-v0.1.json",
+    "runtime_integration": false,
+    "production_database_access": false,
+    "checks_are_synthetic_or_static": true
+  },
+  "summary": {
+    "total": 30,
+    "passed": 30,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "id": "A-01",
+      "description": "UUIDv4 fixture IDs are canonical",
+      "passed": true
+    },
+    {
+      "id": "A-02",
+      "description": "non-UUIDv4 identifier is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-03",
+      "description": "valid two-player fixture passes global identity invariants",
+      "passed": true
+    },
+    {
+      "id": "A-04",
+      "description": "same card_id can appear as separate instances",
+      "passed": true
+    },
+    {
+      "id": "A-05",
+      "description": "deck exemplar IDs in fixture are globally distinct",
+      "passed": true
+    },
+    {
+      "id": "A-06",
+      "description": "same instance in two zones is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-07",
+      "description": "orphan registry instance is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-08",
+      "description": "owner inconsistent with containing zone is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-09",
+      "description": "exemplar ID reused across owners is rejected globally",
+      "passed": true
+    },
+    {
+      "id": "A-10",
+      "description": "deck_exemplar without exemplar_id is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-11",
+      "description": "exemplar owned by another player is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-12",
+      "description": "exemplar whose card_id differs from instance is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-13",
+      "description": "generated token can have null exemplar_id",
+      "passed": true
+    },
+    {
+      "id": "A-14",
+      "description": "generated token cannot invent a collection exemplar",
+      "passed": true
+    },
+    {
+      "id": "A-15",
+      "description": "target_instance_id resolves exact occurrence among same-model copies",
+      "passed": true
+    },
+    {
+      "id": "A-16",
+      "description": "unknown/ineligible target_instance_id is rejected",
+      "passed": true
+    },
+    {
+      "id": "A-17",
+      "description": "legacy card_id adapter resolves one eligible candidate",
+      "passed": true
+    },
+    {
+      "id": "A-18",
+      "description": "legacy card_id adapter rejects ambiguous duplicate model",
+      "passed": true
+    },
+    {
+      "id": "A-19",
+      "description": "legacy card_id adapter rejects no eligible candidate",
+      "passed": true
+    },
+    {
+      "id": "A-20",
+      "description": "metric tie follows persisted zone order before UUID fallback",
+      "passed": true
+    },
+    {
+      "id": "A-21",
+      "description": "first/last selector semantics can use explicit zone order",
+      "passed": true
+    },
+    {
+      "id": "A-22",
+      "description": "current DB schema declares exemplar id as table-level primary key",
+      "passed": true
+    },
+    {
+      "id": "A-23",
+      "description": "current exemplar row ties id to user_id and card_id",
+      "passed": true
+    },
+    {
+      "id": "A-24",
+      "description": "current deck-save endpoint keeps the 12 distinct-model rule",
+      "passed": true
+    },
+    {
+      "id": "A-25",
+      "description": "current match snapshot path passes prepared card without restoring exemplar_id",
+      "passed": true
+    },
+    {
+      "id": "A-26",
+      "description": "standard preparar_carta return has no exemplar_id field",
+      "passed": true
+    },
+    {
+      "id": "A-27",
+      "description": "legacy novo_estado does not generate instance_id",
+      "passed": true
+    },
+    {
+      "id": "A-28",
+      "description": "legacy target summary serializes model id, not instance_id",
+      "passed": true
+    },
+    {
+      "id": "A-29",
+      "description": "legacy relic activation materializes a temporary hand payload",
+      "passed": true
+    },
+    {
+      "id": "A-30",
+      "description": "legacy target action is received as target_id",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Synthetic match and exemplar fixtures; no production DB rows were read.",
+    "Static source assertions are evidence checks, not end-to-end HTTP/runtime tests.",
+    "Owner approval is recorded separately; this harness checks synthetic identity invariants and legacy-source evidence only.",
+    "The harness does not implement identity, target selection, or migration in the live engine."
+  ]
+}

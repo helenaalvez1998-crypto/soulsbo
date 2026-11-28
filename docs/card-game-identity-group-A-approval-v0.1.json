@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "document": "Card game physical identity Group A owner approval",
+    "version": "0.1",
+    "date": "2026-11-27",
+    "baseline": "soulsbo-main-continuity-2026-11-27-rev6.zip",
+    "status": "APPROVED_BY_OWNER",
+    "approval_evidence": "User replied 'ok, continue' immediately after the explicit question 'Podemos seguir com a aprovação do Grupo A?'",
+    "runtime_integration": false
+  },
+  "approved_decisions": [
+    {
+      "id": "CI-001",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Server-generated canonical lowercase UUIDv4; immutable per occurrence."
+    },
+    {
+      "id": "CI-002",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Globally unique instance_id within match; each stable occurrence appears in exactly one zone."
+    },
+    {
+      "id": "CI-003",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Multiple instances may share card_id; current 12-distinct-model deck builder rule remains unchanged."
+    },
+    {
+      "id": "CI-004",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "exemplar_id references current global cartas_exemplares.id PK; validate row existence, owner/user_id and card_id; never infer or reuse."
+    },
+    {
+      "id": "CI-006",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Materialized tokens receive instance_id; equipped relic is outside zones; activation is preferably an event/operation; if materialized it receives its own transient instance_id and null exemplar_id."
+    },
+    {
+      "id": "CI-010",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Use target_instance_id for a single physical target and unique target_instance_ids for multiple targets; legacy adapter resolves only one eligible match."
+    },
+    {
+      "id": "BUF-013",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Persisted zone order defines first/last; metric selectors declare tie-breaker, with zone order then instance_id fallback."
+    },
+    {
+      "id": "RSRX-09",
+      "status": "APPROVED_BY_OWNER",
+      "rule": "Removal, sacrifice, discard extraction, recovery and resurrection act on exact physical instances, never bulk-match by card_id."
+    }
+  ],
+  "scope_exclusions": [
+    "CI-005",
+    "CI-007",
+    "CI-008",
+    "CI-009",
+    "CI-011",
+    "CI-012",
+    "CI-013",
+    "CI-014",
+    "BUF-001",
+    "BUF-002",
+    "BUF-003",
+    "BUF-004",
+    "BUF-005",
+    "BUF-006",
+    "BUF-007",
+    "BUF-008",
+    "BUF-009",
+    "BUF-010",
+    "BUF-011",
+    "BUF-012",
+    "BUF-014",
+    "RSRX-01",
+    "RSRX-02",
+    "RSRX-03",
+    "RSRX-04",
+    "RSRX-05",
+    "RSRX-06",
+    "RSRX-07",
+    "RSRX-08",
+    "RSRX-10"
+  ],
+  "integration": {
+    "runtime_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "frontend_changed": false,
+    "migration_started": false
+  }
+}

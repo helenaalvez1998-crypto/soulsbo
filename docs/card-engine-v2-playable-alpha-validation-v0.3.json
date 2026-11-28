@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "document": "Soulsbo Card Engine v2 playable alpha validation",
+    "version": "0.3",
+    "status": "PASS",
+    "runtime_integration": false,
+    "production_database_access": false,
+    "generated_at_utc": "2026-11-28T02:41:28.302802+00:00"
+  },
+  "summary": {
+    "tests": 97,
+    "passed": 97,
+    "failed": 0,
+    "skipped": 0
+  },
+  "coverage_groups": {
+    "repository_and_persistence": "tests/test_repository.py",
+    "generic_gameplay_resolver": "tests/test_gameplay_resolver.py",
+    "playable_best_of_three_match": "tests/test_playable_match.py",
+    "schema_and_contract": "tests/test_schema.py",
+    "expanded_catalog_entry_effects": "tests/test_expanded_entry_effects.py"
+  },
+  "scope_limits": [
+    "Tests use disposable local SQLite databases and local independent connections.",
+    "No production database, aiosqlite, Discord, HTTP, frontend or multi-host infrastructure was used.",
+    "The runtime alpha uses an explicit, hash-pinned allowlist of 24 historical card models; it is not the full production catalog.",
+    "The staging artifact traces 137 historical models: 24 alpha-test-only and 113 blocked; all still require review/rebuild as specified in the staging summary.",
+    "Twelve on-play unit effect families are implemented for selected allowlisted cards; this is not the full effect registry.",
+    "Leaders, combos, faction passives, damage, and full turn/resource-cost systems remain incomplete."
+  ],
+  "failures": []
+}

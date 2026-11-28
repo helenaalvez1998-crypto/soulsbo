@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-engine-v2-operation-request.v1.json",
+  "title": "Soulsbo Card Engine v2 internal operation request v1",
+  "description": "Internal normalized request after authentication. Not a public HTTP endpoint. Numeric payload values used in the alpha fingerprint must be integers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation_id",
+    "actor",
+    "expected_revision",
+    "action_type",
+    "payload"
+  ],
+  "properties": {
+    "operation_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "actor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "player_id"
+          ],
+          "properties": {
+            "type": {
+              "const": "player"
+            },
+            "player_id": {
+              "type": "string",
+              "pattern": "^-?(?:0|[1-9][0-9]*)$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "system_id"
+          ],
+          "properties": {
+            "type": {
+              "const": "system"
+            },
+            "system_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          }
+        }
+      ]
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "action_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

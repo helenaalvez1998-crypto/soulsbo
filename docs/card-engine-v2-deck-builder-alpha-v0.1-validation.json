@@ -1,0 +1,44 @@
+{
+  "artifact_type": "soulsbo_card_engine_v2_deck_builder_validation",
+  "version": "0.1",
+  "status": "PASS_ALPHA_ONLY_NOT_PRODUCTION_READY",
+  "rules_version": "soulsbo-alpha-deck-rules-v0.1",
+  "source": "docs/CARD_GAME_REDESIGN.md#10-regras-oficiais-setup",
+  "rules": {
+    "deck_size": 30,
+    "maximum_copies_per_card": 3,
+    "initial_hand_size": 4,
+    "unapproved_12_card_32_point_proposal_applied": false,
+    "first_player_selection": "server_random_from_two_players"
+  },
+  "alpha_catalog": {
+    "allowed_cards": 27,
+    "blocked_historical_models": 110,
+    "leaders": 10
+  },
+  "implemented": [
+    "deck_validation",
+    "collection_quantity_validation",
+    "leader_faction_compatibility",
+    "server_side_shuffle",
+    "saved_deck_sqlite_repository",
+    "optimistic_version_updates",
+    "strict_competitive_match_creation",
+    "asyncio_to_thread_application_facade",
+    "read_only_legacy_collection_count_adapter",
+    "server_random_first_player_selection"
+  ],
+  "test_results": {
+    "total": 171,
+    "passed": 171,
+    "failed": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "only 27 alpha-allowlisted card models are accepted",
+    "110 historical models remain blocked",
+    "exemplar_id is not yet connected to individually evolved collection exemplars",
+    "Discord, HTTP and frontend transports are not wired",
+    "no human playtest or production authorization was performed"
+  ]
+}

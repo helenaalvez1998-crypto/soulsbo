@@ -277,6 +277,11 @@ CARD_SYNERGY_TAGS = {
     "luterano_sacerdote": {"fe", "sacerdos"},
     "luterano_irmao": {"fe", "irmandade"},
     "luterano_diacon": {"fe", "diaconia"},
+    "gwent_unidade_sacerdote": {"fe"},
+    "gwent_unidade_cruzado": {"fe", "gloria_divina"},
+    "gwent_unidade_missionario": {"fe", "evangelho"},
+    "gwent_unidade_protetor": {"fe", "protecao"},
+    "gwent_unidade_evangelista": {"fe", "evangelho"},
     # Lua Negra: mobilidade, ataques encadeados e caça.
     "chefe_cervo_sombrio": {"veu_sombrio"},
     "chefe_aparicao_veio": {"veu_sombrio"},
@@ -420,16 +425,6 @@ CARD_IDENTITY_ABILITIES = {
 from sistemas.cartas import CARTAS_SEM_EFEITO_IDS as _CARTAS_SEM_EFEITO_IDS
 CARD_IDENTITY_ABILITIES = {k: v for k, v in CARD_IDENTITY_ABILITIES.items() if k not in _CARTAS_SEM_EFEITO_IDS}
 
-CARD_IDENTITY_ABILITIES.update({
-    "luterano_cruzado": {"name": "Fé Compartilhada", "text": "Ganha +1 de bônus para cada aliado da mesma facção em campo.", "effect": "sinergia_faccao"},
-    "luterano_papa": {"name": "Fé Compartilhada", "text": "Ganha +1 de bônus para cada aliado da mesma facção em campo.", "effect": "sinergia_faccao"},
-    "luterano_profeta": {"name": "Rebanho Unido", "text": "Ganha +1 de bônus para cada aliado da mesma facção em campo.", "effect": "sinergia_faccao"},
-    "luterano_missionario": {"name": "Herança da Vitória", "text": "Se você venceu a rodada anterior, entra com +2 de bônus.", "effect": "legado"},
-    "luterano_pastor": {"name": "Herança da Vitória", "text": "Se você venceu a rodada anterior, entra com +2 de bônus.", "effect": "legado"},
-    "luterano_bispo": {"name": "Devoção", "text": "Ganha +1 de bônus se houver outro aliado da mesma facção em campo.", "effect": "devoto"},
-    "luterano_mistico": {"name": "Devoção", "text": "Ganha +1 de bônus se houver outro aliado da mesma facção em campo.", "effect": "devoto"},
-})
-
 def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state: dict, row: str) -> str | None:
     data = CARD_IDENTITY_ABILITIES.get(str(card.get("id", "")))
     if not data:
@@ -507,10 +502,10 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
         # Legado: se ganhou a rodada anterior, entra com +2 de poder
         card["bonus"] += 2 if player.get("legado_vitoria", False) else 0
     elif effect == "devoto":
-        # Devoto: se houver outro aliado da mesma facção em campo, +1 de bônus
+        # Devoto: se aliada de mesma facção em campo, +1 de poder
         faccao = faction_for_card(card)
         count = sum(1 for u in allies if faction_for_card(u) == faccao)
-        card["bonus"] += 1 if count >= 1 else 0
+        card["bonus"] += 1 if count >= 2 else 0
     elif effect == "escolha_ritmo":
         # Escolha de ritmo: jogador escolhe fileira ao jogar; permanece se ganhar rodada
         card["bonus"] += 1
@@ -697,22 +692,6 @@ def _aplicar_potencia_raridade(card: dict, player: dict, other: dict,
     return applied
 
 
-ORCAMENTO_DECK = 36  # soma do custo das 12 cartas (por raridade do exemplar) + Relíquia equipada
-
-
-def custo_por_raridade(raridade: str) -> int:
-    """Custo oficial de deck: derivado da raridade do exemplar (única fonte de verdade)."""
-    from sistemas.cartas import CUSTO_RARIDADE
-    return int(CUSTO_RARIDADE.get(str(raridade), 1))
-
-
-def custo_total_deck(raridades: list[str], raridade_reliquia: str | None = None) -> int:
-    total = sum(custo_por_raridade(r) for r in raridades)
-    if raridade_reliquia:
-        total += custo_por_raridade(raridade_reliquia)
-    return total
-
-
 def preparar_carta(card: dict) -> dict:
     special = str(card.get("categoria", "")).casefold() == "especial"
     skill = str(card.get("habilidade", ""))
@@ -782,20 +761,6 @@ def preparar_carta(card: dict) -> dict:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: reforça até {budget} bônus já alterados pela habilidade: +1 nos positivos ou -1 nos negativos. Não muda o poder inicial nem os escudos.").strip()
         elif has_synergy:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: ao completar combo compatível, reforça até {budget} bônus já alterados: +1 nos positivos ou -1 nos negativos.").strip()
-    # Combos que a carta realmente pode ativar (tag em comum com o combo; exige 2 cartas distintas).
-    combos_carta = [
-        (combo["name"], combo["bonus"], combo["description"])
-        for combo in sorted(SYNERGY_COMBOS.values(), key=lambda c: c.get("priority", 999))
-        if CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set()) & set(combo["tags"])
-    ]
-    if combos_carta:
-        resumo = "; ".join(f"{nome} (+{bonus})" for nome, bonus, _d in combos_carta[:3])
-        extra_combo = f" Combo de deck: {resumo}."
-        if not (skill or identity):
-            texto_habilidade = "Sem habilidade individual." + extra_combo
-        else:
-            texto_habilidade = texto_habilidade + extra_combo
-    texto_habilidade = texto_habilidade[:520]
     # Monte os parâmetros fora da f-string para manter compatibilidade com Python 3.11.
     image_params = {
         "rarity": raridade,
@@ -817,14 +782,11 @@ def preparar_carta(card: dict) -> dict:
         "especial": special,
         "poder": 0 if special else max(1, min(15, int(card.get("poder", 1)))),
         "raridade": raridade, "potencia_raridade": budget,
-        "custo": custo_por_raridade(raridade),
         "faccao": faction,
         "arquetipo_faccao": FACTION_ARCHETYPES.get(faction, {}).get("name", "Estratégia Geral"),
         "arquetipo_descricao": FACTION_ARCHETYPES.get(faction, {}).get("description", ""),
         "fileira": row,
-        "row": row, "row_label": ROW_LABELS[row],
-        # A identidade substitui a habilidade genérica no motor; o payload reflete o que realmente executa.
-        "habilidade": "" if identity else skill,
+        "row": row, "row_label": ROW_LABELS[row], "habilidade": skill,
         "habilidade_nome": str(
             identity.get("name") if identity
             else card.get("habilidade_nome", skill_data.get("nome", skill.replace("_", " ").title()))
@@ -1203,13 +1165,12 @@ def _resolve_round(state: dict) -> None:
         rodagem_vencida = pid == winner
         # Legado verifica diretamente o resultado da rodada imediatamente anterior.
         player["legado_vitoria"] = rodagem_vencida
-        keepers_gloria = [u for u in board if u.get("habilidade") == "sobrevivente" or (rodagem_vencida and u.get("habilidade") == "gloria")]
-        tem_gloria = any(u.get("habilidade") == "gloria" for u in board)
-        keeper_gloria = max(keepers_gloria, key=lambda u: _poder_efetivo(u, previous_weather), default=None)
+        keepers_gloria = [u for u in board if u.get("habilidade") == "gloria"]
+        keeper_gloria = max(keepers_gloria, key=lambda u: _poder_efetivo(u, previous_weather), default=None) if rodagem_vencida else None
 
         # Unidades vão para o descarte
         for fallen in board:
-            if fallen is keeper_gloria:
+            if fallen is keeper_gloria and rodagem_vencida:
                 continue  # Glória: não envia pro descarte
             archived = deepcopy(fallen)
             # Bônus, escudos e estados são temporários: não podem reaparecer ao
@@ -1221,7 +1182,7 @@ def _resolve_round(state: dict) -> None:
             archived.pop("combo_ativado", None)
             player.setdefault("discard", []).append(archived)
         player["board"] = []
-        if keeper_gloria is not None:
+        if keeper_gloria is not None and rodagem_vencida:
             kept = deepcopy(keeper_gloria)
             kept["bonus"] = 0
             kept["escudo"] = 0
@@ -1230,8 +1191,8 @@ def _resolve_round(state: dict) -> None:
                 kept[status_key] = 0
             kept.pop("combo_ativado", None)
             player["board"].append(kept)
-            extras.append(f"{kept['nome']} permaneceu em campo!")
-        elif tem_gloria:
+            extras.append(f"{kept['nome']} ficou com Glória!")
+        else:
             extras.append("Glória não se ativou — rodada perdida.")
         player["passed"] = False
         player["faction_boost_used"] = False

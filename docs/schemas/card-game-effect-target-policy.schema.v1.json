@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulsbo.local/schemas/card-game-effect-target-policy.v1.json",
+  "title": "Soulsbo effect target policy v1 (Group D candidate)",
+  "description": "Declarative, versioned target selection policy. The client cannot supply or override it.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "policy_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{2,95}$"
+    },
+    "selection_mode": {
+      "enum": [
+        "none",
+        "manual_single",
+        "manual_set",
+        "automatic",
+        "manual_primary_auto_fill"
+      ]
+    },
+    "target_side": {
+      "enum": [
+        "self",
+        "allies",
+        "enemies",
+        "any",
+        "none"
+      ]
+    },
+    "source_zone": {
+      "enum": [
+        "board",
+        "discard",
+        "hand",
+        "any",
+        "none"
+      ]
+    },
+    "row_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "global",
+            "selected_row",
+            "fixed_row",
+            "different_from_selected_row"
+          ]
+        },
+        "row_basis": {
+          "enum": [
+            "current_row",
+            "zone_order"
+          ]
+        },
+        "fixed_row": {
+          "type": "string",
+          "enum": [
+            "melee",
+            "ranged",
+            "siege"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "row_basis"
+      ]
+    },
+    "eligibility_predicates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "predicate_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.-]{2,95}$"
+          },
+          "params": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "predicate_id"
+        ]
+      }
+    },
+    "eligibility_metric": {
+      "enum": [
+        "none",
+        "base_power",
+        "effective_power",
+        "bonus"
+      ]
+    },
+    "display_metric": {
+      "enum": [
+        "none",
+        "base_power",
+        "effective_power",
+        "bonus"
+      ]
+    },
+    "sort": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "enum": [
+            "none",
+            "base_power",
+            "effective_power",
+            "bonus",
+            "zone_order",
+            "played_sequence"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "none",
+            "ascending",
+            "descending"
+          ]
+        },
+        "tie_breaker": {
+          "enum": [
+            "none",
+            "zone_order",
+            "source_sequence_then_instance_id",
+            "grant_sequence_then_grant_id"
+          ]
+        }
+      },
+      "required": [
+        "metric",
+        "direction",
+        "tie_breaker"
+      ]
+    },
+    "target_count": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "exact",
+            "up_to",
+            "all_matching"
+          ]
+        },
+        "minimum_targets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximum_targets": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "const": "all"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "minimum_targets",
+        "maximum_targets"
+      ]
+    },
+    "on_no_target": {
+      "enum": [
+        "reject",
+        "consume_no_effect",
+        "fallback"
+      ]
+    },
+    "fallback_policy_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{2,95}$"
+    },
+    "on_partial_targets": {
+      "enum": [
+        "reject_below_minimum",
+        "apply_available",
+        "fallback"
+      ]
+    },
+    "secondary_selection": {
+      "enum": [
+        "none",
+        "manual_set",
+        "auto_ranked"
+      ]
+    },
+    "protection_resolution_policy_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{2,95}$"
+    },
+    "cost_policy_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{2,95}$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_id",
+    "selection_mode",
+    "target_side",
+    "source_zone",
+    "row_scope",
+    "eligibility_predicates",
+    "eligibility_metric",
+    "display_metric",
+    "sort",
+    "target_count",
+    "on_no_target",
+    "on_partial_targets",
+    "secondary_selection"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "row_scope": {
+            "properties": {
+              "mode": {
+                "const": "fixed_row"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        "required": [
+          "row_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "row_scope": {
+            "required": [
+              "fixed_row"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "on_no_target": {
+            "const": "fallback"
+          }
+        },
+        "required": [
+          "on_no_target"
+        ]
+      },
+      "then": {
+        "required": [
+          "fallback_policy_id"
+        ]
+      }
+    }
+  ]
+}

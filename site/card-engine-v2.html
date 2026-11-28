@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101116">
+  <title>Card Engine v2 · Soulsbo</title>
+  <link rel="stylesheet" href="/assets/card-engine-v2.css">
+  <script src="/assets/card-engine-v2.js" defer></script>
+</head>
+<body>
+  <header class="ce-topbar">
+    <a class="ce-brand" href="/">SOULSBO <span>／ CARD ENGINE V2</span></a>
+    <nav><a href="/">Coliseu</a><a class="active" href="/card-engine-v2">Card Engine v2</a><a href="/biblioteca-cartas">Biblioteca</a><a href="/forja">Forja</a></nav>
+  </header>
+  <main class="ce-shell">
+    <section class="ce-hero">
+      <div>
+        <p class="eyebrow">ARENA COMPETITIVA · ALPHA PRIVADA</p>
+        <h1>Seu próximo duelo começa aqui.</h1>
+        <p class="ce-subtitle">Gerencie seus exemplares, monte decks de 30 cartas e acompanhe partidas do Card Engine v2. O desafio entre jogadores continua sendo criado pelo painel alpha do Discord.</p>
+      </div>
+      <div class="ce-hero-stat"><span id="ce-collection-count">—</span><small>exemplares alpha</small></div>
+    </section>
+
+    <div id="ce-alert" class="ce-alert" role="status" aria-live="polite" hidden></div>
+    <section class="ce-layout">
+      <div class="ce-main-column">
+        <section class="ce-panel">
+          <div class="ce-section-head"><div><p class="eyebrow">CONSTRUTOR</p><h2>Montagem de deck</h2></div><span id="ce-deck-counter" class="ce-counter">0 / 30</span></div>
+          <div class="ce-deck-meta">
+            <label>Nome do deck<input id="ce-deck-name" maxlength="80" placeholder="Ex.: Ordem da Cinza"></label>
+            <label>Líder<select id="ce-leader"><option value="">Selecione um líder</option></select></label>
+          </div>
+          <div class="ce-builder-grid">
+            <div class="ce-pool">
+              <div class="ce-pool-head"><h3>Seus exemplares disponíveis</h3><input id="ce-card-filter" type="search" placeholder="Filtrar cartas..."></div>
+              <div id="ce-inventory" class="ce-card-list"><div class="ce-loading">Carregando coleção…</div></div>
+            </div>
+            <div class="ce-selected-wrap">
+              <div class="ce-pool-head"><h3>Deck selecionado</h3><span id="ce-copy-counter">Máx. 3 por modelo</span></div>
+              <div id="ce-selected" class="ce-selected"><p class="ce-muted">Adicione exemplares da sua coleção.</p></div>
+              <div class="ce-builder-actions"><button id="ce-save-deck" class="ce-button ce-primary" disabled>Salvar deck</button><button id="ce-cancel-edit" class="ce-button ce-ghost" hidden>Cancelar edição</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ce-panel">
+          <div class="ce-section-head"><div><p class="eyebrow">COLEÇÃO COMPETITIVA</p><h2>Seus decks salvos</h2></div><button id="ce-refresh" class="ce-button ce-ghost">Atualizar dados</button></div>
+          <div id="ce-decks" class="ce-deck-list"><div class="ce-loading">Carregando decks…</div></div>
+        </section>
+      </div>
+
+      <aside class="ce-side-column">
+        <section class="ce-panel ce-rules-panel">
+          <p class="eyebrow">REGRAS DA ALPHA</p><h2>Deck competitivo</h2>
+          <div class="ce-rule"><strong>30</strong><span>cartas por deck</span></div>
+          <div class="ce-rule"><strong>3</strong><span>cópias por modelo</span></div>
+          <div class="ce-rule"><strong>4</strong><span>cartas na mão inicial</span></div>
+          <p class="ce-note">Somente os modelos liberados na allowlist alpha podem ser usados. Cada slot precisa corresponder a um exemplar físico existente na sua coleção.</p>
+        </section>
+        <section class="ce-panel">
+          <div class="ce-section-head"><div><p class="eyebrow">ARENA</p><h2>Minhas partidas</h2></div><button id="ce-refresh-matches" class="ce-icon-button" title="Atualizar partidas">↻</button></div>
+          <p class="ce-note">Desafie outro jogador pelo Discord. Quando a partida começar, ela aparecerá aqui e poderá ser reaberta.</p>
+          <div id="ce-matches" class="ce-match-list"><div class="ce-loading">Carregando partidas…</div></div>
+        </section>
+        <section class="ce-panel ce-status-panel"><span class="ce-status-dot"></span><div><strong id="ce-status-title">Conectando ao motor</strong><p id="ce-status-text">Validando sua sessão e consultando a coleção.</p></div></section>
+      </aside>
+    </section>
+
+    <section id="ce-match-panel" class="ce-panel ce-match-panel" hidden>
+      <div class="ce-section-head"><div><p class="eyebrow">PARTIDA V2</p><h2 id="ce-match-title">Partida</h2></div><div class="ce-match-head-actions"><span id="ce-match-status" class="ce-pill">—</span><button id="ce-close-match" class="ce-button ce-ghost">Fechar painel</button></div></div>
+      <div id="ce-match-overview" class="ce-match-overview"></div>
+      <div id="ce-match-boards" class="ce-board-grid"></div>
+      <div class="ce-match-controls"><button id="ce-pass-turn" class="ce-button ce-primary">Passar turno</button><button id="ce-activate-leader" class="ce-button ce-ghost">Ativar líder</button><button id="ce-sacrifice" class="ce-button ce-danger">Sacrificar unidade</button><span id="ce-match-poll" class="ce-note">Atualização automática ativa · a cada 10 segundos</span></div>
+      <div class="ce-match-columns"><section><h3>Sua mão</h3><div id="ce-match-hand" class="ce-card-list"></div></section><section><h3>Histórico de eventos</h3><div id="ce-history" class="ce-history"></div><button id="ce-history-more" class="ce-button ce-ghost" hidden>Carregar eventos anteriores</button></section></div>
+    </section>
+    <footer class="ce-footer">Soulsbo · Card Engine v2 · Alpha privada · regras e custos ainda sujeitos a balanceamento.</footer>
+  </main>
+  <div id="ce-modal" class="ce-modal" hidden><div class="ce-modal-card"><button id="ce-modal-close" class="ce-modal-close" aria-label="Fechar">×</button><div id="ce-modal-content"></div></div></div>
+</body>
+</html>

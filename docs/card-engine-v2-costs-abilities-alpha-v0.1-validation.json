@@ -1,0 +1,187 @@
+{
+  "document": "Card Engine v2 energy costs and generic activated-ability framework validation",
+  "revision": "rev.25",
+  "baseline": "soulsbo-main-continuity-2026-11-28-rev24.zip",
+  "status": "PASS",
+  "test_suite": {
+    "tests": 150,
+    "passed": 150,
+    "failed": 0,
+    "skipped": 0
+  },
+  "catalog_staging": {
+    "historical_model_count": 137,
+    "alpha_test_only_count": 27,
+    "blocked_staging_only_count": 110,
+    "not_rebuilt_count": 137,
+    "faction_unreviewed_count": 137,
+    "legacy_cost_mismatch_count": 19,
+    "status": "PASS"
+  },
+  "energy_cost_schedule": {
+    "status": "alpha_only_provisional_playtest_schedule_not_approved_for_release",
+    "cards_priced": 27,
+    "leaders_priced": 10,
+    "card_cost_range": [
+      1,
+      5
+    ],
+    "leader_cost_range": [
+      2,
+      3
+    ],
+    "manual_abilities_priced": 0,
+    "rarity_is_not_an_input": true,
+    "legacy_deck_cost_is_not_an_input": true
+  },
+  "activated_ability_registry": {
+    "status": "alpha_test_only_not_a_published_registry",
+    "live_abilities_registered": 0,
+    "supported_action_types": [
+      "unit.grant_bonus",
+      "unit.grant_protection",
+      "unit.remove",
+      "unit.move"
+    ]
+  },
+  "playable_match_simulation": {
+    "status": "finished",
+    "event_count": 97,
+    "round_wins": {
+      "1001": 2,
+      "2002": 1
+    },
+    "winner_player_id": "1001",
+    "energy_cost_fixture": "uniform_1_for_mechanics_simulation_only; not_a_balance_validation",
+    "sqlite_integrity": {
+      "event_sequence_violations": 0,
+      "foreign_key_violations": 0,
+      "integrity_check": "ok",
+      "ok": true,
+      "quick_check": "ok",
+      "row_counts": {
+        "card_engine_v2_legacy_archive": 0,
+        "cartas_gwent_match_events": 97,
+        "cartas_gwent_match_operations": 16,
+        "cartas_gwent_match_rewards": 0,
+        "cartas_gwent_matches": 1,
+        "cartas_gwent_outbox": 0
+      },
+      "state_revision_violations": 0
+    }
+  },
+  "combo_faction_leader_simulation": {
+    "round_winner": "1001",
+    "round_scores": {
+      "1001": 20,
+      "2002": 10
+    },
+    "event_count": 49,
+    "energy_cost_fixture": "uniform_1_for_mechanics_simulation_only; not_a_balance_validation",
+    "sqlite_integrity": {
+      "event_sequence_violations": 0,
+      "foreign_key_violations": 0,
+      "integrity_check": "ok",
+      "ok": true,
+      "quick_check": "ok",
+      "row_counts": {
+        "card_engine_v2_legacy_archive": 0,
+        "cartas_gwent_match_events": 49,
+        "cartas_gwent_match_operations": 7,
+        "cartas_gwent_match_rewards": 0,
+        "cartas_gwent_matches": 1,
+        "cartas_gwent_outbox": 0
+      },
+      "state_revision_violations": 0
+    }
+  },
+  "package_smoke": {
+    "zip_integrity": "PASS",
+    "fresh_extraction": "PASS",
+    "extracted_unit_tests": {
+      "tests": 150,
+      "passed": 150,
+      "failed": 0,
+      "skipped": 0
+    },
+    "extracted_catalog_load": {
+      "allowed_cards": 27,
+      "leaders": 10,
+      "live_manual_abilities": 0
+    },
+    "extracted_staging": "PASS"
+  },
+  "legacy_file_hash_check": {
+    "sistemas/gwent.py": {
+      "baseline_sha256": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+      "revision_sha256": "f69e8865759862ddc5bef9ff26ee2ddb43bcfbe33d3e61c985d4b118c6e42383",
+      "identical": true
+    },
+    "sistemas/cartas.py": {
+      "baseline_sha256": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+      "revision_sha256": "3bed48cbd496de431d92b76653518bda54a59ae5ee7ec8586b448b9fd19a0192",
+      "identical": true
+    },
+    "bot.py": {
+      "baseline_sha256": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+      "revision_sha256": "a735b2380176a5871f45770d99489825c587033d4a0d760b48b108a6e2a885ff",
+      "identical": true
+    },
+    "database.py": {
+      "baseline_sha256": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+      "revision_sha256": "ead936a2813335e5a98b31276a9e08ea6dc3a6121543300dd24decc7d69a3ed2",
+      "identical": true
+    },
+    "site/app.js": {
+      "baseline_sha256": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b",
+      "revision_sha256": "9aafa6ba1ef2641fce9ab169192b27d28b92d2b92ee15881ca5db9984b39386b",
+      "identical": true
+    }
+  },
+  "file_delta_vs_rev24": {
+    "added_count": 10,
+    "added": [
+      "data/card_game/card-engine-v2-alpha-activated-abilities.v0.1.json",
+      "data/card_game/card-engine-v2-alpha-energy-cost-schedule.v0.1.json",
+      "data/card_game/card-engine-v2-alpha-ruleset.v0.5.json",
+      "docs/card-engine-v2-alpha-activated-abilities-v0.1.md",
+      "docs/card-engine-v2-alpha-energy-cost-schedule-v0.1.md",
+      "docs/card-engine-v2-costs-abilities-alpha-v0.1-change-manifest.md",
+      "docs/card-engine-v2-costs-abilities-alpha-v0.1-validation.json",
+      "docs/card-engine-v2-energy-economy-alpha-v0.2.md",
+      "tests/card_engine_v2/support.py",
+      "tests/card_engine_v2/test_activated_abilities.py"
+    ],
+    "modified_count": 20,
+    "modified": [
+      "data/card_game/README.md",
+      "docs/PACOTE-MANIFESTO.md",
+      "docs/card-engine-v2-combo-faction-leader-alpha-run.v0.1.json",
+      "docs/card-engine-v2-playable-alpha-validation-v0.5.json",
+      "docs/card-engine-v2-playable-alpha-validation-v0.5.md",
+      "docs/card-engine-v2-playable-match-alpha-run.v0.3.json",
+      "docs/card-game-handoff.md",
+      "docs/scripts/simulate-card-engine-v2-combo-faction-leader-alpha-v0.1.py",
+      "docs/scripts/simulate-card-engine-v2-playable-match-alpha-v0.3.py",
+      "docs/scripts/test-card-engine-v2-playable-alpha-v0.5.py",
+      "sistemas/card_engine_v2/README.md",
+      "sistemas/card_engine_v2/alpha_catalog.py",
+      "sistemas/card_engine_v2/gameplay.py",
+      "sistemas/card_engine_v2/match.py",
+      "sistemas/card_engine_v2/repository.py",
+      "tests/card_engine_v2/test_combo_faction_leaders.py",
+      "tests/card_engine_v2/test_deck_fatigue_runtime.py",
+      "tests/card_engine_v2/test_energy_economy.py",
+      "tests/card_engine_v2/test_expanded_entry_effects.py",
+      "tests/card_engine_v2/test_playable_match.py"
+    ],
+    "removed_count": 0,
+    "removed": []
+  },
+  "limitations": [
+    "Per-card and leader costs are an experimental alpha playtest schedule, not approved release balance and not validated with human playtests or telemetry.",
+    "The live activated-ability registry is intentionally empty because none of the 27 allowlisted cards declares a manual ability; the generic API was validated with a synthetic test fixture only.",
+    "The reproducible gameplay simulations use a uniform one-energy test fixture to isolate mechanics and do not validate the provisional per-ID balance schedule. Dedicated energy tests validate all 27 card and ten leader entries.",
+    "No Discord, HTTP, frontend, published database, asynchronous adapter, multi-host, production migration or legacy cutover is included."
+  ]
+}

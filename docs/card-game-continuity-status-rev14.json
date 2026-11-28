@@ -1,0 +1,26 @@
+{
+  "revision": 14,
+  "date": "2026-11-27",
+  "approved_groups": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "F"
+  ],
+  "pending_groups": [
+    "E"
+  ],
+  "card_instance_draft": "v0.6",
+  "group_F_decisions_approved": 5,
+  "group_E_decisions_pending": 10,
+  "group_E_audit_checks": 24,
+  "group_E_audit_passed": 24,
+  "group_E_audit_failed": 0,
+  "card_instance_v06_checks": 24,
+  "card_instance_v06_passed": 24,
+  "runtime_changed": false,
+  "production_database_changed": false,
+  "files_changed_outside_docs": 0,
+  "card_instance_v06_failed": 0
+}
