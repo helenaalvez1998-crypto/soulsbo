@@ -21,86 +21,55 @@ import PIL
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from config import get_data_dir
 
-from .cartas import HABILIDADES, VERSAO_ARTES
+from .cartas import VERSAO_ARTES
 from .arte_gwent_efeitos import desenhar_aura_unidade, desenhar_emblema_especial
 from . import molduras_cartas, templates_cartas, pintura_procedural
 
 
-def _dados_habilidade_visual(card: dict[str, Any]) -> tuple[str, str]:
-    """Retorna o texto mecânico efetivo sem aplicar duas vezes os ajustes de raridade."""
-    # Payloads de carta-base já passam por preparar_carta em preparar_payload_carta_base.
-    # Reprepará-los acrescentaria novamente os textos de raridade e poderia estourar o rodapé.
-    if (card.get("_habilidade_canonica_preparada")
-            and str(card.get("habilidade_nome") or "").strip()
-            and str(card.get("habilidade_texto") or "").strip()):
-        return str(card["habilidade_nome"]), str(card["habilidade_texto"])
-    try:
-        # Usa exatamente o mesmo texto preparado para a partida, inclusive os ajustes de raridade.
-        from .gwent import preparar_carta
-        prepared = preparar_carta(card)
-        return str(prepared.get("habilidade_nome") or "Habilidade"), str(prepared.get("habilidade_texto") or "Sem habilidade especial.")
-    except Exception:
-        ability = HABILIDADES.get(str(card.get("habilidade", "")), {})
-        return str(ability.get("nome") or "Tática"), str(ability.get("texto") or "Sem habilidade especial.")
+def _dados_lore_visual(card: dict[str, Any]) -> str:
+    """Retorna exclusivamente a lore canônica que pode ser impressa na imagem."""
+    lore = card.get("descricao") or card.get("lore") or ""
+    return " ".join(str(lore).split())
 
 
-def _layout_texto_habilidade(draw: ImageDraw.ImageDraw, texto: str, largura: int = 342,
-                             altura: int = 74) -> tuple[ImageFont.ImageFont, list[str], float]:
-    """Escolhe tipografia e quebras sem omitir nenhuma parte da regra de combate."""
-    for tamanho in (12, 11, 10, 9):
-        fonte = _font(tamanho)
-        linhas = _wrap(draw, str(texto or "Sem habilidade especial."), fonte, largura)
-        passo = 12.6 if tamanho == 9 else tamanho + 3.4
-        if len(linhas) <= 5 and len(linhas) * passo <= altura:
-            return fonte, linhas, passo
-    raise ValueError("O texto de efeito não cabe no painel físico da carta sem ser truncado.")
-
-
-def _layout_texto_habilidade_template(draw: ImageDraw.ImageDraw, texto: str,
-                                     largura: int = 707, altura: int = 177
-                                     ) -> tuple[ImageFont.ImageFont, list[str], int]:
-    """Ajusta o efeito no painel do template sem cortar linhas nem inserir reticências."""
-    conteudo = str(texto or "Sem habilidade especial.").strip()
-    for tamanho in range(18, 9, -1):
+def _layout_texto_lore(
+    draw: ImageDraw.ImageDraw, texto: str, largura: int = 342, altura: int = 74,
+    *, escala: float = 1.0,
+) -> tuple[ImageFont.ImageFont, list[str], float]:
+    """Ajusta a lore inteira à área da carta; nunca substitui, corta ou resume o texto."""
+    conteudo = " ".join(str(texto or "").split())
+    if not conteudo:
+        return _font(max(6, round(8 * escala))), [], max(7, round(9 * escala))
+    for tamanho_base in (9, 8, 7, 6):
+        tamanho = max(6, round(tamanho_base * escala))
         fonte = _font(tamanho)
         linhas = _wrap(draw, conteudo, fonte, largura)
-        passo = max(tamanho + 3, int(tamanho * 1.24))
-        if len(linhas) <= 10 and len(linhas) * passo <= altura and all(
+        passo = max(tamanho + 1, round((tamanho_base + 1.5) * escala))
+        if linhas and len(linhas) <= 12 and len(linhas) * passo <= altura and all(
             draw.textbbox((0, 0), linha, font=fonte)[2] <= largura for linha in linhas
         ):
             return fonte, linhas, passo
-    raise ValueError("O texto de efeito não cabe no painel do template sem ser truncado.")
+    raise ValueError("A lore completa não cabe no painel da carta sem ser truncada.")
 
 
-def _layout_painel_habilidade_template(
-    draw: ImageDraw.ImageDraw, nome: str, texto: str, retangulo: tuple[int, int, int, int],
-) -> tuple[ImageFont.ImageFont, str, int, int, ImageFont.ImageFont, list[str], int, int]:
-    """Mede título + efeito na área real do template, sem truncar nenhum dos dois."""
-    hx1, hy1, hx2, hy2 = retangulo
-    margem_x, margem_y = 24, 9
-    largura_util = (hx2 - hx1) - margem_x * 2
-    titulo = str(nome or "Habilidade").strip().upper()
-    fonte_titulo = None
-    altura_titulo = 0
-    for tamanho in range(23, 14, -1):
-        tentativa = _font(tamanho, True)
-        if draw.textbbox((0, 0), titulo, font=tentativa)[2] <= largura_util:
-            fonte_titulo = tentativa
-            altura_titulo = max(25, int(tamanho * 1.18))
-            break
-    if fonte_titulo is None:
-        raise ValueError("O título da habilidade não cabe no painel do template sem ser truncado.")
-
-    y_titulo = hy1 + margem_y
-    y_texto = y_titulo + altura_titulo + 1
-    altura_disponivel = hy2 - margem_y - y_texto
-    if altura_disponivel <= 0:
-        raise ValueError("O título da habilidade ocupa toda a área do painel do template.")
-    fonte_texto, linhas, passo = _layout_texto_habilidade_template(
-        draw, str(texto or "Sem habilidade especial.").strip(),
-        largura_util, altura_disponivel,
-    )
-    return fonte_titulo, titulo, y_titulo, y_texto, fonte_texto, linhas, passo, margem_x
+def _layout_painel_lore_template(
+    draw: ImageDraw.ImageDraw, lore: str, retangulo: tuple[int, int, int, int],
+) -> tuple[ImageFont.ImageFont, list[str], int, int, int]:
+    """Mede o painel do template para imprimir somente o texto da lore, sem cabeçalho."""
+    x1, y1, x2, y2 = retangulo
+    margem_x, margem_y = 24, 12
+    largura_util = (x2 - x1) - margem_x * 2
+    texto_y = y1 + margem_y
+    altura_disponivel = y2 - margem_y - texto_y
+    for tamanho in range(18, 9, -1):
+        fonte = _font(tamanho)
+        linhas = _wrap(draw, lore, fonte, largura_util)
+        passo = max(tamanho + 3, round(tamanho * 1.2))
+        if linhas and len(linhas) <= 13 and len(linhas) * passo <= altura_disponivel and all(
+            draw.textbbox((0, 0), linha, font=fonte)[2] <= largura_util for linha in linhas
+        ):
+            return fonte, linhas, passo, margem_x, texto_y
+    raise ValueError("A lore completa não cabe no painel do template sem ser truncada.")
 
 
 def _fingerprint_renderizador() -> str:
@@ -131,7 +100,7 @@ def _fingerprint_renderizador() -> str:
 
 # A versão explícita documenta releases; a impressão digital também invalida
 # automaticamente o cache quando o código/overlay/fonte muda sem bump manual.
-VERSAO_RENDERIZADOR = f"{VERSAO_ARTES}-V15-PINTURA-PROCEDURAL-{_fingerprint_renderizador()}"
+VERSAO_RENDERIZADOR = f"{VERSAO_ARTES}-V16-LORE-ONLY-{_fingerprint_renderizador()}"
 
 # Cor principal da moldura por raridade; facção e fileira tática têm sinais próprios.
 CORES_RARIDADE = {
@@ -1109,7 +1078,13 @@ def extrair_ilustracao_de_carta_completa(illustration_bytes: bytes) -> bytes:
 
 def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = ALTURA_PADRAO,
                illustration_bytes: bytes | None = None) -> Image.Image:
-    """Renderiza a carta com dados canônicos; arte enviada substitui só a ilustração."""
+    """Renderiza a carta com dados canônicos; a área narrativa contém somente a lore."""
+    width, height = max(120, int(width)), max(180, int(height))
+    # A miniatura deriva da composição legível em 420×620. Não tentamos espremer
+    # centenas de caracteres numa tela de 210 px antes de reduzir a imagem.
+    if width < LARGURA_PADRAO or height < ALTURA_PADRAO:
+        base = _draw_card(card, LARGURA_PADRAO, ALTURA_PADRAO, illustration_bytes)
+        return base.resize((width, height), Image.Resampling.LANCZOS)
     rarity = str(card.get("raridade", "Comum"))
     category = "Especial" if str(card.get("categoria", "Unidade")).casefold() == "especial" else "Unidade"
     faction = molduras_cartas.normalizar_faccao(card.get("faccao"))
@@ -1226,26 +1201,25 @@ def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = 
     _texto_rastreado(d,(X(rx),Y(ry)+max(1,X(1))),rar_txt,f_rar,(0,0,0,210),X(1.6),centro=True)
     _texto_rastreado(d,(X(rx),Y(ry)),rar_txt,f_rar,(255,250,236,255),X(1.6),centro=True)
 
-    # Painel: facção + fileira, habilidade e texto de efeito.
+    # Painel: identidade tática acima; somente a lore no rodapé da imagem.
     f_lbl=_font(max(8,X(9.5)),True)
     row_label={"melee":"CORPO A CORPO","ranged":"LONGA DISTÂNCIA","siege":"CERCO"}.get(row,"TÁTICA") if not especial else "CARTA ESPECIAL"
     _texto_rastreado(d,(X(38),Y(491)),faction.upper(),f_lbl,(*fac["cor"],255),X(1.0))
     larg=_largura_rastreada(d,row_label,f_lbl,X(1.0))
     _texto_rastreado(d,(X(386)-larg,Y(491)),row_label,f_lbl,(*fac["metal"],225),X(1.0))
-    aname, atext = _dados_habilidade_visual(card)
-    f_hab=_font(max(10,X(13.5)),True,serif=True)
-    txt((X(38),Y(518)),aname,f_hab,(*est["luz"],255),anchor="lm")
-    # O rodapé reserva altura para cinco linhas. A regra é desenhada por inteiro;
-    # quando não couber, o renderer falha em vez de publicar uma carta incompleta.
-    fonte_txt, linhas_txt, passo = _layout_texto_habilidade(
-        d, atext, largura=X(342), altura=Y(74)
-    )
-    for i, line in enumerate(linhas_txt):
-        d.text((X(38), Y(538 + i * passo)), line, font=fonte_txt,
-               fill=(228, 224, 212, 255), anchor="lm")
+    lore = _dados_lore_visual(card)
+    if lore:
+        # O painel narrativo contém somente a lore. Não há título "LORE", nome de
+        # habilidade nem texto substituto como "Sem habilidade especial".
+        fonte_lore, linhas_lore, passo_lore = _layout_texto_lore(
+            d, lore, largura=X(342), altura=Y(94), escala=sx,
+        )
+        for i, line in enumerate(linhas_lore):
+            d.text((X(38), Y(516) + i * passo_lore), line, font=fonte_lore,
+                   fill=(228, 224, 212, 255), anchor="lm")
 
-    # O sistema atual não usa custo de carta/deck: o espaço inferior é reservado
-    # integralmente para o texto da habilidade.
+    # Nenhum nome/regra de habilidade é impresso na imagem; a regra continua
+    # disponível na ficha de combate e no site, fora do arquivo visual.
     return im.convert("RGB")
 
 
@@ -1382,19 +1356,16 @@ def _draw_card_com_template(card: dict[str, Any], illustration_bytes: bytes) -> 
                    ROTULOS_FILEIRA.get(row, "UNIDADE"), maximo=22, minimo=12,
                    cor=suave, alinhamento="direita", margem=22, negrito=True)
 
-    # Habilidade: título e regra completa são dimensionados dentro da área segura.
-    nome_hab, texto_hab = _dados_habilidade_visual(card)
-    nome_hab = nome_hab.strip()
-    texto_hab = texto_hab.strip()
-    hx1, _hy1, _hx2, _hy2 = layout["habilidade"]
-    fonte_nome, titulo, y_titulo, y_texto, fonte_texto, linhas_texto, altura_linha, margem_x = (
-        _layout_painel_habilidade_template(draw, nome_hab, texto_hab, tuple(layout["habilidade"]))
-    )
-    draw.text((hx1 + margem_x, y_titulo), titulo,
-              font=fonte_nome, fill=(*accent, 255), stroke_width=1, stroke_fill=(8, 10, 16, 255))
-    for indice, linha in enumerate(linhas_texto):
-        draw.text((hx1 + margem_x, y_texto + indice * altura_linha), linha, font=fonte_texto,
-                  fill=(230, 231, 227, 255), stroke_width=1, stroke_fill=(8, 10, 16, 255))
+    # O painel inferior do template passa a conter somente a lore canônica.
+    lore = _dados_lore_visual(card)
+    if lore:
+        hx1, hy1, _hx2, _hy2 = layout["habilidade"]
+        fonte_lore, linhas_lore, altura_linha, margem_x, y_texto = (
+            _layout_painel_lore_template(draw, lore, tuple(layout["habilidade"]))
+        )
+        for indice, linha in enumerate(linhas_lore):
+            draw.text((hx1 + margem_x, y_texto + indice * altura_linha), linha, font=fonte_lore,
+                      fill=(230, 231, 227, 255), stroke_width=1, stroke_fill=(8, 10, 16, 255))
     return imagem.convert("RGB")
 
 
@@ -1450,7 +1421,7 @@ def render_previa_template(raridade: str, *, calibracao: bool = False) -> io.Byt
         "fileira": "siege",
         "poder": 88,
         "custo": 3,
-        "habilidade": next(iter(HABILIDADES), ""),
+        "habilidade": "",
         "descricao": "Prévia do template completo enviado.",
     }
     imagem = _draw_card_com_template(exemplo, _arte_de_exemplo(exemplo))

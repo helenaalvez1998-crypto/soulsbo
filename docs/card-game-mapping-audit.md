@@ -665,8 +665,8 @@ A discrepância é demonstrável entre agrupamento/comentários e o campo de fac
 ### 10.9 Texto mecânico e arte aprovada
 
 - `preparar_payload_carta_base()` chama `preparar_carta()` e marca o texto resultante como canônico para evitar reaplicar os sufixos de raridade durante a renderização.
-- `_dados_habilidade_visual()` usa os campos preparados ou recalcula a regra uma única vez. O painel procedural e o painel do template medem título e corpo; se a regra completa não couber, a renderização falha em vez de publicar texto truncado.
-- Arte completa aprovada no Ateliê permanece vinculada ao par `card_id + exemplar_id`, mas não é mais servida como pixels finais intocados. O renderizador extrai a janela da ilustração e recompõe os elementos de carta e o efeito atual a partir do catálogo/motor. O texto antigo incorporado à imagem não é usado como fonte mecânica.
+- `_dados_habilidade_visual()` preserva os metadados de combate para a interface, mas não os imprime. Os painéis procedural e de template são compostos somente com a lore canônica; se a lore inteira não couber, a renderização falha em vez de publicar texto truncado.
+- Arte completa aprovada no Ateliê permanece vinculada ao par `card_id + exemplar_id`, mas não é mais servida como pixels finais intocados. O renderizador extrai a janela da ilustração e recompõe os elementos de carta e a lore atual a partir do catálogo/motor; o texto de habilidade fica fora da imagem. O texto antigo incorporado à imagem não é usado como fonte mecânica.
 - A rota privada também exige dados canônicos para compor uma carta com arte aprovada. Se o modelo/snapshot não estiver disponível, não serve uma imagem isolada como se fosse uma carta validada.
 - A validação de catálogo cruza 137 cartas com o payload público do site, incluindo identidade, efeito, sinergias e combos; verifica 65 definições de efeito, 22 efeitos de identidade e o pool de 13 habilidades de recompensas dinâmicas.
 

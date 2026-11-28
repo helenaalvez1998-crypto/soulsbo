@@ -746,7 +746,9 @@ def preparar_carta(card: dict) -> dict:
         textos_habilidade.append(str(card["habilidade_texto"]))
     elif skill_data.get("texto"):
         textos_habilidade.append(str(skill_data["texto"]))
-    texto_habilidade = str(" ".join(textos_habilidade) or "Sem habilidade especial.")[:420]
+    # Sem habilidade é ausência de dados, não uma regra textual. O front-end decide
+    # exibir um único rótulo; não duplicamos o mesmo placeholder como título e efeito.
+    texto_habilidade = str(" ".join(textos_habilidade))[:420]
     alvo_label = "alvo" if budget == 1 else "alvos"
     combo_count = len(combos_compativeis)
     combo_label = "combo" if combo_count == 1 else "combos"
@@ -831,7 +833,7 @@ def preparar_carta(card: dict) -> dict:
         "habilidade_id_efetiva": str(identity.get("effect") or skill),
         "habilidade_nome": str(
             identity.get("name") if identity
-            else (card.get("habilidade_nome") or skill_data.get("nome") or (skill.replace("_", " ").title() if skill else ("Sinergia de combate" if combos_compativeis else "Sem habilidade especial")))
+            else (card.get("habilidade_nome") or skill_data.get("nome") or (skill.replace("_", " ").title() if skill else ("Sinergia de combate" if combos_compativeis else "")))
         ),
         "habilidade_texto": texto_habilidade,
         "habilidade_identidade": bool(identity),

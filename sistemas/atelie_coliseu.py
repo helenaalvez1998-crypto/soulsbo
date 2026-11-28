@@ -1162,8 +1162,9 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
     # nome resolvido no catalogo ou regra canonica antes de autorizar efeitos.
     tem_habilidade = bool(habilidade_nome or habilidade_regra)
     if not tem_habilidade:
-        habilidade_nome = "Nenhuma habilidade especial"
-        habilidade_regra = "A carta não possui habilidade especial."
+        # Ausência de habilidade é estado vazio, nunca texto a ser impresso na arte.
+        habilidade_nome = ""
+        habilidade_regra = ""
     # Sinergias e combos são recuperados do motor: o dataclass Carta não contém esses campos.
     tags_sinergia_motor = sorted(CARD_SYNERGY_TAGS.get(card_id, set()))
     combos_motor = [
@@ -1325,7 +1326,8 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
         f'BASE POWER (main medallion): {poder}.\nMAXIMUM POWER (separate field): {poder_maximo}.\n{leitura_poder}\n'
         f'GAME ORIGIN: {jogo_origem_prompt}.\nARCHETYPE: {arquetipo or "not specified"}.\nEPITHET: {epiteto or "not specified"}.\n'
         f'DOMINANT AFFINITY: {afinidade_dominante or "not specified"}.\nALL AFFINITIES: {", ".join(afinidades) if afinidades else "not specified"}.\n'
-        f'ABILITY: {habilidade_nome}.\nCANONICAL ABILITY RULE: {habilidade_regra}'
+        f'COMBAT ABILITY (VISUAL REFERENCE ONLY; NEVER PRINT): {habilidade_nome or "none"}.\n'
+        f'CANONICAL ABILITY RULE (VISUAL REFERENCE ONLY; NEVER PRINT): {habilidade_regra or "none"}'
     )
     if descricao:
         contexto += f'\nCANONICAL CARD LORE: "{descricao}".'
@@ -1358,7 +1360,8 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
         (
             "CARD STORY — CANONICAL STORYBOARD, NOT GENERIC PROMPT DECORATION: Before composing the image, "
             "resolve the card as a specific story. The CARD NAME defines the primary subject or concept. "
-            "The complete description and ability name/rule define what this subject is doing, why this moment "
+            "The complete description defines the story to print; the ability name/rule may inform the visual action only, "
+            "and must never appear as card lettering. These define what this subject is doing, why this moment "
             "matters, and what visible consequence should appear. The image must show one readable instant with "
             "a before-and-after implied by action, expression, gesture, environment and consequence. "
             "If the name identifies a person (for example Duelist, Guardian, Oracle, Weaver, Smith, Scout, "
@@ -1473,9 +1476,13 @@ def _gerar_prompt_carta_base(carta: dict[str, Any]) -> str:
         "NEGATIVE CONSTRAINTS: no generic fantasy stock character, no random dragon/skull/castle unless the card data calls for it, no unrelated companions, no extra weapons, no exaggerated anatomy, no waxy skin, no plastic materials, no glossy CGI finish, no anime styling, "
         "no film grain, digital noise, pixelation, compression artifacts, dithering, speckling, artificial micro-texture, excessive pores, random scratch noise, oversharpening, clarity halos, HDR crunch or tiny unreadable ornaments, "
         "no contradictory faction colors, no ability symbols that look like interface icons, no split panels, no collage, no illegible runes, no misspelled text, no wrong numbers, no watermark or external logo.\n\n"
-        "FULL-CARD SOURCE DATA: reproduce exact name, faction, rarity, tactical row, cost, base power, maximum power, ability text and lore from the canonical data block assembled by the master prompt. "
+        "ON-CARD TEXT POLICY — LORE ONLY: the single narrative text panel below the illustration must contain only the exact canonical card lore/description. "
+        "Do not print an ability name, ability rule, combat effect paragraph, synergy, explanatory fallback or duplicate description. "
+        "Never print the phrases 'Sem habilidade especial' or 'Nenhuma habilidade especial'. If the lore field is empty, leave the narrative panel blank. "
+        "Combat abilities may guide the illustration but are never printed inside the image; their rules remain in the game interface.\n\n"
+        "FULL-CARD SOURCE DATA: reproduce exact name, faction, rarity, tactical row, cost, base power, maximum power and lore from the canonical data block assembled by the master prompt. "
         "The base-power value belongs in the main power medallion; maximum power belongs in its distinct labeled field. Do not create a rarity-potency field, badge, meter or number. Never swap or recalculate the approved power values. "
-        "FINAL OUTPUT: one complete vertical 2:3 collectible card with finished illustration, frame, typography, stat panels and all official text; no isolated artwork, no empty template and no multi-card sheet."
+        "FINAL OUTPUT: one complete vertical 2:3 collectible card with finished illustration, frame, typography, stat panels and the single lore panel; no isolated artwork, no empty template and no multi-card sheet."
     )
     return "\n\n".join(blocos)
 
@@ -1495,10 +1502,11 @@ def gerar_prompt_carta_estruturado(carta: dict[str, Any]) -> dict[str, Any]:
     else:
         ability_name = _valor_prompt(ability.get("nome") or carta.get("habilidade_nome") or "", 100)
         ability_rule = _valor_prompt(ability.get("texto") or carta.get("habilidade_descricao") or carta.get("habilidade_regra") or "", 500)
-    has_ability = bool(ability_id and (ability_name or ability_rule))
+    has_ability = bool(ability_name or ability_rule)
     if not has_ability:
-        ability_name = "Sem habilidade especial"
-        ability_rule = "A carta não possui habilidade especial. Não inventar efeitos, feitiços ou poderes visuais."
+        # O prompt não deve conter uma frase de fallback que o gerador possa copiar.
+        ability_name = ""
+        ability_rule = ""
     scene = V16_BOSS_ART_PROMPTS.get(card_id, "") or CENAS_ELDEN_POR_ID.get(card_id, "")
     from sistemas.prompt_arte_criador import _faction_direction
     faction = _valor_prompt(carta.get("faccao") or "", 80)
@@ -1578,9 +1586,9 @@ def gerar_prompt_carta_estruturado(carta: dict[str, Any]) -> dict[str, Any]:
     # payload canônica usado no combate e no catálogo público do site.
     if model is not None:
         prepared_card = preparar_carta(card_data)
-        ability_name = _valor_prompt(prepared_card.get("habilidade_nome") or "Sem habilidade especial", 100)
-        ability_rule = _valor_prompt(prepared_card.get("habilidade_texto") or "Sem habilidade especial.", 500)
-        has_ability = ability_name != "Sem habilidade especial"
+        ability_name = _valor_prompt(prepared_card.get("habilidade_nome") or "", 100)
+        ability_rule = _valor_prompt(prepared_card.get("habilidade_texto") or "", 500)
+        has_ability = bool(ability_name or ability_rule)
     return pacote_prompt_arte(
         card_id=card_id,
         card=card_data,

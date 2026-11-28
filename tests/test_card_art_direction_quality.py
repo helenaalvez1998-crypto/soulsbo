@@ -70,6 +70,24 @@ class CardArtDirectionQualityTests(unittest.TestCase):
             self.assertIn(str(model.nome), prompt)
             self.assertIn("PROFESSIONAL FINISH", prompt)
             self.assertIn("HARD ANTI-GENERIC RULES", prompt)
+        self.assertIn("print only the exact supplied lore text", creator_prompt)
+        self.assertIn("print only the exact supplied lore text", coliseum_prompt)
+
+    def test_card_generation_prompts_do_not_offer_a_missing_skill_placeholder_as_card_text(self):
+        from sistemas.atelie_coliseu import gerar_prompt_carta_estruturado
+        from sistemas.cartas import get_carta
+        from sistemas.prompt_arte_criador import gerar_prompt_arte
+
+        model = get_carta("chefe_cacador_sem_rosto")
+        self.assertIsNotNone(model)
+        definition = model.para_dict()
+        creator = gerar_prompt_arte(definition, card_id=model.id)["prompt"]
+        coliseum = gerar_prompt_carta_estruturado(definition)["prompt"]
+        for prompt in (creator, coliseum):
+            self.assertIn("print only the exact supplied lore text", prompt.casefold())
+            self.assertIn("never print", prompt.casefold())
+        self.assertNotIn("ABILITY: Sem habilidade especial", creator)
+        self.assertNotIn("ABILITY: Sem habilidade especial", coliseum)
 
     def test_lore_cues_are_evidence_based_and_do_not_force_missing_equipment(self):
         cues = pistas_lore_visuais(

@@ -38,8 +38,10 @@ def montar_catalogo_publico_cartas() -> dict:
             "custo": int(preparada.get("custo", carta.custo) or 0),
             "habilidade_id": str(preparada.get("habilidade_id_efetiva") or ""),
             "habilidade_id_declarada": str(preparada.get("habilidade_id_declarada") or ""),
-            "habilidade": str(preparada.get("habilidade_nome") or "Sem habilidade especial"),
-            "habilidade_texto": str(preparada.get("habilidade_texto") or "Sem habilidade especial."),
+            # Ausência de habilidade é serializada como campos vazios. A interface
+            # exibe um único estado neutro, sem duplicar o rótulo em título e texto.
+            "habilidade": str(preparada.get("habilidade_nome") or ""),
+            "habilidade_texto": str(preparada.get("habilidade_texto") or ""),
             "habilidade_identidade": bool(preparada.get("habilidade_identidade")),
             "sinergias": list(preparada.get("sinergias") or []),
             "combos_compativeis": list(preparada.get("combos_compativeis") or []),

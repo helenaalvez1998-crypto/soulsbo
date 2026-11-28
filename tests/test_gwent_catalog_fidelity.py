@@ -148,11 +148,23 @@ def test_legado_does_not_activate_when_previous_round_was_not_won():
     assert int(played["bonus"]) == 0
 
 
-def test_every_static_card_has_a_nonempty_canonical_effect_field():
+def test_every_static_card_exposes_only_real_effect_data_without_placeholder_duplication():
+    from sistemas.gwent import CARD_SYNERGY_TAGS
+
     for model in CARTAS_POR_ID.values():
         prepared = preparar_carta(model.para_dict())
-        assert prepared["habilidade_nome"].strip(), model.id
-        assert prepared["habilidade_texto"].strip(), model.id
+        has_effect = bool(
+            model.habilidade
+            or model.id in CARD_IDENTITY_ABILITIES
+            or CARD_SYNERGY_TAGS.get(model.id)
+            or prepared.get("combos_compativeis")
+        )
+        if has_effect:
+            assert prepared["habilidade_nome"].strip() or prepared["habilidade_texto"].strip(), model.id
+            assert prepared["habilidade_texto"].strip(), model.id
+        else:
+            assert prepared["habilidade_nome"] == "", model.id
+            assert prepared["habilidade_texto"] == "", model.id
         if model.id in CARD_IDENTITY_ABILITIES:
             assert prepared["habilidade_id_efetiva"] == CARD_IDENTITY_ABILITIES[model.id]["effect"]
         else:
@@ -189,26 +201,111 @@ def test_every_effect_registry_entry_has_a_runtime_or_identity_handler():
 
 
 
-def test_long_effect_is_not_double_appended_when_rendering_base_card():
-    from sistemas.arte_cartas import (
-        _dados_habilidade_visual, _draw_card, preparar_payload_carta_base,
-    )
+def test_base_card_image_prints_lore_only_and_keeps_combat_rule_outside_image():
+    from PIL import ImageDraw
+    from unittest.mock import patch
+    from sistemas.arte_cartas import _draw_card, preparar_payload_carta_base
 
-    model = get_carta("gwent_especial_execucao")
+    model = get_carta("chefe_malenia_lamina_miquella")
     assert model is not None
     payload = preparar_payload_carta_base(model)
-    expected = (payload["habilidade_nome"], payload["habilidade_texto"])
-    assert _dados_habilidade_visual(payload) == expected
-    rendered = _draw_card(payload)
+    drawn_text: list[str] = []
+    original_text = ImageDraw.ImageDraw.text
+
+    def capture_text(draw, xy, text, *args, **kwargs):
+        drawn_text.append(str(text))
+        return original_text(draw, xy, text, *args, **kwargs)
+
+    with patch.object(ImageDraw.ImageDraw, "text", capture_text):
+        rendered = _draw_card(payload)
+
     assert rendered.size == (420, 620)
+    lore = " ".join(str(payload.get("descricao") or "").split())
+    assert lore
+    printed = " ".join(" ".join(drawn_text).split())
+    assert lore in printed
+    assert payload["habilidade_nome"] not in printed
+    assert payload["habilidade_texto"] not in printed
+    assert "LORE" not in drawn_text
+    assert "Sem habilidade especial" not in drawn_text
 
 
-def test_full_card_atelier_art_is_recomposed_with_canonical_game_text():
+
+def test_no_skill_card_image_never_prints_absence_placeholder():
+    from PIL import ImageDraw
+    from unittest.mock import patch
+    from sistemas.arte_cartas import _draw_card, preparar_payload_carta_base
+
+    model = get_carta("chefe_cacador_sem_rosto")
+    assert model is not None
+    payload = preparar_payload_carta_base(model)
+    assert payload["habilidade_nome"] == ""
+    assert payload["habilidade_texto"] == ""
+    drawn_text: list[str] = []
+    original_text = ImageDraw.ImageDraw.text
+
+    def capture_text(draw, xy, text, *args, **kwargs):
+        drawn_text.append(str(text))
+        return original_text(draw, xy, text, *args, **kwargs)
+
+    with patch.object(ImageDraw.ImageDraw, "text", capture_text):
+        rendered = _draw_card(payload)
+
+    assert rendered.size == (420, 620)
+    printed = " ".join(" ".join(drawn_text).split())
+    lore = " ".join(payload["descricao"].split())
+    assert lore in printed
+    assert "Sem habilidade especial" not in printed
+    assert "Nenhuma habilidade especial" not in printed
+    assert "LORE" not in printed
+
+
+def test_custom_template_card_image_prints_only_lore(monkeypatch):
+    from PIL import Image, ImageDraw
+    from unittest.mock import patch
+    import io
+    from sistemas import templates_cartas
+    from sistemas.arte_cartas import _draw_card_com_template, preparar_payload_carta_base
+
+    model = get_carta("chefe_malenia_lamina_miquella")
+    assert model is not None
+    payload = preparar_payload_carta_base(model)
+    template = Image.new("RGBA", templates_cartas.TAMANHO_TEMPLATE, (16, 20, 27, 255))
+    alpha = template.getchannel("A")
+    ImageDraw.Draw(alpha).rectangle(tuple(templates_cartas.LAYOUT_PADRAO["arte"]), fill=0)
+    template.putalpha(alpha)
+    monkeypatch.setattr(
+        templates_cartas, "carregar_template",
+        lambda _rarity: (template.copy(), templates_cartas.carregar_layout()),
+    )
+
+    art = Image.new("RGB", (500, 400), (70, 42, 50))
+    art_bytes = io.BytesIO()
+    art.save(art_bytes, format="PNG")
+    drawn_text: list[str] = []
+    original_text = ImageDraw.ImageDraw.text
+
+    def capture_text(draw, xy, text, *args, **kwargs):
+        drawn_text.append(str(text))
+        return original_text(draw, xy, text, *args, **kwargs)
+
+    with patch.object(ImageDraw.ImageDraw, "text", capture_text):
+        rendered = _draw_card_com_template(payload, art_bytes.getvalue())
+
+    assert rendered is not None
+    assert rendered.size == templates_cartas.TAMANHO_TEMPLATE
+    printed = " ".join(" ".join(drawn_text).split())
+    lore = " ".join(payload["descricao"].split())
+    assert lore in printed
+    assert payload["habilidade_nome"] not in printed
+    assert payload["habilidade_texto"] not in printed
+    assert "LORE" not in printed
+    assert "Sem habilidade especial" not in printed
+
+def test_full_card_atelier_art_is_recomposed_with_canonical_lore_only():
     from PIL import Image, ImageDraw
     import io
-    from sistemas.arte_cartas import (
-        _dados_habilidade_visual, preparar_payload_carta_base, renderizar_carta_com_arte_completa,
-    )
+    from sistemas.arte_cartas import preparar_payload_carta_base, renderizar_carta_com_arte_completa
 
     model = get_carta("chefe_malenia_lamina_miquella")
     assert model is not None
@@ -223,7 +320,7 @@ def test_full_card_atelier_art_is_recomposed_with_canonical_game_text():
 
     rendered = renderizar_carta_com_arte_completa(source, original.getvalue())
     assert rendered.size == (420, 620)
-    assert source["habilidade_texto"] in _dados_habilidade_visual(source)
+    assert source["habilidade_texto"]  # regra continua presente nos dados da interface/partida
 
 
 def test_full_card_image_endpoints_never_serve_text_baked_into_old_art():

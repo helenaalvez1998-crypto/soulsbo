@@ -33,10 +33,10 @@ O prompt fixo também exige carta isolada, sem fundo externo, em PNG com canal a
 - O prompt recebe os dados do exemplar confirmado no banco; identidade, facção, categoria e fileira são verificadas contra o catálogo.
 - Poder-base, poder máximo e custo são os campos numéricos visíveis autorizados. A raridade é apenas classificatória no Card Engine v2: não desenhar potência, orçamento, escala de efeito, medidor ou pontuação de raridade.
 - O arquivo aprovado fica associado ao par `card_id` + `exemplar_id`. Outra cópia do mesmo modelo não herda essa arte completa.
-- Cartas completas aprovadas continuam vinculadas ao exemplar, mas não são servidas diretamente como pixels finais. O renderizador extrai somente a janela da ilustração e recompõe a moldura, nome, poder-base, raridade, facção, posição tática e efeito de combate a partir dos dados canônicos atuais. Texto antigo incorporado à imagem aprovada não pode substituir a regra executada no jogo.
+- Cartas completas aprovadas continuam vinculadas ao exemplar, mas não são servidas diretamente como pixels finais. O renderizador extrai somente a janela da ilustração e recompõe a moldura, nome, poder-base, raridade, facção, posição tática e somente a lore narrativa a partir dos dados canônicos atuais. Texto antigo incorporado à imagem aprovada não pode substituir a regra executada no jogo.
 - Artes legadas por modelo continuam sendo fallback apenas para instâncias sem arte nova específica.
 - Classificação tática válida: Corpo a corpo, Longa distância ou Cerco. Cartas especiais usam Carta especial. Força, Destreza e Magia não são classificações de combate.
-- Modelos de imagem podem errar tipografia; revisão humana antes da aprovação continua obrigatória. O renderizador não confia nos textos impressos pelo modelo: usa apenas a região de arte e sobrepõe a regra mecânica canônica do jogo.
+- Modelos de imagem podem errar tipografia; revisão humana antes da aprovação continua obrigatória. O renderizador não confia nos textos impressos pelo modelo: usa apenas a região de arte e sobrepõe os dados canônicos; o painel narrativo contém exclusivamente a lore, enquanto a regra mecânica permanece na interface de jogo.
 
 
 ## Varredura de consistência (Opção B · v3.1)

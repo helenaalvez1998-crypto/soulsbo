@@ -63,6 +63,14 @@ const cardSigil = value => {
     : key.includes('cura') || key.includes('purif') ? '✧'
     : key.includes('Especial') ? '◇' : '✦');
 };
+const gwentCardEffectMarkup = (card, className = 'gwent-collection-section gwent-collection-effect') => {
+  const abilityName = String(card?.habilidade_nome || card?.efeito_nome || card?.habilidade || card?.efeito || '').trim();
+  const abilityText = String(card?.habilidade_texto || card?.texto_efeito || '').trim();
+  if (!abilityName && !abilityText) {
+    return `<section class="${className}"><small>EFEITO DE COMBATE</small><p>Sem habilidade especial</p></section>`;
+  }
+  return `<section class="${className}"><small>EFEITO DE COMBATE</small>${abilityName ? `<strong>${escapeHTML(abilityName)}</strong>` : ''}${abilityText ? `<p>${escapeHTML(abilityText)}</p>` : ''}</section>`;
+};
 const cardInsigniaMarkup = card => {
   const category = card.categoria === 'Especial' ? 'Especial' : 'Unidade';
   const faction = card.faccao || 'Sem facção';
@@ -254,7 +262,9 @@ function updateGwentSelectedCardUI(cardId = gwentSelectedHandCard) {
 
   if (name) name.textContent = card ? (card.nome || 'Carta selecionada') : 'Selecione uma carta';
   if (effect) effect.textContent = card
-    ? `${card.habilidade_nome || 'Habilidade'} · ${card.habilidade_texto || 'Sem efeito adicional'}${card.especial ? ' · Carta especial' : ` · ${number(card.poder)} poder`}`
+    ? ((card.habilidade_nome || card.habilidade_texto || card.habilidade)
+      ? `${card.habilidade_nome || 'Efeito'} · ${card.habilidade_texto || ''}${card.especial ? ' · Carta especial' : ` · ${number(card.poder)} poder`}`
+      : `Sem habilidade especial${card.especial ? ' · Carta especial' : ` · ${number(card.poder)} poder`}`)
     : 'Clique em uma carta para configurar a jogada.';
   if (detail) detail.hidden = !card;
   if (preview) {
@@ -403,8 +413,7 @@ function openGwentCollectionCardModal(cardId) {
   const deckCardId = ownedCard ? String(ownedCard.id) : '';
   const inDeck = !!deckCardId && gwentDeckIds.includes(deckCardId);
   const special = card.categoria === 'Especial';
-  const abilityName = card.habilidade_nome || card.efeito_nome || (special ? 'Efeito especial' : 'Sem habilidade especial');
-  const abilityText = card.habilidade_texto || card.texto_efeito || (special ? 'Efeito não informado.' : 'Esta unidade não possui habilidade especial.');
+  const effectMarkup = gwentCardEffectMarkup(card);
   const src = imageUrl(card);
   const modalCard = {...card};
   if (isCardImageUrl(src)) {
@@ -444,11 +453,7 @@ function openGwentCollectionCardModal(cardId) {
           <div><small>PODER-BASE</small><strong>${special ? '—' : number(card.poder)}</strong></div>
           <div><small>PODER MÁXIMO</small><strong>${special ? '—' : number(card.max_power || card.poder)}</strong></div>
         </section>
-        <section class="gwent-collection-section gwent-collection-effect">
-          <small>EFEITO DE COMBATE</small>
-          <h3>${escapeHTML(abilityName)}</h3>
-          <p>${escapeHTML(abilityText)}</p>
-        </section>
+        ${effectMarkup}
         ${card.descricao ? `<section class="gwent-collection-section"><small>LORE</small><p class="gwent-collection-lore">${escapeHTML(card.descricao)}</p></section>` : ''}
         ${(synergies.length || combos.length) ? `<section class="gwent-collection-section"><small>SINERGIAS</small>${synergies.length ? `<div class="gwent-collection-chips">${synergies.map(x=>`<span>${escapeHTML(x)}</span>`).join('')}</div>` : ''}${combos.map(x=>`<article class="gwent-collection-combo"><b>${escapeHTML(x.nome || 'Combo')}</b><p>${escapeHTML(x.descricao || '')}</p></article>`).join('')}</section>` : ''}
         <footer class="gwent-collection-actions">
@@ -2281,11 +2286,7 @@ function openGwentBoardCardModal(cardId) {
           <div class="gwent-bonus-breakdown-heading"><div><small>RASTREIO DE COMBATE</small><strong>Origem do bônus ${signedBonus(bonus)}</strong></div><span>DETALHAMENTO</span></div>
           ${bonusBreakdownContent}
         </section>
-        <section class="gwent-board-card-ability">
-          <small>EFEITO DE COMBATE</small>
-          <strong>${escapeHTML(card.habilidade_nome || 'Sem habilidade especial')}</strong>
-          <p>${escapeHTML(card.habilidade_texto || 'Sem habilidade especial.')}</p>
-        </section>
+        ${gwentCardEffectMarkup(card, 'gwent-board-card-ability')}
         ${card.descricao ? `<section class="gwent-board-card-ability gwent-board-card-lore"><small>DESCRIÇÃO</small><p>${escapeHTML(card.descricao)}</p></section>` : ''}
         <p class="gwent-board-card-note"><strong>Como ler o poder:</strong> o número impresso na carta é o poder-base (${number(basePower)}). O bônus de combate é ${bonus > 0 ? "+" : ""}${number(bonus)}. Por isso, o poder atual é ${number(currentPower)} (poder-base + bônus, com mínimo de 1). A raridade exibida identifica a categoria da carta; não é um valor de poder.</p>
         <button type="button" class="gwent-board-card-dismiss" data-gwent-board-close>FECHAR INSPEÇÃO</button>
@@ -2358,11 +2359,7 @@ function openGwentPlayCardModal(cardId) {
         <small class="eyebrow">PREPARAR JOGADA</small>
         <h2>${escapeHTML(card.nome || 'Carta')}</h2>
         <div class="gwent-play-card-tags"><span>${escapeHTML(card.raridade || 'Carta')}</span><span>${escapeHTML(power)}</span></div>
-        <section class="gwent-play-card-ability">
-          <small>EFEITO DE COMBATE</small>
-          <strong>${escapeHTML(card.habilidade_nome || 'Sem habilidade especial')}</strong>
-          <p>${escapeHTML(card.habilidade_texto || 'Sem habilidade especial.')}</p>
-        </section>
+        ${gwentCardEffectMarkup(card, 'gwent-play-card-ability')}
         ${card.descricao ? `<section class="gwent-play-card-ability gwent-play-card-lore"><small>DESCRIÇÃO</small><p>${escapeHTML(card.descricao)}</p></section>` : ''}
         <p class="gwent-play-card-state">${escapeHTML(stateText)}</p>
         <label class="gwent-play-card-row" style="${(!isSpecial || !needsRowChoice) ? 'display:none' : ''}"><span>FILEIRA DO EFEITO</span>

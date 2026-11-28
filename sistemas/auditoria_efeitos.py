@@ -76,8 +76,8 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
     import inspect
     from sistemas.catalogo_publico import montar_catalogo_publico_cartas
     from sistemas.arte_cartas import (
-        _layout_texto_habilidade,
-        _layout_painel_habilidade_template,
+        _layout_texto_lore,
+        _layout_painel_lore_template,
     )
     from sistemas.templates_cartas import carregar_layout
 
@@ -184,32 +184,37 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
         expected_effect_id = str((identity or {}).get("effect") or skill)
         if prepared.get("habilidade_id_efetiva") != expected_effect_id:
             errors.append(f"{card_id}: ID efetivo da habilidade divergente no motor.")
-        if not str(prepared.get("habilidade_texto") or "").strip():
-            errors.append(f"{card_id}: texto de efeito vazio.")
+        # O efeito é dado mecânico para a interface; a imagem da carta imprime
+        # somente a lore. Cartas sem efeito individual nem combo mantêm campos vazios.
+        if classification != "sem_efeito_individual" and not str(prepared.get("habilidade_texto") or "").strip():
+            errors.append(f"{card_id}: texto de efeito vazio para carta com efeito cadastrado.")
+        lore_text = str(prepared.get("descricao") or "")
         try:
-            effect_text = str(prepared.get("habilidade_texto") or "")
-            _font, lines, _line_step = _layout_texto_habilidade(
-                draw, effect_text, 342, 74
-            )
-            if " ".join(" ".join(lines).split()) != " ".join(effect_text.split()):
-                errors.append(f"{card_id}: o layout procedural alteraria/omitiria texto do efeito.")
+            if lore_text.strip():
+                _font, lines, _line_step = _layout_texto_lore(
+                    draw, lore_text, 342, 94,
+                )
+                if " ".join(" ".join(lines).split()) != " ".join(lore_text.split()):
+                    errors.append(f"{card_id}: o layout procedural alteraria/omitiria a lore.")
+            else:
+                lines = []
         except Exception as exc:
-            errors.append(f"{card_id}: texto não cabe na carta procedural ({exc}).")
+            errors.append(f"{card_id}: a lore não cabe na carta procedural ({exc}).")
             lines = []
         try:
-            _font_title, title_template, _title_y, _text_y, _font_template, template_lines, _template_step, _margin = (
-                _layout_painel_habilidade_template(
-                    draw, str(prepared.get("habilidade_nome") or "Habilidade"),
-                    str(prepared.get("habilidade_texto") or ""),
-                    tuple(carregar_layout(str(prepared.get("raridade") or "Comum"))["habilidade"]),
+            if lore_text.strip():
+                _font_template, template_lines, _template_step, _margin, _text_y = (
+                    _layout_painel_lore_template(
+                        draw, lore_text,
+                        tuple(carregar_layout(str(prepared.get("raridade") or "Comum"))["habilidade"]),
+                    )
                 )
-            )
-            if title_template != str(prepared.get("habilidade_nome") or "Habilidade").strip().upper():
-                errors.append(f"{card_id}: o título do efeito seria truncado no template.")
-            if " ".join(" ".join(template_lines).split()) != " ".join(str(prepared["habilidade_texto"]).split()):
-                errors.append(f"{card_id}: o template alteraria/omitiria texto do efeito.")
+                if " ".join(" ".join(template_lines).split()) != " ".join(lore_text.split()):
+                    errors.append(f"{card_id}: o template alteraria/omitiria a lore.")
+            else:
+                template_lines = []
         except Exception as exc:
-            errors.append(f"{card_id}: título/efeito não cabem no template de arte personalizada ({exc}).")
+            errors.append(f"{card_id}: a lore não cabe no template de arte personalizada ({exc}).")
             template_lines = []
 
         if public_item is None:
@@ -239,7 +244,9 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
             if special and public_item.get("fileira_id") != "special":
                 errors.append(f"{card_id}: carta especial classificada como unidade no site.")
 
-        if not skill and not identity and not tags and prepared.get("habilidade_nome") != "Sem habilidade especial":
+        if not skill and not identity and not tags and (
+            prepared.get("habilidade_nome") or prepared.get("habilidade_texto")
+        ):
             errors.append(f"{card_id}: carta sem efeito individual exibe habilidade inesperada.")
         if card_id in CARTAS_SEM_EFEITO_IDS and skill:
             errors.append(f"{card_id}: consta como sem efeito, mas mantém habilidade ativa.")
@@ -309,9 +316,9 @@ def gerar_markdown_fidelidade_cartas(relatorio: dict | None = None) -> str:
         "",
         "## Como ler esta auditoria",
         "",
-        "O campo **Efeito de combate** reproduz o texto preparado pelo próprio motor `preparar_carta`, incluindo os limites de raridade realmente aplicáveis. O site recebe esse mesmo campo pelo catálogo público e a arte da carta usa o mesmo preparador. A **Lore** é narrativa e não substitui nem altera a regra. Cartas sem habilidade individual continuam podendo participar de combos quando isso estiver listado em suas sinergias.",
+        "O campo **Efeito de combate** reproduz o texto preparado pelo próprio motor `preparar_carta`, incluindo os limites de raridade realmente aplicáveis; ele permanece no site e na interface de jogo. A imagem física da carta imprime apenas a **lore** narrativa no painel inferior: não imprime nome de habilidade, regra, combo ou aviso 'Sem habilidade especial'. Cartas sem habilidade individual continuam podendo participar de combos quando isso estiver listado em suas sinergias.",
         "",
-        "A cobertura automatizada confirma definição/handler cadastrado para as habilidades do catálogo e para o pool de recompensas geradas dinamicamente, igualdade dos campos mecânicos, sinergias e combos enviados ao site, geração dinâmica do compêndio e encaixe integral do título e do efeito nos dois painéis físicos (procedural e template com arte personalizada). Ela não substitui testes funcionais de cada combinação possível de tabuleiro; as regras de entrada, efeitos especiais, remoção, fim de rodada e combos permanecem testadas separadamente na suíte do projeto.",
+        "A cobertura automatizada confirma definição/handler cadastrado para as habilidades do catálogo e para o pool de recompensas geradas dinamicamente, igualdade dos campos mecânicos e sinergias enviados ao site, geração dinâmica do compêndio e encaixe integral da lore nos dois painéis físicos (procedural e template com arte personalizada). O conteúdo de combate é verificado separadamente e nunca é inserido como texto na imagem. A auditoria não substitui testes funcionais de cada combinação possível de tabuleiro; as regras de entrada, efeitos especiais, remoção, fim de rodada e combos permanecem testadas na suíte do projeto.",
         "",
         "## Cartas de líder",
         "",
@@ -333,9 +340,11 @@ def gerar_markdown_fidelidade_cartas(relatorio: dict | None = None) -> str:
             "",
             f"**Tipo:** {card['categoria']} · **Facção:** {card['faccao']} · **Fileira:** {card['fileira']}  ",
             f"**Raridade:** {card['raridade']} · **Poder-base:** {card['poder']} · **Custo:** {card['custo']}  ",
-            f"**Classificação:** {card['classificacao']} · **Linhas no render procedural/template:** {card['linhas_na_carta']}/{card['linhas_template']} · **Validação:** {card['status']}",
+            f"**Classificação:** {card['classificacao']} · **Linhas de lore no render procedural/template:** {card['linhas_na_carta']}/{card['linhas_template']} · **Validação:** {card['status']}",
             "",
-            f"**Efeito de combate — {card['habilidade_nome']}:** {card['habilidade_texto']}",
+            (f"**Efeito de combate — {card['habilidade_nome']}:** {card['habilidade_texto']}"
+             if card.get('habilidade_nome') or card.get('habilidade_texto')
+             else "**Efeito de combate:** Sem habilidade especial."),
             f"**Lore:** {card['descricao'] or 'Sem lore cadastrada.'}",
         ])
         if card.get("sinergias"):
@@ -349,6 +358,6 @@ def gerar_markdown_fidelidade_cartas(relatorio: dict | None = None) -> str:
     if data.get("erros"):
         lines.extend(f"- {error}" for error in data["erros"])
     else:
-        lines.append("Nenhuma divergência estrutural encontrada no cruzamento catálogo → motor → site → texto da arte.")
+        lines.append("Nenhuma divergência estrutural encontrada no cruzamento catálogo → motor → site. A imagem contém somente a lore.")
     lines.append("")
     return "\n".join(lines)

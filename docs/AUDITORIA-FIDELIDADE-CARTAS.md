@@ -19,9 +19,9 @@
 
 ## Como ler esta auditoria
 
-O campo **Efeito de combate** reproduz o texto preparado pelo próprio motor `preparar_carta`, incluindo os limites de raridade realmente aplicáveis. O site recebe esse mesmo campo pelo catálogo público e a arte da carta usa o mesmo preparador. A **Lore** é narrativa e não substitui nem altera a regra. Cartas sem habilidade individual continuam podendo participar de combos quando isso estiver listado em suas sinergias.
+O campo **Efeito de combate** reproduz o texto preparado pelo próprio motor `preparar_carta`, incluindo os limites de raridade realmente aplicáveis; ele permanece no site e na interface de jogo. A imagem física da carta imprime apenas a **lore** narrativa no painel inferior: não imprime nome de habilidade, regra, combo ou aviso 'Sem habilidade especial'. Cartas sem habilidade individual continuam podendo participar de combos quando isso estiver listado em suas sinergias.
 
-A cobertura automatizada confirma definição/handler cadastrado para as habilidades do catálogo e para o pool de recompensas geradas dinamicamente, igualdade dos campos mecânicos, sinergias e combos enviados ao site, geração dinâmica do compêndio e encaixe integral do título e do efeito nos dois painéis físicos (procedural e template com arte personalizada). Ela não substitui testes funcionais de cada combinação possível de tabuleiro; as regras de entrada, efeitos especiais, remoção, fim de rodada e combos permanecem testadas separadamente na suíte do projeto.
+A cobertura automatizada confirma definição/handler cadastrado para as habilidades do catálogo e para o pool de recompensas geradas dinamicamente, igualdade dos campos mecânicos e sinergias enviados ao site, geração dinâmica do compêndio e encaixe integral da lore nos dois painéis físicos (procedural e template com arte personalizada). O conteúdo de combate é verificado separadamente e nunca é inserido como texto na imagem. A auditoria não substitui testes funcionais de cada combinação possível de tabuleiro; as regras de entrada, efeitos especiais, remoção, fim de rodada e combos permanecem testadas na suíte do projeto.
 
 ## Cartas de líder
 
@@ -83,7 +83,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Marca da Dinastia:** Marca o inimigo de maior poder efetivo na fileira. Na segunda marca, consome Sangramento, reduz 2 de bônus (mín. -2) e esta carta recebe +1. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um acólito do Palácio de Mohgwyn prepara o altar para os ritos secretos da dinastia e reverencia a chama do sangue.
@@ -94,7 +94,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Postura Encadeada:** Recebe +2 de bônus se entrar na mesma fileira da sua última unidade jogada. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 20.
@@ -103,7 +103,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Singular · **Poder-base:** 9 · **Custo:** 0  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Mira Cariana:** Recebe +1 de bônus ao entrar na fileira de Longa Distância. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Conquistada ao concluir um desafio sem sofrer dano.
@@ -112,7 +112,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Algemas de Margit:** Na fileira escolhida, zera o bônus positivo do alvo escolhido ou do inimigo com maior bônus. Bônus negativos não mudam; Escudos não bloqueiam o efeito. A ativação consome a Relíquia.
 **Lore:** Correntes forjadas para conter o Agouro caído, capazes de subjugar até mesmo um inimigo temível.
@@ -121,7 +121,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Lendária · **Poder-base:** 5 · **Custo:** 4  
-**Classificação:** unidade · **Linhas no render procedural/template:** 5/5 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Glória:** Ao vencer a rodada, mantém no campo a unidade com Glória ou Sobrevivente de maior poder efetivo; as demais são descartadas. Em empate ou derrota, nenhuma permanece. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Uma presença alada atravessa os salões esquecidos, iluminando os vitrais partidos.
@@ -132,7 +132,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Longa distância  
 **Raridade:** Épica · **Poder-base:** 3 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 5/5 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Glória:** Ao vencer a rodada, mantém no campo a unidade com Glória ou Sobrevivente de maior poder efetivo; as demais são descartadas. Em empate ou derrota, nenhuma permanece. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um mensageiro alado atravessa os vitrais partidos da antiga catedral, levando uma luz que quase se apagou.
@@ -143,25 +143,25 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 10.
 
 ### Aprendiz de Feitiçaria Cariana (`magia_fagulha`)
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Um aprendiz da tradição cariana começa a dominar os projéteis de pedra cintilante.
 
 ### Apóstolo da Pele Divina (`magia_sol_negro`)
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 8 · **Custo:** 4  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Eclipse Devorador:** Ganha +2 se algum inimigo tiver bônus acima de zero. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Devoto da antiga ordem da Pele Divina, empunha a chama negra associada à morte dos deuses.
@@ -170,7 +170,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Cerco  
 **Raridade:** Épica · **Poder-base:** 7 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Caçador de Feitiços:** Recebe +1 de bônus ao entrar se o adversário tiver uma unidade da Lua Negra ou qualquer unidade com bônus positivo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Converte conhecimento arcano em força de combate.
@@ -181,7 +181,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um pregador percorre as estradas douradas com fragmentos de escrituras antigas.
@@ -192,7 +192,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Longa distância  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Não possui habilidade individual. Pode completar combos de formação da Ordem Áurea com a unidade compatível.
@@ -203,16 +203,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Uma assassina Numen ligada à Noite das Facas Negras, quando um fragmento da Runa da Morte foi usado para matar Godwyn.
 
 ### Assassina de Ravenmount (`gwent_unidade_cacadora_fantasma`)
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Uma assassina de Ravenmount atravessa a névoa sem deixar rastros fáceis de seguir.
@@ -223,7 +223,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Épica · **Poder-base:** 7 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Névoa Ancestral:** Ganha +2 se houver efeito climático em qualquer fileira. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Sob os céus de Liurnia, uma astróloga procura nas estrelas sinais de destinos ainda ocultos.
@@ -234,7 +234,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 0 · **Custo:** 1  
-**Classificação:** especial · **Linhas no render procedural/template:** 2/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Bastião de Leyndell:** Escolha uma fileira: seus aliados nela recebem +1 de bônus até o fim da rodada.
 **Lore:** As muralhas douradas de Leyndell erguem-se como símbolo da resistência da capital.
@@ -243,7 +243,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um recusante percorre os caminhos do Monte Gelmir, atento às rotas e aos movimentos dos inimigos.
@@ -254,7 +254,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Cerco  
 **Raridade:** Primordial · **Poder-base:** 8 · **Custo:** 6  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lei Primeva:** Recebe +2 de bônus ao entrar na primeira rodada. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** A Besta Prístina manifesta a vontade que veio além das estrelas e deu forma à ordem dourada.
@@ -263,7 +263,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** O conhecimento reunido na guerra vale mais que ouro.
@@ -274,7 +274,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Cerco  
 **Raridade:** Lendária · **Poder-base:** 5 · **Custo:** 4  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Devoção:** Recebe +1 de bônus ao entrar se já houver pelo menos 2 outras unidades da mesma facção em campo. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um bispo dos Esquecidos conduz os fiéis entre ruínas de antigas catedrais.
@@ -285,7 +285,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Vingança:** Quando esta unidade é removida, cada aliado da mesma fileira recebe +1 de bônus. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** A presa que o derruba desperta a matilha inteira.
@@ -296,7 +296,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Bênção da Árvore Áurea:** Escolha um aliado sem Escudo para receber 1 Escudo; a raridade pode proteger até 3 aliados. Escudos não bloqueiam sacrifícios. Raridade Rara: protege até 2 aliados sem Escudo.
 **Lore:** Uma prece antiga invoca a proteção dourada que envolve os campeões da capital.
@@ -305,7 +305,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Preço em Sangue:** Sacrifica o aliado de menor poder efetivo da mesma fileira e recebe bônus igual ao poder efetivo dele (mín. +1, máx. +3). Sem aliado, recebe +1. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** O carrasco conduz procissões sob estandartes vermelhos, vestindo as vestes cerimoniais dos guerreiros de Mohgwyn.
@@ -316,7 +316,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** unidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Devorar:** Ao entrar, sacrifica o aliado de menor poder efetivo na mesma fileira e recebe bônus igual ao poder efetivo dele (mín. +1, máx. +4). Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um executor da Mansão Vulcânica veste o aço manchado dos recusantes e serve aos banquetes de Tanith.
@@ -327,7 +327,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.
@@ -338,7 +338,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Uma duelista cariana, treinada nas tradições de combate da realeza lunar.
@@ -349,7 +349,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Mítica · **Poder-base:** 8 · **Custo:** 5  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Estandarte:** Ao entrar, concede +1 de bônus aos outros aliados na mesma fileira. Raridade Mítica: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um cavaleiro consagrado guarda os ramos pálidos do Haligtree, onde a esperança resiste à decadência.
@@ -358,7 +358,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 7 · **Custo:** 4  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Selo Enfraquecedor:** Reduz em 1 o bônus de cada unidade inimiga, até o mínimo de -2. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um guerreiro jurado à dinastia sanguínea guarda os domínios ocultos de Mohg.
@@ -369,7 +369,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Égide das Cinzas:** Se já houver um aliado na mesma fileira, ele recebe +1 de bônus e esta carta também recebe +1. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um sentinela montado patrulha os caminhos que conduzem à Árvore Áurea, impondo a autoridade da capital.
@@ -380,16 +380,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Um soldado da capital mantém a vigília entre as muralhas erguidas em nome da Ordem Áurea.
 
 ### Cavaleiro de Radahn (`gwent_unidade_sentinela_rubra`)
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um cavaleiro da hoste de Radahn mantém sua posição sob o estandarte vermelho de Caelid.
@@ -400,7 +400,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um cavaleiro ligado ao sangue de Mohg participa dos rituais sombrios da dinastia subterrânea.
@@ -411,7 +411,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um cavaleiro do Crisol, marcado pelas antigas formas que antecederam a Árvore Áurea, guarda a formação com disciplina.
@@ -422,7 +422,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um cavaleiro errante segue a trilha de presas pelas florestas enevoadas das Terras Intermédias.
@@ -433,7 +433,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Já viu mais muralhas caírem do que rostos conhecidos.
@@ -444,7 +444,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Veteranos da hoste do Flagelo das Estrelas, marcham sob o estandarte do general de Caelid.
@@ -455,16 +455,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Combatentes unidos por juramentos de sangue permanecem ao lado de seu senhor até o último fôlego.
 
 ### Caçador das Catacumbas de Mohgwyn (`gwent_v75_veu_cacador_sangue`)
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Não possui habilidade individual. Pode completar combos de marca de Sangramento com a unidade compatível.
@@ -475,16 +475,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Caçador de Dedos, um duelista errante que prefere trilhas solitárias e confrontos sem testemunhas.
 
 ### Chama do Gigante (`elden_especial_chama`)
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Chama do Gigante:** Remove Geada de todos os aliados afetados; cada unidade purificada recebe +1 de bônus até o fim da rodada. A raridade pode ampliar esses bônus. Raridade Rara: acrescenta +1 de bônus a até 1 aliados purificados.
 **Lore:** A chama dos gigantes arde contra o frio que tenta aprisionar os vivos.
@@ -493,7 +493,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Loucura Frenética:** Escolha uma fileira inimiga. Cada marca reduz 1 de poder efetivo; a segunda zera bônus positivos. Marcas expiram no fim da rodada; a raridade antecipa marcas. Raridade Épica: aplica a segunda marca imediatamente a até 1 alvos sem marca prévia; reforça reduções de bônus causadas, até -2.
 **Lore:** A chama frenética consome razão e identidade, deixando apenas o caos da Chama Frenética.
@@ -502,7 +502,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Chama Negra:** Em cada lado, tenta remover a unidade de maior poder efetivo. Escudo bloqueia a remoção; se ela ocorrer, gatilhos de queda são resolvidos. Raridade Épica: reforça bônus gerados por efeitos de queda em até 1 alvo; não amplia remoções nem atravessa Escudos.
 **Lore:** A chama negra, temida até pelos deuses, consome tudo o que toca.
@@ -511,7 +511,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Chamado dos Mortos:** Traz do descarte diretamente ao campo uma unidade escolhida com poder-base até 6; a raridade pode elevar esse limite até 9. Raridade Épica: o limite de poder-base sobe até 7.
 **Lore:** Um cântico atravessa as catacumbas e ecoa entre os nomes que a história tentou apagar.
@@ -520,7 +520,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Cinzas dos Lobos Solitários:** Escolha uma fileira e invoque Lobos Espirituais nela com 3 de poder; a raridade pode elevar o poder da invocação até 6. Raridade Rara: invoca Lobos Espirituais com 4 de poder.
 **Lore:** Cinzas antigas despertam os espíritos de lobos que outrora caçaram ao lado de seus mestres.
@@ -529,7 +529,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Cerco  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Regressão Serena:** Purifica até 2 aliados da fileira de Sangramento, Geada, Podridão ou Loucura; cada um recebe +1. Se ninguém precisar, o aliado mais fraco recebe +1; sem aliados, esta carta recebe +1. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Uma Confessora percorre os caminhos de Leyndell em silêncio, levando os ensinamentos da Lei da Regressão aos santuários esquecidos.
@@ -540,7 +540,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Selo de Vigília:** Esta carta recebe Resistência Climática 1. Se houver aliado na mesma fileira, o primeiro recebe +1 de bônus. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Treinada para agir discretamente, a Confessora combina devoção, infiltração e combate próximo.
@@ -549,7 +549,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Singular · **Poder-base:** 9 · **Custo:** 0  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Paradoxo Eterno:** Na terceira rodada, recebe +2 de bônus se o adversário venceu a rodada anterior. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Conquistada ao derrotar todos os chefes de um desafio.
@@ -558,7 +558,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de Facção:** Recebe +1 de bônus por cada outra unidade aliada da mesma facção que já esteja em campo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um guerreiro sagrado guarda as estradas em ruínas e carrega no escudo o símbolo de uma ordem que já não existe.
@@ -569,7 +569,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Não possui habilidade individual. Pode completar o combo Banquete da Hemorragia com a unidade compatível.
@@ -580,7 +580,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Discípulo de Raya Lucaria, dedica-se ao estudo dos círculos arcanos e dos resíduos de feitiçaria.
@@ -591,16 +591,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Seguidores dos antigos monges preservam a chama dos gigantes e seus rituais esquecidos.
 
 ### Diácono Esquecido (`luterano_diacon`)
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 3 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Auxiliar dos rituais, mantém acesas as lâmpadas dos altares esquecidos.
@@ -611,7 +611,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Longa distância  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Descarga Oca:** Cada inimigo na mesma fileira perde 1 de bônus (mín. -2). Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um guerreiro ligado aos antigos dragões canaliza relâmpagos ancestrais em meio à batalha.
@@ -620,7 +620,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Herdeiro de uma casa de duelistas, transforma a elegância do aço em uma promessa de sangue.
@@ -631,7 +631,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Pesquisador de Raya Lucaria, dedica a vida ao estudo dos segredos das pedras cintilantes.
@@ -642,7 +642,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um estudioso das pedras cintilantes investiga as ressonâncias deixadas por feitiçarias antigas.
@@ -653,16 +653,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 15.
 
 ### Espada da Noite e da Chama (`reliquia_noite_chama`)
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 0 · **Custo:** 4  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/4 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Espada da Noite e da Chama:** Noite: aplica 1 marca de Geada (máx. 2) a todos os inimigos da fileira escolhida. Chama: atinge o inimigo de maior poder efetivo na fileira, reduzindo 1 de poder-base (mín. 1) e 2 de bônus. Escudo bloqueia o golpe; a Relíquia é consumida.
 **Lore:** Arma lendária da Mansão Cariana. Sua postura especial libera um ataque mágico ou uma onda de fogo.
@@ -671,7 +671,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 7 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Dança Espelhada:** Ganha +1 se você tiver outro aliado em uma fileira diferente. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um duelista das tradições carianas conduz a lâmina sob a luz fria da Lua Negra.
@@ -682,7 +682,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Encontra rotas onde os outros veem obstáculos.
@@ -693,7 +693,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Uma feiticeira errante combina o frio das antigas artes lunares com chamas de origem desconhecida.
@@ -704,16 +704,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Discípulo da realeza cariana, conjura feitiçarias de pedra cintilante sob a proteção da lua.
 
 ### Feiticeiro Cariano — Executor Sombrio (`patente_7`)
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 7 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Caçador de Feitiços:** Recebe +1 de bônus ao entrar se o adversário tiver uma unidade da Lua Negra ou qualquer unidade com bônus positivo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 40.
@@ -722,16 +722,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Entre fornalhas e juramentos de traição, um artesão molda armas para os recusantes do Monte Gelmir.
 
 ### Fia, Companheira do Leito de Morte (`gwent_unidade_cantora_lamentos`)
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Fia, Companheira do Leito de Morte, entoa lamentos pelos que encontraram repouso entre os mortos.
@@ -742,7 +742,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/5 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Podridão Escarlate:** Escolha uma fileira inimiga. Cada marca reduz 1 de poder efetivo; a segunda reduz 1 de bônus positivo (mín. 0). Marcas expiram no fim da rodada; a raridade antecipa marcas. Raridade Épica: aplica a segunda marca imediatamente a até 1 alvos sem marca prévia; reforça reduções de bônus causadas, até -2.
 **Lore:** A flor escarlate floresce onde a podridão encontra carne, pedra e memória.
@@ -751,7 +751,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lua Gélida:** Todas as unidades inimigas recebem 1 marca de Geada; cada marca reduz 1 de poder efetivo, até 2 marcas. Raridades Lendárias ou superiores aplicam a segunda marca imediatamente. As marcas acabam no fim da rodada.
 **Lore:** O frio dos Picos dos Gigantes avança sobre o campo e silencia o vigor dos combatentes.
@@ -760,7 +760,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 7 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Instinto de Caçador:** Recebe +2 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Uma presença colossal na linha de frente.
@@ -769,7 +769,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 7 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Dízimo do Abismo:** Recebe +2 se houver qualquer carta no seu descarte; caso contrário, recebe +1 se o adversário tiver mais unidades em campo. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Primeiro Lorde Prístino e consorte de Marika, Godfrey liderou os guerreiros que conquistaram as Terras Intermédias.
@@ -780,7 +780,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Vingança:** Quando esta unidade é removida, cada aliado da mesma fileira recebe +1 de bônus. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** O príncipe dourado foi amado por dragões e homens; sua queda marcou a primeira rachadura irreversível no destino das Terras Intermédias.
@@ -791,7 +791,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 0 · **Custo:** 4  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Grande Runa de Godrick:** Exige ao menos 1 unidade aliada em campo. Concede +1 de bônus a todas as unidades aliadas; uso único por partida.
 **Lore:** Fragmento do Anel Prístino reivindicado por Godrick, o Enxertado, que buscava poder por meio do enxerto.
@@ -800,7 +800,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 0 · **Custo:** 4  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Grande Runa dos Não Nascidos:** Remove Geada e Podridão dos aliados afetados; cada unidade purificada recebe +1 de bônus. Uso único por partida.
 **Lore:** A Grande Runa guardada por Rennala conserva o poder do renascimento e da perfeição inacabada.
@@ -809,7 +809,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Cisalhamento Gravitacional:** Até 2 inimigos com bônus positivo na fileira perdem 1 (mín. -2). Se atingir 2 alvos, esta carta recebe +1. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um astrólogo das Cidades Eternas estuda as correntes gravitacionais que sustentam as ruínas suspensas de Nokron.
@@ -820,7 +820,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** unidade · **Linhas no render procedural/template:** 2/2 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Retaliação dos Semideuses:** Recebe +1 de bônus ao entrar se sua pontuação estiver abaixo da adversária.
 **Lore:** Defensores juramentados protegem os caminhos e santuários consagrados à Árvore Áurea.
@@ -831,7 +831,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Épica: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Não possui habilidade individual. Pode completar combos de mobilidade lunar com a unidade compatível.
@@ -842,7 +842,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um guardião da Ordem Áurea carrega inscrições rúnicas ligadas aos ensinamentos da capital.
@@ -853,7 +853,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Não possui habilidade individual. Pode completar combos da Ordem Áurea quando estiver em campo com a unidade compatível.
@@ -864,16 +864,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Vigias da cidade oculta de Sellia protegem seus segredos e as passagens de feitiçaria.
 
 ### Guerreiro da Chama Frenética (`gwent_unidade_detonador`)
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Vingança:** Quando esta unidade é removida, cada aliado da mesma fileira recebe +1 de bônus. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Sua queda libera a energia que ele guardava.
@@ -884,7 +884,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 7 · **Custo:** 4  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Presságio da Ruína:** A unidade inimiga de maior poder efetivo perde 1 de bônus (mín. -2). Se sua pontuação estiver menor ao entrar, esta carta recebe +1. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** O clérigo bestial consome Raiz da Morte e guarda um segredo ligado à própria Runa da Morte.
@@ -893,7 +893,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Duas irmãs das Cidades Eternas percorrem caminhos subterrâneos que raramente aparecem nos mapas.
@@ -904,7 +904,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um peregrino humilde permanece ao lado de sua irmandade, mesmo quando todos os demais recuam.
@@ -915,7 +915,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Aliança Lunar:** Esta carta recebe +1. O aliado de menor poder efetivo em outra fileira também recebe +1 de bônus, se existir. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Uma aliada juramentada à princesa lunar acompanha sua busca por um caminho além da Ordem Áurea.
@@ -926,7 +926,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Juramento do Crisol:** Escolha uma fileira com ao menos 2 aliados. Todas as unidades aliadas nela recebem +2 de bônus até o fim da rodada. Raridade Rara: acrescenta +1 de bônus a até 1 aliados afetados.
 **Lore:** Um juramento ancestral une os guerreiros às formas primordiais que precederam a Erdtree.
@@ -935,7 +935,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Singular · **Poder-base:** 10 · **Custo:** 0  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Caçador Solitário:** Recebe +2 de bônus ao entrar se não houver outro aliado na mesma fileira. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Exemplar singular conquistado por um feito extraordinário.
@@ -944,7 +944,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Nenhuma rota é cara demais para quem leva o butim.
@@ -955,16 +955,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Treinado para defender os domínios da Árvore Áurea, avança com lança e disciplina militar.
 
 ### Lei da Regressão (`gwent_especial_purificar`)
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 2/1 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lei da Regressão:** Remove o clima ativo das três fileiras para os dois jogadores.
 **Lore:** A Lei da Regressão revela a verdade por trás das ilusões e desfaz os véus que encobrem o mundo.
@@ -973,7 +973,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 3 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Uma estudiosa de Sellia observa os astros e procura caminhos ocultos na feitiçaria noturna.
@@ -984,7 +984,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Cerco  
 **Raridade:** Lendária · **Poder-base:** 8 · **Custo:** 4  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Ímpeto do Lorde:** Recebe +1 de bônus ao entrar se sua pontuação estiver acima da adversária. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 75.
@@ -993,7 +993,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Geada Cariana:** Escolha uma fileira inimiga. Cada unidade nela recebe 1 marca de Geada; cada marca reduz 1 de poder efetivo até o fim da rodada. A raridade pode aplicar a segunda marca imediatamente a até 3 alvos. Raridade Rara: aplica a segunda marca imediatamente a até 1 alvos sem Geada prévia.
 **Lore:** A lua cheia de Rennala ilumina o campo com a frieza ancestral da realeza cariana.
@@ -1002,7 +1002,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lágrima Sagrada:** Devolve à sua mão uma unidade escolhida do seu descarte com poder-base até 4; a raridade pode elevar esse limite até 7. Raridade Rara: o limite de poder-base sobe até 5.
 **Lore:** Uma lágrima consagrada guarda a memória dos que tombaram e ainda podem retornar à jornada.
@@ -1011,7 +1011,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/5 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lâmina da Morte Destinada:** Escolha uma fileira e um inimigo nela com poder efetivo até 6. Tenta removê-lo; Escudo pode bloquear. Se a remoção ocorrer, gatilhos de queda são resolvidos. A raridade eleva o limite até 9. Raridade Épica: alcança poder efetivo até 7; pode reforçar bônus gerados por efeitos de queda em até 1 alvo.
 **Lore:** A lâmina da Morte Destinada carrega o fragmento de um poder que deveria permanecer selado.
@@ -1020,7 +1020,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Mítica · **Poder-base:** 0 · **Custo:** 5  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lâmina Negra:** Na fileira escolhida, reduz em 3 o bônus do alvo escolhido ou, sem alvo, do inimigo de maior poder efetivo. Escudo é consumido e bloqueia o efeito sem consumir a Relíquia.
 **Lore:** A arma de Maliketh, que guarda a Morte Destinada selada em sua lâmina. Não é uma das adagas usadas pelas Assassinas da Faca Negra.
@@ -1029,7 +1029,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Uma figura encapuzada atravessa as sombras, deixando apenas o rumor de uma lâmina silenciosa.
@@ -1040,7 +1040,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Primordial · **Poder-base:** 9 · **Custo:** 6  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 9/8 · **Validação:** OK
 
 **Efeito de combate — Flor Escarlate:** Cada inimigo da fileira recebe 1 marca de Podridão (máx. 2); cada marca reduz 1 de poder efetivo. Ao atingir 2, bônus positivo perde 1 (mín. 0). Primordial: até 3 alvos nessa transição perdem mais 1 (mín. -2). Não reduz de novo com 2 marcas.
 **Lore:** Malenia é uma Empírea e semideusa, filha de Marika e Radagon e irmã gêmea de Miquella. Nasceu afligida pela Podridão Escarlate e foi treinada por um espadachim cego, tornando-se uma espadachim incomparável. Como Lâmina de Miquella, protegeu o irmão e aguarda seu retorno em Elphael, sob a Árvore Sacra. Empunha a Mão de Malenia, uma katana, e combate com próteses douradas. Na batalha contra Radahn em Caelid, liberou uma florescência da Podridão Escarlate que devastou a região. Esta ficha representa Malenia antes de sua transformação na Deusa da Podridão.
@@ -1049,7 +1049,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Primordial · **Poder-base:** 8 · **Custo:** 6  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Paradoxo Eterno:** Na terceira rodada, recebe +2 de bônus se o adversário venceu a rodada anterior. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Maliketh guarda a Morte Destinada, o poder cuja ausência sustenta a ordem sem morte de Marika.
@@ -1058,7 +1058,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 8 · **Custo:** 4  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Morte Destinada:** Ao entrar, o inimigo de maior poder efetivo perde 2 de bônus (mín. -2). Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Sombra leal de Marika e guardião da Runa da Morte, carrega a Morte Destinada selada em sua lâmina.
@@ -1067,7 +1067,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Primordial · **Poder-base:** 8 · **Custo:** 6  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Decreto Soberano:** Ao entrar, reduz em 2 o bônus de todas as unidades inimigas (mín. -2). Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Marika, a Rainha Eterna, ergueu a ordem dourada e rompeu o Anel Prístino, mudando para sempre as Terras Intermédias.
@@ -1076,7 +1076,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um mercador nômade percorre as Terras Intermédias levando provisões e notícias entre assentamentos.
@@ -1087,7 +1087,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 8 · **Custo:** 4  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Lança do Impalador:** Ao entrar, cada inimigo da fileira recebe 1 marca de Sangramento. A segunda marca consome as marcas e causa -2 de bônus (mín. -2); estados expiram no fim da rodada. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Filho de Marika e senhor da chama impura, comandou a purga que devastou o Reino das Sombras.
@@ -1096,7 +1096,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Lendária · **Poder-base:** 6 · **Custo:** 4  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Ruptura de Postura:** Recebe +1 de bônus se a última unidade jogada pelo adversário entrou na mesma fileira. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 100.
@@ -1105,7 +1105,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 2 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um mestre ferreiro de Volcano Manor trabalha entre brasas, aço e os juramentos dos recusantes.
@@ -1116,7 +1116,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Névoa de Sellia:** Escolha uma fileira inimiga. Cada unidade nela recebe 1 marca de Podridão Escarlate; cada marca reduz 1 de poder efetivo, até 2 marcas. Raridades Lendárias ou superiores aplicam a segunda marca imediatamente. As marcas acabam no fim da rodada.
 **Lore:** Uma nuvem pútrida se espalha pelo campo, lembrando os pântanos corrompidos de Caelid.
@@ -1125,7 +1125,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um viajante percorre capelas abandonadas levando escrituras preservadas por gerações.
@@ -1136,7 +1136,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 4 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Devoto do fogo dos gigantes, preserva ritos antigos nas encostas geladas dos Picos dos Gigantes.
@@ -1147,7 +1147,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Cerco  
 **Raridade:** Primordial · **Poder-base:** 8 · **Custo:** 6  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Fome do Abismo:** Recebe +2 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** A Mãe Sem Forma é venerada pelos seguidores de Mohg como origem do poder sanguíneo.
@@ -1156,7 +1156,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Devoção:** Recebe +1 de bônus ao entrar se já houver pelo menos 2 outras unidades da mesma facção em campo. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um intérprete de sinais antigos contempla as estrelas sobre as ruínas de Sellia.
@@ -1167,7 +1167,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 3 · **Custo:** 1  
-**Classificação:** unidade · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Caçador de Feitiços:** Recebe +1 de bônus ao entrar se o adversário tiver uma unidade da Lua Negra ou qualquer unidade com bônus positivo.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 1.
@@ -1176,16 +1176,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Comum · **Poder-base:** 3 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 5.
 
 ### Oráculo Gélido de Sellia (`gwent_v75_lua_oraculo_geada`)
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Presságio da Geada:** O inimigo de maior poder efetivo na fileira recebe 1 marca de Geada (máx. 2). Se já tinha marca, esta carta recebe +1. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Uma astróloga de Sellia lê presságios nas lâminas de gelo que se formam sobre as águas imóveis da cidade.
@@ -1196,7 +1196,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Cerco  
 **Raridade:** Mítica · **Poder-base:** 7 · **Custo:** 5  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de Facção:** Recebe +1 de bônus por cada outra unidade aliada da mesma facção que já esteja em campo. Raridade Mítica: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Sumo sacerdote dos Esquecidos, governa uma ordem que sobreviveu à queda de seus templos.
@@ -1207,7 +1207,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Passo do Cão de Caça:** Compra 1 carta da reserva; a raridade pode elevar a compra para 2, se houver cartas disponíveis. Raridade Rara: compra até 2 cartas da reserva.
 **Lore:** O passo do cão de caça atravessa o campo antes que o inimigo perceba sua aproximação.
@@ -1216,7 +1216,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Passo do Lobo:** Escolha uma fileira e mova para ela uma unidade aliada que esteja em outra fileira. Raridade Rara: move até 2 aliados.
 **Lore:** O antigo instinto de caça guia seus guerreiros por caminhos que parecem impossíveis.
@@ -1225,7 +1225,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Legado:** Recebe +2 de bônus ao entrar se você venceu a rodada imediatamente anterior. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um guia errante conduz os fiéis por trilhas esquecidas e capelas abandonadas.
@@ -1236,16 +1236,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** Viajantes das cidades subterrâneas cruzam a escuridão em busca de uma nova estrela.
 
 ### Placidusax, Lorde Dragão (`chefe_placidusax_lorde_dragao`)
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Primordial · **Poder-base:** 9 · **Custo:** 6  
-**Classificação:** identidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Tempestade do Tempo:** Ao entrar, cada inimigo da fileira recebe 1 marca de Geada (máx. 2); esta carta recebe +1 por inimigo atingido, até +3. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Lorde Dragão ancestral que aguarda, em Farum Azula, o retorno de seu deus desaparecido.
@@ -1254,7 +1254,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Primordial · **Poder-base:** 8 · **Custo:** 6  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Olho da Tempestade:** Recebe +2 de bônus ao entrar se sua fileira estiver sob clima ativo. Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Placidusax, antigo lorde dos dragões, permanece suspenso no tempo em Farum Azula.
@@ -1263,7 +1263,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 3 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** O estandarte de Leyndell reúne soldados dispersos sob o símbolo dourado da capital.
@@ -1274,16 +1274,16 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 6 · **Custo:** 2  
-**Classificação:** sem_efeito_individual · **Linhas no render procedural/template:** 1/1 · **Validação:** OK
+**Classificação:** sem_efeito_individual · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
-**Efeito de combate — Sem habilidade especial:** Sem habilidade especial.
+**Efeito de combate:** Sem habilidade especial.
 **Lore:** O profeta de Liurnia observa as mudanças do céu e interpreta os sinais trazidos por tempestades e geadas.
 
 ### Profeta Esquecido (`luterano_profeta`)
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Mítica · **Poder-base:** 6 · **Custo:** 5  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/1 · **Validação:** OK
 
 **Efeito de combate — Sinergia de Facção:** Recebe +1 de bônus por cada outra unidade aliada da mesma facção que já esteja em campo. Raridade Mítica: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Líder espiritual que reúne seus seguidores sob os vitrais partidos de Leyndell.
@@ -1294,7 +1294,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Cerco  
 **Raridade:** Primordial · **Poder-base:** 9 · **Custo:** 6  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Gravidade do Flagelo:** Ao entrar, move o inimigo de maior poder efetivo para esta fileira e reduz seu bônus em 2 (mín. -2). Raridade Primordial: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** General temido da Fragmentação, dominou a gravidade para deter o curso das estrelas e permaneceu em Caelid após a Podridão.
@@ -1303,7 +1303,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Épica · **Poder-base:** 6 · **Custo:** 3  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Fenda do Vazio:** Ao entrar em campo, tira 2 pontos de bônus da unidade inimiga mais forte. O bônus dela não pode ficar abaixo de -2. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** A princesa lunar rompeu com os Dois Dedos e busca um destino independente da Vontade Maior.
@@ -1314,7 +1314,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Longa distância  
 **Raridade:** Comum · **Poder-base:** 5 · **Custo:** 1  
-**Classificação:** combo · **Linhas no render procedural/template:** 3/3 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 1 combo; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site.
 **Lore:** Um recusante de Volcano Manor, acostumado a negociar favores e segredos nas encostas do Monte Gelmir.
@@ -1325,7 +1325,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sangramento:** Escolha uma fileira inimiga. Cada unidade nela recebe Sangramento; a segunda marca reduz 2 de bônus (mín. -2) e consome as marcas. Marcas expiram no fim da rodada. Raridade Rara: aplica a segunda marca a até 1 alvo sem marca; reforça a redução de bônus em até 1 alvo (mín. -2).
 **Lore:** O ritual desperta o poder do sangue e transforma cada ferida em um presságio de ruína.
@@ -1334,7 +1334,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 0 · **Custo:** 3  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Rugido de Godfrey:** Escolha uma fileira: seus aliados nela recebem +2 de bônus até o fim da rodada. Raridade Épica: acrescenta +1 de bônus a até 1 aliados afetados.
 **Lore:** O rugido do Primeiro Lorde Prístino ecoa entre as fileiras e reacende a coragem dos guerreiros.
@@ -1343,7 +1343,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Mítica · **Poder-base:** 0 · **Custo:** 5  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Runa da Morte:** Em cada fileira, a unidade inimiga com maior bônus positivo perde até 2 pontos de bônus (sem ficar negativa). Uso único por partida.
 **Lore:** O fragmento da Morte Destinada recorda o poder que Maliketh recebeu para manter selado.
@@ -1352,7 +1352,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Os Esquecidos · **Fileira:** Longa distância  
 **Raridade:** Rara · **Poder-base:** 5 · **Custo:** 2  
-**Classificação:** combo · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** combo · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sinergia de combate:** Sinergia: participa de 6 combos; ativa ao reunir as tags exigidas e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site. Raridade Rara: quando o combo alterar bônus, reforça até 1 alvo (+1 aliado; -1 inimigo, mín. -2).
 **Lore:** Um sacerdote conserva os ritos de sua ordem em um santuário quase tomado pelo tempo.
@@ -1363,7 +1363,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 0 · **Custo:** 1  
-**Classificação:** especial · **Linhas no render procedural/template:** 3/2 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sangue Corrompido:** Aplica 1 Sangramento a cada inimigo em Cerco. Na segunda marca, consome as marcas e reduz 2 de bônus (mín. -2). Estados expiram no fim da rodada.
 **Lore:** Um rito sanguíneo mancha o campo de batalha com a promessa de uma dívida ainda não paga.
@@ -1372,7 +1372,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Lendária · **Poder-base:** 8 · **Custo:** 4  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Sino do Último Bastião:** Ganha +2 quando sua pontuação total for menor que a do adversário. Raridade Lendária: se esta entrada alterar bônus, reforça até 2 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um guardião de elite protege os acessos da capital e enfrenta qualquer ameaça à ordem dourada.
@@ -1381,7 +1381,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Lua Negra · **Fileira:** Cerco  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** unidade · **Linhas no render procedural/template:** 5/4 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Ressurgir:** Ao entrar, traz do seu descarte ao campo a unidade elegível de maior poder-base até 5; ela retorna sem bônus nem Escudo. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Um devoto da raiz da morte percorre criptas esquecidas, guiado por sussurros que os vivos não conseguem ouvir.
@@ -1392,7 +1392,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Especial · **Facção:** Lua Negra · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 0 · **Custo:** 2  
-**Classificação:** especial · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** especial · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Tempestade dos Picos:** Escolha uma fileira. Enquanto o clima estiver ativo, todas as unidades dos dois lados nela perdem 1 de poder efetivo (mínimo 1); Resistência Climática pode absorver a penalidade.
 **Lore:** Nuvens pesadas cobrem uma fileira. A chuva atravessa as defesas e enfraquece todas as unidades expostas enquanto o clima durar.
@@ -1401,7 +1401,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Retaliação dos Semideuses:** Recebe +1 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 30.
@@ -1410,7 +1410,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Longa distância  
 **Raridade:** Épica · **Poder-base:** 5 · **Custo:** 3  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Retaliação dos Semideuses:** Recebe +1 de bônus ao entrar se sua pontuação estiver abaixo da adversária. Raridade Épica: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Recompensa de patente concedida ao alcançar o nível 50.
@@ -1419,7 +1419,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Rara · **Poder-base:** 4 · **Custo:** 2  
-**Classificação:** identidade · **Linhas no render procedural/template:** 4/4 · **Validação:** OK
+**Classificação:** identidade · **Linhas de lore no render procedural/template:** 2/2 · **Validação:** OK
 
 **Efeito de combate — Juramento Dourado:** Ao entrar, esta carta recebe +1; o aliado de menor poder efetivo na mesma fileira também recebe +1, se existir. Raridade Rara: se esta entrada alterar bônus, reforça até 1 alvo: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Veterano das muralhas internas de Leyndell, traz no escudo o juramento feito diante da Árvore Áurea.
@@ -1430,7 +1430,7 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Véu Carmesim · **Fileira:** Corpo a corpo  
 **Raridade:** Comum · **Poder-base:** 3 · **Custo:** 1  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Glória:** Ao vencer a rodada, mantém no campo a unidade com Glória ou Sobrevivente de maior poder efetivo; as demais são descartadas. Em empate ou derrota, nenhuma permanece.
 **Lore:** Um sentinela solitário vigia os portões enquanto a noite cobre as ruínas.
@@ -1441,11 +1441,11 @@ Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na i
 
 **Tipo:** Unidade · **Facção:** Ordem Áurea · **Fileira:** Corpo a corpo  
 **Raridade:** Singular · **Poder-base:** 10 · **Custo:** 0  
-**Classificação:** unidade · **Linhas no render procedural/template:** 4/3 · **Validação:** OK
+**Classificação:** unidade · **Linhas de lore no render procedural/template:** 1/1 · **Validação:** OK
 
 **Efeito de combate — Último Suspiro:** Na terceira rodada, recebe +1 de bônus ao entrar em campo. Raridade Singular: se esta entrada alterar bônus, reforça até 3 alvos: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.
 **Lore:** Conquistada ao vencer um desafio no nível um.
 
 ## Divergências automáticas
 
-Nenhuma divergência estrutural encontrada no cruzamento catálogo → motor → site → texto da arte.
+Nenhuma divergência estrutural encontrada no cruzamento catálogo → motor → site. A imagem contém somente a lore.
