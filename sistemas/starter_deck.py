@@ -6,7 +6,7 @@ STARTER_DECK = [
     # === COMUNS (6 cartas) ===
     "chefe_vigia_cinzento",      # Cavaleiro de Leyndell - Ordem Áurea/Comum - drenagem
     "chefe_aparicao_veio",       # Lâmina Negra Errante - Véu Carmesim/Comum - adaptação
-    "arma_lamina_peregrino",     # Duelista da Casa Hoslow - Véu Carmesim/Comum - primeira_luz
+    "arma_lamina_peregrino",     # Duelista Recusante de Gelmir - Véu Carmesim/Comum - primeira_luz
     "arma_agulha_astro",         # Leitora de Estrelas de Sellia - Lua Negra/Comum - primeira_luz
     "arma_lanca_fornalha",       # Lanceiro da Árvore Áurea - Ordem Áurea/Comum - primeira_luz
     "magia_fagulha",             # Aprendiz de Feitiçaria Cariana - Véu Carmesim/Comum - caçador_arcano

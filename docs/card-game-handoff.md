@@ -2,6 +2,14 @@
 
 > Documento operacional vivo. Leia primeiro este arquivo e depois o inventário técnico em [`card-game-mapping-audit.md`](card-game-mapping-audit.md).
 
+## Estado atual — nomes e lore v2 (2026-11-28)
+
+- **Fonte única:** `sistemas/nomes_lore.py` (`NOMES_LORE: id -> (nome|None, lore)`), aplicada em `sistemas/cartas.py` (`_aplicar_nome_lore`) a todas as 127 cartas do catálogo; IDs estáveis (sem migração de coleção/deck). Lore é só narrativa (teste de lint barra mecânica).
+- **Critério:** personagens canônicos de Elden Ring mantêm o nome oficial e ganharam lore fiel ao jogo; as 14 cartas `luterano_*` (vocabulário cristão, fora do universo) foram renomeadas conforme a facção: Esquecidos → "Cavaleiro Peregrino das Cinzas", "Peregrino do Santuário Perdido", "Vigário das Ruínas", "Mensageiro Cinzento", "Primeiro Guardião dos Esquecidos", "Sacerdote das Cinzas", "Irmão do Juramento Cinzento", "Guardião do Livro Queimado"; Ordem → "Pregador da Graça Perdida", "Profeta da Graça Apagada"; Véu → "Pastor do Rebanho Rubro", "Vigia das Brasas Rubras"; Lua → "Místico das Estrelas Mortas", "Sentinela da Luz Pálida". Também renomeados: `chefe_cervo_sombrio`, `arma_lamina_peregrino`, `covenant_ultimos`, `gwent_unidade_lamina_sem_juramento`, `gwent_unidade_cacadora_fantasma` (Ravenmount não é do universo), `gwent_unidade_saqueadora_veu`.
+- **Mantido:** facção de cada carta e o líder "Papa Esquecido" (nome de líder separado; ajustar depois se desejado). Docs antigos (matriz de rastreabilidade etc.) citam os nomes anteriores como histórico.
+- **Impacto:** as artes geradas se regeneram sozinhas (hash do payload); artes oficiais enviadas por upload mantêm o nome antigo embutido. Textos de exemplo no `site/app.js` atualizados. Testes: 8 suites 251/251, sincronia 26/26.
+- **Cuidado de autoria:** lore de personagens canônicos foi escrita de memória dos jogos, sem checagem de fonte; revisar detalhes (ex.: Messmer, Placidusax) antes de publicar.
+
 ## Estado atual — potência da raridade e poder máximo (2026-11-28)
 
 - **Poder máximo ≠ habilidade:** `PODER MÁXIMO` vem de `faixa_poder_exemplar()` (teto da faixa da raridade, ex.: Rara 4–6) e indica até onde o exemplar pode ser **aprimorado com almas**; não é bônus de efeito. Rótulo no site agora diz "(APRIMORAMENTO)".

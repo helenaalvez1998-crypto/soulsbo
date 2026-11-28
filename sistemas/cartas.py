@@ -13,7 +13,7 @@ from typing import Any
 
 from levels import PATENTES
 
-VERSAO_ARTES = 32
+VERSAO_ARTES = 33
 
 
 RARIDADES = ("Comum", "Rara", "Épica", "Lendária", "Mítica", "Primordial", "Singular")
@@ -420,45 +420,19 @@ _LUTERANO_CARTAS = []
 
 _CARTAS_BASE = [*_CARTAS_BASE, *CARTAS_EXPANSAO_V75, *_LUTERANO_CARTAS]
 
-# Lore pura: a descrição narrativa NUNCA descreve mecânica. O efeito mostrado na carta/imagem/catálogo
-# vem exclusivamente de gwent.preparar_carta(), a mesma fonte que o motor executa.
-DESCRICOES_LORE = {
-    "luterano_cruzado": "Um guerreiro sagrado que luta pela fé, mesmo após ser esquecido pelo mundo.",
-    "luterano_missionario": "Percorre as estradas esquecidas levando a palavra de uma fé que ninguém mais recorda.",
-    "luterano_bispo": "Líder espiritual de uma congregação sem templo, guardião das últimas liturgias.",
-    "luterano_anjo": "Mensageiro de uma luz antiga que ainda ronda os campos de batalha.",
-    "luterano_papa": "Sumo sacerdote dos Esquecidos, cujo nome já não consta em nenhum registro.",
-    "luterano_sacerdote": "Cuida dos feridos e das cinzas dos mortos nas capelas em ruínas.",
-    "luterano_irmao": "Um irmão de fé que sobrevive de vigília em vigília.",
-    "luterano_diacon": "Auxilia nos ritos e guarda os livros salvos das ruínas.",
-    "luterano_apostolo": "Espalha a palavra dos Esquecidos entre peregrinos e sobreviventes.",
-    "luterano_pastor": "Guia o rebanho fiel por estradas sem destino.",
-    "luterano_mistico": "Busca o sagrado nas sombras onde a fé ainda respira.",
-    "luterano_profeta": "Profeta de uma fé marginal, ouvido apenas pelos que nada mais têm.",
-    "luterano_vigia": "Mantém a vigilância durante a noite sobre as ruínas esquecidas.",
-    "luterano_anjo2": "Brilho do sagrado que insiste em permanecer onde tudo se apagou.",
-    "gwent_especial_requiem": "Os mortos atendem ao chamado de quem ainda lhes deve um juramento.",
-    "gwent_v75_ordem_veterano_juramento": "Veterano de Leyndell que mantém a formação unida sob o juramento dourado.",
-    "gwent_v75_ordem_guardiao_crisol": "Guardião menor do Crisol, treinado nos ritos de formação da Ordem Áurea.",
-    "gwent_v75_ordem_confessora_graca": "Confessora treinada na Lei da Regressão, ouvinte dos que carregam culpa.",
-    "gwent_v75_ordem_arauto_estandarte": "Arauto que ergue o estandarte áureo diante das legiões de Leyndell.",
-    "gwent_v75_veu_acolito_sangue": "Servo do Palácio de Mohgwyn, devoto da Dinastia Sanguínea.",
-    "gwent_v75_veu_devota_hemorragia": "Devota que celebra a hemorragia como sacramento do Véu Carmesim.",
-    "gwent_v75_veu_carrasco_preco": "Carrasco da Procissão Carmesim, que cobra um preço por cada vitória.",
-    "gwent_v75_veu_cacador_sangue": "Caçador das catacumbas de Mohgwyn, rastreador de presas feridas.",
-    "gwent_v75_lua_oraculo_geada": "Astróloga de Sellia que lê o futuro na geada das estrelas.",
-    "gwent_v75_lua_cartografo_lunar": "Cartógrafo das Cidades Eternas, desenhando rotas sob a lua.",
-    "gwent_v75_lua_graviturgista": "Graviturgista de Nokron, mestre em dobrar o peso do mundo.",
-    "gwent_v75_lua_guardia": "Guardiã do juramento lunar, sentinela dos caminhos entre as estrelas.",
-}
-_cartas_lore = []
-for _c in _CARTAS_BASE:
-    _novo_custo = CUSTO_RARIDADE.get(_c.raridade, _c.custo)
-    _cartas_lore.append(Carta(_c.id, _c.nome, _c.categoria, _c.faccao, _c.poder, _c.raridade, _novo_custo, _c.habilidade,
-                              DESCRICOES_LORE.get(_c.id, _c.descricao), _c.jogo_origem, _c.fileira))
-_CARTAS_BASE = _cartas_lore
-CARTAS_PRIMORDIAIS = [Carta(_c.id, _c.nome, _c.categoria, _c.faccao, _c.poder, _c.raridade, CUSTO_RARIDADE.get(_c.raridade, _c.custo),
-                            _c.habilidade, _c.descricao, _c.jogo_origem, _c.fileira) for _c in CARTAS_PRIMORDIAIS]
+# Nomes e lore v2 (universo Elden Ring / Dark Souls) vivem em sistemas/nomes_lore.py.
+# A descrição NUNCA descreve mecânica: o efeito vem de gwent.preparar_carta().
+from sistemas.nomes_lore import NOMES_LORE
+
+
+def _aplicar_nome_lore(_c: "Carta") -> "Carta":
+    _nome, _lore = NOMES_LORE.get(_c.id, (None, _c.descricao))
+    return Carta(_c.id, _nome or _c.nome, _c.categoria, _c.faccao, _c.poder, _c.raridade,
+                 CUSTO_RARIDADE.get(_c.raridade, _c.custo), _c.habilidade, _lore, _c.jogo_origem, _c.fileira)
+
+
+_CARTAS_BASE = [_aplicar_nome_lore(_c) for _c in _CARTAS_BASE]
+CARTAS_PRIMORDIAIS = [_aplicar_nome_lore(_c) for _c in CARTAS_PRIMORDIAIS]
 
 CARTAS_POR_ID: dict[str, Carta] = {c.id: c for c in [*_CARTAS_BASE, *CARTAS_PRIMORDIAIS]}
 

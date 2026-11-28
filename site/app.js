@@ -1658,9 +1658,9 @@ function gwentSimpleExample(card) {
   const skill = String(card?.habilidade || '');
   const examples = {
     devoto: 'Exemplo: você já tem duas unidades dos Esquecidos no campo e joga outra carta dos Esquecidos com Devoto. Ela recebe +1. Com apenas uma aliada da mesma facção, não recebe o bônus.',
-    gloria: 'Exemplo: o Anjo Esquecido está no campo e você vence a rodada. Ele permanece para a próxima. Se a NARA vencer, ele vai para o descarte.',
-    legado: 'Exemplo: você vence a primeira rodada. Ao jogar o Missionário Esquecido na segunda, ele entra com +2 de poder. Se você perdeu a rodada anterior, esse bônus não ativa.',
-    sinergia_faccao: 'Exemplo: você tem três unidades dos Esquecidos no campo e joga o Cruzado Esquecido. Ele ganha +3 de poder, porque já havia três aliados da mesma facção.',
+    gloria: 'Exemplo: o Mensageiro Cinzento está no campo e você vence a rodada. Ele permanece para a próxima. Se a NARA vencer, ele vai para o descarte.',
+    legado: 'Exemplo: você vence a primeira rodada. Ao jogar o Peregrino do Santuário Perdido na segunda, ele entra com +2 de poder. Se você perdeu a rodada anterior, esse bônus não ativa.',
+    sinergia_faccao: 'Exemplo: você tem três unidades dos Esquecidos no campo e joga o Cavaleiro Peregrino das Cinzas. Ele ganha +3 de poder, porque já havia três aliados da mesma facção.',
     lei_primeva: 'Exemplo: se jogar esta unidade na primeira rodada, ela recebe +2. Se jogar nas rodadas seguintes, esse bônus especial não acontece.',
     decreto_soberano: 'Exemplo: um inimigo com +3 de bônus passa a ter +1; outro com +1 passa a ter -1. A habilidade não reduz ninguém abaixo de -2 de bônus.',
     olho_tempestade: 'Exemplo: se a fileira onde esta unidade está tiver chuva, ela recebe +2. Sem clima naquela fileira, não recebe esse bônus.',
