@@ -1,3 +1,9 @@
+# Atualização de continuidade V76 — 2026-11-28
+
+Estado atual do runtime principal: V77 possui 179 modelos no índice, 164 cartas no pacote jogável, 30 unidades + 11 especiais por facção e três líderes por facção. Os Esquecidos receberam dez especiais nesta revisão; os dois líderes adicionais introduzidos na V76 permanecem como parte do trio. Os títulos do catálogo têm até 27 caracteres, são únicos e mantêm IDs estáveis. A auditoria atual está em `docs/AUDITORIA-FIDELIDADE-CARTAS.md/.json`; o histórico da expansão está em `docs/v77-normalizacao-faccoes-e-nomes.md` e `docs/v76-expansao-os-esquecidos.md`. Os registros posteriores abaixo mantêm valor histórico, mas as contagens V76 e anteriores não representam o runtime V77.
+
+---
+
 # Estado corrente — Malenia e NARA (2026-11-28)
 
 A revisão atual do runtime do Gwent está documentada em `docs/card-game-malenia-runtime-and-nara-training-v1.0.md`. Malenia usa poder 9, raridade Primordial, custo 6 e habilidade `scarlet_bloom` / Flor Escarlate; a corrosão não se repete quando o alvo já está no limite de duas marcas. A NARA tem três decks separados por dificuldade e espera 3–5 segundos antes de cada decisão usando o motor normal de partidas. O deck difícil inclui Malenia. O relatório de rastreabilidade de 2026-11-27 e as revisões candidatas abaixo são históricos e não substituem esse registro de runtime vigente.

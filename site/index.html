@@ -240,7 +240,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
     <select id="gwent-relic-select">
       <option value="">Sem Relíquia</option>
       <option value="reliquia_grande_runa_godrick">Grande Runa de Godrick</option>
-      <option value="reliquia_runa_nao_nascidos">Grande Runa dos Não Nascidos</option>
+      <option value="reliquia_runa_nao_nascidos">Runa dos Não Nascidos</option>
       <option value="reliquia_runa_morte">Runa da Morte</option>
       <option value="reliquia_noite_chama">Espada da Noite e da Chama</option>
       <option value="reliquia_lamina_negra">Lâmina Negra</option>
@@ -498,9 +498,20 @@ function go(d){if(list.length<2)return;idx=(idx+d+list.length)%list.length;rende
 
 function open(card,pool){if(!ov)build();list=pool&&pool.length?pool:[card];idx=Math.max(0,list.findIndex(c=>c===card||(c.exemplar_id&&c.exemplar_id===card.exemplar_id)));if(idx<0){list=[card];idx=0}
 ov.hidden=false;document.body.style.overflow='hidden';hist=null;render();
+if(card.custom_image_only)return;
 fetch('/api/gwent/drops/history',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{hist=d||{history:[],movements:[]};if(!ov.hidden)renderHistory()}).catch(()=>{hist={history:[],movements:[]};if(!ov.hidden)renderHistory()})}
 
-function render(){const c=list[idx],rk=key(c.raridade),esp=c.categoria==='Especial'||c.especial,pw=Number(c.poder||0),mx=Number(c.max_power||pw||0);
+function render(){const c=list[idx];
+if(c.custom_image_only){
+ ov.classList.add('cd-image-only');ov.dataset.r='custom';
+ ov.querySelector('.cd-x').hidden=true;ov.querySelector('.prev').hidden=true;ov.querySelector('.next').hidden=true;
+ ov.querySelector('.cd-body').innerHTML=`<div class="cd-custom-image"><img class="cd-card-art" src="${E(imageUrl(c))}" alt="Arte de ${E(c.nome||'carta')}" decoding="async"></div>`;
+ const artImg=ov.querySelector('.cd-card-art');
+ if(artImg){const hdUrl=new URL(imageUrl(c),window.location.origin);if(hdUrl.pathname.includes('/api/gwent/public-cards/')||hdUrl.pathname.includes('/api/gwent/cards/')){hdUrl.searchParams.delete('thumb');hdUrl.searchParams.set('detail','1');hdUrl.searchParams.delete('v');const hd=new Image();hd.decoding='async';hd.onload=()=>{if(ov&&!ov.hidden&&list[idx]===c)artImg.src=hdUrl.pathname+hdUrl.search};hd.src=hdUrl.pathname+hdUrl.search}}
+ ov.querySelector('.cd-body').scrollTop=0;return;
+}
+ ov.classList.remove('cd-image-only');ov.querySelector('.cd-x').hidden=false;
+ const rk=key(c.raridade),esp=c.categoria==='Especial'||c.especial,pw=Number(c.poder||0),mx=Number(c.max_power||pw||0);
 ov.style.setProperty('--rc',RC[rk]||RC.comum);ov.dataset.r=rk;
 ov.querySelector('.prev').hidden=ov.querySelector('.next').hidden=list.length<2;
 const seg=Array.from({length:Math.max(15,mx)},(_,i)=>`<i class="${i<pw?'on':i<mx?'pot':''}"></i>`).join('');

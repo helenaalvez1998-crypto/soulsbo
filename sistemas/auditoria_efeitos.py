@@ -66,12 +66,13 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
     """
     from PIL import Image, ImageDraw
     from sistemas.cartas import (
-        CARTAS_POR_ID, HABILIDADES, CARTAS_SEM_EFEITO_IDS, HABILIDADES_COMUNS,
+        CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V77,
+        HABILIDADES, CARTAS_SEM_EFEITO_IDS, HABILIDADES_COMUNS,
     )
     from sistemas.gwent import (
         CARD_IDENTITY_ABILITIES, CARD_SYNERGY_TAGS, LEADERS,
         HABILIDADES_UNIDADE_IMPLEMENTADAS, HABILIDADES_ESPECIAIS_IMPLEMENTADAS,
-        aplicar_jogada, preparar_carta,
+        SPECIAL_EFFECT_ALIASES, aplicar_jogada, preparar_carta,
     )
     import inspect
     from sistemas.catalogo_publico import montar_catalogo_publico_cartas
@@ -139,6 +140,25 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
             + ", ".join(missing_generated_skills)
         )
 
+    factions = ("Ordem Áurea", "Véu Carmesim", "Lua Negra", "Os Esquecidos")
+    faction_roster = {}
+    for faction in factions:
+        package_cards = [card for card in CARTAS_PACOTE if card.faccao == faction]
+        faction_roster[faction] = {
+            "unidades": sum(1 for card in package_cards if str(card.categoria).casefold() != "especial"),
+            "especiais": sum(1 for card in package_cards if str(card.categoria).casefold() == "especial"),
+            "total_pacote": len(package_cards),
+            "lideres": sum(1 for leader in LEADERS.values() if leader.get("faction") == faction),
+        }
+    title_values = [str(model.nome).strip() for model in CARTAS_POR_ID.values()]
+    normalized_titles = [title.casefold() for title in title_values]
+    title_duplicates = sorted({title for title in normalized_titles if normalized_titles.count(title) > 1})
+    title_audit = {
+        "limite_caracteres": 27,
+        "maior_titulo": max((len(title) for title in title_values), default=0),
+        "titulos_acima_limite": sorted(title for title in title_values if len(title) > 27),
+        "titulos_duplicados": title_duplicates,
+    }
     counts = {
         "identidade": 0,
         "unidade": 0,
@@ -181,7 +201,7 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
             classification = "sem_efeito_individual"
             counts[classification] += 1
 
-        expected_effect_id = str((identity or {}).get("effect") or skill)
+        expected_effect_id = str((identity or {}).get("effect") or SPECIAL_EFFECT_ALIASES.get(skill, skill))
         if prepared.get("habilidade_id_efetiva") != expected_effect_id:
             errors.append(f"{card_id}: ID efetivo da habilidade divergente no motor.")
         # O efeito é dado mecânico para a interface; a imagem da carta imprime
@@ -275,6 +295,16 @@ def gerar_relatorio_fidelidade_cartas() -> dict:
     return {
         "total_cartas": len(cards),
         "total_publicadas_site": len(public_by_id),
+        "total_no_pacote": len(CARTAS_PACOTE),
+        "total_expansao_v77": len(CARTAS_EXPANSAO_V77),
+        "distribuicao_faccoes": faction_roster,
+        "auditoria_nomes": title_audit,
+        "cartas_expansao_v77": [
+            {"id": model.id, "nome": model.nome, "faccao": model.faccao,
+             "habilidade_declarada": model.habilidade,
+             "habilidade_efetiva": SPECIAL_EFFECT_ALIASES.get(str(model.habilidade), str(model.habilidade or ""))}
+            for model in CARTAS_EXPANSAO_V77
+        ],
         "total_habilidades_catalogadas": len(HABILIDADES),
         "total_identidades": len(CARD_IDENTITY_ABILITIES),
         "total_habilidades_recompensas_dinamicas": len(HABILIDADES_COMUNS),
@@ -300,11 +330,27 @@ def gerar_markdown_fidelidade_cartas(relatorio: dict | None = None) -> str:
         f"**Status:** {data.get('status')}  ",
         f"**Cartas auditadas:** {data.get('total_cartas')}  ",
         f"**Cartas publicadas no site:** {data.get('total_publicadas_site')}  ",
+        f"**Cartas no pacote jogável:** {data.get('total_no_pacote')}  ",
+        f"**Novas especiais V77:** {data.get('total_expansao_v77')}  ",
         f"**Habilidades catalogadas:** {data.get('total_habilidades_catalogadas')}  ",
         f"**Efeitos de identidade:** {data.get('total_identidades')}  ",
         f"**Habilidades do pool de recompensas dinâmicas:** {data.get('total_habilidades_recompensas_dinamicas')}  ",
         f"**Cartas de líder auditadas em separado:** {data.get('total_lideres', 0)}  ",
         f"**Divergências automáticas:** {data.get('total_erros')}  ",
+        "",
+        "## Paridade entre facções",
+        "",
+    ]
+    for faction, roster in data.get("distribuicao_faccoes", {}).items():
+        lines.append(
+            f"- **{faction}:** {roster['unidades']} unidades, {roster['especiais']} especiais, "
+            f"{roster['total_pacote']} cartas no pacote e {roster['lideres']} líderes."
+        )
+    names = data.get("auditoria_nomes", {})
+    lines.extend([
+        "",
+        f"Títulos: máximo atual de {names.get('maior_titulo', 0)} caracteres; limite de {names.get('limite_caracteres', 27)}; "
+        f"acima do limite: {len(names.get('titulos_acima_limite', []))}; duplicados: {len(names.get('titulos_duplicados', []))}.",
         "",
         "## Cobertura por tipo",
         "",
@@ -313,6 +359,16 @@ def gerar_markdown_fidelidade_cartas(relatorio: dict | None = None) -> str:
         f"- Cartas especiais: {counts.get('especial', 0)}",
         f"- Unidades sem habilidade individual, mas com combo: {counts.get('combo', 0)}",
         f"- Sem efeito individual intencional: {counts.get('sem_efeito_individual', 0)}",
+        "",
+        "## Cartas especiais adicionadas na V77",
+        "",
+    ])
+    for card in data.get("cartas_expansao_v77", []):
+        lines.append(
+            f"- **{card['nome']}** — {card['faccao']} · `{card['id']}` · "
+            f"efeito `{card['habilidade_efetiva']}`."
+        )
+    lines.extend([
         "",
         "## Como ler esta auditoria",
         "",
@@ -324,7 +380,7 @@ def gerar_markdown_fidelidade_cartas(relatorio: dict | None = None) -> str:
         "",
         "Os líderes não fazem parte do deck de 12 cartas, mas aparecem como cartas na interface da partida. Nome, facção, ID de efeito e descrição são lidos do registro `LEADERS`; o relatório também confirma que cada ID tem ramo correspondente no resolvedor de jogadas e que o navegador não mantém uma segunda tabela mecânica independente.",
         "",
-    ]
+    ])
     for leader in data.get("lideres", []):
         lines.extend([
             f"### {leader['nome']} (`{leader['id']}`)",

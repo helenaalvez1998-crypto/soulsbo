@@ -48,7 +48,7 @@ TREINO_PERFIS: dict[str, dict[str, Any]] = {
         "faction": "Lua Negra",
         "leader_id": "mestre_eclipse",
         "relic_id": "reliquia_runa_nao_nascidos",
-        "relic_name": "Grande Runa dos Não Nascidos",
+        "relic_name": "Runa dos Não Nascidos",
         "description": "Controle de fileira, geada e respostas mágicas com curva intermediária.",
         "ai_style": "avalia o valor imediato da jogada e conserva recursos quando a vantagem já é suficiente.",
         "cards": [

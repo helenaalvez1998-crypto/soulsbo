@@ -1,14 +1,14 @@
 {
   "metadata": {
     "document": "Leader effect behavioral assertions v0.1",
-    "status": "DIAGNOSTIC ONLY; ALL TEN LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
+    "status": "DIAGNOSTIC ONLY; ALL TWELVE LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
     "baseline": "soulsbo-main(1).zip",
     "engine": "sistemas.gwent.aplicar_jogada(..., action='leader')",
     "scope": "Synthetic controlled states; no database/API/site/Discord/R2/production match"
   },
   "counts": {
-    "assertions": 22,
-    "passed": 22,
+    "assertions": 26,
+    "passed": 26,
     "failed": 0
   },
   "cases": [
@@ -66,6 +66,19 @@
       "status": "passed",
       "leader": "Papa Esquecido",
       "only_forgotten_selected_row": true
+    },
+    {
+      "case": "leader_abadessa_purifies_two_strongest_affected_forgotten_allies",
+      "status": "passed",
+      "leader": "Abadessa das Ruínas",
+      "purified_two_strongest_eligible_forgotten_allies": true
+    },
+    {
+      "case": "leader_martir_revives_strongest_eligible_forgotten_unit",
+      "status": "passed",
+      "leader": "Mártir da Vigília",
+      "revived_strongest_forgotten_base_power_5_or_less": true,
+      "cleared_status_and_shield": true
     },
     {
       "case": "leader_rennala_purifies_and_buffs_only_siege",
@@ -136,6 +149,20 @@
       "error": "O Papa Esquecido precisa de ao menos uma unidade dos Esquecidos na fileira escolhida."
     },
     {
+      "case": "negative_abadessa_requires_affected_forgotten_ally",
+      "status": "passed",
+      "leader": "abadessa",
+      "rejected": true,
+      "error": "A Abadessa precisa de ao menos um aliado dos Esquecidos afetado na fileira escolhida."
+    },
+    {
+      "case": "negative_martir_requires_eligible_forgotten_discard_unit",
+      "status": "passed",
+      "leader": "martir",
+      "rejected": true,
+      "error": "A Mártir precisa de uma unidade dos Esquecidos com poder-base até 5 no descarte."
+    },
+    {
       "case": "negative_rennala_requires_frost_or_rot",
       "status": "passed",
       "leader": "rennala",
@@ -171,7 +198,7 @@
     }
   ],
   "limitations": [
-    "All ten leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
+    "All twelve leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
     "The tests use rarity-independent synthetic unit records; leadership upgrades or external campaign modifiers are not represented.",
     "The action flow is exercised in memory; persistent match serialization, HTTP API, frontend target choices, Discord command flow and production database are not tested.",
     "Passing behavior assertions do not measure strategic strength, balance or win rate."

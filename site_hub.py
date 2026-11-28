@@ -917,6 +917,9 @@ def registrar_rotas(bot, app: web.Application) -> None:
         try:
             from sistemas.catalogo_publico import montar_catalogo_publico_cartas
             payload = montar_catalogo_publico_cartas()
+            await bot._gwent_mark_custom_art(payload.get("cartas", []))
+            for card in payload.get("cartas", []):
+                bot._gwent_canonicalize_malenia_card(card)
             return web.json_response(payload, headers={"Cache-Control": "public, max-age=300"})
         except Exception:
             import logging

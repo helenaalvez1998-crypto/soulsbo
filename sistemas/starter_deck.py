@@ -1,19 +1,19 @@
-"""Deck inicial para novos jogadores - 10 cartas (6 Comuns + 4 Raras)
+"""Deck inicial de demonstração - 10 cartas (6 Comuns + 3 Raras + 1 Especial Rara)
 Equilibrado para permitir que qualquer pessoa jogue imediatamente.
 """
 
 STARTER_DECK = [
     # === COMUNS (6 cartas) ===
-    "chefe_vigia_cinzento",      # Cavaleiro de Leyndell - Ordem Áurea/Comum - drenagem
-    "chefe_aparicao_veio",       # Lâmina Negra Errante - Véu Carmesim/Comum - adaptação
-    "arma_lamina_peregrino",     # Duelista da Casa Hoslow - Véu Carmesim/Comum - primeira_luz
-    "arma_agulha_astro",         # Leitora de Estrelas de Sellia - Lua Negra/Comum - primeira_luz
-    "arma_lanca_fornalha",       # Lanceiro da Árvore Áurea - Ordem Áurea/Comum - primeira_luz
-    "magia_fagulha",             # Aprendiz de Feitiçaria Cariana - Véu Carmesim/Comum - caçador_arcano
+    "chefe_vigia_cinzento",      # Cavaleiro de Leyndell — Ordem Áurea
+    "chefe_aparicao_veio",       # Lâmina Negra Errante — Véu Carmesim
+    "arma_lamina_peregrino",     # Duelista da Casa Hoslow — Véu Carmesim
+    "arma_agulha_astro",         # Leitora de Sellia — Lua Negra
+    "arma_lanca_fornalha",       # Lanceiro da Árvore Áurea — Ordem Áurea
+    "magia_fagulha",             # Aprendiz Cariano — Lua Negra
 
-    # === RARAS (4 cartas) ===
-    "chefe_guardiao_cinzas",     # Cavaleiro da Árvore Áurea - Ordem Áurea/Rara - quebra_ritmo
-    "arma_martelo_fornalha",     # Ferreiro de Volcano Manor - Ordem Áurea/Rara - encadeamento
-    "magia_selo_vigilia",        # Confessora da Ordem Áurea - Véu Carmesim/Rara - adaptação
-    "gwent_especial_nevoa",      # Miasma da Podridão - Especial/Rara - gwent_nevoa
+    # === RARAS (3 unidades + 1 especial) ===
+    "chefe_guardiao_cinzas",     # Cavaleiro da Árvore Áurea — Ordem Áurea / quebra_ritmo
+    "arma_martelo_fornalha",     # Ferreiro Vulcânico — Véu Carmesim
+    "magia_selo_vigilia",        # Confessora da Ordem Áurea — Ordem Áurea / adaptacao
+    "gwent_especial_nevoa",      # Miasma da Podridão — Lua Negra / gwent_nevoa
 ]

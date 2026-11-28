@@ -297,8 +297,10 @@ const gwentFactionInfo = {
     ['sombra_caminhante', 'Rykard', 'Sacrifica o aliado mais fraco e fortalece os demais da fileira.'],
     ['voz_caidos', 'Esgar', 'Ressuscita uma unidade de poder-base até 5 do descarte.']
   ]},
-  'Os Esquecidos': { description: 'Fé, devoção e glória: evangelho, irmandade e fortalecimento das unidades esquecidas.', leaders: [
-    ['lider_papa_esquecido', 'Papa Esquecido', 'Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.']
+  'Os Esquecidos': { description: 'Fé, proteção e retorno: devoção, purificação e irmandade nas ruínas.', leaders: [
+    ['lider_papa_esquecido', 'Papa Esquecido', 'Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.'],
+    ['lider_abadessa_ruinas', 'Abadessa das Ruínas', 'Purifica até 2 aliados dos Esquecidos afetados e de maior poder efetivo na fileira escolhida, removendo Sangramento, Geada, Podridão e Loucura; cada um recebe +1 de bônus.'],
+    ['lider_martir_vigilia', 'Mártir da Vigília', 'Ressuscita do descarte a unidade mais forte dos Esquecidos com poder-base até 5, com +1 de bônus.']
   ]}
 };
 // Os líderes vêm do servidor (fonte única); a lista fixa acima serve só de reserva se a API não enviar.
@@ -337,9 +339,11 @@ function renderGwentBuilder() {
   const specialCount = selected.filter(card => card.categoria === 'Especial').length;
   const unitCount = selected.length - specialCount;
   $('#gwent-deck-count').textContent = `${selected.length}/12 cartas · ${unitCount} unidades · ${specialCount} especiais`;
-  const cardTile = (card, inDeck = false) => inDeck
-    ? `<button type="button" class="gwent-card-tile gwent-deck-mini is-selected" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-deck-mini-name">${escapeHTML(card.nome || 'Carta')}</span></button>`
-    : `<button type="button" class="gwent-card-tile" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-card-tile-hint">VER CARTA</span></button>`;
+  const cardTile = (card, inDeck = false) => card.custom_image_only
+    ? `<button type="button" class="gwent-card-tile gwent-card-image-only ${inDeck ? 'gwent-deck-mini is-selected' : ''}" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Ver arte da carta ${escapeHTML(card.nome || 'Carta')}"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span></button>`
+    : inDeck
+      ? `<button type="button" class="gwent-card-tile gwent-deck-mini is-selected" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-deck-mini-name">${escapeHTML(card.nome || 'Carta')}</span></button>`
+      : `<button type="button" class="gwent-card-tile" data-gwent-inspect="${escapeHTML(card.id)}" aria-label="Inspecionar ${escapeHTML(card.nome)}" title="Clique para ver detalhes"><span class="gwent-card-tile-art">${cardImageMarkup(card, card.nome || 'Carta')}</span><span class="gwent-card-tile-hint">VER CARTA</span></button>`;
   $('#gwent-deck-selected').innerHTML = selected.map(card => cardTile(card, true)).join('') || '<div class="empty-state">Selecione 12 cartas da coleção.</div>';
   const q = ($('#gwent-card-search').value || '').trim().toLocaleLowerCase('pt-BR');
   const selectedSet = new Set(selected.map(card => card.card_id || card.id));
@@ -395,7 +399,9 @@ function renderGwentCatalog() {
   target.innerHTML = pool.map(card => {
     const cardId = String(card.card_id || card.id || '');
     const owned = ownedIds.has(cardId);
-    return `<article class="gwent-catalog-card ${owned ? 'is-owned' : 'is-locked'}" tabindex="0" role="button" data-gwent-inspect="${escapeHTML(cardId)}" aria-label="Ver detalhes de ${escapeHTML(card.nome || 'Carta')}"><div class="gwent-catalog-art">${cardImageMarkup(card, card.nome || 'Carta')}</div><div class="gwent-catalog-meta"><b>${escapeHTML(card.nome || 'Carta')}</b><small>${escapeHTML(card.raridade || 'Comum')} · ${escapeHTML(card.faccao || 'Sem facção')}</small><span class="gwent-catalog-state">${owned ? '✓ Na sua coleção' : 'Ainda não obtida'}</span><span class="gwent-catalog-open">Ver detalhes</span></div></article>`;
+    return card.custom_image_only
+      ? `<article class="gwent-catalog-card is-custom-image-only ${owned ? 'is-owned' : 'is-locked'}" tabindex="0" role="button" data-gwent-inspect="${escapeHTML(cardId)}" aria-label="Ver arte de ${escapeHTML(card.nome || 'Carta')}"><div class="gwent-catalog-art">${cardImageMarkup(card, card.nome || 'Carta')}</div></article>`
+      : `<article class="gwent-catalog-card ${owned ? 'is-owned' : 'is-locked'}" tabindex="0" role="button" data-gwent-inspect="${escapeHTML(cardId)}" aria-label="Ver detalhes de ${escapeHTML(card.nome || 'Carta')}"><div class="gwent-catalog-art">${cardImageMarkup(card, card.nome || 'Carta')}</div><div class="gwent-catalog-meta"><b>${escapeHTML(card.nome || 'Carta')}</b><small>${escapeHTML(card.raridade || 'Comum')} · ${escapeHTML(card.faccao || 'Sem facção')}</small><span class="gwent-catalog-state">${owned ? '✓ Na sua coleção' : 'Ainda não obtida'}</span><span class="gwent-catalog-open">Ver detalhes</span></div></article>`;
   }).join('') || '<p class="muted">Nenhuma carta corresponde aos filtros.</p>';
   observeCardImages(target);
 }
@@ -428,6 +434,16 @@ function openGwentCollectionCardModal(cardId) {
   modal.setAttribute('role','dialog');
   modal.setAttribute('aria-modal','true');
   modal.setAttribute('aria-label',`Detalhes da carta ${card.nome || ''}`);
+  if (card.custom_image_only) {
+    modal.classList.add('gwent-image-only-modal');
+    modal.innerHTML = `<section class="gwent-collection-card-dialog gwent-image-only-dialog"><div class="gwent-collection-art gwent-image-only-art">${cardImageMarkup(modalCard, card.nome || 'Carta')}</div></section>`;
+    document.body.appendChild(modal);
+    observeCardImages(modal);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeGwentCollectionCardModal();
+    });
+    return;
+  }
   const tags = [
     card.raridade || 'Comum',
     card.faccao || 'Sem facção',
@@ -1153,6 +1169,9 @@ function gwentEffectivePower(card, weatherValue = 0) {
   return Math.max(1, Number(card.poder || 0) + Number(card.bonus || 0) - weatherPenalty - statusPenalty);
 }
 function gwentCardView(card, isEntering = false, weatherValue = 0, previousPower = null) {
+  if (card?.custom_image_only) {
+    return `<article class="gwent-board-card is-custom-image-only ${isEntering ? 'is-entering' : ''}" data-card-id="${escapeHTML(card.id)}" data-row="${escapeHTML(card.row || '')}" role="button" tabindex="0" aria-label="Inspecionar arte de ${escapeHTML(card.nome || 'carta')}">${cardImageMarkup(card, card.nome || 'Carta')}</article>`;
+  }
   const power = gwentEffectivePower(card, weatherValue);
   const hasPowerDelta = previousPower !== null && previousPower !== undefined && Number.isFinite(Number(previousPower));
   const powerDelta = hasPowerDelta ? power - Number(previousPower) : 0;
@@ -1223,7 +1242,7 @@ function openGwentTargetPicker(cardId, row, info) {
 const GWENT_LEADER_DEFAULT_ARTS = {
   comandante_fornalha: 'godfrey', bastiao_ancestral: 'morgott', juiz_cerco: 'radagon',
   mestre_veu: 'mohg', sombra_caminhante: 'rykard', voz_caidos: 'esgar',
-  lider_papa_esquecido: 'esgar', arquimaga_eclipse: 'rennala',
+  lider_papa_esquecido: 'esgar', lider_abadessa_ruinas: 'abadessa', lider_martir_vigilia: 'martir', arquimaga_eclipse: 'rennala',
   mestre_eclipse: 'astel', oraculo_tempestade: 'loretta'
 };
 function gwentLeaderArtMarkup(leaderId, extraClass = '') {
@@ -1237,12 +1256,12 @@ function gwentLeaderArtMarkup(leaderId, extraClass = '') {
 const GWENT_LEADER_ICONS = {
   comandante_fornalha: '⚔', bastiao_ancestral: '🛡', juiz_cerco: '☀',
   mestre_veu: '🩸', sombra_caminhante: '🔥', voz_caidos: '†',
-  lider_papa_esquecido: '✝', arquimaga_eclipse: '☾', mestre_eclipse: '✦',
+  lider_papa_esquecido: '✝', lider_abadessa_ruinas: '✧', lider_martir_vigilia: '†', arquimaga_eclipse: '☾', mestre_eclipse: '✦',
   oraculo_tempestade: '➶'
 };
 const GWENT_LEADER_ROW_CHOICES = new Set([
   'bastiao_ancestral','mestre_veu','sombra_caminhante','voz_caidos',
-  'lider_papa_esquecido','mestre_eclipse'
+  'lider_papa_esquecido','lider_abadessa_ruinas','lider_martir_vigilia','mestre_eclipse'
 ]);
 function gwentLeaderSimpleExplanation(_leaderId, canonicalDescription = '') {
   // A descrição da carta de líder vem do mesmo registro usado por aplicar_jogada.
@@ -1342,7 +1361,7 @@ function openGwentRelicPicker(data = currentGwentData) {
   modal.id = 'gwent-relic-modal'; modal.className = 'gwent-target-modal';
   modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true');
   const relicNames = {
-    reliquia_grande_runa_godrick:'Grande Runa de Godrick', reliquia_runa_nao_nascidos:'Grande Runa dos Não Nascidos',
+    reliquia_grande_runa_godrick:'Grande Runa de Godrick', reliquia_runa_nao_nascidos:'Runa dos Não Nascidos',
     reliquia_runa_morte:'Runa da Morte', reliquia_noite_chama:'Espada da Noite e da Chama',
     reliquia_lamina_negra:'Lâmina Negra', reliquia_algemas_margit:'Algemas de Margit'
   };
@@ -1717,9 +1736,9 @@ function renderGwentArena(data) {
     const cardId = escapeHTML(card.id);
     const cardName = escapeHTML(card.nome || 'Carta');
     const swapControl = prep
-      ? `<input class="gwent-hand-swap-input" type="checkbox" data-gwent-swap value="${cardId}" aria-label="Marcar ${cardName} para troca" ${data.mulligan_done || !(data.draw_count > 0) ? 'disabled' : ''}>`
+      ? `<input class="gwent-hand-swap-input" type="checkbox" data-gwent-swap ${card.custom_image_only ? 'data-custom-art-swap="true"' : ''} value="${cardId}" aria-label="Marcar ${cardName} para troca" ${data.mulligan_done || !(data.draw_count > 0) ? 'disabled' : ''}>`
       : '';
-    return `<article class="gwent-unit gwent-hand-card" data-gwent-hand-card="${cardId}" role="button" tabindex="0" aria-pressed="false" aria-label="Selecionar ${cardName}" title="${cardName}">
+    return `<article class="gwent-unit gwent-hand-card ${card.custom_image_only ? 'is-custom-image-only' : ''}" data-gwent-hand-card="${cardId}" ${card.custom_image_only ? 'data-custom-art-card="true"' : ''} role="button" tabindex="0" aria-pressed="false" aria-label="Selecionar ${cardName}" ${card.custom_image_only ? '' : `title="${cardName}"`}>
       ${cardImageMarkup(card, cardName)}
       ${swapControl}
     </article>`;
@@ -2226,6 +2245,23 @@ function openGwentBoardCardModal(cardId) {
   modal.setAttribute('role', 'dialog');
   modal.setAttribute('aria-modal', 'true');
   modal.setAttribute('aria-label', `Inspeção de combate: ${card.nome || 'carta'}`);
+  if (card.custom_image_only) {
+    const modalCard = {...card};
+    const src = imageUrl(card);
+    if (isCardImageUrl(src)) {
+      const hi = new URL(src, window.location.origin);
+      hi.searchParams.delete('thumb');
+      hi.searchParams.set('detail', '1');
+      modalCard.image_url = `${hi.pathname}${hi.search}`;
+    }
+    modal.innerHTML = `<div class="gwent-image-only-frame">${cardImageMarkup(modalCard, card.nome || 'Carta')}</div>`;
+    document.body.appendChild(modal);
+    observeCardImages(modal);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeGwentBoardCardModal();
+    });
+    return;
+  }
 
   const basePower = Number(card.poder || 0);
   const bonus = Number(card.bonus || 0);
@@ -2334,7 +2370,8 @@ function openGwentPlayCardModal(cardId) {
   const row = ['melee','ranged','siege'].includes(card.row || card.fileira) ? (card.row || card.fileira) : 'melee';
   const rowNames = {melee:'Corpo a corpo',ranged:'Longa distância',siege:'Cerco'};
   const rowTargetSkills = new Set(['gwent_clima','gwent_nevoa','gwent_chifre','gwent_execucao','gwent_vinculo','gwent_muralha','gwent_sangramento','gwent_geada_cariana','gwent_podrida','gwent_loucura','gwent_invocacao','gwent_passo']);
-  const needsRowChoice = isSpecial && rowTargetSkills.has(String(card.habilidade || ''));
+  const effectiveSkill = String(card.habilidade_id_efetiva || card.habilidade_id || card.habilidade || '');
+  const needsRowChoice = isSpecial && rowTargetSkills.has(effectiveSkill);
   const options = (isSpecial && needsRowChoice ? [['melee','Corpo a corpo'],['ranged','Longa distância'],['siege','Cerco']] : [[row,rowNames[row]]])
     .map(([v,l]) => `<option value="${v}" ${row === v ? 'selected' : ''}>${l}</option>`).join('');
   const power = isSpecial ? 'Carta especial · efeito tático' : `${number(card.poder)} poder`;
@@ -2350,6 +2387,29 @@ function openGwentPlayCardModal(cardId) {
     highRes.searchParams.delete('thumb');
     highRes.searchParams.set('detail', '1');
     modalCard.image_url = `${highRes.pathname}${highRes.search}`;
+  }
+  if (card.custom_image_only) {
+    modal.innerHTML = `
+      <section class="gwent-play-card-dialog gwent-image-only-play-dialog">
+        <div class="gwent-play-card-art">${cardImageMarkup(modalCard, card.nome || 'Carta')}</div>
+        <div class="gwent-image-only-play-actions">
+          ${canPlay && !prep && needsRowChoice ? `<label class="gwent-play-card-row"><span>FILEIRA DO EFEITO</span><select data-gwent-modal-row>${options}</select></label>` : ''}
+          <button type="button" class="gwent-play-card-confirm" data-gwent-modal-play ${canPlay && !prep ? '' : 'disabled'}>JOGAR CARTA</button>
+        </div>
+      </section>`;
+    document.body.appendChild(modal);
+    observeCardImages(modal);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) { closeGwentPlayCardModal(); return; }
+      const play = event.target.closest('[data-gwent-modal-play]');
+      if (!play || play.disabled) return;
+      const selectedRow = modal.querySelector('[data-gwent-modal-row]')?.value || row;
+      closeGwentPlayCardModal();
+      const targetInfo = gwentOpcoesDoAlvo(String(card.id), selectedRow);
+      if (targetInfo && targetInfo.opcoes.length) openGwentTargetPicker(String(card.id), selectedRow, targetInfo);
+      else sendGwentAction('play', String(card.id), selectedRow);
+    });
+    return;
   }
   modal.innerHTML = `
     <section class="gwent-play-card-dialog">
@@ -2464,7 +2524,7 @@ document.addEventListener('click', async event => {
     if (document.querySelector('#gwent-arena .gwent-prep')) {
       const swap = handCard.querySelector('[data-gwent-swap]');
       if (swap && !swap.disabled && event.target !== swap) swap.checked = !swap.checked;
-      handCard.classList.toggle('is-swap-marked', !!swap?.checked);
+      handCard.classList.toggle('is-swap-marked', !!swap?.checked && !handCard.dataset.customArtCard);
     } else {
       gwentSelectedHandCard = cardId;
       openGwentPlayCardModal(cardId);
@@ -3202,7 +3262,7 @@ window.addEventListener('resize', () => {
 (() => {
   const relics = {
     reliquia_grande_runa_godrick: ['Grande Runa de Godrick','Lendária','','Grande Runa'],
-    reliquia_runa_nao_nascidos: ['Grande Runa dos Não Nascidos','Lendária','','Grande Runa'],
+    reliquia_runa_nao_nascidos: ['Runa dos Não Nascidos','Lendária','','Grande Runa'],
     reliquia_runa_morte: ['Runa da Morte','Mítica','','Grande Runa'],
     reliquia_noite_chama: ['Espada da Noite e da Chama','Lendária','','Arma lendária'],
     reliquia_lamina_negra: ['Lâmina Negra','Mítica','','Arma lendária'],

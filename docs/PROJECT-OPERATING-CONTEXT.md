@@ -1,3 +1,25 @@
+# Estado vigente V77 — 2026-11-28
+
+O runtime principal de cartas está na V77: 179 modelos no índice, 164 cartas no pacote jogável, 30 unidades + 11 especiais e três líderes por facção. Os Esquecidos receberam dez cartas especiais nesta etapa; Abadessa das Ruínas e Mártir da Vigília continuam compondo o trio de líderes com Papa Esquecido. Os títulos são únicos e limitados a 27 caracteres, com IDs preservados. A auditoria catálogo → combate → site está em `docs/AUDITORIA-FIDELIDADE-CARTAS.md/.json`; o manifesto detalhado está em `docs/v77-normalizacao-faccoes-e-nomes.md`. A V77 está no código-fonte e ainda precisa ser implantada no host.
+
+---
+
+# Estado corrente do runtime principal — revisão V76 (2026-11-28)
+
+O runtime principal do Coliseu usa o catálogo `sistemas/cartas.py`, o resolvedor `sistemas/gwent.py`, a API em `bot.py` e a interface `site/app.js`. A revisão V76 expandiu Os Esquecidos, corrigiu atribuições de facção, adicionou dois líderes, padronizou títulos e alinhou os decks-base.
+
+- **Catálogo:** 162 registros no índice (`CARTAS_POR_ID`), incluindo cartas de coleção, primordiais e recompensas de patente; 147 cartas no pacote jogável estático.
+- **Unidades por facção:** 30 para Ordem Áurea, 30 para Véu Carmesim, 30 para Lua Negra e 30 para Os Esquecidos.
+- **Líderes:** 12, três por facção. O registro de combos permanece em 27; as unidades V76 usam os combos de fé existentes. Os Esquecidos agora oferece Papa Esquecido, Abadessa das Ruínas e Mártir da Vigília.
+- **Nomes:** limite validado de 28 caracteres, sem duplicatas no índice atual; recompensas dinâmicas e patentes também usam títulos compactos e distribuem entre as quatro facções; IDs existentes foram preservados.
+- **Decks-base:** nove unidades + uma especial por facção, todos com IDs válidos e cartas alinhadas à facção. O deck competitivo continua com 12 cartas.
+- **Snapshots antigos:** o servidor resolve facção, nome e lore pelo ID canônico, evitando que decks antigos mantenham dados desatualizados.
+- **Validação:** 315 testes e 106 subtestes aprovados; auditoria automática 162/162, 12 líderes e zero divergências estruturais.
+
+A revisão está no código do pacote; não houve deploy, reinício do serviço hospedado nem alteração do banco externo. Os registros abaixo deste cabeçalho sobre Card Engine v2 são históricos e pertencem ao motor alpha isolado, cujo staging antigo de 137 modelos não é o catálogo público do runtime principal. Ver `docs/v76-expansao-os-esquecidos.md` e `docs/AUDITORIA-FIDELIDADE-CARTAS.md`.
+
+---
+
 # Contexto operacional do projeto — ambiente de teste (2026-11-28)
 
 ## Atualização técnica corrente — Card Engine v2 alpha rev. 22

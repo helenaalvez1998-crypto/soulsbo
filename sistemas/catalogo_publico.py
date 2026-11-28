@@ -10,12 +10,13 @@ from urllib.parse import quote
 
 
 def montar_catalogo_publico_cartas() -> dict:
-    from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75
+    from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75, CARTAS_EXPANSAO_V77
     from sistemas.gwent import preparar_carta
     from sistemas.arte_cartas import preparar_payload_carta_base, etag_carta_base
 
     ids_pacote = {str(c.id) for c in CARTAS_PACOTE}
     ids_expansao_v75 = {str(c.id) for c in CARTAS_EXPANSAO_V75}
+    ids_expansao_v77 = {str(c.id) for c in CARTAS_EXPANSAO_V77}
     items: list[dict] = []
     for carta in CARTAS_POR_ID.values():
         original = carta.para_dict()
@@ -49,6 +50,7 @@ def montar_catalogo_publico_cartas() -> dict:
             "descricao": str(preparada.get("descricao") or ""),
             "no_pacote": str(carta.id) in ids_pacote,
             "expansao_v75": str(carta.id) in ids_expansao_v75,
+            "expansao_v77": str(carta.id) in ids_expansao_v77,
         })
 
     ordem = {nome: i for i, nome in enumerate((
@@ -59,5 +61,6 @@ def montar_catalogo_publico_cartas() -> dict:
         "total": len(items),
         "total_pacote": len(ids_pacote),
         "total_expansao_v75": sum(1 for item in items if item["expansao_v75"]),
+        "total_expansao_v77": sum(1 for item in items if item["expansao_v77"]),
         "cartas": items,
     }

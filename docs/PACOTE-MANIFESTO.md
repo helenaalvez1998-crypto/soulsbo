@@ -1,3 +1,9 @@
+# Estado corrente V77 — paridade de facções e revisão de nomes (2026-11-28)
+
+A revisão V77 está no código do pacote: 179 modelos no índice, 164 cartas no pacote jogável, 30 unidades + 11 especiais e três líderes por facção (41 cartas de coleção por facção; 12 líderes no total). Os Esquecidos têm dez novas cartas especiais nesta revisão, além dos dois líderes adicionais já introduzidos na V76. Os 17 especiais V77 usam aliases declarados e handlers canônicos testados; o site recebe o efeito efetivo para usar os controles corretos. Os títulos atuais são únicos e limitados a 27 caracteres; IDs anteriores foram preservados. A auditoria catálogo → motor → site reporta 179/179 e zero divergências; suíte completa: **340 testes + 109 subtestes aprovados**; `py_compile` e `node --check site/app.js` aprovados. A atualização ainda não foi implantada no host. Consulte `docs/v77-normalizacao-faccoes-e-nomes.md` e `docs/AUDITORIA-FIDELIDADE-CARTAS.md/.json`. As seções abaixo preservam registros históricos.
+
+---
+
 # Manifesto atual — revisão rev. 31 (2026-11-28)
 
 - **Baseline:** `soulsbo-main-continuity-2026-11-28-rev30.zip`.

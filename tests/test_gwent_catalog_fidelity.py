@@ -13,6 +13,7 @@ from sistemas.gwent import (
     aplicar_jogada,
     novo_estado,
     preparar_carta,
+    SPECIAL_EFFECT_ALIASES,
 )
 from sistemas.auditoria_efeitos import gerar_relatorio_fidelidade_cartas
 
@@ -75,8 +76,8 @@ def _play_catalog_unit(card_id: str, *, same_faction_allies: int = 0, previous_r
 
 def test_complete_catalog_matches_runtime_site_and_physical_card_text():
     report = gerar_relatorio_fidelidade_cartas()
-    assert report["total_cartas"] == 137
-    assert report["total_publicadas_site"] == 137
+    assert report["total_cartas"] == 179
+    assert report["total_publicadas_site"] == 179
     assert report["total_erros"] == 0, report["erros"]
     assert report["status"] == "OK"
     assert len(report["cartas"]) == len(CARTAS_POR_ID)
@@ -168,7 +169,8 @@ def test_every_static_card_exposes_only_real_effect_data_without_placeholder_dup
         if model.id in CARD_IDENTITY_ABILITIES:
             assert prepared["habilidade_id_efetiva"] == CARD_IDENTITY_ABILITIES[model.id]["effect"]
         else:
-            assert prepared["habilidade_id_efetiva"] == (model.habilidade or "")
+            expected = SPECIAL_EFFECT_ALIASES.get(model.habilidade, model.habilidade or "") if model.categoria.casefold() == "especial" else (model.habilidade or "")
+            assert prepared["habilidade_id_efetiva"] == expected
 
 
 def test_generated_reward_skill_pool_is_fully_present_in_runtime_and_catalog():
@@ -335,7 +337,7 @@ def test_leader_card_description_is_canonical_and_all_leaders_have_runtime_branc
     from sistemas.auditoria_efeitos import gerar_relatorio_fidelidade_cartas
 
     report = gerar_relatorio_fidelidade_cartas()
-    assert len(report["lideres"]) == 10
+    assert len(report["lideres"]) == 12
     assert report["total_erros"] == 0, report["erros"]
     app = Path("site/app.js").read_text(encoding="utf-8")
     assert "GWENT_LEADER_SIMPLE" not in app

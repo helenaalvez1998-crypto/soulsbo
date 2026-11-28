@@ -662,26 +662,6 @@ class NaraBot(commands.Bot):
         else:
             log.error("%s | contexto=%s", message, {k: str(v)[:300] for k, v in context.items() if k != "task"})
 
-    async def _avisar_vez_gwent(self, match_id: int, alvo_id: int, adversario_id: int) -> None:
-        """DM discreta quando chega a vez do jogador (no máx. 1 a cada 5 min por partida)."""
-        agora = time.time()
-        ultimos = self.__dict__.setdefault("_avisos_vez_gwent", {})
-        if agora - ultimos.get((match_id, alvo_id), 0) < 300:
-            return
-        ultimos[(match_id, alvo_id)] = agora
-        if len(ultimos) > 500:
-            for k in sorted(ultimos, key=ultimos.get)[:250]:
-                ultimos.pop(k, None)
-        try:
-            guild = self.get_guild(config.GUILD_ID) if config.GUILD_ID else None
-            alvo = (guild.get_member(alvo_id) if guild else None) or await self.fetch_user(alvo_id)
-            rival = guild.get_member(adversario_id) if guild else None
-            base_url = os.getenv("SOULSBOT_PUBLIC_URL", "https://narabot.sbs").rstrip("/")
-            nome = rival.display_name if rival else "seu adversário"
-            await alvo.send(f"🃏 **Sua vez no Gwent!** {nome} jogou. Continue a partida: {base_url}/?gwent={match_id}")
-        except Exception:
-            log.info("Não foi possível avisar a vez do Gwent #%s.", match_id)
-
     async def _loop_anuncios_drops(self) -> None:
         """Anuncia no canal do Coliseu quando um membro ganha carta por contribuir."""
         from admin_config import GuildConfig
@@ -1090,6 +1070,8 @@ class NaraBot(commands.Bot):
         card["image_url"] = (
             f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?{image_query}"
         )
+        card["card_id"] = str(card_id)
+        card["exemplar_id"] = exemplar_id
         return card
 
     async def _api_gwent_deck(self, request: web.Request) -> web.Response:
@@ -1170,7 +1152,9 @@ class NaraBot(commands.Bot):
             "comandante_fornalha": "godfrey", "bastiao_ancestral": "morgott",
             "juiz_cerco": "radagon", "mestre_veu": "mohg",
             "sombra_caminhante": "rykard", "voz_caidos": "esgar",
-            "arquimaga_eclipse": "rennala", "mestre_eclipse": "astel",
+            "lider_papa_esquecido": "esgar", "lider_abadessa_ruinas": "abadessa",
+            "lider_martir_vigilia": "martir", "arquimaga_eclipse": "rennala",
+            "mestre_eclipse": "astel",
             "oraculo_tempestade": "loretta",
         }
         def leader_payload(key, value):
@@ -1217,6 +1201,9 @@ class NaraBot(commands.Bot):
                     (user_id, saved_relic_id),
                 )
             saved_relic_id = ""
+        for card in cards:
+            self._gwent_canonicalize_malenia_card(card)
+        await self._gwent_mark_custom_art(cards)
         return web.json_response({
             "deck": cards, "faction": faction, "leader_id": leader_id,
             "leaders": leaders,
@@ -1366,6 +1353,142 @@ class NaraBot(commands.Bot):
             **result, "message": "Deck zerado. Sua coleção permanece intacta.",
         })
 
+    async def _gwent_mark_custom_art(self, cards):
+        """Marca exemplares com arte aprovada para que a interface mostre somente a imagem."""
+        from urllib.parse import parse_qs, urlsplit
+
+        if not isinstance(cards, list) or not cards:
+            return cards
+        descriptors = []
+        card_ids = set()
+        for card in cards:
+            if not isinstance(card, dict):
+                continue
+            raw_id = str(card.get("card_id") or card.get("id") or "")
+            if not raw_id:
+                card["custom_image_only"] = False
+                continue
+            parts = raw_id.split("::", 1)
+            card_id = parts[0]
+            exemplar_id = card.get("exemplar_id")
+            if not exemplar_id and len(parts) > 1:
+                exemplar_id = parts[1]
+            if not exemplar_id:
+                try:
+                    values = parse_qs(urlsplit(str(card.get("image_url") or "")).query).get("exemplar_id", [])
+                    exemplar_id = values[0] if values else None
+                except Exception:
+                    exemplar_id = None
+            try:
+                exemplar_id = int(exemplar_id) if exemplar_id not in (None, "", 0, "0") else None
+            except (TypeError, ValueError):
+                exemplar_id = None
+            descriptors.append((card, card_id, exemplar_id))
+            card_ids.add(card_id)
+
+        if not card_ids:
+            return cards
+        ordered_ids = sorted(card_ids)
+        placeholders = ",".join("?" for _ in ordered_ids)
+        rows = await self.db._all(
+            f"SELECT card_id, exemplar_id FROM cartas_atelie_submissoes "
+            f"WHERE status='approved' AND card_id IN ({placeholders})",
+            tuple(ordered_ids),
+        )
+        approved = {}
+        for row in rows:
+            key = str(row["card_id"])
+            exemplar = row["exemplar_id"]
+            try:
+                exemplar = int(exemplar) if exemplar is not None else None
+            except (TypeError, ValueError):
+                continue
+            approved.setdefault(key, set()).add(exemplar)
+        for card, card_id, exemplar_id in descriptors:
+            art_exemplars = approved.get(card_id, set())
+            card["custom_image_only"] = None in art_exemplars or (
+                exemplar_id is not None and exemplar_id in art_exemplars
+            )
+        return cards
+
+    @staticmethod
+    def _gwent_canonicalize_malenia_card(card):
+        """Recompõe a identidade de Malenia sem perder o ID do exemplar em jogo."""
+        if not isinstance(card, dict):
+            return card
+        from urllib.parse import quote, urlencode
+        from sistemas.cartas import get_carta, faixa_poder_exemplar
+        from sistemas.gwent import preparar_carta
+
+        malenia_id = "chefe_malenia_lamina_miquella"
+        instance_id = str(card.get("id") or "")
+        declared_card_id = str(card.get("card_id") or "")
+        instance_parts = instance_id.split("::", 1)
+        declared_parts = declared_card_id.split("::", 1)
+        instance_base = instance_parts[0]
+        declared_base = declared_parts[0]
+        canonical_id_match = malenia_id in (instance_base, declared_base)
+        card_name = str(card.get("nome") or "").casefold()
+        if not canonical_id_match and "malenia" not in card_name:
+            return card
+
+        model = get_carta(malenia_id)
+        if model is None:
+            return card
+        payload = model.para_dict()
+        # Só preserva dados variáveis do exemplar quando sua identidade de catálogo
+        # já é Malenia. Se apenas o nome estava misturado a outro ID, usa os valores
+        # canônicos do modelo em vez de importar poder/raridade da outra carta.
+        exemplar_id = card.get("exemplar_id") if canonical_id_match else None
+        if canonical_id_match and not exemplar_id:
+            exemplar_id = (instance_parts[1] if len(instance_parts) > 1
+                           else (declared_parts[1] if len(declared_parts) > 1 else None))
+        if canonical_id_match and card.get("raridade"):
+            payload["raridade"] = str(card["raridade"])
+        if canonical_id_match and card.get("poder") is not None:
+            try:
+                payload["poder"] = int(card["poder"])
+            except (TypeError, ValueError):
+                pass
+        try:
+            exemplar_id = int(exemplar_id) if exemplar_id not in (None, "", 0, "0") else None
+        except (TypeError, ValueError):
+            exemplar_id = None
+        if exemplar_id:
+            payload["exemplar_id"] = exemplar_id
+
+        canonical = preparar_carta(payload)
+        identity_fields = (
+            "nome", "categoria", "papel_gwent", "tipo_combate", "especial", "poder",
+            "raridade", "custo", "potencia_raridade", "faccao", "arquetipo_faccao",
+            "arquetipo_descricao", "fileira", "row", "row_label", "habilidade",
+            "habilidade_id_declarada", "habilidade_id_efetiva", "habilidade_nome",
+            "habilidade_texto", "habilidade_identidade", "sinergias", "combos_compativeis",
+            "descricao",
+        )
+        for field in identity_fields:
+            if field in canonical:
+                card[field] = canonical[field]
+
+        rarity = str(card.get("raridade") or "Primordial")
+        power = int(card.get("poder") or 9)
+        max_power = faixa_poder_exemplar(model, rarity)[1]
+        card["max_power"] = int(max_power)
+        card["card_id"] = malenia_id
+        card["id"] = f"{malenia_id}::{exemplar_id}" if exemplar_id else malenia_id
+        if exemplar_id:
+            card["exemplar_id"] = exemplar_id
+        else:
+            card.pop("exemplar_id", None)
+        image_query = {"rarity": rarity, "power": power, "thumb": "1"}
+        if exemplar_id:
+            image_query["exemplar_id"] = exemplar_id
+        card["image_url"] = (
+            f"/api/gwent/public-cards/{quote(malenia_id, safe='')}/image?"
+            f"{urlencode(image_query)}"
+        )
+        return card
+
     async def _gwent_deck_snapshots(self, user_id: int):
         import json
         from sistemas.cartas import get_carta, carta_de_jogo_por_id, CUSTO_RARIDADE
@@ -1394,6 +1517,8 @@ class NaraBot(commands.Bot):
                 personal = await self._gwent_generated_card_payload(user_id, str(card_id), record)
                 if not personal:
                     return None
+                personal["card_id"] = str(card_id)
+                personal["exemplar_id"] = int(record["id"])
                 cards.append(personal)
                 continue
             card = get_carta(card_id)
@@ -1410,8 +1535,15 @@ class NaraBot(commands.Bot):
             payload["poder"] = int(record["power"] or payload.get("poder", 0))
             payload["custo"] = int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0)))
             payload["exemplar_id"] = int(record["id"])
-            cards.append(preparar_carta(payload))
-        return cards if len(cards) == 12 else None
+            prepared = preparar_carta(payload)
+            prepared["card_id"] = str(card_id)
+            prepared["exemplar_id"] = int(record["id"])
+            self._gwent_canonicalize_malenia_card(prepared)
+            cards.append(prepared)
+        if len(cards) != 12:
+            return None
+        await self._gwent_mark_custom_art(cards)
+        return cards
 
     async def _api_gwent_matches(self, request: web.Request) -> web.Response:
         user_id = self._api_user_id(request)
@@ -1965,6 +2097,16 @@ class NaraBot(commands.Bot):
             except (TypeError, ValueError):
                 weather_snapshot[row_key] = 0
         active_weather_rows = [row_key for row_key, level in weather_snapshot.items() if level > 0]
+        score_snapshot = placar(state)
+        for card in own.get("hand", []):
+            self._gwent_canonicalize_malenia_card(card)
+        visible_match_cards = list(own.get("hand", []))
+        for player_score in score_snapshot.values():
+            board = player_score.get("board", []) if isinstance(player_score, dict) else []
+            for card in board:
+                self._gwent_canonicalize_malenia_card(card)
+                visible_match_cards.append(card)
+        await self._gwent_mark_custom_art(visible_match_cards)
         public = {
             "match_id": match_id, "status": state["status"], "phase": state.get("phase", "battle"),
             "is_ai_match": is_ai_match,
@@ -1974,7 +2116,7 @@ class NaraBot(commands.Bot):
             "ai_thinking": bool(state.get("ai_pending") and str(state.get("turn")) == "-1"),
             "round": state["round"], "turn": state["turn"], "crowns": state["crowns"],
             "winner_id": state["winner_id"], "last_event": state["last_event"],
-            "score": placar(state), "hand": own["hand"], "leader_used": own["leader_used"],
+            "score": score_snapshot, "hand": own["hand"], "leader_used": own["leader_used"],
             "alvos": opcoes_de_alvo(state, user_id),
             "relic_options": opcoes_de_reliquia(state, user_id),
             "equipped_relic_id": own.get("equipped_relic_id", ""),
@@ -2034,7 +2176,6 @@ class NaraBot(commands.Bot):
             ):
                 return web.json_response({"error": "Seleção de troca inválida."}, status=400)
 
-            turno_antes = str(state.get("turn") or "")
             target_id = str(body.get("target_id", ""))[:120] or None
             if action == "relic":
                 current_player = state.get("players", {}).get(str(user_id), {})
@@ -2073,14 +2214,6 @@ class NaraBot(commands.Bot):
                 "UPDATE cartas_gwent_matches SET status=?,state_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",
                 (state["status"], json.dumps(state, ensure_ascii=False), match_id),
             )
-            try:
-                novo_turno = str(state.get("turn") or "")
-                if (not state.get("is_ai_match") and state["status"] == "active" and novo_turno
-                        and novo_turno != turno_antes and novo_turno != str(user_id)):
-                    asyncio.get_running_loop().create_task(self._avisar_vez_gwent(match_id, int(novo_turno), user_id))
-            except Exception:
-                log.debug("Falha ao agendar aviso de vez Gwent.", exc_info=True)
-
             if state["status"] == "finished" and not state.get("is_ai_match"):
                 winner = state.get("winner_id")
                 participants = (int(match_row["creator_id"]), int(match_row["opponent_id"]))
@@ -2370,6 +2503,9 @@ class NaraBot(commands.Bot):
                 })
                 catalog.append(model_payload)
 
+            for card_item in [*cards, *catalog]:
+                self._gwent_canonicalize_malenia_card(card_item)
+            await self._gwent_mark_custom_art([*cards, *catalog])
             from levels import nivel_por_xp
             xp = int(estado["xp"])
             return web.json_response({
@@ -2888,7 +3024,9 @@ class NaraBot(commands.Bot):
             "comandante_fornalha": "godfrey", "bastiao_ancestral": "morgott",
             "juiz_cerco": "radagon", "mestre_veu": "mohg",
             "sombra_caminhante": "rykard", "voz_caidos": "esgar",
-            "arquimaga_eclipse": "rennala", "mestre_eclipse": "astel",
+            "lider_papa_esquecido": "esgar", "lider_abadessa_ruinas": "abadessa",
+            "lider_martir_vigilia": "martir", "arquimaga_eclipse": "rennala",
+            "mestre_eclipse": "astel",
             "oraculo_tempestade": "loretta",
         }
         leaders = []

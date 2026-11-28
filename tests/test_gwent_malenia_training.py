@@ -214,7 +214,7 @@ def test_ai_training_delay_is_between_three_and_five_seconds():
 def test_each_nara_profile_equips_a_relic_that_resolves_through_the_normal_engine():
     relics = {
         "facil": ("reliquia_grande_runa_godrick", "Grande Runa de Godrick"),
-        "normal": ("reliquia_runa_nao_nascidos", "Grande Runa dos Não Nascidos"),
+        "normal": ("reliquia_runa_nao_nascidos", "Runa dos Não Nascidos"),
         "dificil": ("reliquia_runa_morte", "Runa da Morte"),
     }
     for difficulty, (relic_id, relic_name) in relics.items():

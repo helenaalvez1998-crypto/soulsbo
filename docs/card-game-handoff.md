@@ -1,3 +1,9 @@
+# Estado corrente V76 — expansão de Os Esquecidos (2026-11-28)
+
+Este adendo é a referência atual do runtime principal e precede os registros históricos abaixo. O catálogo ativo contém 162 registros; são 30 unidades por facção (120 unidades no total) e 27 especiais distribuídas por afinidade. Os Esquecidos agora possuem 16 unidades adicionais, três líderes (Papa Esquecido, Abadessa das Ruínas e Mártir da Vigília), um deck-base de 9 unidades + 1 especial e suporte nas recompensas dinâmicas. Os seis IDs Luteranos foram reclassificados sem troca de ID; snapshots antigos recuperam facção/nome/lore do catálogo. Os títulos atuais têm até 28 caracteres e não se repetem. Ver `docs/v76-expansao-os-esquecidos.md` e `docs/AUDITORIA-FIDELIDADE-CARTAS.md`.
+
+---
+
 # Atualização de runtime — Malenia e treino contra NARA (2026-11-28)
 
 **Estado atual:** revisão funcional implementada no Gwent legado, acima do baseline rev. 32. Leia `docs/card-game-malenia-runtime-and-nara-training-v1.0.md` e `data/card_game/malenia-runtime-current.v1.json` antes dos snapshots históricos abaixo.

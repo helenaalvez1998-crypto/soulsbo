@@ -138,13 +138,10 @@ def canonical_faction(value: str | None) -> str | None:
 
 
 def faction_for_card(card: dict | None) -> str | None:
-    """Resolve a facção canônica; snapshots antigos são atualizados pelo ID do catálogo, nunca pelo tipo legado."""
+    """Resolve primeiro pelo ID canônico; snapshots antigos herdam a facção atual do catálogo."""
     if not isinstance(card, dict):
         return None
-    faction = canonical_faction(card.get("faccao"))
-    if faction in FACTION_TYPES:
-        return faction
-    card_id = str(card.get("id") or card.get("card_id") or "")
+    card_id = str(card.get("card_id") or card.get("id") or "").split("::", 1)[0]
     if card_id:
         try:
             from sistemas.cartas import get_carta
@@ -153,31 +150,27 @@ def faction_for_card(card: dict | None) -> str | None:
                 return model.faccao
         except Exception:
             pass
-    return None
+    faction = canonical_faction(card.get("faccao"))
+    return faction if faction in FACTION_TYPES else None
 
 
 
 def row_for_card(card: dict | None) -> str:
-    """Resolve a posição tática por campo canônico ou ID do catálogo, nunca por classe antiga."""
+    """Resolve primeiro a fileira registrada no catálogo; campos antigos são fallback."""
     if not isinstance(card, dict):
         return "melee"
-    row = str(card.get("fileira") or card.get("row") or "")
-    if row in ROWS:
-        return row
-    card_id = str(card.get("id") or card.get("card_id") or "")
+    card_id = str(card.get("card_id") or card.get("id") or "").split("::", 1)[0]
     if card_id:
         try:
             from sistemas.cartas import get_carta, FILEIRAS_POR_CARTA
             model = get_carta(card_id)
-            if model is not None:
-                row = str(model.fileira or FILEIRAS_POR_CARTA.get(card_id) or "")
-            else:
-                row = str(FILEIRAS_POR_CARTA.get(card_id) or "")
+            row = str((model.fileira if model else "") or FILEIRAS_POR_CARTA.get(card_id) or "")
             if row in ROWS:
                 return row
         except Exception:
             pass
-    return "melee"
+    row = str(card.get("fileira") or card.get("row") or "")
+    return row if row in ROWS else "melee"
 
 def embaralhar_deck(deck: list[dict], rng=None) -> list[dict]:
     """Retorna uma cópia embaralhada; produção usa SystemRandom e testes podem injetar RNG."""
@@ -233,13 +226,42 @@ HABILIDADES_ESPECIAIS_IMPLEMENTADAS = frozenset({
     "gwent_egide", "gwent_requiem", "gwent_passo",
     "gwent_sangramento", "gwent_geada_cariana", "gwent_podrida", "gwent_loucura",
     "gwent_chama", "gwent_invocacao",
+    "gwent_v77_ord_egide", "gwent_v77_ord_hino", "gwent_v77_ord_silencio",
+    "gwent_v77_veu_sangramento", "gwent_v77_veu_podrida", "gwent_v77_veu_loucura", "gwent_v77_veu_execucao",
+    "gwent_v77_esq_muralha", "gwent_v77_esq_chifre", "gwent_v77_esq_medico", "gwent_v77_esq_egide",
+    "gwent_v77_esq_passo", "gwent_v77_esq_chama", "gwent_v77_esq_vinculo", "gwent_v77_esq_batedor",
+    "gwent_v77_esq_purificar", "gwent_v77_esq_clima",
     "reliquia_godrick", "reliquia_renala", "reliquia_morte", "reliquia_noite_chama", "reliquia_lamina_negra", "reliquia_algemas",
 })
+
+# IDs declarados nas cartas V77 mantêm nomes temáticos; o motor executa o handler
+# já validado correspondente. A interface recebe o ID efetivo para mostrar
+# controles de fileira/alvo exatamente como nas cartas originais.
+SPECIAL_EFFECT_ALIASES = {
+    "gwent_v77_ord_egide": "gwent_egide",
+    "gwent_v77_ord_hino": "gwent_chifre",
+    "gwent_v77_ord_silencio": "gwent_purificar",
+    "gwent_v77_veu_sangramento": "gwent_sangramento",
+    "gwent_v77_veu_podrida": "gwent_podrida",
+    "gwent_v77_veu_loucura": "gwent_loucura",
+    "gwent_v77_veu_execucao": "gwent_execucao",
+    "gwent_v77_esq_muralha": "gwent_muralha",
+    "gwent_v77_esq_chifre": "gwent_chifre",
+    "gwent_v77_esq_medico": "gwent_medico",
+    "gwent_v77_esq_egide": "gwent_egide",
+    "gwent_v77_esq_passo": "gwent_passo",
+    "gwent_v77_esq_chama": "gwent_chama",
+    "gwent_v77_esq_vinculo": "gwent_vinculo",
+    "gwent_v77_esq_batedor": "gwent_batedor",
+    "gwent_v77_esq_purificar": "gwent_purificar",
+    "gwent_v77_esq_clima": "gwent_clima",
+}
+
 FACTION_ARCHETYPES = {
     "Ordem Áurea": {"name": "Formação e Resistência", "description": "Proteção de fileira, fortalecimento de aliados e +1 na primeira unidade da Ordem Áurea jogada em cada rodada."},
     "Lua Negra": {"name": "Feitiçaria e Controle", "description": "Magia lunar, cosmos, gravidade, congelamento e +1 na primeira unidade da Lua Negra jogada em cada rodada."},
     "Véu Carmesim": {"name": "Sangue e Sacrifício", "description": "Sangramento, sacrifício, heresia e +1 na primeira unidade do Véu Carmesim jogada em cada rodada."},
-    "Os Esquecidos": {"name": "Fé e Glória", "description": "Devoção, evangelho, irmandade e +1 na primeira unidade dos Esquecidos jogada em cada rodada."},
+    "Os Esquecidos": {"name": "Fé e Renascimento", "description": "Devoção, proteção, purificação, glória e retorno das unidades esquecidas; a primeira unidade dos Esquecidos jogada em cada rodada recebe +1."},
 }
 LEADERS = {
     # Ordem Áurea — força régia, proteção e purificação.
@@ -252,6 +274,8 @@ LEADERS = {
     "voz_caidos": {"name": "Esgar", "faction": "Véu Carmesim", "description": "Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus.", "effect": "esgar_blood_priest"},
     # Líder próprio dos Esquecidos, baseado na identidade do Papa Esquecido.
     "lider_papa_esquecido": {"name": "Papa Esquecido", "faction": "Os Esquecidos", "description": "Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.", "effect": "forgotten_blessing"},
+    "lider_abadessa_ruinas": {"name": "Abadessa das Ruínas", "faction": "Os Esquecidos", "description": "Purifica até 2 aliados dos Esquecidos afetados e de maior poder efetivo na fileira escolhida, removendo Sangramento, Geada, Podridão e Loucura. Cada um recebe +1 de bônus.", "effect": "forgotten_purification"},
+    "lider_martir_vigilia": {"name": "Mártir da Vigília", "faction": "Os Esquecidos", "description": "Ressuscita do descarte a unidade mais forte dos Esquecidos com poder-base até 5 na fileira escolhida, com +1 de bônus.", "effect": "forgotten_revival"},
     # Lua Negra — feitiçaria, gravidade e domínio astral.
     "arquimaga_eclipse": {"name": "Rennala", "faction": "Lua Negra", "description": "Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus.", "effect": "rennala_full_moon"},
     "mestre_eclipse": {"name": "Astel", "faction": "Lua Negra", "description": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes.", "effect": "astel_gravity"},
@@ -340,6 +364,31 @@ CARD_SYNERGY_TAGS = {
     "luterano_profeta": {"fe", "soberania"},
     "luterano_vigia": {"fe", "gloria_divina"},
     "luterano_anjo2": {"fe", "gloria_divina"},
+    "gwent_v76_esq_cavaleiro_penitente": {"fe", "irmandade"},
+    "gwent_v76_esq_peregrino_cinza": {"fe", "evangelho"},
+    "gwent_v76_esq_guardiao_vitrais": {"fe", "sacerdos"},
+    "gwent_v76_esq_irma_ruinas": {"fe", "irmandade"},
+    "gwent_v76_esq_confessor_velado": {"fe", "devocao"},
+    "gwent_v76_esq_guardia_santuario": {"fe", "sacerdos"},
+    "gwent_v76_esq_cantor_hino": {"fe", "gloria_divina"},
+    "gwent_v76_esq_diaconisa_altar": {"fe", "devocao"},
+    "gwent_v76_esq_oraculo_silencioso": {"fe", "sacerdos"},
+    "gwent_v76_esq_serafim_caido": {"fe", "gloria_divina"},
+    "gwent_v76_esq_martir_cinzento": {"fe", "irmandade"},
+    "gwent_v76_esq_prelado_ruinas": {"fe", "soberania"},
+    "gwent_v76_esq_arauto_cantico": {"fe", "gloria_divina"},
+    "gwent_v76_esq_guardiao_relicario": {"fe", "sacerdos"},
+    "gwent_v76_esq_santo_sem_nome": {"fe", "soberania"},
+    "gwent_v76_esq_anjo_selo": {"fe", "gloria_divina"},
+    "gwent_v76_ordem_guardiao_graal": {"muralha", "ordem_dourada"},
+    "gwent_v76_ordem_sentinela_luz": {"estandarte", "ordem_dourada"},
+    "gwent_v76_lua_tecela_nevoa": {"astral", "lua_cariana"},
+    "gwent_v76_lua_cavaleiro_astral": {"lua_cariana", "v75_lunar_paths"},
+    "gwent_v76_veu_flagelante": {"sangue_mohgwyn", "v75_blood_mark"},
+    "gwent_v76_veu_lamina_hemantica": {"sangue_mohgwyn", "v75_blood_mark"},
+    "gwent_v76_veu_carrasco_altar": {"sangue_mohgwyn", "v75_blood_feast"},
+    "gwent_v76_veu_arauto_sangue": {"sangue_mohgwyn", "banquete"},
+    "gwent_v76_veu_cao_rubro": {"sangue_mohgwyn", "banquete"},
 }
 SYNERGY_COMBOS = {
     "cinzas_fornalha": {"priority": 10, "name": "Aliança da Árvore Áurea", "tags": {"cinzas", "fornalha"}, "minimum": 2, "bonus": 2, "description": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."},
@@ -348,15 +397,15 @@ SYNERGY_COMBOS = {
     "mare_abissal": {"priority": 40, "name": "Maré Abissal", "tags": {"abismo"}, "minimum": 2, "bonus": 2, "description": "Godfrey e Cavaleiro Carmesim despertam a mesma força (+2)."},
     "juramento_estandarte": {"priority": 50, "name": "Juramento de Leyndell", "tags": {"estandarte"}, "minimum": 2, "bonus": 1, "team_bonus": 1, "description": "Porta-estandarte e Guardas da Árvore Áurea fortalecem a formação (+1 para a carta participante que ativa o combo e +1 aos aliados na mesma fileira)."},
     "passos_duas_luas": {"priority": 60, "name": "Dança da Lua Negra", "tags": {"duas_luas"}, "minimum": 2, "bonus": 2, "description": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."},
-    "eco_convergente": {"priority": 70, "name": "Eco das Pedras Cintilantes", "tags": {"eco", "astral"}, "minimum": 2, "bonus": 2, "description": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."},
+    "eco_convergente": {"priority": 70, "name": "Eco das Pedras Cintilantes", "tags": {"eco", "astral"}, "minimum": 2, "bonus": 2, "description": "O Erudito das Pedras e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."},
     "chama_dupla": {"priority": 80, "name": "Chamas do Monte Gelmir", "tags": {"chama"}, "minimum": 2, "bonus": 2, "description": "Piromante e Feiticeira da Lua Gélida equilibram suas chamas (+2)."},
     "muralha_inabalavel": {"priority": 90, "name": "Defesa de Leyndell", "tags": {"muralha"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
     "banquete_guerra": {"priority": 100, "name": "Banquete de Sangue", "tags": {"banquete"}, "minimum": 2, "bonus": 3, "description": "Carniceiro da Forja e Intendente dividem o butim (+3)."},
     "procissao_fantasma": {"priority": 110, "name": "Procissão dos que Vivem na Morte", "tags": {"fantasmas"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades fantasmas marcham juntas (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
     "caravana_saqueadora": {"priority": 120, "name": "Saque da Cidade Eterna", "tags": {"caravana"}, "minimum": 2, "bonus": 2, "description": "Saqueadora e Contrabandista fecham o negócio (+2)."},
     "ritual_runico": {"priority": 130, "name": "Ritual das Runas", "tags": {"runico"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades rúnicas completam o círculo (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
-    "eclipse_voraz": {"priority": 140, "name": "Eclipse Sanguíneo", "tags": {"eclipse_voraz"}, "minimum": 2, "bonus": 3, "description": "Cavaleiro de Sangue de Mohg e Bibliotecária eclipsam a mesma fonte (+3)."},
-    "rota_peregrina": {"priority": 150, "name": "Caminho do Maculado", "tags": {"peregrino"}, "minimum": 2, "bonus": 1, "description": "Duelista e Batedor da Mansão Vulcânica coordenam o avanço (+1)."},
+    "eclipse_voraz": {"priority": 140, "name": "Eclipse Sanguíneo", "tags": {"eclipse_voraz"}, "minimum": 2, "bonus": 3, "description": "Cavaleiro Sangrento e Bibliotecária eclipsam a mesma fonte (+3)."},
+    "rota_peregrina": {"priority": 150, "name": "Caminho do Maculado", "tags": {"peregrino"}, "minimum": 2, "bonus": 1, "description": "Duelista e Batedor de Gelmir coordenam o avanço (+1)."},
     "juramento_erdtree": {"priority": 160, "name": "Juramento da Árvore Áurea", "tags": {"ordem_dourada"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."},
     "convergencia_lunar": {"priority": 170, "name": "Convergência da Lua Negra", "tags": {"lua_cariana"}, "minimum": 2, "bonus": 2, "description": "Duas unidades ligadas à Lua Negra convergem e recebem +2."},
     "ritual_dinastia": {"priority": 180, "name": "Ritual do Véu Carmesim", "tags": {"sangue_mohgwyn"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."},
@@ -705,26 +754,27 @@ def _aplicar_potencia_raridade(card: dict, player: dict, other: dict,
 
 
 def preparar_carta(card: dict) -> dict:
-    special = str(card.get("categoria", "")).casefold() == "especial"
-    skill = str(card.get("habilidade", ""))
+    catalog_id = str(card.get("card_id") or card.get("id") or "").split("::", 1)[0]
+    model = None
     try:
         from sistemas.cartas import HABILIDADES, FILEIRAS_POR_CARTA, CUSTO_RARIDADE, get_carta
-        skill_data = HABILIDADES.get(skill, {})
-        model = get_carta(str(card.get("id", "")))
-        fileira_catalogo = (model.fileira or FILEIRAS_POR_CARTA.get(model.id, "melee")) if model else FILEIRAS_POR_CARTA.get(str(card.get("id", "")), "melee")
+        model = get_carta(catalog_id)
     except Exception:
-        skill_data = {}
-        CUSTO_RARIDADE = {}
-        fileira_catalogo = "melee"
+        HABILIDADES, FILEIRAS_POR_CARTA, CUSTO_RARIDADE = {}, {}, {}
+    special = str(model.categoria if model else card.get("categoria", "")).casefold() == "especial"
+    skill = str(model.habilidade if model else card.get("habilidade", ""))
+    skill_effect = SPECIAL_EFFECT_ALIASES.get(skill, skill) if special else skill
+    skill_data = HABILIDADES.get(skill, {})
+    fileira_catalogo = (model.fileira or FILEIRAS_POR_CARTA.get(model.id, "melee")) if model else FILEIRAS_POR_CARTA.get(catalog_id, "melee")
     # Cartas antigas salvas no banco recebem a classificação tática atual pelo ID.
     row = row_for_card(card)
     faction = faction_for_card(card) or "Ordem Áurea"
     category = "Especial" if special else "Unidade"
-    identity = CARD_IDENTITY_ABILITIES.get(str(card["id"]), {})
+    identity = CARD_IDENTITY_ABILITIES.get(catalog_id, {})
     raridade = str(card.get("raridade", "Comum"))
     # Sinergias são regras de combate e precisam ser visíveis na carta, mesmo
     # quando ela não possui uma habilidade individual.
-    own_tags = CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set())
+    own_tags = CARD_SYNERGY_TAGS.get(catalog_id, set())
     has_synergy = bool(own_tags)
     combos_compativeis = [
         {"id": combo_id, "nome": combo["name"], "descricao": combo["description"]}
@@ -780,19 +830,19 @@ def preparar_carta(card: dict) -> dict:
             # Clima altera estado climático e poder efetivo, sem alterar bônus.
             "gwent_clima": "",
         }
-        if skill in {"gwent_nevoa", "gwent_geada"}:
+        if skill_effect in {"gwent_nevoa", "gwent_geada"}:
             # Esses dois efeitos globais só aplicam a segunda marca a partir
             # do orçamento 2 (Lendária+), não em Rara/Épica.
             if budget >= 2:
-                label = "Podridão Escarlate" if skill == "gwent_nevoa" else "Geada"
+                label = "Podridão Escarlate" if skill_effect == "gwent_nevoa" else "Geada"
                 texto_habilidade = (texto_habilidade + f" Raridade {raridade}: aplica a segunda marca de {label} a todas as unidades elegíveis da fileira/campo afetado.").strip()
-        elif skill in upgrades:
-            texto_habilidade = (texto_habilidade + upgrades[skill]).strip()
-        elif skill and str(card.get("id", "")) == "chefe_malenia_lamina_miquella":
+        elif skill_effect in upgrades:
+            texto_habilidade = (texto_habilidade + upgrades[skill_effect]).strip()
+        elif skill_effect and str(card.get("id", "")) == "chefe_malenia_lamina_miquella":
             # A Flor Escarlate já descreve e resolve sua amplificação Primordial
             # dedicada; não acrescentar uma segunda explicação genérica.
             pass
-        elif skill:
+        elif skill_effect:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: se esta entrada alterar bônus, reforça até {budget} {alvo_label}: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.").strip()
         elif identity:
             texto_habilidade = (texto_habilidade + f" Raridade {raridade}: se esta entrada alterar bônus, reforça até {budget} {alvo_label}: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.").strip()
@@ -815,7 +865,7 @@ def preparar_carta(card: dict) -> dict:
         f"{urlencode(image_params)}"
     )
     return {
-        "id": str(card["id"]), "nome": str(card.get("nome", "Carta")),
+        "id": str(card["id"]), "nome": str(model.nome if model else card.get("nome", "Carta")),
         "categoria": category,
         "papel_gwent": str(card.get("papel_gwent", "Tática" if special else ROW_LABELS[row])),
         "tipo_combate": "Carta especial" if special else ROW_LABELS[row],
@@ -828,18 +878,18 @@ def preparar_carta(card: dict) -> dict:
         "arquetipo_faccao": FACTION_ARCHETYPES.get(faction, {}).get("name", "Estratégia Geral"),
         "arquetipo_descricao": FACTION_ARCHETYPES.get(faction, {}).get("description", ""),
         "fileira": row,
-        "row": row, "row_label": ROW_LABELS[row], "habilidade": skill,
+        "row": row, "row_label": "Carta especial" if special else ROW_LABELS[row], "habilidade": skill,
         "habilidade_id_declarada": skill,
-        "habilidade_id_efetiva": str(identity.get("effect") or skill),
+        "habilidade_id_efetiva": str(identity.get("effect") or skill_effect),
         "habilidade_nome": str(
             identity.get("name") if identity
             else (card.get("habilidade_nome") or skill_data.get("nome") or (skill.replace("_", " ").title() if skill else ("Sinergia de combate" if combos_compativeis else "")))
         ),
         "habilidade_texto": texto_habilidade,
         "habilidade_identidade": bool(identity),
-        "sinergias": sorted(CARD_SYNERGY_TAGS.get(str(card["id"]), set())),
+        "sinergias": sorted(CARD_SYNERGY_TAGS.get(catalog_id, set())),
         "combos_compativeis": combos_compativeis,
-        "descricao": str(card.get("descricao", ""))[:700],
+        "descricao": str(model.descricao if model else card.get("descricao", ""))[:700],
         "image_url": image_url,
     }
 
@@ -1093,7 +1143,8 @@ def opcoes_de_alvo(state: dict, user_id) -> dict:
     for card in player.get("hand", []):
         if not (card.get("especial") or str(card.get("categoria", "")).casefold() == "especial"):
             continue
-        skill = card.get("habilidade", "")
+        declared_skill = str(card.get("habilidade", ""))
+        skill = SPECIAL_EFFECT_ALIASES.get(declared_skill, declared_skill)
         if skill == "gwent_execucao":
             info = {"rotulo": f"Escolha a unidade inimiga a eliminar (poder efetivo {min(9, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos)",
                     "filtro_fileira": "mesma",
@@ -1525,6 +1576,44 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 return {"error": "O Papa Esquecido precisa de ao menos uma unidade dos Esquecidos na fileira escolhida."}
             for unit in targets:
                 unit["bonus"] = int(unit.get("bonus", 0)) + 1
+        elif effect == "forgotten_purification":
+            status_keys = ("sangramento", "geada", "podrida", "loucura")
+            targets = sorted(
+                (
+                    unit for unit in player["board"]
+                    if unit.get("row") == row
+                    and faction_for_card(unit) == "Os Esquecidos"
+                    and any(int(unit.get(key, 0)) > 0 for key in status_keys)
+                ),
+                key=lambda unit: _poder_efetivo(unit, state.get("weather")),
+                reverse=True,
+            )[:2]
+            if not targets:
+                return {"error": "A Abadessa precisa de ao menos um aliado dos Esquecidos afetado na fileira escolhida."}
+            for unit in targets:
+                for key in status_keys:
+                    unit[key] = 0
+                unit["bonus"] = int(unit.get("bonus", 0)) + 1
+        elif effect == "forgotten_revival":
+            eligible = [
+                card for card in player["discard"]
+                if not card.get("especial")
+                and str(card.get("categoria", "Unidade")).casefold() != "especial"
+                and faction_for_card(card) == "Os Esquecidos"
+                and int(card.get("poder", 99)) <= 5
+            ]
+            if not eligible:
+                return {"error": "A Mártir precisa de uma unidade dos Esquecidos com poder-base até 5 no descarte."}
+            revived = deepcopy(max(eligible, key=lambda card: int(card.get("poder", 0))))
+            revived_id = revived.get("id")
+            player["discard"] = [card for card in player["discard"] if card.get("id") != revived_id]
+            revived["row"] = row
+            revived["fileira"] = row
+            revived["bonus"] = int(revived.get("bonus", 0)) + 1
+            revived.pop("escudo", None)
+            for key in ("sangramento", "geada", "podrida", "loucura"):
+                revived[key] = 0
+            player["board"].append(revived)
         else:
             return {"error": "Habilidade de líder não reconhecida."}
         player["leader_used"] = True
@@ -1547,7 +1636,8 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
         bonus_card_antes = int(card.get("bonus", 0))
         # Cartas com habilidade de identidade substituem a habilidade genérica do
         # campo `habilidade`; executar ambas criava efeitos ocultos não descritos.
-        skill = "" if str(card.get("id", "")) in CARD_IDENTITY_ABILITIES else card.get("habilidade", "")
+        declared_skill = "" if str(card.get("id", "")) in CARD_IDENTITY_ABILITIES else str(card.get("habilidade", ""))
+        skill = SPECIAL_EFFECT_ALIASES.get(declared_skill, declared_skill)
         eventos_especial: list[str] = []
         potencia_raridade = int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0))
         if card.get("especial") or str(card.get("categoria", "")).casefold() == "especial":
@@ -1565,7 +1655,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                         unit["geada"] = 0; unit["podrida"] = 0; unit["bonus"] = int(unit.get("bonus", 0)) + 1; purificados += 1
                 if not purificados: return {"error": "Não há aliados com Geada ou Podridão para purificar."}
                 player["relic_used"] = True
-                eventos_especial.append(f"Grande Runa dos Não Nascidos purificou {purificados} aliado(s) e concedeu +1.")
+                eventos_especial.append(f"Runa dos Não Nascidos purificou {purificados} aliado(s) e concedeu +1.")
             elif skill == "reliquia_morte":
                 alvos=[]
                 for fileira in ROWS:
@@ -1610,7 +1700,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 state.setdefault("weather", {r: 0 for r in ROWS})
                 state["weather"][row] = max(1, int(state["weather"].get(row, 0) or 0))
                 eventos_especial.append(
-                    f"Tempestade dos Picos cobriu {ROW_LABELS[row]}; todas as unidades da fileira sofrem -1 de poder efetivo enquanto o clima durar."
+                    f"{card['nome']} cobriu {ROW_LABELS[row]}; todas as unidades da fileira sofrem -1 de poder efetivo enquanto o clima durar."
                 )
             elif skill == "gwent_nevoa":
                 if row not in ROWS:
@@ -1638,9 +1728,10 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
             elif skill == "gwent_chifre":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
-                for unit in player["board"]:
-                    if unit["row"] == row:
-                        unit["bonus"] = int(unit.get("bonus", 0)) + 2
+                alvos = [unit for unit in player["board"] if unit["row"] == row]
+                for unit in alvos:
+                    unit["bonus"] = int(unit.get("bonus", 0)) + 2
+                eventos_especial.append(f"{card['nome']} fortaleceu {len(alvos)} aliado(s) em {ROW_LABELS[row]}.")
             elif skill == "gwent_medico":
                 candidates = [c for c in player["discard"] if not c.get("especial") and int(c["poder"]) <= min(7, 4 + potencia_raridade)]
                 if not candidates:
@@ -1653,13 +1744,16 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     revived = candidates[-1]
                 player["discard"].remove(revived)
                 player["hand"].append(revived)
+                eventos_especial.append(f"{card['nome']} devolveu {revived['nome']} à sua mão.")
             elif skill == "gwent_queima":
                 for side in (player, other):
                     if side["board"]:
                         strongest = max(side["board"], key=lambda u: _poder_efetivo(u, state.get("weather")))
                         eventos_especial.append(_remover_unidade(side, strongest))
             elif skill == "gwent_purificar":
+                removido = sum(1 for value in state.get("weather", {}).values() if int(value or 0) > 0)
                 state["weather"] = {r: 0 for r in ROWS}
+                eventos_especial.append(f"{card['nome']} dissipou o clima ativo em {removido} fileira(s).")
             elif skill == "gwent_execucao":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
@@ -1675,7 +1769,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                         return {"error": f"O alvo escolhido não está nessa fileira ou excede poder efetivo {min(9, 6 + potencia_raridade)}."}
                 else:
                     victim = min(elegiveis, key=lambda u: _poder_efetivo(u, state.get("weather")))
-                eventos_especial.append(_remover_unidade(other, victim, "execucao"))
+                eventos_especial.append(f"{card['nome']}: " + _remover_unidade(other, victim, "execucao"))
             elif skill == "gwent_vinculo":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
@@ -1684,19 +1778,21 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     return {"error": "O Juramento exige pelo menos duas unidades na fileira."}
                 for unit in allies:
                     unit["bonus"] = int(unit.get("bonus", 0)) + 2
+                eventos_especial.append(f"{card['nome']} fortaleceu {len(allies)} aliados em {ROW_LABELS[row]}.")
             elif skill == "gwent_batedor":
                 quantidade = min(2, 1 + potencia_raridade, len(player["draw_pile"]))
                 if quantidade <= 0:
                     return {"error": "Sua reserva de compra está vazia."}
                 for _ in range(quantidade):
                     player["hand"].append(player["draw_pile"].pop(0))
-                eventos_especial.append(f"Passo do Cão de Caça comprou {quantidade} carta(s).")
+                eventos_especial.append(f"{card['nome']} comprou {quantidade} carta(s) da reserva.")
             elif skill == "gwent_muralha":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
-                for unit in player["board"]:
-                    if unit["row"] == row:
-                        unit["bonus"] = int(unit.get("bonus", 0)) + 1
+                alvos = [unit for unit in player["board"] if unit["row"] == row]
+                for unit in alvos:
+                    unit["bonus"] = int(unit.get("bonus", 0)) + 1
+                eventos_especial.append(f"{card['nome']} fortaleceu {len(alvos)} aliado(s) em {ROW_LABELS[row]}.")
             elif skill == "gwent_chama":
                 purificados = 0
                 for unit in player["board"]:
@@ -1705,7 +1801,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                         unit["geada"] = 0
                         unit["bonus"] = int(unit.get("bonus", 0)) + 1
                         purificados += 1
-                eventos_especial.append(f"Chama removeu Geada de {purificados} unidade(s) aliada(s); cada uma recebeu +1.")
+                eventos_especial.append(f"{card['nome']} removeu Geada de {purificados} unidade(s) aliada(s); cada uma recebeu +1.")
             elif skill == "gwent_invocacao":
                 if row not in ROWS:
                     return {"error": "Escolha a fileira para a invocação."}
@@ -1798,7 +1894,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 escolhidos = [alvo] + [u for u in sorted(protegiveis, key=lambda u: _poder_efetivo(u, state.get("weather")), reverse=True) if u is not alvo]
                 for protegida in escolhidos[:min(3, 1 + potencia_raridade)]:
                     protegida["escudo"] = 1
-                eventos_especial.append(f"{len(escolhidos[:min(3, 1 + potencia_raridade)])} unidade(s) receberam escudo.")
+                eventos_especial.append(f"{card['nome']} concedeu Escudo a {len(escolhidos[:min(3, 1 + potencia_raridade)])} unidade(s).")
             elif skill == "gwent_requiem":
                 elegiveis = [c for c in player["discard"] if not c.get("especial") and int(c["poder"]) <= min(9, 6 + potencia_raridade)]
                 if not elegiveis:
@@ -1835,7 +1931,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     origem = unidade["row"]
                     unidade["row"] = row
                     movidos.append(unidade["nome"])
-                eventos_especial.append(f"{', '.join(movidos)} moveram-se para {ROW_LABELS[row]}.")
+                eventos_especial.append(f"{card['nome']}: {', '.join(movidos)} moveram-se para {ROW_LABELS[row]}.")
             else:
                 return {"error": "Efeito especial desconhecido."}
             # Relíquias têm efeitos fixos descritos no catálogo; sua raridade não

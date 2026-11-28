@@ -3,14 +3,14 @@
     "document": "Card game behavioral validation aggregate v0.3",
     "status": "POST-POLICY DIAGNOSTIC; SYNTHETIC CONTROLLED STATES; NOT BALANCE OR PRODUCTION INTEGRATION",
     "baseline": "current source tree after approved combo policy v0.1",
-    "date": "2026-11-27",
+    "date": "2026-11-28",
     "runtime_modified": true,
     "runner": "docs/scripts/summarize-card-game-behavior-v0.3.py"
   },
   "counts": {
     "suites": 8,
-    "assertions": 251,
-    "passed": 251,
+    "assertions": 255,
+    "passed": 255,
     "failed": 0
   },
   "suites": [
@@ -86,14 +86,14 @@
     },
     {
       "suite": "leaders",
-      "label": "All ten leader handlers plus negative/limit cases",
+      "label": "All twelve leader handlers plus negative/limit cases",
       "source": "docs/card-game-leader-assertions-v0.1.json",
-      "assertions": 22,
-      "passed": 22,
+      "assertions": 26,
+      "passed": 26,
       "failed": 0,
-      "metadata_status": "DIAGNOSTIC ONLY; ALL TEN LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
+      "metadata_status": "DIAGNOSTIC ONLY; ALL TWELVE LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
       "limitations": [
-        "All ten leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
+        "All twelve leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
         "The tests use rarity-independent synthetic unit records; leadership upgrades or external campaign modifiers are not represented.",
         "The action flow is exercised in memory; persistent match serialization, HTTP API, frontend target choices, Discord command flow and production database are not tested.",
         "Passing behavior assertions do not measure strategic strength, balance or win rate."
@@ -132,13 +132,14 @@
     }
   ],
   "static_handler_coverage": {
-    "generic_catalog_ids": 59,
+    "generic_catalog_ids": 60,
     "generic_direct_handler_values": 56,
     "generic_lifecycle_hooks": [
       "espolios",
       "vinganca"
     ],
     "generic_declared_ids_without_handler": [
+      "scarlet_bloom",
       "sobrevivente"
     ],
     "hidden_lifecycle_hooks_not_in_catalog": [

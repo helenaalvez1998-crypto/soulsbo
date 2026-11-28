@@ -12,7 +12,12 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
 
-BASE_PATH = Path(__file__).resolve().parents[1] / "dados" / "nara_faq.json"
+from config import get_state_path
+
+# A FAQ deve sobreviver a deploys: /data é o volume persistente da hospedagem.
+# Mantemos o caminho legado como fallback para instalações antigas.
+BASE_PATH = get_state_path("NARA_FAQ_PATH", "nara_faq.json")
+LEGACY_BASE_PATH = Path(__file__).resolve().parents[1] / "dados" / "nara_faq.json"
 STOPWORDS = {
     "a", "o", "as", "os", "um", "uma", "uns", "umas", "de", "da", "do", "das", "dos",
     "em", "no", "na", "nos", "nas", "por", "para", "pra", "com", "sem", "e", "ou", "que",
@@ -39,10 +44,26 @@ def _tokens_normalizados(texto_normalizado: str) -> frozenset[str]:
 
 @lru_cache(maxsize=1)
 def carregar_base() -> dict:
-    with BASE_PATH.open("r", encoding="utf-8") as arquivo:
+    caminho = BASE_PATH if BASE_PATH.is_file() else LEGACY_BASE_PATH
+    with caminho.open("r", encoding="utf-8") as arquivo:
         data = json.load(arquivo)
     if not isinstance(data.get("intents"), list):
         raise ValueError("Base FAQ inválida: campo 'intents' ausente")
+
+    # Primeira execução: restaura a FAQ empacotada no volume persistente.
+    # Nunca sobrescreve uma base já existente em /data.
+    if caminho == LEGACY_BASE_PATH and not BASE_PATH.exists():
+        try:
+            BASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            temporario = BASE_PATH.with_name(BASE_PATH.name + ".tmp")
+            temporario.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2) + "\\n",
+                encoding="utf-8",
+            )
+            temporario.replace(BASE_PATH)
+        except OSError:
+            # A FAQ empacotada continua utilizável mesmo se o volume estiver indisponível.
+            pass
     return data
 
 

@@ -131,16 +131,38 @@ def analisar_direcao(card: dict[str, Any]) -> ArtDirection:
 
     if is_relic:
         subject, action, material = "named relic or weapon", "the named relic displayed as the unmistakable focal subject", "forged metal, engraved stone, leather wrapping and restrained magical inlay"
+    elif category == "especial" and _contains(title, "silencio dourado", "ceu sem cinzas"):
+        subject, action, material = "weather-cleansing blessing", "a broad sacred current opens the cloud cover and disperses battlefield weather, revealing clear light through the broken sky", "soft gold-white rays, thinning storm layers, wind-torn ash and translucent sacred particles"
+    elif category == "especial" and _contains(title, "luz na geada"):
+        subject, action, material = "frost-cleansing flame", "a small but intense pale flame travels across frozen stone, melting the ice around exhausted allies without consuming them", "ivory-gold flame, blue crystal frost, thawing droplets and warm light against cold vapor"
+    elif category == "especial" and _contains(title, "bruma sepulcral"):
+        subject, action, material = "sepulchral mist", "a low grave-cold fog pours from open crypts and blankets one battlefield line, partially obscuring distant silhouettes", "layered grey-blue fog, damp tombstone, pale particles and deep charcoal stone"
     elif category == "especial" and _contains(title, "tempestade"):
         subject, action, material = "storm event", "a violent storm front sweeps across the battlefield, with directional rain, pressure-heavy clouds and a visible lightning strike only when named", "layered storm clouds, rain-slick stone, cold atmospheric haze and forked white-blue lightning"
     elif category == "especial" and _contains(title, "geada", "gelo"):
         subject, action, material = "frost phenomenon", "a freezing wave advances over the battlefield, crystallizing the ground and air", "translucent ice, frost crystals, blue-white haze and brittle frozen surfaces"
+    elif category == "especial" and _contains(title, "rito hematico"):
+        subject, action, material = "blood rite", "an officiant performs a precise blood rite before a marked enemy line, with the ritual altar and flowing blood as clear focal elements", "deep crimson liquid, dark sacrificial stone, black iron, ritual linen and suspended red droplets"
+    elif category == "especial" and _contains(title, "nevoa rubra"):
+        subject, action, material = "scarlet rot mist", "a dense scarlet corruption cloud crawls through an enemy formation, leaving rotting petals and red spores suspended in the air", "crimson rot vapor, decayed rose petals, wet organic residue, dark stone and red particulate"
     elif category == "especial" and _contains(title, "miasma", "sangue corrompido", "ritual de sangue"):
         subject, action, material = "corruption event", "a spreading corruptive vapor or blood rite stains the battlefield at ground level", "dense red-black vapor, wet organic residue, dark liquid and low drifting particles"
     elif category == "especial" and _contains(title, "rugido"):
         subject, action, material = "sonic shockwave", "a powerful roar sends pressure rings across the ranks, visibly bending dust and loose cloth", "compressed air, concentric distortions, dust, torn banners and muted golden light"
-    elif category == "especial" and _contains(title, "bencao", "egide"):
-        subject, action, material = "protective blessing", "a single chosen figure is enclosed by a precise protective aureole, not a generic caster", "pale gold filaments, translucent shield facets and fine sacred particles"
+    elif category == "especial" and _contains(title, "sino do peregrino"):
+        subject, action, material = "pilgrim bell", "a monumental weathered bell swings above ruined cloisters, its visible soundwaves calling a lone messenger toward the viewer", "aged bronze, cracked clapper, dark timber, vibrating dust and concentric pale-gold sound ripples"
+    elif category == "especial" and _contains(title, "cantico dourado", "cantico dos fieis"):
+        subject, action, material = "sacred choir", "a small choir of distinct faithful figures sings in formation as a visible harmonic current strengthens the line", "layered vestments, aged gold thread, candle smoke, stone arches and restrained luminous sound rings"
+    elif category == "especial" and _contains(title, "delirio carmesim"):
+        subject, action, material = "frenzied blood ritual", "a crimson rite breaks the discipline of enemy soldiers as distorted silhouettes and fractured rhythm overtake the ranks", "dark red cloth, broken ritual circles, irregular crimson light and ink-black smoke"
+    elif category == "especial" and _contains(title, "sentenca carmesim"):
+        subject, action, material = "execution", "a masked executioner delivers a controlled sentence to one visibly vulnerable armored target, framed as a ritual judgment", "blackened execution steel, dark crimson cloth, worn iron, restrained blood-red light"
+    elif category == "especial" and _contains(title, "misericordia final"):
+        subject, action, material = "last mercy and recovery", "a fallen forgotten soldier is lifted from a crypt threshold by a veiled sister, with the return to safety as the focal action", "weathered linen, pale candlelight, worn reliquary silver, ash and soft resurrection haze"
+    elif category == "especial" and _contains(title, "procissao dos fieis"):
+        subject, action, material = "faithful procession", "a visible line of pilgrims advances through broken cloisters carrying a relic toward the chosen battlefield line", "heavy ceremonial cloth, worn sandals, aged wood, stone dust and narrow shafts of light"
+    elif category == "especial" and _contains(title, "bencao", "egide", "vigilia do relicario"):
+        subject, action, material = "protective blessing", "a chosen ally or sacred relic is enclosed by a precise protective aureole, with visible shield facets rather than a generic caster", "pale gold filaments, translucent shield facets, worn silver reliquary and fine sacred particles"
     elif category == "especial" and _contains(title, "lei da regressao", "purificar"):
         subject, action, material = "purification phenomenon", "a veil of false appearances is peeled away by a controlled field of pale light", "soft gold-white light, dissolving mist, fine geometric tracery and transparent layers"
     elif category == "especial" and _has_word(title, "chama", "fogo"):
@@ -171,7 +193,7 @@ def analisar_direcao(card: dict[str, Any]) -> ArtDirection:
         subject, action, material = "scarlet bloom", "a gigantic scarlet flower opens from corrupted ground as the unmistakable focal subject", "layered crimson petals, dark organic stem, wet stone and drifting red spores"
     elif _contains(title, "gemeas", "irmas gemeas"):
         subject, action, material = "paired characters", "two distinct sisters share the composition, with separate silhouettes, gestures and coordinated but non-identical clothing", "layered travel cloth, worn leather, moonlit metal details and individual fabric textures"
-    elif _contains(title, "servo dos que vivem na morte", "necromante", "necromancia"):
+    elif _contains(title, "servo dos mortos", "servo dos que vivem na morte", "necromante", "necromancia"):
         subject, action, material = "necromancer", "a hooded death-servant raises spectral dead from the ground, with the summoner and the spirits both clearly legible", "aged dark cloth, bone, cold spectral vapor, tarnished iron and ashen particulate"
     elif (title.startswith(("cavaleiros ", "guardioes ", "guardas ", "discipulos ", "peregrinos ",
                             "servos ", "sentinelas ", "combatentes ", "veteranos ", "apostolos ",
@@ -197,7 +219,7 @@ def analisar_direcao(card: dict[str, Any]) -> ArtDirection:
         subject, action, material = "ancient dragon warrior", "an armored warrior channels ancestral lightning through both hands during battle; keep the human fighter as the unmistakable subject", "dark forged plate, dragon-scale relief, weathered leather, oxidized bronze and cold-white lightning"
     elif _contains(title, "gigante") or _contains(lore, "presenca colossal", "gigante de fogo"):
         subject, action, material = "giant", "a towering fire giant with exaggerated scale, heavy anatomy and a clear silhouette against the terrain", "charred hide, massive muscle, cracked basalt, scorched cloth and molten fissures"
-    elif _contains(title, "anjo", "angel"):
+    elif _contains(title, "anjo", "serafim", "angel", "seraph"):
         subject, action, material = "winged celestial", "a winged messenger with layered feather structure, a readable human figure and a deliberate descent or protective gesture", "weathered ivory feathers, pale cloth, tarnished gold and soft atmospheric light"
     elif is_standard_bearer:
         subject, action, material = "standard bearer", "a single herald carrying a large faction banner in a wind-readable pose", "embroidered heavy cloth, worn pole wood, metal fittings and ceremonial armor"
@@ -205,7 +227,7 @@ def analisar_direcao(card: dict[str, Any]) -> ArtDirection:
         subject, action, material = "artisan or merchant", "a working craftsperson or traveling trader surrounded by role-specific tools or wares, not a generic soldier", "worn work leather, coarse linen, soot, hammered iron, wood and practical travel gear"
     elif _contains(title, "bibliotecaria", "bibliotecario", "cartografo", "cartografa", "leitora de estrelas", "exploradora", "erudito"):
         subject, action, material = "scholar or explorer", "a learned observer studying a map, book, instrument or the environment named by the lore", "parchment, ink, worn leather, layered robes, brass instruments and fine stitching"
-    elif _contains(title, "papa", "bispo", "sacerdote", "sacerdotisa", "missionario", "diacono", "pastor", "confessora", "apostolo", "monge", "clerigo", "profeta", "irmao esquecido", "acolito", "acólito", "devota"):
+    elif _contains(title, "papa", "bispo", "sacerdote", "sacerdotisa", "missionario", "peregrino", "diacono", "diaconisa", "pastor", "confessora", "confessor", "apostolo", "monge", "clerigo", "profeta", "irmao", "irmã", "irma", "acolito", "acólito", "devota", "abadessa", "martir", "mártir", "prelado", "santo", "cantor"):
         subject, action, material = "cleric or preacher", "a solemn religious figure performing a blessing, proclamation or rite grounded in the lore", "heavy vestments, woven trim, aged metal, relics and candlelit fabric"
     elif _contains(title, "cavaleiro", "cavaleira", "soldado", "guardiao", "guardia", "sentinela",
                    "escudeiro", "lanceiro", "carrasco", "cruzado", "veterano", "guerreiro", "combatente"):
@@ -261,7 +283,7 @@ def analisar_direcao(card: dict[str, Any]) -> ArtDirection:
         scene = "frozen highlands"
     elif canonical in {"black knife assassin", "black blade wanderer", "blaidd", "ranni"}:
         scene = "moonlit ruins"
-    elif _contains(title, "anjo", "angel", "papa esquecido") or _contains(lore, "mensageiro divino") or (_contains(title, "esquecido") and subject in {"cleric or preacher", "arcane or ritual figure"}) or ("esquecidos" in faction and subject == "cleric or preacher"):
+    elif _contains(title, "anjo", "serafim", "angel", "papa esquecido") or _contains(lore, "mensageiro divino") or (_contains(title, "esquecido") and subject in {"cleric or preacher", "arcane or ritual figure"}) or ("esquecidos" in faction and subject in {"cleric or preacher", "arcane or ritual figure"}):
         scene = "forgotten cathedral"
     elif _contains(title, "dragoeiro") or _contains(ident, "dragões ancestrais", "dragoes ancestrais", "raios ancestrais"):
         scene = "storm-riven sky temple"
@@ -275,7 +297,7 @@ def analisar_direcao(card: dict[str, Any]) -> ArtDirection:
         scene = "storm-riven sky temple"
     elif _contains(ident, "gigante de fogo", "fire giant"):
         scene = "frozen highlands"
-    elif _contains(ident, "raya lucaria", "academia", "observatorio", "sellia"):
+    elif _contains(ident, "raya lucaria", "raya", "academia", "observatorio", "bibliotecaria", "bibliotecario", "sellia"):
         scene = "academy observatory"
     elif _contains(ident, "mercador nomade", "caravana", "viajante", "estrada entre assentamentos"):
         scene = "crossroads caravan"

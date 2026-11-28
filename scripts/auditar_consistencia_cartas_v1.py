@@ -13,21 +13,19 @@ from typing import Any
 
 from PIL import Image, ImageDraw
 
-from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75, CUSTO_RARIDADE
+from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75, CARTAS_EXPANSAO_V77, CUSTO_RARIDADE, HABILIDADES
 from sistemas.gwent import (
     CARD_IDENTITY_ABILITIES,
     HABILIDADES_ESPECIAIS_IMPLEMENTADAS,
     HABILIDADES_UNIDADE_IMPLEMENTADAS,
     preparar_carta,
+    SPECIAL_EFFECT_ALIASES,
 )
-from sistemas.arte_cartas import _ajustar_texto, _wrap
+from sistemas.arte_cartas import _layout_texto_lore, _layout_painel_lore_template
 from sistemas.templates_cartas import carregar_layout
 
 
 def construir_auditoria() -> dict[str, Any]:
-    layout = carregar_layout()
-    hx1, hy1, hx2, hy2 = layout["habilidade"]
-    width = (hx2 - hx1) - 48
     draw = ImageDraw.Draw(Image.new("RGB", (840, 1240)))
     rows: list[dict[str, Any]] = []
     checks = {
@@ -36,7 +34,8 @@ def construir_auditoria() -> dict[str, Any]:
         "habilidade_nao_vazia": True,
         "lore_separada": True,
         "habilidade_implementada": True,
-        "texto_cabe_na_carta": True,
+        "lore_cabe_na_carta": True,
+        "lore_cabe_no_template": True,
         "fileira_valida": True,
     }
 
@@ -51,36 +50,48 @@ def construir_auditoria() -> dict[str, Any]:
         row = str(prepared.get("fileira") or "")
 
         if special:
-            ability_implemented = (not skill) or skill in HABILIDADES_ESPECIAIS_IMPLEMENTADAS or card_id in CARD_IDENTITY_ABILITIES
+            effective_skill = SPECIAL_EFFECT_ALIASES.get(skill, skill)
+            ability_implemented = (not skill) or (skill in HABILIDADES and effective_skill in HABILIDADES_ESPECIAIS_IMPLEMENTADAS) or card_id in CARD_IDENTITY_ABILITIES
             row_valid = str(prepared.get("row_label") or "") == "Carta especial"
         else:
             ability_implemented = (not skill) or skill in HABILIDADES_UNIDADE_IMPLEMENTADAS or card_id in CARD_IDENTITY_ABILITIES
             row_valid = row in {"melee", "ranged", "siege"}
 
         cost_ok = prepared["custo"] == CUSTO_RARIDADE.get(rarity)
-        ability_ok = bool(ability_text.strip())
+        has_mechanical_effect = bool(
+            skill or card_id in CARD_IDENTITY_ABILITIES
+            or prepared.get("sinergias") or prepared.get("combos_compativeis")
+        )
+        ability_ok = bool(ability_text.strip()) if has_mechanical_effect else not ability_text.strip()
         lore_separate = ability_text.strip() != lore.strip()
 
-        title = str(prepared.get("habilidade_nome") or "")
-        _, _, title_height = _ajustar_texto(
-            draw, title.upper(), width, 27,
-            maximo=23, minimo=15, negrito=True, max_linhas=1, espaco=1.0,
-        )
-        y_body = hy1 + 9 + max(25, title_height) + 1
-        available_height = hy2 - 9 - y_body
-        body_font, lines, _ = _ajustar_texto(
-            draw, ability_text, width, available_height,
-            maximo=19, minimo=12, max_linhas=3, espaco=1.05,
-        )
-        # O renderer acrescenta reticências quando precisa cortar o fim da regra.
-        actual_lines = _wrap(draw, ability_text, body_font, width)
-        fits = len(actual_lines) <= 3 and not (lines and lines[-1].endswith("…"))
+        # A arte física imprime somente a lore; regras de combate ficam no site.
+        try:
+            if lore.strip():
+                _font, lore_lines, _step = _layout_texto_lore(draw, lore, 342, 94)
+                fits = " ".join(" ".join(lore_lines).split()) == " ".join(lore.split())
+            else:
+                fits = True
+        except Exception:
+            lore_lines = []
+            fits = False
+        try:
+            if lore.strip():
+                _font_template, template_lines, _step, _margin, _y = _layout_painel_lore_template(
+                    draw, lore, tuple(carregar_layout(rarity)["habilidade"])
+                )
+                template_fits = " ".join(" ".join(template_lines).split()) == " ".join(lore.split())
+            else:
+                template_fits = True
+        except Exception:
+            template_fits = False
 
         checks["custo_por_raridade"] &= cost_ok
         checks["habilidade_nao_vazia"] &= ability_ok
         checks["lore_separada"] &= lore_separate
         checks["habilidade_implementada"] &= ability_implemented
-        checks["texto_cabe_na_carta"] &= fits
+        checks["lore_cabe_na_carta"] &= fits
+        checks["lore_cabe_no_template"] &= template_fits
         checks["fileira_valida"] &= row_valid
 
         rows.append({
@@ -102,7 +113,8 @@ def construir_auditoria() -> dict[str, Any]:
                 "habilidade_nao_vazia": ability_ok,
                 "lore_separada": lore_separate,
                 "habilidade_implementada": ability_implemented,
-                "texto_cabe_na_carta": fits,
+                "lore_cabe_na_carta": fits,
+                "lore_cabe_no_template": template_fits,
                 "fileira_valida": row_valid,
             },
         })
@@ -111,18 +123,19 @@ def construir_auditoria() -> dict[str, Any]:
     checks["ids_unicos"] = len(ids) == len(set(ids))
     failed = [name for name, passed in checks.items() if not passed]
     return {
-        "versao": "1.0",
+        "versao": "2.0",
         "total_cartas": len(rows),
         "total_unicas": len(set(ids)),
         "total_pacote": len(CARTAS_PACOTE),
         "total_expansao_v75": len(CARTAS_EXPANSAO_V75),
+        "total_expansao_v77": len(CARTAS_EXPANSAO_V77),
         "checks": checks,
         "falhas": failed,
         "cartas": sorted(rows, key=lambda item: item["nome"].casefold()),
         "escopo": [
             "Verifica consistência dos dados publicados com preparar_carta(), fonte de preparação compartilhada pelo motor e pelo site.",
             "Verifica que cada habilidade declarada está registrada como implementada ou é uma habilidade de identidade exclusiva.",
-            "Verifica custo por raridade, separação entre regra e lore, fileira e ajuste do texto no slot gráfico.",
+            "Verifica custo por raridade, separação entre regra e lore, fileira e encaixe integral da lore no painel físico (o efeito não é impresso na imagem).",
             "Não substitui testes de integração de todas as combinações possíveis de combate, efeitos cruzados, banco de dados, Discord ou produção.",
         ],
     }

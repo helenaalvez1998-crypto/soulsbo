@@ -190,7 +190,7 @@ hooks = {
 report = {
     "metadata": {
         "document": "Mapa de evidências de código por efeito v0.2",
-        "generated_at": "2026-11-27",
+        "generated_at": "2026-11-28",
         "baseline": "current source tree after approved combo policy v0.1",
         "status": "POST-POLICY SOURCE MAP ONLY; DOES NOT APPROVE EFP OR BALANCE",
         "method": "Python AST over sistemas/cartas.py and sistemas/gwent.py; exact string literals linked to enclosing functions and nearest matching if branch where available.",
