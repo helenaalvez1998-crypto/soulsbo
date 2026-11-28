@@ -6,6 +6,9 @@ transmutações), do nome/lore/facção/fileira. Determinístico: a mesma carta 
 """
 from __future__ import annotations
 
+import colorsys
+import hashlib
+import math
 import random
 import unicodedata
 from typing import Any
@@ -70,7 +73,7 @@ R: dict[str, dict] = {
     "covenant_peregrinos_nevoa": dict(cen="nokron", helm="capuz", corpo="couro", arma="cajado", orbe=(160, 190, 255)),
     "covenant_irmandade_ferro": dict(cen="planicie", helm="grande", corpo="placas", arma="espada_escudo", escudo="redondo"),
     "gwent_unidade_baluarte": dict(cen="leyndell", helm="grande", corpo="placas", arma="espada_escudo", escudo="alto", escala=1.04),
-    "gwent_unidade_lamina_sem_juramento": dict(cen="catacumba", helm="capuz", corpo="couro", arma="katana", capuz=(50, 34, 40)),
+    "gwent_unidade_lamina_sem_juramento": dict(cen="nokron", helm="capuz", corpo="couro", arma="katana", capuz=(50, 34, 40)),
     "gwent_unidade_portaestandarte": dict(cen="leyndell", helm="grande", corpo="placas", arma="estandarte"),
     "gwent_unidade_oraculo_clima": dict(cen="academia", helm="aberto", corpo="robe", arma="cajado", orbe=(190, 210, 255), cabelo=(200, 200, 230), cabelo_longo=True),
     "gwent_unidade_eco": dict(cen="academia", helm="aberto", corpo="robe", arma="livro", cabelo=(70, 70, 110)),
@@ -90,7 +93,7 @@ R: dict[str, dict] = {
     "gwent_unidade_cantora_lamentos": dict(cen="mohgwyn", helm="aberto", corpo="robe", arma="livro", cabelo=(40, 30, 40), cabelo_longo=True, pele=(190, 160, 150), olhos_luz=(255, 90, 90)),
     "gwent_unidade_senhor_cacada": dict(cen="academia", helm="lobo", corpo="placas", arma="espada_grande", escala=1.06, brilho_lamina=(170, 190, 255)),
     "gwent_unidade_saqueadora_veu": dict(cen="nokron", helm="capuz", corpo="couro", arma="arco"),
-    "gwent_unidade_contrabandista": dict(cen="volcano", helm="capuz", corpo="couro", arma="arco", capuz=(80, 30, 30)),
+    "gwent_unidade_contrabandista": dict(cen="catacumba", helm="capuz", corpo="couro", arma="adagas", capuz=(80, 30, 30)),
     "gwent_unidade_guardiao_runas": dict(cen="leyndell", helm="grande", corpo="placas", arma="alabarda", extras=("runas",)),
     "gwent_unidade_necromante": dict(cen="nokron", helm="capuz", corpo="robe", arma="cajado", orbe=(150, 200, 255), capuz=(30, 40, 90), extras=("runas",)),
     "gwent_unidade_detonador": dict(cen="caelid", amb="podridao", helm="grande", corpo="placas", arma="machado", brilho=(255, 220, 80), extras=("chamas",)),
@@ -99,8 +102,8 @@ R: dict[str, dict] = {
     "gwent_mitica_coroa": dict(cen="leyndell", helm="grande", corpo="placas", arma="espada_escudo", crista="coroa", escala=1.06, extras=("aureola",), arm=((255, 226, 150), (120, 84, 26))),
     "gwent_singular_primeiro": dict(cen="mohgwyn", special="runa", cor=(236, 70, 80)),
     "gwent_singular_intocavel": dict(cen="mohgwyn", special="lamina", cor=(220, 70, 76), lamina=(40, 30, 40), luz=(255, 150, 140)),
-    "gwent_singular_nivel1": dict(cen="leyndell", special="arvore"),
-    "gwent_singular_cacador_chefes": dict(cen="academia", special="runa", cor=(190, 200, 255)),
+    "gwent_singular_nivel1": dict(cen="leyndell", special="lamina", cor=(255, 214, 125), lamina=(210, 170, 80), luz=(255, 240, 190)),
+    "gwent_singular_cacador_chefes": dict(cen="academia", special="runa", cor=(190, 200, 255), forma_g="coroa"),
     "luterano_cruzado": dict(cen="capela", helm="grande", corpo="placas", arma="espada_grande", arm=((176, 170, 150), (46, 44, 38))),
     "luterano_missionario": dict(cen="capela", helm="capuz", corpo="robe", arma="cajado", orbe=(235, 228, 196), capuz=(120, 114, 98)),
     "luterano_bispo": dict(cen="capela", helm="mitra", corpo="robe", arma="cajado", orbe=(250, 240, 200), extras=("aureola",)),
@@ -113,7 +116,7 @@ R: dict[str, dict] = {
     "luterano_profeta": dict(cen="leyndell", helm="aberto", corpo="robe", arma="livro", extras=("aureola",), cabelo=(220, 214, 200), cabelo_longo=True),
     "luterano_pastor": dict(cen="mohgwyn", helm="capuz", corpo="robe", arma="cajado", orbe=(255, 90, 80), capuz=(90, 24, 30)),
     "luterano_mistico": dict(cen="nokron", helm="capuz", corpo="robe", arma="livro", capuz=(50, 60, 140)),
-    "luterano_vigia": dict(cen="catacumba", helm="capuz", corpo="couro", arma="lanca", capuz=(70, 24, 30)),
+    "luterano_vigia": dict(cen="capela", helm="capuz", corpo="couro", arma="lanca", capuz=(70, 24, 30)),
     "luterano_anjo2": dict(cen="nokron", helm="aberto", corpo="robe", arma="espada_grande", extras=("asas", "aureola"), cabelo=(200, 210, 255), cabelo_longo=True, pele=(210, 214, 235)),
     "primordial_origem": dict(cen="leyndell", fig="besta", amb="aurea"),
     "primordial_trono": dict(cen="leyndell", helm="coroa", corpo="robe", arma="cajado", cabelo=(240, 210, 130), cabelo_longo=True, pele=(226, 196, 160), extras=("aureola", "runas"), pano=((70, 20, 40), (20, 6, 14)), orbe=(255, 224, 150), escala=1.06),
@@ -143,7 +146,7 @@ E: dict[str, tuple[str, dict]] = {
     "gwent_especial_chifre": ("rugido", dict(amb="aurea")),
     "gwent_especial_medico": ("lagrima", dict(amb="aurea")),
     "gwent_especial_queima": ("chama", dict(variante="negra", amb="trevas")),
-    "gwent_especial_purificar": ("sigilo", dict(cor=(176, 200, 255), n=34)),
+    "gwent_especial_purificar": ("sigilo", dict(cor=(176, 200, 255), n=34, pontas=8, achatar=.8)),
     "gwent_especial_execucao": ("lamina", dict(cor=(255, 200, 90), lamina=(26, 22, 30), luz=(255, 214, 125))),
     "gwent_especial_vinculo": ("vinculo", dict(amb="aurea")),
     "gwent_especial_batedor": ("passo", dict(amb="carmesim")),
@@ -156,9 +159,9 @@ E: dict[str, tuple[str, dict]] = {
     "elden_especial_invocacao": ("lobo", dict(amb="lua", cor=(200, 206, 230))),
     "reliquia_grande_runa_godrick": ("runa", dict(cor=(240, 190, 90), amb="aurea")),
     "reliquia_runa_nao_nascidos": ("runa", dict(cor=(120, 190, 255), amb="lua")),
-    "reliquia_runa_morte": ("runa", dict(cor=(255, 214, 125), amb="trevas")),
+    "reliquia_runa_morte": ("runa", dict(cor=(255, 214, 125), amb="trevas", forma_g="losango")),
     "reliquia_noite_chama": ("lamina", dict(cor=(120, 150, 255), lamina=(70, 80, 130), luz=(190, 210, 255), dupla=(255, 130, 40))),
-    "reliquia_lamina_negra": ("lamina", dict(cor=(255, 200, 90), lamina=(20, 16, 24), luz=(255, 214, 125))),
+    "reliquia_lamina_negra": ("lamina", dict(cor=(255, 120, 60), lamina=(14, 10, 18), luz=(255, 170, 90), curva=34)),
     "reliquia_algemas_margit": ("correntes", dict(amb="aurea")),
     "gwent_especial_egide": ("arvore", dict(amb="aurea")),
     "gwent_especial_requiem": ("espiritos", dict(amb="lua")),
@@ -225,10 +228,45 @@ def _spec(card: dict[str, Any], faccao: str, row: str, rarity: str) -> dict:
     return spec
 
 
+def _hsv(c, dh=0.0, ds=1.0, dv=1.0):
+    h, sa, v = colorsys.rgb_to_hsv(*(x / 255 for x in c))
+    r, g, b = colorsys.hsv_to_rgb((h + dh) % 1.0, min(1, sa * ds), min(1, v * dv))
+    return (int(r * 255), int(g * 255), int(b * 255))
+
+
+def _hash_carta(card: dict[str, Any]) -> int:
+    base = f"{card.get('id', '')}|{card.get('nome', '')}"
+    return int.from_bytes(hashlib.sha256(base.encode("utf-8")).digest()[:8], "big")
+
+
+_PELES = ((226, 188, 160), (196, 150, 120), (160, 112, 84), (120, 82, 62), (232, 214, 196), (150, 170, 190))
+_CABELOS = ((40, 30, 26), (96, 64, 36), (200, 170, 110), (180, 60, 40), (210, 210, 220), (60, 70, 120), (30, 24, 34))
+
+
+def _selo_unico(t: Tela, h: int, cor) -> None:
+    """Selo heráldico exclusivo da carta (formato, anéis e posição vêm do hash do ID)."""
+    r = random.Random(h ^ 0x5E10)
+    cx, cy = 192 + r.uniform(-40, 40), r.uniform(46, 96)
+    lados, raio = r.randint(3, 9), r.uniform(14, 24)
+    rot = r.uniform(0, math.tau)
+    c = t.camada(1)
+    pts = [(cx + math.cos(rot + i * math.tau / lados) * raio, cy + math.sin(rot + i * math.tau / lados) * raio) for i in range(lados)]
+    c.d.polygon(pts, outline=(*cor, 150), width=1.1)
+    for k in range(r.randint(1, 3)):
+        rr = raio * (.35 + k * .25)
+        c.d.circulo(cx, cy, rr, outline=(*cor, 110), width=.8)
+    for i in range(lados):
+        a = rot + i * math.tau / lados
+        c.d.line([(cx, cy), (cx + math.cos(a) * raio * r.uniform(.5, 1.0), cy + math.sin(a) * raio * r.uniform(.5, 1.0))], fill=(*cor, 120), width=.8)
+    c.aplicar(aditivo=True)
+
+
 def pintar_ilustracao(card: dict[str, Any], aw: int, ah: int, seed: int, faccao: str, row: str,
                       rarity: str, categoria: str) -> Image.Image:
     """Pinta a ilustração completa da carta (aw x ah)."""
     cid = str(card.get("id", ""))
+    h = _hash_carta(card)
+    seed = h  # a arte depende só do ID/nome: cada carta tem a sua, sempre a mesma
     rng = random.Random(seed)
     S = 2
     t = Tela(384, 430, S=S, seed=seed)
@@ -244,14 +282,28 @@ def pintar_ilustracao(card: dict[str, Any], aw: int, ah: int, seed: int, faccao:
                          "Os Esquecidos": ("espiritos", {})}.get(faccao, ("sigilo", {}))
         amb = cen_amb(ops.pop("amb", p["amb"]))
         cen.ESPECIAIS[nome](t, amb, rng, **ops)
+        _selo_unico(t, h, amb["luz"])
     else:
         spec = _spec(card, faccao, row, rarity)
         A = cen.AMBIENTES[spec["amb"]]
         cen.CENARIOS[spec["cen"]](t, A, rng)
+        _selo_unico(t, h, A["luz"])
         tipo = spec.get("fig", "humanoide")
         o = dict(spec)
-        o.setdefault("lado", rng.choice((-1, 1)) if cid not in R else 1)
-        o.setdefault("vento", rng.uniform(-14, 14))
+        vr = random.Random(h ^ 0xA11CE)
+        o["lado"] = vr.choice((-1, 1))
+        o["vento"] = vr.uniform(-22, 22)
+        o["passo"] = vr.uniform(7, 17)
+        o["x"] = 192 + vr.uniform(-22, 22)
+        o["escala"] = o.get("escala", 1.1) * vr.uniform(.94, 1.06)
+        dh = vr.uniform(-.035, .035)
+        o["arm"] = (_hsv(o["arm"][0], dh, vr.uniform(.85, 1.15), vr.uniform(.9, 1.08)), _hsv(o["arm"][1], dh, 1, vr.uniform(.9, 1.15)))
+        o["pano"] = (_hsv(o["pano"][0], dh * 2, vr.uniform(.85, 1.15), vr.uniform(.9, 1.1)), _hsv(o["pano"][1], dh * 2, 1, vr.uniform(.9, 1.15)))
+        if "pele" not in R.get(cid, {}):
+            o["pele"] = vr.choice(_PELES)
+        if "cabelo" not in R.get(cid, {}):
+            o["cabelo"] = vr.choice(_CABELOS)
+            o["cabelo_longo"] = o.get("cabelo_longo", vr.random() < .4)
         if tipo == "humanoide":
             fig.humanoide(t, A, o, rng)
         elif tipo == "cavalo":
@@ -274,6 +326,14 @@ def pintar_ilustracao(card: dict[str, Any], aw: int, ah: int, seed: int, faccao:
         brilho(t, 192, 330, 130, A["luz"], k=.22, ry=34)
         particulas(t, 40, A["luz"], (20, 80, 364, 380), (.5, 1.6), .9, sal=99, deriva=.3)
     img = finalizar(t)
+    # deslocamento sutil de matiz/saturação exclusivo da carta
+    vr2 = random.Random(h ^ 0xC0105)
+    hsv = img.convert("RGB").convert("HSV")
+    dh = int(vr2.uniform(-9, 9))
+    hh, ss, vv = hsv.split()
+    hh = hh.point(lambda x: (x + dh) % 256)
+    ss = ss.point(lambda x: min(255, int(x * vr2.uniform(.92, 1.12))))
+    img = Image.merge("HSV", (hh, ss, vv)).convert("RGBA")
     if (aw, ah) != img.size:
         img = img.resize((aw, ah), Image.Resampling.LANCZOS)
     return img

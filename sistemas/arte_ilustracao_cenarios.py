@@ -465,27 +465,29 @@ def esp_chama(t, A, rng, variante="negra", **o):
         c.aplicar()
 
 
-def esp_sigilo(t, A, rng, cor=(255, 214, 125), n=30, achatar=1.0, **o):
+def esp_sigilo(t, A, rng, cor=(255, 214, 125), n=30, achatar=1.0, pontas=5, **o):
     ceu(t, [(0, mix(cor, (0, 0, 0), .92)), (.5, mix(cor, (0, 0, 0), .75)), (1, mix(cor, (0, 0, 0), .9))])
     brilho(t, 192, 215, 220, cor, k=.5)
     estrelas(t, 90, 0, 1, cor, .8, sal=3)
     for rr, nn in ((150, n), (112, n - 8), (74, n - 14)):
         anel_runico(t, 192, 215, rr, cor, rng, n=max(8, nn), larg=14, k=.9, achatar=achatar)
     c = t.camada(1)
-    pts = [(192 + math.cos(-math.pi / 2 + i * 4 * math.pi / 5) * 74, 215 + math.sin(-math.pi / 2 + i * 4 * math.pi / 5) * 74 * achatar) for i in range(5)]
+    pts = [(192 + math.cos(-math.pi / 2 + i * 2 * math.pi * (2 if pontas % 2 else 3) / pontas) * 74, 215 + math.sin(-math.pi / 2 + i * 2 * math.pi * (2 if pontas % 2 else 3) / pontas) * 74 * achatar) for i in range(pontas)]
     c.d.polygon(pts + [pts[0]], outline=(*cor, 200), width=1.3)
     c.aplicar(aditivo=True)
     brilho(t, 192, 215, 30, clarear(cor, .5), k=.9, pot=1.6)
     particulas(t, 90, cor, (30, 40, 354, 400), (.5, 1.8), 1.0, sal=22, deriva=.3)
 
 
-def esp_lamina(t, A, rng, cor=(255, 214, 125), lamina=(40, 40, 52), luz=(255, 226, 150), dupla=None, **o):
+def esp_lamina(t, A, rng, cor=(255, 214, 125), lamina=(40, 40, 52), luz=(255, 226, 150), dupla=None, curva=0, **o):
     ceu(t, [(0, mix(cor, (0, 0, 0), .93)), (.55, mix(cor, (0, 0, 0), .7)), (1, mix(cor, (0, 0, 0), .9))])
     brilho(t, 192, 190, 230, cor, k=.55)
     raios(t, 192, 190, cor, n=14, k=.14, abre=180, alcance=440)
     a = math.radians(-6)
     # lâmina vertical com chanfro e runas
     L = [(192, 36), (211, 80), (213, 292), (192, 306), (171, 292), (173, 80)]
+    if curva:
+        L = [(x + curva * ((300 - y) / 270) ** 2 * 1.0, y) for x, y in L]
     forma(t, L, mix(lamina, (255, 255, 255), .25), lamina, rim=luz, rim_k=1, esp=1.6, lado=(-1, 0), horizontal=True)
     c = t.camada(1)
     c.d.line([(192, 50), (192, 296)], fill=(*luz, 240), width=1.6)
@@ -642,17 +644,22 @@ def esp_arvore(t, A, rng, **o):
     particulas(t, 130, A["luz"], (0, 20, 384, 380), (.5, 2.0), 1.0, sal=30, deriva=.3)
 
 
-def esp_runa_grande(t, A, rng, cor=(240, 190, 90), **o):
+def esp_runa_grande(t, A, rng, cor=(240, 190, 90), forma_g="gema", **o):
     ceu(t, [(0, mix(cor, (0, 0, 0), .93)), (.5, mix(cor, (0, 0, 0), .7)), (1, mix(cor, (0, 0, 0), .92))])
     brilho(t, 192, 200, 240, cor, k=.55)
     estrelas(t, 80, 0, 1, cor, .7, sal=2)
     raios(t, 192, 200, cor, n=16, k=.14, abre=180, alcance=440)
     # pedra rúnica: cristal facetado
-    pts = [(192, 70), (252, 130), (262, 230), (222, 316), (192, 336), (162, 316), (122, 230), (132, 130)]
+    nv = rng.randint(6, 10)
+    pts = [(192 + math.sin(i * math.tau / nv) * rng.uniform(58, 76) * (1 if i % 2 else .92), 200 - math.cos(i * math.tau / nv) * rng.uniform(112, 138)) for i in range(nv)]
+    if forma_g == "losango":
+        pts = [(192, 60), (246, 200), (192, 340), (138, 200)]
+    if forma_g == "coroa":
+        pts = [(122, 300), (122, 150), (152, 210), (172, 110), (192, 200), (212, 110), (232, 210), (262, 150), (262, 300)]
     forma(t, pts, mix(cor, (255, 255, 255), .45), mix(cor, (0, 0, 0), .55), rim=(255, 255, 255), rim_k=1, esp=2, lado=(-1, -1), alfa=235)
     c = t.camada(1)
-    for a, b in ((0, 3), (1, 4), (2, 5), (0, 5), (1, 6), (7, 3), (4, 7)):
-        c.d.line([pts[a], pts[b]], fill=(*clarear(cor, .6), 90), width=.9)
+    for a in range(len(pts)):
+        c.d.line([pts[a], pts[(a + len(pts) // 2) % len(pts)]], fill=(*clarear(cor, .6), 90), width=.9)
     c.aplicar()
     anel_runico(t, 192, 200, 118, cor, rng, n=24, larg=14, k=.9)
     brilho(t, 192, 200, 54, clarear(cor, .6), k=.8, pot=1.6)

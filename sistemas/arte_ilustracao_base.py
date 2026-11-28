@@ -463,7 +463,8 @@ def vinheta(t: Tela, k: float = .55, v_base: float = 0.0) -> None:
 
 
 def grao(t: Tela, k: float = .10) -> None:
-    n = Image.effect_noise((t.W, t.H), 42).convert("RGB")
+    r = random.Random(t.seed ^ 0x6A41)
+    n = Image.frombytes("L", (t.W, t.H), r.randbytes(t.W * t.H)).point(lambda v: 128 + (v - 128) // 3).convert("RGB")
     base = t.img.convert("RGB")
     t.img = Image.blend(base, ImageChops.overlay(base, n), k).convert("RGBA")
 
