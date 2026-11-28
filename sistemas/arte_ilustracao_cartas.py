@@ -17,7 +17,7 @@ from PIL import Image
 
 from . import arte_ilustracao_cenarios as cen
 from . import arte_ilustracao_figuras as fig
-from .arte_ilustracao_base import Tela, brilho, finalizar, neblina, particulas
+from .arte_ilustracao_base import Tela, brilho, finalizar, neblina, particulas, profundidade
 
 # --- paletas de armadura/pano por facção -------------------------------------------------------
 PALETAS = {
@@ -239,7 +239,7 @@ def _hash_carta(card: dict[str, Any]) -> int:
     return int.from_bytes(hashlib.sha256(base.encode("utf-8")).digest()[:8], "big")
 
 
-_PELES = ((226, 188, 160), (196, 150, 120), (160, 112, 84), (120, 82, 62), (232, 214, 196), (150, 170, 190))
+_PELES = ((226, 188, 160), (196, 150, 120), (160, 112, 84), (120, 82, 62), (232, 214, 196))
 _CABELOS = ((40, 30, 26), (96, 64, 36), (200, 170, 110), (180, 60, 40), (210, 210, 220), (60, 70, 120), (30, 24, 34))
 
 
@@ -288,6 +288,7 @@ def pintar_ilustracao(card: dict[str, Any], aw: int, ah: int, seed: int, faccao:
         A = cen.AMBIENTES[spec["amb"]]
         cen.CENARIOS[spec["cen"]](t, A, rng)
         _selo_unico(t, h, A["luz"])
+        profundidade(t, 1.5)
         tipo = spec.get("fig", "humanoide")
         o = dict(spec)
         vr = random.Random(h ^ 0xA11CE)
@@ -296,7 +297,7 @@ def pintar_ilustracao(card: dict[str, Any], aw: int, ah: int, seed: int, faccao:
         o["passo"] = vr.uniform(7, 17)
         o["x"] = 192 + vr.uniform(-22, 22)
         o["escala"] = o.get("escala", 1.1) * vr.uniform(.94, 1.06)
-        dh = vr.uniform(-.035, .035)
+        dh = vr.uniform(-.015, .015)
         o["arm"] = (_hsv(o["arm"][0], dh, vr.uniform(.85, 1.15), vr.uniform(.9, 1.08)), _hsv(o["arm"][1], dh, 1, vr.uniform(.9, 1.15)))
         o["pano"] = (_hsv(o["pano"][0], dh * 2, vr.uniform(.85, 1.15), vr.uniform(.9, 1.1)), _hsv(o["pano"][1], dh * 2, 1, vr.uniform(.9, 1.15)))
         if "pele" not in R.get(cid, {}):
@@ -329,10 +330,10 @@ def pintar_ilustracao(card: dict[str, Any], aw: int, ah: int, seed: int, faccao:
     # deslocamento sutil de matiz/saturação exclusivo da carta
     vr2 = random.Random(h ^ 0xC0105)
     hsv = img.convert("RGB").convert("HSV")
-    dh = int(vr2.uniform(-9, 9))
+    dh = int(vr2.uniform(-4, 4))
     hh, ss, vv = hsv.split()
     hh = hh.point(lambda x: (x + dh) % 256)
-    ss = ss.point(lambda x: min(255, int(x * vr2.uniform(.92, 1.12))))
+    ss = ss.point(lambda x: min(255, int(x * vr2.uniform(.9, 1.0))))
     img = Image.merge("HSV", (hh, ss, vv)).convert("RGBA")
     if (aw, ah) != img.size:
         img = img.resize((aw, ah), Image.Resampling.LANCZOS)

@@ -11,7 +11,7 @@ import math
 import random
 from typing import Callable, Sequence
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 Cor = tuple[int, int, int]
 Pt = tuple[float, float]
@@ -280,7 +280,7 @@ def chaikin(pts: Sequence[Pt], n: int = 2, fechado: bool = True) -> list[Pt]:
 # ------------------------------------------------------------------------------------------
 def forma(t: Tela, pts: Sequence[Pt], cima: Cor, baixo: Cor, rim: Cor | None = None, rim_k: float = .85,
           lado: tuple[float, float] = (-1, -1), esp: float = 2.2, sombra: int = 80, alfa: int = 255,
-          contorno: Cor | None = None, horizontal: bool = False) -> None:
+          contorno: Cor | None = None, horizontal: bool = False, volume: float = .6) -> None:
     """Polígono com gradiente, luz de contorno (lado da luz) e sombra interna oposta."""
     S = t.S
     P = [(x * S, y * S) for x, y in pts]
@@ -300,6 +300,26 @@ def forma(t: Tela, pts: Sequence[Pt], cima: Cor, baixo: Cor, rim: Cor | None = N
     g = g.rotate(90, expand=True) if horizontal else g
     g = g.resize((w, h), Image.Resampling.BILINEAR)
     fill = ImageOps.colorize(g, black=cima, white=baixo).convert("RGBA")
+    if volume and w > 8 and h > 8:
+        # mapa de altura (máscara borrada) -> iluminação lambertiana: dá volume arredondado à peça
+        raio = max(2.0, min(min(w, h) * .28, 15 * S))
+        alt = m.filter(ImageFilter.GaussianBlur(raio))
+        ln = math.hypot(*lado) or 1
+        d = max(1, int(raio * .45))
+        ix, iy = int(round(lado[0] / ln * d)), int(round(lado[1] / ln * d))
+        sombra_map = ImageChops.subtract(ImageChops.offset(alt, ix, iy), ImageChops.offset(alt, -ix, -iy), scale=.42, offset=128)
+        sm_rgb = sombra_map.convert("RGB")
+        base_rgb = fill.convert("RGB")
+        mod = ImageChops.overlay(base_rgb, sm_rgb)
+        base_rgb = Image.blend(base_rgb, mod, volume)
+        # textura granulada determinística (couro/pano/metal)
+        rr = random.Random((x0 * 73856093) ^ (y0 * 19349663) ^ (w * 83492791))
+        ruido = Image.frombytes("L", (w, h), rr.randbytes(w * h)).point(lambda v: 128 + (v - 128) // 5).convert("RGB")
+        base_rgb = Image.blend(base_rgb, ImageChops.overlay(base_rgb, ruido), .55)
+        # brilho especular nas cristas voltadas para a luz
+        espec = sombra_map.point(lambda v: max(0, v - 168) * 3).filter(ImageFilter.GaussianBlur(S * .5))
+        base_rgb = ImageChops.screen(base_rgb, Image.merge("RGB", (espec.point(lambda v: int(v * .55)),) * 3))
+        fill = base_rgb.convert("RGBA")
     lay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     lay.paste(fill, (0, 0), m if alfa >= 255 else m.point(lambda v: v * alfa // 255))
     e = max(1, int(esp * S))
@@ -479,7 +499,11 @@ def finalizar(t: Tela, vinhetak: float = .55, granulo: float = .09, bloom_k: flo
     bloom(t, bloom_k)
     vinheta(t, vinhetak)
     grao(t, granulo)
-    return t.img.resize((t.aw, t.ah), Image.Resampling.LANCZOS)
+    out = t.img.resize((t.aw, t.ah), Image.Resampling.LANCZOS).convert("RGB")
+    out = ImageEnhance.Contrast(out).enhance(1.05)
+    out = ImageEnhance.Color(out).enhance(.95)
+    out = out.filter(ImageFilter.UnsharpMask(radius=1.1, percent=70, threshold=2))
+    return out.convert("RGBA")
 
 
 def catmull(pts: Sequence[Pt], n: int = 8) -> list[Pt]:
@@ -516,3 +540,8 @@ def fita(pts: Sequence[Pt], larguras: Sequence[float], n: int = 8):
         esq.append((x + nx * ws[i] / 2, y + ny * ws[i] / 2))
         dire.append((x - nx * ws[i] / 2, y - ny * ws[i] / 2))
     return esq + dire[::-1], c, normais, ws
+
+
+def profundidade(t: Tela, raio: float = 1.4) -> None:
+    """Desfoque suave do cenário (profundidade de campo) antes de pintar a figura."""
+    t.img = t.img.filter(ImageFilter.GaussianBlur(raio * t.S))
