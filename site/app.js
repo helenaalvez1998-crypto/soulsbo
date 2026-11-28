@@ -3588,14 +3588,39 @@ $('#vis-open')?.addEventListener('click', () => { visPanel().hidden = false; });
     });
   };
   loaders.news = async () => {
-    const box = $('#ad-news'), r = await api('/api/portal/admin/news'); if (!r.ok) return box.innerHTML = empty('Acesso restrito à moderação', r.data.error);
-    box.innerHTML = `<div class="pt-grid2"><div class="pt-card"><h4>Feeds monitorados</h4>${(r.data.feeds || []).map(f => `<div class="pt-row"><span class="pt-chip ${f.ativo ? 'ok' : 'warn'}">${f.ativo ? 'Ativo' : 'Pausado'}</span><div><b>${E(f.nome)}</b><small>${E(f.url)}</small></div><button class="text-btn" data-rm="${f.id}" type="button">remover</button></div>`).join('') || empty('Nenhum feed cadastrado')}</div><div class="pt-card"><h4>Adicionar feed RSS</h4><div class="pt-form">${field('Nome', 'nw-name', 'Ex.: IGN Brasil', 80, 'wide')}${field('URL do RSS (https)', 'nw-url', 'https://...', 500, 'wide')}<button class="primary" id="nw-add" type="button">Validar e adicionar</button><small class="muted">As notícias novas são publicadas pelo bot no canal configurado.</small></div></div></div>`;
+    const box = $('#ad-news'), r = await api('/api/portal/admin/news');
+    if (!r.ok) return box.innerHTML = empty('Acesso restrito à moderação', r.data.error);
+    const feeds = r.data.feeds || [], channels = r.data.channels || [], current = String(r.data.channel_id || '');
+    const channelOptions = channels.map(c => `<option value="${E(c.id)}" ${String(c.id) === current ? 'selected' : ''}>#${E(c.name)}</option>`).join('');
+    const fallback = current && !channels.some(c => String(c.id) === current) ? `<option value="${E(current)}" selected>Canal configurado (${E(current)})</option>` : '';
+    box.innerHTML = `<div class="pt-grid2"><div class="pt-card"><h4>Destino das publicações</h4><div class="pt-form"><label for="nw-channel">Canal do Discord<select id="nw-channel"><option value="">Não publicar (desativado)</option>${fallback}${channelOptions}</select></label><div class="pt-actions"><button class="primary" id="nw-save-channel" type="button">Salvar canal</button><button class="secondary" id="nw-test" type="button" ${current ? '' : 'disabled'}>Testar canal salvo</button></div><small class="muted">O bot publica as novas notícias RSS no canal selecionado. O teste confirma que ele consegue enviar mensagens.</small></div></div><div class="pt-card"><h4>Feeds monitorados</h4>${feeds.map(f => `<div class="pt-row"><span class="pt-chip ${f.ativo ? 'ok' : 'warn'}">${f.ativo ? 'Ativo' : 'Pausado'}</span><div><b>${E(f.nome)}</b><small>${E(f.url)}</small></div><button class="text-btn" data-rm="${f.id}" type="button">remover</button></div>`).join('') || empty('Nenhum feed cadastrado')}</div><div class="pt-card"><h4>Adicionar feed RSS</h4><div class="pt-form">${field('Nome', 'nw-name', 'Ex.: IGN Brasil', 80, 'wide')}${field('URL do RSS (https)', 'nw-url', 'https://...', 500, 'wide')}<button class="primary" id="nw-add" type="button">Validar e adicionar</button><small class="muted">O primeiro carregamento valida o feed sem republicar notícias antigas.</small></div></div></div>`;
+    $('#nw-channel').onchange = () => { $('#nw-test').disabled = !current || V('nw-channel') !== current; };
+    $('#nw-save-channel').onclick = async (ev) => {
+      ev.currentTarget.disabled = true;
+      const x = await api('/api/portal/admin/news', {json: {action: 'channel', channel_id: V('nw-channel')}});
+      x.ok ? (showNotice('Canal de publicação salvo.', 'success'), loaders.news()) : (fail(x), ev.currentTarget.disabled = false);
+    };
+    $('#nw-test').onclick = async (ev) => {
+      ev.currentTarget.disabled = true;
+      const x = await api('/api/portal/admin/news', {json: {action: 'test'}});
+      x.ok ? (showNotice('Mensagem de teste enviada ao Discord.', 'success'), loaders.news()) : (fail(x), ev.currentTarget.disabled = false);
+    };
     $('#nw-add').onclick = async (ev) => { ev.currentTarget.disabled = true; const x = await api('/api/portal/admin/news', {json: {action: 'add', name: V('nw-name'), url: V('nw-url')}}); x.ok ? (showNotice('Feed adicionado.', 'success'), loaders.news()) : (fail(x), $('#nw-add').disabled = false); };
     $$('[data-rm]', box).forEach(b => b.onclick = async () => { if (!confirm('Remover este feed?')) return; const x = await api('/api/portal/admin/news', {json: {action: 'remove', id: Number(b.dataset.rm)}}); x.ok ? loaders.news() : fail(x); });
   };
 
   /* ---------- Descobrir moderador (mostra a aba Moderação) ---------- */
-  (async () => { await new Promise(r => setTimeout(r, 1200)); if (!uid()) return; const r = await api('/api/portal/admin/queue'); if (r.ok) { const n = $('#nav-admin'); if (n) n.hidden = false; } })();
+  (async () => {
+    await new Promise(r => setTimeout(r, 1200));
+    if (uid()) {
+      const r = await api('/api/portal/admin/queue');
+      if (r.ok) { const n = $('#nav-admin'); if (n) n.hidden = false; }
+    }
+    // Deep links enviados pelos comandos /nara e /adm também precisam disparar o carregador da aba.
+    const requested = location.hash.slice(1);
+    if (requested === 'portal') sub('tab-portal', 'profile');
+    else if (requested === 'admin') sub('tab-admin', 'queue');
+  })();
   window.portalVisit = (id) => { document.querySelector('.nav[data-tab="portal"]').click(); setTimeout(() => sub('tab-portal', 'sanctuary') || loaders.sanctuary(id), 50); };
 })();
 

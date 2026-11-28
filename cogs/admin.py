@@ -7,6 +7,7 @@ config.py quando não há valor personalizado.
 """
 
 import logging
+import os
 import sqlite3
 import discord
 from discord import app_commands
@@ -98,15 +99,17 @@ class ModeracaoSolicitacaoSelect(discord.ui.Select):
 
 class ModeracaoPainelView(discord.ui.View):
     """Fila unificada que navega até o cartão original no canal de aprovação."""
-    def __init__(self, bot, user_id: int, categoria: str = "all", guild_id: int | None = None):
+    def __init__(self, bot, user_id: int, categoria: str = "all", guild_id: int | None = None, somente_denuncias: bool = False):
         super().__init__(timeout=600)
         self.bot = bot
         self.user_id = user_id
         self.guild_id = int(guild_id) if guild_id else None
-        self.categoria = categoria
+        self.somente_denuncias = bool(somente_denuncias)
+        self.categoria = "denuncias" if self.somente_denuncias else categoria
         self.registros = []
         self.pagina = 0
-        self.add_item(ModeracaoCategoriaSelect(self))
+        if not self.somente_denuncias:
+            self.add_item(ModeracaoCategoriaSelect(self))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         from cogs.platinas import eh_moderador
@@ -214,10 +217,12 @@ class ModeracaoPainelView(discord.ui.View):
         # O canal é configurado por servidor; a interação define o servidor atual.
         pendentes = len(self.registros)
         embed = discord.Embed(
-            title="🛡️ Central de Moderação — NARA",
+            title=("🚩 Denúncias da comunidade" if self.somente_denuncias else "🛡️ Central de Moderação — NARA"),
             description=(
-                "A fila reúne as solicitações pendentes por categoria e ordem de chegada.\n\n"
-                "**Como revisar:** abra a ficha privada, confira os comprovantes e só então use os botões de decisão. O sistema registra a decisão no fluxo original; evidência primeiro, espetáculo depois."
+                "Esta área reúne apenas sinalizações feitas pela comunidade. Abra cada ficha para conferir o contexto e decidir se a publicação deve ser ocultada.\n\n"
+                "A fila comum de platinas, zerados, runs, contribuições e catálogos foi centralizada na aba **Moderação** do site."
+                if self.somente_denuncias else
+                "As sinalizações comunitárias são tratadas aqui no Discord. A fila comum de platinas, zerados, runs, contribuições e catálogos fica na aba **Moderação** do site."
             ), color=COR_PAINEL,
         )
         embed.add_field(name="Na lista atual", value=f"**{pendentes}** solicitação(ões) exibida(s)", inline=True)
@@ -226,7 +231,7 @@ class ModeracaoPainelView(discord.ui.View):
         if pagina_registros:
             linhas = []
             for item in pagina_registros[:10]:
-                linhas.append(f"{item['emoji']} **{item['tipo_label']} #{item['id']}** — {discord.utils.escape_markdown(str(item['titulo']))[:65]} · <@{item['user_id']}>")
+                linhas.append(f"{item['emoji']} **{item['tipo_label']} #{item['id']}** — {discord.utils.escape_markdown(str(item['titulo']))[:65]} · <@{item.get('user_id', item.get('reporter_id', 0))}>")
             embed.add_field(name="Solicitações pendentes", value="\n".join(linhas), inline=False)
             if len(self.registros) > 10:
                 embed.set_footer(text="A lista de seleção contém até 25 solicitações; use o filtro para localizar outras.")
@@ -237,7 +242,8 @@ class ModeracaoPainelView(discord.ui.View):
     async def atualizar(self, interaction: discord.Interaction):
         embed = await self.embed_painel()
         self.clear_items()
-        self.add_item(ModeracaoCategoriaSelect(self))
+        if not self.somente_denuncias:
+            self.add_item(ModeracaoCategoriaSelect(self))
         self.add_item(ModeracaoSolicitacaoSelect(self, self.registros[self.pagina * 25:(self.pagina + 1) * 25]))
         if self.pagina > 0:
             self.add_item(ModeracaoPaginaButton(self, -1))
@@ -1154,9 +1160,9 @@ ADMIN_CATEGORIAS = {
     },
     "moderacao": {
         "titulo": "🛡️ Moderação e auditoria",
-        "descricao": "Acompanhe solicitações, atualizações operacionais e o histórico de decisões. As ferramentas respeitam o nível de acesso da equipe.",
+        "descricao": "A fila comum de aprovações e o Radar RSS ficam no site. Use esta área para denúncias comunitárias, indicadores operacionais e auditoria do Discord.",
         "acoes": [
-            ("moderacao", "Fila de aprovação", "📥"),
+            ("moderacao_denuncias", "Denúncias comunitárias", "🚩"),
             ("dashboard", "Resumo operacional", "📈"),
             ("history", "Histórico de auditoria", "📜"),
         ],
@@ -1196,14 +1202,13 @@ ADMIN_CATEGORIAS = {
     },
     "publicacoes": {
         "titulo": "📌 Publicações e integrações",
-        "descricao": "Publique painéis no canal atual ou use o gerenciador para escolher outro canal. Configure também Radar, YouTube e ofertas.",
+        "descricao": "Publique e atualize os painéis do Discord. A configuração de feeds RSS e canal de notícias foi movida para a aba Moderação do site.",
         "acoes": [
             ("publicar_paineis", "Gerenciador de painéis (escolher canal)", "📌"),
             ("post_coliseu", "Publicar painel principal neste canal", "⚔️"),
             ("post_ajuda", "Publicar Central de Ajuda neste canal", "📖"),
             ("post_loja", "Publicar painel da loja neste canal", "🪙"),
             ("post_santuario", "Publicar painel de Santuários neste canal", "🏛️"),
-            ("radar_games", "Configurar Radar de Games", "📡"),
             ("youtube_status", "Status do YouTube", "📺"),
             ("youtube_test_video", "Testar aviso de vídeo", "🎬"),
             ("youtube_test_live", "Testar aviso de live", "🔴"),
@@ -1291,12 +1296,17 @@ async def _executar_acao_admin(interaction: discord.Interaction, bot, action: st
         return await _abrir_secao(interaction, bot, "roles", "🎭 Cargos configurados", callback_voltar=voltar)
     if action == "coliseu":
         return await _abrir_coliseu(interaction, bot, callback_voltar=voltar)
-    if action == "moderacao":
+    if action in ("moderacao", "moderacao_denuncias"):
         from cogs.platinas import eh_moderador
         if not await eh_moderador(interaction.user, bot.db) and not await _eh_admin_painel(bot, interaction.user):
             return await interaction.response.send_message("Seu cargo não tem permissão para moderar solicitações.", ephemeral=True)
-        view = ModeracaoPainelView(bot, interaction.user.id)
-        view.guild_id = int(interaction.guild_id) if interaction.guild_id else None
+        somente_denuncias = action == "moderacao_denuncias"
+        view = ModeracaoPainelView(
+            bot, interaction.user.id,
+            categoria="denuncias" if somente_denuncias else "all",
+            guild_id=interaction.guild_id,
+            somente_denuncias=somente_denuncias,
+        )
         embed = await view.embed_painel()
         # ModeracaoPainelView.__init__ já adiciona o filtro de categorias na linha 0.
         # Não adicionar uma segunda instância: dois Select ocupam 10 posições na mesma linha.
@@ -1853,7 +1863,7 @@ class AdminAtalhosSelect(discord.ui.Select):
 
 
 class AdminMainView(discord.ui.View):
-    """Painel administrativo organizado por categorias e atalhos frequentes."""
+    """Painel administrativo enxuto, com configurações Discord e link para moderação web."""
 
     def __init__(self, bot, user_id: int | None = None, is_admin: bool = True, is_bot_owner: bool = False):
         super().__init__(timeout=None)
@@ -1873,10 +1883,11 @@ class AdminMainView(discord.ui.View):
             categorias = [c for c in categorias if c[0] not in CATEGORIAS_SO_ADMIN]
         for index, (key, label, emoji) in enumerate(categorias):
             self.add_item(AdminCategoriaButton(bot, key, label, emoji, row=index // 4, user_id=user_id))
-        # Sempre presente para que o custom_id também seja registrado na view
-        # persistente criada durante cog_load(). As opções da sessão continuam
-        # filtradas conforme o nível de acesso do usuário.
-        self.add_item(AdminAtalhosSelect(bot, user_id, is_admin=is_admin))
+        base_url = str(os.getenv("SOULSBOT_PUBLIC_URL", "https://narabot.sbs") or "https://narabot.sbs").strip().rstrip("/")
+        self.add_item(discord.ui.Button(
+            label="Abrir Moderação no site", emoji="🌐", style=discord.ButtonStyle.link,
+            url=f"{base_url}/#admin", row=2,
+        ))
         if is_bot_owner:
             self.add_item(RelacionamentoAdminButton(bot, int(user_id or 0)))
 
@@ -2412,9 +2423,8 @@ async def _mostrar_painel_principal(interaction: discord.Interaction, bot):
     embed = discord.Embed(
         title="⚙️ Central administrativa",
         description=(
-            "Gerencie o NARABOT por áreas. As ações mais usadas ficam no acesso rápido; "
-            "as demais estão organizadas nas categorias abaixo.\n\n"
-            "**Escolha uma categoria ou use o seletor de acesso rápido.**"
+            "Gerencie aqui as configurações e integrações nativas do Discord. A fila de aprovações e o Radar RSS ficam centralizados na aba **Moderação** do site.\n\n"
+            "**Escolha uma categoria ou abra a moderação web.**"
         ),
         color=COR_PAINEL,
     )
@@ -2430,14 +2440,14 @@ async def _mostrar_painel_principal(interaction: discord.Interaction, bot):
     embed.add_field(
         name="Fila de aprovação",
         value=(
-            f"**{pendentes}** solicitações de platinas, zerados e runs pendentes"
-            if pendentes is not None else "Indicador indisponível no momento; abra a fila para consultar."
+            f"**{pendentes}** pendência(s) no fluxo de aprovações, gerenciado no site"
+            if pendentes is not None else "Indicador indisponível no momento; consulte a aba Moderação do site."
         ),
         inline=True,
     )
     embed.add_field(
         name="Navegação",
-        value="• Categorias para encontrar qualquer ferramenta\n• Acesso rápido para tarefas frequentes\n• Voltar à categoria após configurar",
+        value="• Categorias para configurações e operações do Discord\n• Moderação web para aprovações e Radar RSS\n• Voltar à categoria após configurar",
         inline=False,
     )
     embed.set_footer(text="NARA • Painel privado • As alterações são salvas por servidor")

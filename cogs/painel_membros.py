@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import discord
 import logging
 from discord import app_commands
@@ -106,40 +107,6 @@ class RemoverZeradoModal(discord.ui.Modal, title="Remover registro de jogo zerad
         await type(self.cog).remover_zerado.callback(self.cog, interaction, registro)
 
 
-GUIA_MEMBROS = {
-    "jogos": ("🎮 Começar pelos jogos", "**Minha biblioteca:** registre e consulte platinas, zerados e runs.\n**Meus registros:** acompanhe aprovações e corrija envios rejeitados.\n**Ports & Mods:** explore o catálogo da comunidade."),
-    "coliseu": ("⚔️ Como funciona o Coliseu", "Use **Cartas do Coliseu** no painel de Jogos ou o comando `/jogo` para abrir sua coleção e consultar seu deck, drops e estatísticas. As conquistas de platinas, zerados e runs ficam em **Conquistas e jornadas**."),
-    "progresso": ("🏆 Progresso e recompensas", "Consulte nível, patente, XP e ranking. Os Denários ficam na carteira e podem ser usados na loja e nos pacotes do Coliseu."),
-    "comunidade": ("📡 Participar da comunidade", "Envie lore, teorias, descobertas, guias e propostas. Acompanhe o estado de cada contribuição e responda a pedidos de ajuste."),
-}
-
-
-class GuiaMembrosSelect(discord.ui.Select):
-    def __init__(self, bot, user_id: int):
-        self.bot = bot
-        self.user_id = int(user_id)
-        super().__init__(
-            placeholder="Não sabe por onde começar? Escolha um guia...",
-            min_values=1,
-            max_values=1,
-            options=[
-                discord.SelectOption(label="Começar pelos jogos", value="jogos", description="Biblioteca, conquistas e registros", emoji="🎮"),
-                discord.SelectOption(label="Entender o Coliseu", value="coliseu", description="Deck, cartas e desafios", emoji="⚔️"),
-                discord.SelectOption(label="Progresso e recompensas", value="progresso", description="Nível, XP, Denários e loja", emoji="🏆"),
-                discord.SelectOption(label="Participar da comunidade", value="comunidade", description="Contribuições e arquivo", emoji="📡"),
-            ],
-            row=3,
-        )
-
-    async def callback(self, interaction: discord.Interaction):
-        titulo, descricao = GUIA_MEMBROS[self.values[0]]
-        embed = discord.Embed(title=titulo, description=descricao, color=config.COR_OURO)
-        embed.set_footer(text="NARA • Orientação rápida · Voltar à central")
-        callback = _retorno_categoria_membro(self.bot, self.user_id, "__inicio__")
-        view = _view_com_navegacao_nara(view_so_com_voltar(callback), callback, self.user_id, interaction.message)
-        await interaction.response.edit_message(embed=embed, view=view)
-
-
 
 MEMBROS_CATEGORIAS = {
     "jogos": {
@@ -189,6 +156,14 @@ MEMBROS_CATEGORIAS = {
             ("community_mine", "Minhas contribuições", "🗂️", discord.ButtonStyle.secondary),
         ],
     },
+    "ferramentas_discord": {
+        "titulo": "🧰 Ferramentas do Discord",
+        "descricao": "Recursos que dependem da integração nativa com o Discord e não são substituídos pelo portal web.",
+        "acoes": [
+            ("luatools", "LuaTools — Steam", "🕹️", discord.ButtonStyle.primary),
+            ("tutorial_transmissao", "Como transmitir a tela", "📺", discord.ButtonStyle.secondary),
+        ],
+    },
 }
 
 
@@ -213,15 +188,15 @@ async def _montar_embed_central_nara(bot: commands.Bot, user_id: int):
     embed = discord.Embed(
         title="🌙 NARA — SUA CENTRAL",
         description=(
-            "Sua jornada em um só lugar. Consulte seu progresso, veja seu deck, acompanhe registros e ajuste avisos sem precisar memorizar comandos. Os painéis são privados e você pode voltar ou fechar quando quiser."
+            "O Discord fica com os recursos próprios da NARA. Para gerenciar sua conta, conquistas e preferências, use o **Meu Portal**; para coleção, decks e partidas, entre no **Coliseu** pelo site."
         ),
         color=config.COR_OURO,
     )
     embed.add_field(
         name="🛡️ Seu progresso",
         value=(
-            f"**Nível {nivel_atual} · {patente_por_nivel(nivel_atual)}**\\n"
-            f"{barra_progresso(xp)}\\n"
+            f"**Nível {nivel_atual} · {patente_por_nivel(nivel_atual)}**\n"
+            f"{barra_progresso(xp)}\n"
             f"🏆 {resumo['platinas']} platinas · ✅ {resumo['zerados']} zerados · ⚔️ {resumo['runs']} runs"
         ),
         inline=False,
@@ -240,17 +215,16 @@ async def _montar_embed_central_nara(bot: commands.Bot, user_id: int):
     if resumo["pendentes"]:
         embed.add_field(
             name="📬 Há atualizações nos seus registros",
-            value=f"Você tem **{resumo['pendentes']}** registro(s) aguardando moderação. Consulte **Minha biblioteca → Meus registros**.",
+            value=f"Você tem **{resumo['pendentes']}** registro(s) aguardando moderação. Consulte **Meu Portal → Envios**.",
             inline=True,
         )
 
     embed.add_field(
-        name="Atalhos rápidos",
+        name="Onde continuar",
         value=(
-            "📬 **Meus registros** para acompanhar aprovações · "
-            "🔔 **Notificações** para escolher avisos · "
-            "👤 **Meu perfil** para consultar sua trajetória.\\n"
-            "🃏 **Cartas do Coliseu** para consultar sua coleção, deck, drops e estatísticas."
+            "🌐 **Meu Portal:** perfil, conquistas, registros, loja e preferências.\n"
+            "🏛️ **Coliseu:** coleção, decks, mercado, forja e partidas.\n"
+            "🧠 **Aqui no Discord:** memória da NARA, ajuda e ferramentas de integração."
         ),
         inline=False,
     )
@@ -262,7 +236,7 @@ async def _montar_embed_central_nara(bot: commands.Bot, user_id: int):
 def _retorno_categoria_membro(bot: commands.Bot, user_id: int, categoria: str):
     async def voltar(interaction: discord.Interaction):
         if categoria == "__inicio__":
-            # Reconhece o clique antes das consultas do resumo e da renderização do deck.
+            # Reconhece o clique antes de consultar e reconstruir o resumo da central.
             if not interaction.response.is_done():
                 await interaction.response.defer()
             embed, deck_file = await _montar_embed_central_nara(bot, user_id)
@@ -926,27 +900,26 @@ class MembrosCategoriaButton(discord.ui.Button):
 
 
 class PainelMembrosView(discord.ui.View):
-    """Central de membros organizada por categorias, com submenus privados."""
+    """Roteador privado para o portal web e recursos exclusivos da NARA no Discord."""
 
     def __init__(self, bot: commands.Bot, user_id: int):
         super().__init__(timeout=600)
         self.bot = bot
         self.user_id = user_id
-        categorias = [
-            ("jogos", "Jogos e biblioteca", "🎮"),
-            ("progresso", "Meu progresso", "🏆"),
-            ("comunidade", "Comunidade", "📡"),
-            ("preferencias", "Preferências", "🧠"),
-            ("ajuda", "Ajuda e suporte", "❔"),
-        ]
-        for index, (key, label, emoji) in enumerate(categorias):
-            self.add_item(MembrosCategoriaButton(self, key, label, emoji, row=index // 3))
-        self.add_item(MembrosAcessoDiretoButton(self, "perfil", "Meu perfil", "👤", discord.ButtonStyle.secondary))
-        self.add_item(MembrosAcessoDiretoButton(self, "santuario", "Meu Santuário", "🏛️", discord.ButtonStyle.secondary))
-        # Atalhos frequentes na tela inicial: reduzem navegação sem duplicar regras de negócio.
-        self.add_item(MembrosAcessoDiretoButton(self, "meus_registros", "Meus registros", "📬", discord.ButtonStyle.secondary))
-        self.add_item(MembrosAcessoDiretoButton(self, "notificacoes", "Notificações", "🔔", discord.ButtonStyle.secondary))
-        self.add_item(GuiaMembrosSelect(bot, user_id))
+        base_url = str(os.getenv("SOULSBOT_PUBLIC_URL", "https://narabot.sbs") or "https://narabot.sbs").strip().rstrip("/")
+
+        # O portal concentra as operações da conta; o site concentra o jogo.
+        self.add_item(discord.ui.Button(
+            label="Meu Portal", emoji="🌐", style=discord.ButtonStyle.link,
+            url=f"{base_url}/#portal", row=0,
+        ))
+        self.add_item(discord.ui.Button(
+            label="Abrir Coliseu", emoji="🏛️", style=discord.ButtonStyle.link,
+            url=f"{base_url}/#arena", row=0,
+        ))
+        self.add_item(MembrosAcessoDiretoButton(self, "memoria", "Memória da NARA", "🧠", discord.ButtonStyle.secondary, row=1))
+        self.add_item(MembrosAcessoDiretoButton(self, "ajuda", "Central de ajuda", "❔", discord.ButtonStyle.secondary, row=1))
+        self.add_item(MembrosCategoriaButton(self, "ferramentas_discord", "Ferramentas do Discord", "🧰", row=2))
         adicionar_fechar_nara(self, user_id)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -966,7 +939,7 @@ class PainelMembros(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="nara", description="Abra sua central de Ports & Mods, biblioteca, progresso, recompensas e suporte.")
+    @app_commands.command(name="nara", description="Abra os atalhos do Meu Portal, Coliseu e recursos da NARA no Discord.")
     @app_commands.guild_only()
     async def nara(self, interaction: discord.Interaction):
         # O usuário recebe o ACK do Discord imediatamente; o painel substitui o

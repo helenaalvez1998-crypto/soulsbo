@@ -655,7 +655,10 @@ def registrar_rotas(bot, app: web.Application) -> None:
                 feeds=[dict(r) for r in conn.execute("SELECT id,nome,url,ativo,inicializado FROM news_feeds ORDER BY id").fetchall()]
                 row=conn.execute("SELECT valor FROM news_config WHERE chave='channel_id'").fetchone()
                 channel_id=row["valor"] if row else None
-                return web.json_response({"feeds":feeds,"channel_id":channel_id or ""})
+                guild=bot.get_guild(guild_id()) if guild_id() else None
+                channels=[{"id":str(channel.id),"name":channel.name} for channel in (guild.text_channels if guild else [])]
+                channels.sort(key=lambda item: item["name"].casefold())
+                return web.json_response({"feeds":feeds,"channel_id":channel_id or "","channels":channels})
             data=await request.json()
             action=str(data.get("action",""))
             if action=="add":
@@ -691,17 +694,40 @@ def registrar_rotas(bot, app: web.Application) -> None:
             if action=="channel":
                 raw_channel=str(data.get("channel_id","")).strip()
                 try: channel_id=int(raw_channel) if raw_channel else 0
-                except ValueError: return web.json_response({"error":"Informe um ID numérico de canal."},status=400)
+                except ValueError: return web.json_response({"error":"Selecione um canal válido."},status=400)
                 if channel_id < 0: return web.json_response({"error":"ID de canal inválido."},status=400)
                 if channel_id:
-                    channel=bot.get_channel(channel_id)
-                    if channel is None:
-                        try: channel=await bot.fetch_channel(channel_id)
-                        except Exception:return web.json_response({"error":"Não foi possível acessar esse canal."},status=400)
-                    if not hasattr(channel,"send"):
-                        return web.json_response({"error":"O ID informado não é um canal de texto compatível."},status=400)
+                    import discord
+                    guild=bot.get_guild(guild_id()) if guild_id() else None
+                    channel=guild.get_channel(channel_id) if guild else None
+                    if not isinstance(channel, discord.TextChannel) or getattr(getattr(channel,"guild",None),"id",None)!=guild_id():
+                        return web.json_response({"error":"Selecione um canal de texto deste servidor."},status=400)
+                    me=getattr(guild,"me",None)
+                    if me is not None and not channel.permissions_for(me).send_messages:
+                        return web.json_response({"error":"O bot não tem permissão para enviar mensagens nesse canal."},status=400)
                 conn.execute("INSERT INTO news_config(chave,valor) VALUES('channel_id',?) ON CONFLICT(chave) DO UPDATE SET valor=excluded.valor",(str(channel_id) if channel_id else "",))
                 conn.commit()
+                return web.json_response({"ok":True})
+            if action=="test":
+                row=conn.execute("SELECT valor FROM news_config WHERE chave='channel_id'").fetchone()
+                channel_id=int(row["valor"] or 0) if row else 0
+                guild=bot.get_guild(guild_id()) if guild_id() else None
+                import discord
+                channel=guild.get_channel(channel_id) if guild and channel_id else None
+                if not isinstance(channel, discord.TextChannel):
+                    return web.json_response({"error":"Configure primeiro um canal de texto válido."},status=400)
+                me=getattr(guild,"me",None)
+                if me is not None and not channel.permissions_for(me).send_messages:
+                    return web.json_response({"error":"O bot não tem permissão para enviar mensagens nesse canal."},status=400)
+                embed=discord.Embed(
+                    title="📡 Radar de Games — teste de publicação",
+                    description="Canal de destino configurado corretamente. As novas notícias RSS serão publicadas aqui.",
+                    color=0x8E6A3A,
+                )
+                try:
+                    await channel.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
+                except Exception as exc:
+                    return web.json_response({"error":f"Falha ao publicar teste: {str(exc)[:160]}"},status=400)
                 return web.json_response({"ok":True})
             return web.json_response({"error":"Ação inválida."},status=400)
         finally:
