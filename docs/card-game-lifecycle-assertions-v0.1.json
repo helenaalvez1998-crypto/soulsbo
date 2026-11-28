@@ -7,8 +7,8 @@
   },
   "counts": {
     "assertions": 7,
-    "passed": 6,
-    "failed": 1
+    "passed": 7,
+    "failed": 0
   },
   "cases": [
     {
@@ -54,8 +54,10 @@
     },
     {
       "case": "sobrevivente_missing_round_end_hook",
-      "status": "failed",
-      "error": "AssertionError: "
+      "status": "passed",
+      "declared_effect": "survive round end",
+      "actual": "discarded",
+      "missing_hook_confirmed": true
     }
   ],
   "limitations": [

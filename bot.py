@@ -588,8 +588,6 @@ class NaraBot(commands.Bot):
         self._web_presence: dict[int, float] = {}
         self._gwent_bootstrapped: set[int] = set()
         self._gwent_bootstrap_locks: dict[int, asyncio.Lock] = {}
-        # Uma tarefa por partida solo; cada decisão da NARA recebe atraso próprio.
-        self._gwent_ai_tasks: dict[int, asyncio.Task] = {}
         # Os PNGs são persistidos em disco e enviados por FileResponse; manter cópias
         # completas em bytes na RAM só duplicava memória sem acelerar cache frio.
         self._gwent_image_locks: dict[str, asyncio.Lock] = {}
@@ -661,6 +659,26 @@ class NaraBot(commands.Bot):
             log.error("%s", message, exc_info=(type(exception), exception, exception.__traceback__))
         else:
             log.error("%s | contexto=%s", message, {k: str(v)[:300] for k, v in context.items() if k != "task"})
+
+    async def _avisar_vez_gwent(self, match_id: int, alvo_id: int, adversario_id: int) -> None:
+        """DM discreta quando chega a vez do jogador (no máx. 1 a cada 5 min por partida)."""
+        agora = time.time()
+        ultimos = self.__dict__.setdefault("_avisos_vez_gwent", {})
+        if agora - ultimos.get((match_id, alvo_id), 0) < 300:
+            return
+        ultimos[(match_id, alvo_id)] = agora
+        if len(ultimos) > 500:
+            for k in sorted(ultimos, key=ultimos.get)[:250]:
+                ultimos.pop(k, None)
+        try:
+            guild = self.get_guild(config.GUILD_ID) if config.GUILD_ID else None
+            alvo = (guild.get_member(alvo_id) if guild else None) or await self.fetch_user(alvo_id)
+            rival = guild.get_member(adversario_id) if guild else None
+            base_url = os.getenv("SOULSBOT_PUBLIC_URL", "https://narabot.sbs").rstrip("/")
+            nome = rival.display_name if rival else "seu adversário"
+            await alvo.send(f"🃏 **Sua vez no Gwent!** {nome} jogou. Continue a partida: {base_url}/?gwent={match_id}")
+        except Exception:
+            log.info("Não foi possível avisar a vez do Gwent #%s.", match_id)
 
     async def _loop_anuncios_drops(self) -> None:
         """Anuncia no canal do Coliseu quando um membro ganha carta por contribuir."""
@@ -1070,8 +1088,6 @@ class NaraBot(commands.Bot):
         card["image_url"] = (
             f"/api/gwent/public-cards/{quote(card_id, safe='')}/image?{image_query}"
         )
-        card["card_id"] = str(card_id)
-        card["exemplar_id"] = exemplar_id
         return card
 
     async def _api_gwent_deck(self, request: web.Request) -> web.Response:
@@ -1152,9 +1168,7 @@ class NaraBot(commands.Bot):
             "comandante_fornalha": "godfrey", "bastiao_ancestral": "morgott",
             "juiz_cerco": "radagon", "mestre_veu": "mohg",
             "sombra_caminhante": "rykard", "voz_caidos": "esgar",
-            "lider_papa_esquecido": "esgar", "lider_abadessa_ruinas": "abadessa",
-            "lider_martir_vigilia": "martir", "arquimaga_eclipse": "rennala",
-            "mestre_eclipse": "astel",
+            "arquimaga_eclipse": "rennala", "mestre_eclipse": "astel",
             "oraculo_tempestade": "loretta",
         }
         def leader_payload(key, value):
@@ -1201,9 +1215,6 @@ class NaraBot(commands.Bot):
                     (user_id, saved_relic_id),
                 )
             saved_relic_id = ""
-        for card in cards:
-            self._gwent_canonicalize_malenia_card(card)
-        await self._gwent_mark_custom_art(cards)
         return web.json_response({
             "deck": cards, "faction": faction, "leader_id": leader_id,
             "leaders": leaders,
@@ -1353,142 +1364,6 @@ class NaraBot(commands.Bot):
             **result, "message": "Deck zerado. Sua coleção permanece intacta.",
         })
 
-    async def _gwent_mark_custom_art(self, cards):
-        """Marca exemplares com arte aprovada para que a interface mostre somente a imagem."""
-        from urllib.parse import parse_qs, urlsplit
-
-        if not isinstance(cards, list) or not cards:
-            return cards
-        descriptors = []
-        card_ids = set()
-        for card in cards:
-            if not isinstance(card, dict):
-                continue
-            raw_id = str(card.get("card_id") or card.get("id") or "")
-            if not raw_id:
-                card["custom_image_only"] = False
-                continue
-            parts = raw_id.split("::", 1)
-            card_id = parts[0]
-            exemplar_id = card.get("exemplar_id")
-            if not exemplar_id and len(parts) > 1:
-                exemplar_id = parts[1]
-            if not exemplar_id:
-                try:
-                    values = parse_qs(urlsplit(str(card.get("image_url") or "")).query).get("exemplar_id", [])
-                    exemplar_id = values[0] if values else None
-                except Exception:
-                    exemplar_id = None
-            try:
-                exemplar_id = int(exemplar_id) if exemplar_id not in (None, "", 0, "0") else None
-            except (TypeError, ValueError):
-                exemplar_id = None
-            descriptors.append((card, card_id, exemplar_id))
-            card_ids.add(card_id)
-
-        if not card_ids:
-            return cards
-        ordered_ids = sorted(card_ids)
-        placeholders = ",".join("?" for _ in ordered_ids)
-        rows = await self.db._all(
-            f"SELECT card_id, exemplar_id FROM cartas_atelie_submissoes "
-            f"WHERE status='approved' AND card_id IN ({placeholders})",
-            tuple(ordered_ids),
-        )
-        approved = {}
-        for row in rows:
-            key = str(row["card_id"])
-            exemplar = row["exemplar_id"]
-            try:
-                exemplar = int(exemplar) if exemplar is not None else None
-            except (TypeError, ValueError):
-                continue
-            approved.setdefault(key, set()).add(exemplar)
-        for card, card_id, exemplar_id in descriptors:
-            art_exemplars = approved.get(card_id, set())
-            card["custom_image_only"] = None in art_exemplars or (
-                exemplar_id is not None and exemplar_id in art_exemplars
-            )
-        return cards
-
-    @staticmethod
-    def _gwent_canonicalize_malenia_card(card):
-        """Recompõe a identidade de Malenia sem perder o ID do exemplar em jogo."""
-        if not isinstance(card, dict):
-            return card
-        from urllib.parse import quote, urlencode
-        from sistemas.cartas import get_carta, faixa_poder_exemplar
-        from sistemas.gwent import preparar_carta
-
-        malenia_id = "chefe_malenia_lamina_miquella"
-        instance_id = str(card.get("id") or "")
-        declared_card_id = str(card.get("card_id") or "")
-        instance_parts = instance_id.split("::", 1)
-        declared_parts = declared_card_id.split("::", 1)
-        instance_base = instance_parts[0]
-        declared_base = declared_parts[0]
-        canonical_id_match = malenia_id in (instance_base, declared_base)
-        card_name = str(card.get("nome") or "").casefold()
-        if not canonical_id_match and "malenia" not in card_name:
-            return card
-
-        model = get_carta(malenia_id)
-        if model is None:
-            return card
-        payload = model.para_dict()
-        # Só preserva dados variáveis do exemplar quando sua identidade de catálogo
-        # já é Malenia. Se apenas o nome estava misturado a outro ID, usa os valores
-        # canônicos do modelo em vez de importar poder/raridade da outra carta.
-        exemplar_id = card.get("exemplar_id") if canonical_id_match else None
-        if canonical_id_match and not exemplar_id:
-            exemplar_id = (instance_parts[1] if len(instance_parts) > 1
-                           else (declared_parts[1] if len(declared_parts) > 1 else None))
-        if canonical_id_match and card.get("raridade"):
-            payload["raridade"] = str(card["raridade"])
-        if canonical_id_match and card.get("poder") is not None:
-            try:
-                payload["poder"] = int(card["poder"])
-            except (TypeError, ValueError):
-                pass
-        try:
-            exemplar_id = int(exemplar_id) if exemplar_id not in (None, "", 0, "0") else None
-        except (TypeError, ValueError):
-            exemplar_id = None
-        if exemplar_id:
-            payload["exemplar_id"] = exemplar_id
-
-        canonical = preparar_carta(payload)
-        identity_fields = (
-            "nome", "categoria", "papel_gwent", "tipo_combate", "especial", "poder",
-            "raridade", "custo", "potencia_raridade", "faccao", "arquetipo_faccao",
-            "arquetipo_descricao", "fileira", "row", "row_label", "habilidade",
-            "habilidade_id_declarada", "habilidade_id_efetiva", "habilidade_nome",
-            "habilidade_texto", "habilidade_identidade", "sinergias", "combos_compativeis",
-            "descricao",
-        )
-        for field in identity_fields:
-            if field in canonical:
-                card[field] = canonical[field]
-
-        rarity = str(card.get("raridade") or "Primordial")
-        power = int(card.get("poder") or 9)
-        max_power = faixa_poder_exemplar(model, rarity)[1]
-        card["max_power"] = int(max_power)
-        card["card_id"] = malenia_id
-        card["id"] = f"{malenia_id}::{exemplar_id}" if exemplar_id else malenia_id
-        if exemplar_id:
-            card["exemplar_id"] = exemplar_id
-        else:
-            card.pop("exemplar_id", None)
-        image_query = {"rarity": rarity, "power": power, "thumb": "1"}
-        if exemplar_id:
-            image_query["exemplar_id"] = exemplar_id
-        card["image_url"] = (
-            f"/api/gwent/public-cards/{quote(malenia_id, safe='')}/image?"
-            f"{urlencode(image_query)}"
-        )
-        return card
-
     async def _gwent_deck_snapshots(self, user_id: int):
         import json
         from sistemas.cartas import get_carta, carta_de_jogo_por_id, CUSTO_RARIDADE
@@ -1517,8 +1392,6 @@ class NaraBot(commands.Bot):
                 personal = await self._gwent_generated_card_payload(user_id, str(card_id), record)
                 if not personal:
                     return None
-                personal["card_id"] = str(card_id)
-                personal["exemplar_id"] = int(record["id"])
                 cards.append(personal)
                 continue
             card = get_carta(card_id)
@@ -1535,15 +1408,8 @@ class NaraBot(commands.Bot):
             payload["poder"] = int(record["power"] or payload.get("poder", 0))
             payload["custo"] = int(CUSTO_RARIDADE.get(rarity, payload.get("custo", 0)))
             payload["exemplar_id"] = int(record["id"])
-            prepared = preparar_carta(payload)
-            prepared["card_id"] = str(card_id)
-            prepared["exemplar_id"] = int(record["id"])
-            self._gwent_canonicalize_malenia_card(prepared)
-            cards.append(prepared)
-        if len(cards) != 12:
-            return None
-        await self._gwent_mark_custom_art(cards)
-        return cards
+            cards.append(preparar_carta(payload))
+        return cards if len(cards) == 12 else None
 
     async def _api_gwent_matches(self, request: web.Request) -> web.Response:
         user_id = self._api_user_id(request)
@@ -1650,163 +1516,22 @@ class NaraBot(commands.Bot):
             log.info("Não foi possível enviar DM do convite Gwent #%s.", match_id)
         return web.json_response({"ok": True, "match_id": match_id, "status": "pending"}, status=201)
 
-    def _ensure_gwent_ai_worker(self, match_id: int) -> None:
-        """Inicia no máximo um worker de IA para a partida informada."""
-        match_id = int(match_id)
-        task = self._gwent_ai_tasks.get(match_id)
-        if task is not None and not task.done():
-            return
-        task = asyncio.create_task(
-            self._run_gwent_ai_worker(match_id),
-            name=f"gwent-nara-{match_id}",
-        )
-        self._gwent_ai_tasks[match_id] = task
-
-        def _cleanup(done_task: asyncio.Task, tracked_id: int = match_id) -> None:
-            if self._gwent_ai_tasks.get(tracked_id) is done_task:
-                self._gwent_ai_tasks.pop(tracked_id, None)
-            try:
-                error = done_task.exception()
-            except asyncio.CancelledError:
-                return
-            if error:
-                log.exception("Worker da NARA encerrou com erro na partida #%s.", tracked_id,
-                              exc_info=(type(error), error, error.__traceback__))
-
-        task.add_done_callback(_cleanup)
-
-    async def _run_gwent_ai_worker(self, match_id: int) -> None:
-        """Executa uma ação da NARA por ciclo, com espera fora da transação.
-
-        O horário de execução fica no snapshot da partida. Isso evita disparos
-        duplicados por polling e permite recuperar partidas após reinício do bot.
-        """
-        import json
-        import random
-        import time
-        from sistemas.gwent import AI_PLAYER_ID, aplicar_jogada, executar_uma_jogada_ia
-        from sistemas.gwent_treino import AI_THINK_DELAY_SECONDS
-
-        ai_uid = str(AI_PLAYER_ID)
-        while True:
-            row = await self.db._one(
-                "SELECT status,state_json FROM cartas_gwent_matches WHERE id=?", (match_id,)
-            )
-            if not row or row["status"] != "active":
-                return
-            try:
-                state = json.loads(row["state_json"] or "{}")
-            except (TypeError, ValueError):
-                log.error("Snapshot inválido no worker da NARA para partida #%s.", match_id)
-                return
-            if not state.get("is_ai_match") or str(state.get("turn")) != ai_uid:
-                return
-
-            due_at = 0.0
-            try:
-                due_at = float(state.get("ai_ready_at") or 0.0)
-            except (TypeError, ValueError):
-                due_at = 0.0
-            if not state.get("ai_pending") or due_at <= 0:
-                # Recuperação de snapshots antigos ou worker reiniciado.
-                async with self.db.transaction() as tx:
-                    latest = await tx._one(
-                        "SELECT status,state_json FROM cartas_gwent_matches WHERE id=?", (match_id,)
-                    )
-                    if not latest or latest["status"] != "active":
-                        return
-                    current = json.loads(latest["state_json"] or "{}")
-                    if not current.get("is_ai_match") or str(current.get("turn")) != ai_uid:
-                        return
-                    if not current.get("ai_pending") or not current.get("ai_ready_at"):
-                        current["ai_pending"] = True
-                        current["ai_ready_at"] = time.time() + random.uniform(*AI_THINK_DELAY_SECONDS)
-                        await tx.conn.execute(
-                            "UPDATE cartas_gwent_matches SET state_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",
-                            (json.dumps(current, ensure_ascii=False), match_id),
-                        )
-                    state = current
-                    due_at = float(current.get("ai_ready_at") or 0.0)
-
-            await asyncio.sleep(max(0.0, due_at - time.time()))
-
-            continue_worker = False
-            async with self.db.transaction() as tx:
-                latest = await tx._one(
-                    "SELECT status,state_json FROM cartas_gwent_matches WHERE id=?", (match_id,)
-                )
-                if not latest or latest["status"] != "active":
-                    return
-                current = json.loads(latest["state_json"] or "{}")
-                if (not current.get("is_ai_match") or str(current.get("turn")) != ai_uid
-                        or not current.get("ai_pending")):
-                    return
-                try:
-                    stored_due = float(current.get("ai_ready_at") or 0.0)
-                except (TypeError, ValueError):
-                    stored_due = 0.0
-                # Outro worker/ação pode ter renovado o prazo enquanto aguardávamos.
-                if stored_due > time.time():
-                    continue_worker = True
-                else:
-                    difficulty = str(current.get("ai_difficulty") or "normal")
-                    current.pop("ai_pending", None)
-                    current.pop("ai_ready_at", None)
-                    try:
-                        next_state = executar_uma_jogada_ia(current, AI_PLAYER_ID, difficulty)
-                        if next_state == current:
-                            fallback = aplicar_jogada(current, AI_PLAYER_ID, action="pass")
-                            if "error" not in fallback:
-                                next_state = fallback["state"]
-                        current = next_state
-                    except Exception:
-                        log.exception("Falha ao calcular jogada da NARA na partida #%s.", match_id)
-                        fallback = aplicar_jogada(current, AI_PLAYER_ID, action="pass")
-                        if "error" not in fallback:
-                            current = fallback["state"]
-
-                    if current.get("status") == "active" and str(current.get("turn")) == ai_uid:
-                        current["ai_pending"] = True
-                        current["ai_ready_at"] = time.time() + random.uniform(*AI_THINK_DELAY_SECONDS)
-                        continue_worker = True
-                    else:
-                        current.pop("ai_pending", None)
-                        current.pop("ai_ready_at", None)
-                    await tx.conn.execute(
-                        "UPDATE cartas_gwent_matches SET status=?,state_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",
-                        (current.get("status", "active"), json.dumps(current, ensure_ascii=False), match_id),
-                    )
-
-            if not continue_worker:
-                return
-
     async def _api_gwent_match_create_solo(self, request: web.Request) -> web.Response:
-        """Cria uma partida de treino contra um deck próprio da NARA."""
+        """Cria uma partida de treino contra a NARA sem depender de outro membro."""
         user_id = self._api_user_id(request)
         if user_id is None:
             return web.json_response({"error": "Autenticação necessária."}, status=401)
         if not self._api_origin_ok(request):
             return web.json_response({"error": "Origem não autorizada."}, status=403)
 
-        try:
-            body = await request.json()
-            difficulty = str(body.get("difficulty", "normal")).casefold()
-        except Exception:
-            difficulty = "normal"
-        from sistemas.gwent_treino import construir_deck_treino, perfil_treino
-        profile = perfil_treino(difficulty)
-        try:
-            ai_deck = construir_deck_treino(profile["key"])
-        except (ValueError, KeyError) as exc:
-            log.exception("Deck de treino inválido para perfil %s.", profile.get("key"))
-            return web.json_response({"error": "O deck de treino configurado está inválido."}, status=500)
-
         deck = await self._gwent_deck_snapshots(user_id)
         if not deck or len(deck) != 12:
             return web.json_response({"error": "Salve primeiro um deck Gwent válido com 12 cartas."}, status=409)
 
+        import copy
         import json
-        from sistemas.gwent import AI_PLAYER_ID, aplicar_jogada, novo_estado, canonical_faction, embaralhar_deck
+        from sistemas.gwent import (AI_PLAYER_ID, DEFAULT_LEADERS, aplicar_jogada,
+                                    novo_estado, canonical_faction, embaralhar_deck)
 
         saved = await self.db._one(
             "SELECT faction,leader_id,relic_id FROM cartas_gwent_decks WHERE user_id=?", (user_id,)
@@ -1827,15 +1552,17 @@ class NaraBot(commands.Bot):
                     "error": "Você não possui mais a carta da Relíquia equipada. Atualize seu deck."
                 }, status=409)
             human_config["relic_owned"] = True
-
+        faction = human_config["faction"]
         ai_config = {
-            "faction": profile["faction"],
-            "leader_id": profile["leader_id"],
-            # Relíquia de treino é fornecida pelo próprio perfil NARA; não depende
-            # do inventário de um usuário real, mas usa a validação normal de partida.
-            "relic_id": profile["relic_id"],
-            "relic_owned": True,
+            "faction": faction,
+            # O modo treino é espelhado: mesma facção e líder evitam vantagem
+            # artificial de coleção; a IA recebe outra ordem de compra.
+            "leader_id": human_config["leader_id"] or DEFAULT_LEADERS.get(faction, ""),
+            "relic_id": human_config["relic_id"],
+            # A NARA espelha a Relíquia somente no modo treino e só quando o jogador a possui.
+            "relic_owned": bool(human_config["relic_owned"]),
         }
+        ai_deck = copy.deepcopy(deck)
 
         async with self.db.transaction() as tx:
             active = await tx._one(
@@ -1848,6 +1575,9 @@ class NaraBot(commands.Bot):
                     {"error": "Você já possui três partidas ou convites em andamento."}, status=409
                 )
 
+            # Garante as duas referências exigidas pela FK da tabela de partidas.
+            # O registro negativo é uma identidade técnica reservada: nunca recebe
+            # ranking, XP, moeda ou recompensa competitiva.
             await tx.conn.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (user_id,))
             await tx.conn.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (AI_PLAYER_ID,))
             cursor = await tx.conn.execute(
@@ -1862,14 +1592,11 @@ class NaraBot(commands.Bot):
             }
             configs = {str(user_id): human_config, str(AI_PLAYER_ID): ai_config}
             state = novo_estado(match_id, user_id, AI_PLAYER_ID, decks, configs)
-            state.update({
-                "is_ai_match": True,
-                "ai_difficulty": profile["key"],
-                "ai_difficulty_name": profile["label"],
-                "ai_deck_name": profile["deck_name"],
-                "ai_style": profile["ai_style"],
-            })
+            state["is_ai_match"] = True
+            state["ai_difficulty"] = "normal"
 
+            # A NARA conclui a preparação antes do usuário. A troca inicial humana
+            # continua independente e a partida só entra em batalha após a escolha dele.
             setup = aplicar_jogada(state, AI_PLAYER_ID, action="keep")
             if "error" in setup:
                 raise RuntimeError(f"Falha ao preparar a NARA: {setup['error']}")
@@ -1879,20 +1606,9 @@ class NaraBot(commands.Bot):
                 (json.dumps(state, ensure_ascii=False), match_id),
             )
 
-        from sistemas.gwent import LEADERS
         return web.json_response({
-            "ok": True,
-            "match_id": match_id,
-            "status": "active",
-            "opponent": f"NARA · {profile['label']}",
-            "mode": "solo",
-            "difficulty": profile["key"],
-            "difficulty_name": profile["label"],
-            "deck_name": profile["deck_name"],
-            "faction": profile["faction"],
-            "leader_name": LEADERS.get(profile["leader_id"], {}).get("name", "Líder"),
-            "relic_id": profile["relic_id"],
-            "relic_name": profile["relic_name"],
+            "ok": True, "match_id": match_id, "status": "active",
+            "opponent": "NARA", "mode": "solo", "difficulty": "normal",
             "rewards": False,
         }, status=201)
 
@@ -1999,16 +1715,6 @@ class NaraBot(commands.Bot):
         import json
         from sistemas.gwent import placar
         state = json.loads(row["state_json"])
-        from sistemas.cartas import get_carta
-        opponent_uid = str(int(row["opponent_id"]) if int(row["creator_id"]) == user_id else int(row["creator_id"]))
-        opponent_snapshot = state.get("players", {}).get(opponent_uid, {})
-        opponent_relic_id = str(opponent_snapshot.get("equipped_relic_id") or "")
-        opponent_relic_model = get_carta(opponent_relic_id) if opponent_relic_id else None
-        opponent_relic_name = opponent_relic_model.nome if opponent_relic_model else ""
-        is_ai_match_snapshot = bool(state.get("is_ai_match") or str(state.get("turn")) == "-1")
-        if (is_ai_match_snapshot and state.get("status") == "active"
-                and str(state.get("turn")) == "-1"):
-            self._ensure_gwent_ai_worker(match_id)
         reward_row = await self.db._one(
             """SELECT reward_denarios,reward_xp,mmr_delta,drop_event_key,milestone_drop_event_key
                FROM cartas_gwent_rewards WHERE match_id=? AND user_id=?""",
@@ -2041,11 +1747,7 @@ class NaraBot(commands.Bot):
         guild = self.get_guild(int(getattr(config, "GUILD_ID", 0) or 0))
         is_ai_match = bool(state.get("is_ai_match") or opponent_id == "-1")
         opponent_member = guild.get_member(int(opponent_id)) if guild and str(opponent_id).isdigit() and not is_ai_match else None
-        difficulty_name = str(state.get("ai_difficulty_name") or {
-            "facil": "Aprendiz", "normal": "Estrategista", "dificil": "Lendária"
-        }.get(str(state.get("ai_difficulty", "normal")), "Estrategista"))
-        opponent_name = (f"NARA · {difficulty_name}" if is_ai_match
-                         else (opponent_member.display_name if opponent_member else f"Jogador {opponent_id[-4:]}"))
+        opponent_name = "NARA · Adversária IA" if is_ai_match else (opponent_member.display_name if opponent_member else f"Jogador {opponent_id[-4:]}")
         from sistemas.gwent import LEADERS, opcoes_de_alvo, opcoes_de_reliquia
         leader_id = own.get("leader_id", "")
         # O histórico interno guarda score_a/score_b na ordem em que os jogadores
@@ -2097,26 +1799,12 @@ class NaraBot(commands.Bot):
             except (TypeError, ValueError):
                 weather_snapshot[row_key] = 0
         active_weather_rows = [row_key for row_key, level in weather_snapshot.items() if level > 0]
-        score_snapshot = placar(state)
-        for card in own.get("hand", []):
-            self._gwent_canonicalize_malenia_card(card)
-        visible_match_cards = list(own.get("hand", []))
-        for player_score in score_snapshot.values():
-            board = player_score.get("board", []) if isinstance(player_score, dict) else []
-            for card in board:
-                self._gwent_canonicalize_malenia_card(card)
-                visible_match_cards.append(card)
-        await self._gwent_mark_custom_art(visible_match_cards)
         public = {
             "match_id": match_id, "status": state["status"], "phase": state.get("phase", "battle"),
-            "is_ai_match": is_ai_match,
-            "ai_difficulty": state.get("ai_difficulty", ""),
-            "ai_difficulty_name": difficulty_name if is_ai_match else "",
-            "ai_deck_name": str(state.get("ai_deck_name") or "") if is_ai_match else "",
-            "ai_thinking": bool(state.get("ai_pending") and str(state.get("turn")) == "-1"),
+            "is_ai_match": is_ai_match, "ai_difficulty": state.get("ai_difficulty", ""),
             "round": state["round"], "turn": state["turn"], "crowns": state["crowns"],
             "winner_id": state["winner_id"], "last_event": state["last_event"],
-            "score": score_snapshot, "hand": own["hand"], "leader_used": own["leader_used"],
+            "score": placar(state), "hand": own["hand"], "leader_used": own["leader_used"],
             "alvos": opcoes_de_alvo(state, user_id),
             "relic_options": opcoes_de_reliquia(state, user_id),
             "equipped_relic_id": own.get("equipped_relic_id", ""),
@@ -2134,10 +1822,6 @@ class NaraBot(commands.Bot):
                 "name": opponent_name,
                 "faction": opponent.get("faction", ""),
                 "leader_name": opponent.get("leader_name", "Líder"),
-                "relic_id": opponent.get("equipped_relic_id", ""),
-                "relic_name": opponent_relic_name,
-                "deck_name": str(state.get("ai_deck_name") or "") if is_ai_match else "",
-                "difficulty": difficulty_name if is_ai_match else "",
             },
             "event_log": state.get("event_log", [])[-12:],
             "reward": ({**dict(reward_row), "drops": reward_drops} if reward_row else None),
@@ -2157,16 +1841,13 @@ class NaraBot(commands.Bot):
             return web.json_response({"error": "Ação inválida."}, status=400)
 
         import json
-        import random
-        import time
-        from sistemas.gwent_treino import AI_THINK_DELAY_SECONDS
         finished_participants: tuple[int, int] | None = None
         async with self.db.transaction() as tx:
             match_row = await tx._one("SELECT * FROM cartas_gwent_matches WHERE id=?", (match_id,))
             if not match_row or user_id not in (int(match_row["creator_id"]), int(match_row["opponent_id"])):
                 return web.json_response({"error": "Partida não encontrada."}, status=404)
             state = json.loads(match_row["state_json"])
-            from sistemas.gwent import AI_PLAYER_ID, aplicar_jogada
+            from sistemas.gwent import AI_PLAYER_ID, aplicar_jogada, executar_turno_ia
             action = str(body.get("action", "play"))[:24]
             card_id = str(body.get("card_id", ""))[:120]
             target_row = str(body.get("row", ""))[:16]
@@ -2176,6 +1857,7 @@ class NaraBot(commands.Bot):
             ):
                 return web.json_response({"error": "Seleção de troca inválida."}, status=400)
 
+            turno_antes = str(state.get("turn") or "")
             target_id = str(body.get("target_id", ""))[:120] or None
             if action == "relic":
                 current_player = state.get("players", {}).get(str(user_id), {})
@@ -2199,21 +1881,29 @@ class NaraBot(commands.Bot):
             if "error" in result:
                 return web.json_response({"error": result["error"]}, status=409)
             state = result["state"]
-            # A IA pensa fora da transação. Cada decisão recebe atraso próprio
-            # de 3–5 s; quando permanece no turno após o passe humano, agenda a
-            # próxima carta com outro intervalo completo.
-            if (state.get("is_ai_match") and state["status"] == "active"
-                    and str(state.get("turn")) == str(AI_PLAYER_ID)):
-                state["ai_pending"] = True
-                state["ai_ready_at"] = time.time() + random.uniform(*AI_THINK_DELAY_SECONDS)
-            else:
-                state.pop("ai_pending", None)
-                state.pop("ai_ready_at", None)
+            # Em partidas solo, a NARA responde no servidor antes de persistir o
+            # snapshot. O navegador nunca pode enviar ações em nome do jogador IA.
+            if state.get("is_ai_match") and state["status"] == "active" and str(state.get("turn")) == str(AI_PLAYER_ID):
+                try:
+                    state = executar_turno_ia(state, AI_PLAYER_ID)
+                except Exception:
+                    log.exception("Falha na jogada da IA Gwent da partida #%s.", match_id)
+                    fallback = aplicar_jogada(state, AI_PLAYER_ID, action="pass")
+                    if "error" not in fallback:
+                        state = fallback["state"]
 
             await tx.conn.execute(
                 "UPDATE cartas_gwent_matches SET status=?,state_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",
                 (state["status"], json.dumps(state, ensure_ascii=False), match_id),
             )
+            try:
+                novo_turno = str(state.get("turn") or "")
+                if (not state.get("is_ai_match") and state["status"] == "active" and novo_turno
+                        and novo_turno != turno_antes and novo_turno != str(user_id)):
+                    asyncio.get_running_loop().create_task(self._avisar_vez_gwent(match_id, int(novo_turno), user_id))
+            except Exception:
+                log.debug("Falha ao agendar aviso de vez Gwent.", exc_info=True)
+
             if state["status"] == "finished" and not state.get("is_ai_match"):
                 winner = state.get("winner_id")
                 participants = (int(match_row["creator_id"]), int(match_row["opponent_id"]))
@@ -2293,11 +1983,6 @@ class NaraBot(commands.Bot):
                          drop_event_key, milestone_drop_event_key),
                     )
                 finished_participants = participants
-
-        # Agenda o worker somente depois do commit; nenhuma espera ocorre com lock aberto.
-        if (state.get("is_ai_match") and state.get("status") == "active"
-                and str(state.get("turn")) == "-1"):
-            self._ensure_gwent_ai_worker(match_id)
 
         # Sincroniza patentes liberadas pelo XP da partida depois de confirmar a transação.
         if finished_participants:
@@ -2503,9 +2188,6 @@ class NaraBot(commands.Bot):
                 })
                 catalog.append(model_payload)
 
-            for card_item in [*cards, *catalog]:
-                self._gwent_canonicalize_malenia_card(card_item)
-            await self._gwent_mark_custom_art([*cards, *catalog])
             from levels import nivel_por_xp
             xp = int(estado["xp"])
             return web.json_response({
@@ -2690,13 +2372,7 @@ class NaraBot(commands.Bot):
                 "reference_url": reference_url,
                 "reference_required": True,
                 "full_card": True,
-                "format_note": (
-                    f"Gere e envie a carta completa do exemplar #{exemplar_id}, usando o modelo visual específico da facção. "
-                    f"A composição final será recomposta pelo motor do jogo com os dados canônicos atuais e o efeito de combate exato. "
-                    f"Apenas a janela central da ilustração será reaproveitada; textos impressos pelo modelo não são fonte de dados. "
-                    f"Nome, poder-base {power}, raridade {rarity}, posição tática, facção, lore e efeito serão apresentados pelo catálogo/renderizador. "
-                    "A arte será vinculada somente a este exemplar."
-                ),
+                "format_note": f"Gere e envie a carta completa do exemplar #{exemplar_id}, usando o modelo visual específico da facção. Dados visíveis: nome, poder-base {power}, raridade {rarity}, posição tática e facção. A lore deve ser reproduzida integralmente. A arte será vinculada somente a este exemplar.",
             })
         except Exception:
             log.exception("Falha ao gerar prompt do Ateliê para %s.", user_id)
@@ -3024,9 +2700,7 @@ class NaraBot(commands.Bot):
             "comandante_fornalha": "godfrey", "bastiao_ancestral": "morgott",
             "juiz_cerco": "radagon", "mestre_veu": "mohg",
             "sombra_caminhante": "rykard", "voz_caidos": "esgar",
-            "lider_papa_esquecido": "esgar", "lider_abadessa_ruinas": "abadessa",
-            "lider_martir_vigilia": "martir", "arquimaga_eclipse": "rennala",
-            "mestre_eclipse": "astel",
+            "arquimaga_eclipse": "rennala", "mestre_eclipse": "astel",
             "oraculo_tempestade": "loretta",
         }
         leaders = []
@@ -3394,7 +3068,7 @@ class NaraBot(commands.Bot):
             from sistemas.arte_cartas import (
                 preparar_payload_carta_base, etag_carta_base, webp_disponivel,
                 cache_carta_webp_existente, render_carta_webp,
-                cache_carta_existente, render_carta, renderizar_carta_com_arte_completa,
+                cache_carta_existente, render_carta,
                 cache_arte_oficial_webp_existente, render_arte_oficial_webp_cacheada_por_id,
                 cache_arte_oficial_por_id_existente, render_arte_oficial_cacheada_por_id,
                 detectar_mime_imagem, validar_imagem_bytes,
@@ -3544,8 +3218,7 @@ class NaraBot(commands.Bot):
                 output_mime = "image/webp" if use_webp else "image/png"
                 output_ext = ".webp" if use_webp else ".png"
                 full_etag = hashlib.sha256(
-                    f"atelier-full-recomposed:{official_meta['id']}:{base_etag}:{image_size}:"
-                    f"{image_quality}:{output_mime}".encode("utf-8")
+                    f"atelier-full:{official_meta['id']}:{image_size}:{image_quality}:{output_mime}".encode("utf-8")
                 ).hexdigest()
                 cache_root = Path(get_data_dir()) / "cartas_cache" / "public-art"
                 cache_root.mkdir(parents=True, exist_ok=True)
@@ -3568,26 +3241,29 @@ class NaraBot(commands.Bot):
                         raise web.HTTPUnprocessableEntity(text="Arte oficial armazenada inválida.")
 
                     def render_full_card_variant() -> Path:
+                        from PIL import Image, ImageOps
                         import tempfile
-                        rendered = renderizar_carta_com_arte_completa(
-                            source, full_bytes, tamanho=image_size,
-                        )
-                        if use_webp:
-                            output_format = "WEBP"
-                            save_options = {"quality": image_quality, "method": 4}
-                        else:
-                            output_format = "PNG"
-                            save_options = {"optimize": False}
-                        with tempfile.NamedTemporaryFile(
-                            prefix=f"{cache_path.stem}.", suffix=output_ext + ".tmp",
-                            dir=cache_root, delete=False,
-                        ) as temp_file:
-                            temp_path = Path(temp_file.name)
-                        try:
-                            rendered.save(temp_path, format=output_format, **save_options)
-                            temp_path.replace(cache_path)
-                        finally:
-                            temp_path.unlink(missing_ok=True)
+                        with Image.open(BytesIO(full_bytes)) as original:
+                            rendered = ImageOps.exif_transpose(original)
+                            rendered.thumbnail(image_size, Image.Resampling.LANCZOS)
+                            if rendered.mode not in ("RGB", "RGBA"):
+                                rendered = rendered.convert("RGBA" if "A" in rendered.getbands() else "RGB")
+                            if use_webp:
+                                output_format = "WEBP"
+                                save_options = {"quality": image_quality, "method": 4}
+                            else:
+                                output_format = "PNG"
+                                save_options = {"optimize": False}
+                            with tempfile.NamedTemporaryFile(
+                                prefix=f"{cache_path.stem}.", suffix=output_ext + ".tmp",
+                                dir=cache_root, delete=False,
+                            ) as temp_file:
+                                temp_path = Path(temp_file.name)
+                            try:
+                                rendered.save(temp_path, format=output_format, **save_options)
+                                temp_path.replace(cache_path)
+                            finally:
+                                temp_path.unlink(missing_ok=True)
                         return cache_path
 
                     cache_lookup = lambda: cache_path if cache_path.is_file() and cache_path.stat().st_size >= 64 else None
@@ -3745,7 +3421,6 @@ class NaraBot(commands.Bot):
                 render_arte_oficial_cacheada_por_id,
                 cache_arte_oficial_webp_existente,
                 render_arte_oficial_webp_cacheada_por_id,
-                extrair_ilustracao_de_carta_completa,
                 detectar_mime_imagem,
                 _fingerprint_templates,
                 VERSAO_RENDERIZADOR,
@@ -3769,6 +3444,22 @@ class NaraBot(commands.Bot):
 
             # Só metadados nesta etapa. O BLOB de arte oficial é lido apenas no cache miss.
             official_meta = await self.db.coliseu_atelie_obter_arte_oficial_metadata(card_id, exemplar_id)
+            if official_meta and int(official_meta["full_card"] or 0) == 1:
+                # Opção B: a imagem aprovada já é a carta final completa. Não aplicar
+                # moldura, medalhões, títulos ou quaisquer camadas do renderizador.
+                complete_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+                if complete_art:
+                    if complete_art["image_key"]:
+                        from sistemas.storage_r2 import download_image
+                        full_bytes = await asyncio.to_thread(download_image, str(complete_art["image_key"]))
+                    else:
+                        full_bytes = bytes(complete_art["image_data"] or b"")
+                    full_mime = await asyncio.to_thread(detectar_mime_imagem, full_bytes)
+                    if full_mime:
+                        full_etag = hashlib.sha256(f"atelier-full:{official_meta['id']}:{exemplar_id}".encode()).hexdigest()
+                        return _responder(full_bytes, full_mime, full_etag)
+                    log.warning("Arte completa oficial inválida: card=%s exemplar=%s", card_id, exemplar_id)
+
             catalog_card = get_carta(card_id)
             snapshot = None
             if owned_row is None:
@@ -3796,10 +3487,21 @@ class NaraBot(commands.Bot):
                     if found:
                         break
                 if snapshot is None and catalog_card is None:
-                    raise web.HTTPNotFound(text=(
-                        "Carta sem dados canônicos disponíveis; a arte isolada não será exibida "
-                        "como se fosse uma carta validada."
-                    ))
+                    if official_meta:
+                        official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+                        if official_art:
+                            if official_art["image_key"]:
+                                from sistemas.storage_r2 import download_image
+                                raw_art = await asyncio.to_thread(
+                                    download_image, str(official_art["image_key"])
+                                )
+                            else:
+                                raw_art = bytes(official_art["image_data"] or b"")
+                            raw_mime = await asyncio.to_thread(detectar_mime_imagem, raw_art)
+                            if raw_mime:
+                                etag = hashlib.sha256(f"official-raw:{official_meta['id']}".encode()).hexdigest()
+                                return _responder(raw_art, raw_mime, etag)
+                    raise web.HTTPNotFound(text="Carta não encontrada no catálogo, coleção ou partidas.")
 
             card = catalog_card
             if card is None and card_id.startswith("jogo_"):
@@ -3813,10 +3515,21 @@ class NaraBot(commands.Bot):
             if card is None and snapshot:
                 card = snapshot
             if card is None:
-                raise web.HTTPNotFound(text=(
-                    "Carta sem dados canônicos disponíveis; a arte isolada não será exibida "
-                    "como se fosse uma carta validada."
-                ))
+                if official_meta:
+                    official_art = await self.db.coliseu_atelie_obter_arte_oficial(card_id, exemplar_id)
+                    if official_art:
+                        if official_art["image_key"]:
+                            from sistemas.storage_r2 import download_image
+                            raw_art = await asyncio.to_thread(
+                                download_image, str(official_art["image_key"])
+                            )
+                        else:
+                            raw_art = bytes(official_art["image_data"] or b"")
+                        raw_mime = await asyncio.to_thread(detectar_mime_imagem, raw_art)
+                        if raw_mime:
+                            etag = hashlib.sha256(f"official-raw:{official_meta['id']}".encode()).hexdigest()
+                            return _responder(raw_art, raw_mime, etag)
+                raise web.HTTPNotFound(text="Carta não encontrada no catálogo.")
 
             source = card.para_dict() if hasattr(card, "para_dict") else dict(card)
             if owned_row is not None and owned_row["rarity"]:
@@ -3834,7 +3547,6 @@ class NaraBot(commands.Bot):
                 "papel_gwent": gwent["papel_gwent"],
                 "habilidade_nome": gwent["habilidade_nome"],
                 "habilidade_texto": gwent["habilidade_texto"],
-                "_habilidade_canonica_preparada": True,
             })
 
             # Três perfis independentes: grade leve, preview e modal HD.
@@ -3857,27 +3569,19 @@ class NaraBot(commands.Bot):
                 if _etag_corresponde(etag):
                     return web.Response(status=304, headers=_headers(etag))
 
-                def _canonical_official_illustration(raw: bytes) -> bytes:
-                    # Artes completas do Ateliê contêm dados impressos em pixels.
-                    # Reaproveita somente a janela ilustrada e reescreve a carta pelo motor.
-                    return (
-                        extrair_ilustracao_de_carta_completa(raw)
-                        if int(official_meta.get("full_card") or 0) == 1 else raw
-                    )
-
                 if use_webp:
                     official_lookup = lambda: cache_arte_oficial_webp_existente(
                         source, official_id, image_size, quality=image_quality
                     )
                     official_renderer = lambda raw: render_arte_oficial_webp_cacheada_por_id(
-                        source, _canonical_official_illustration(raw), official_id, image_size, quality=image_quality
+                        source, raw, official_id, image_size, quality=image_quality
                     )
                 else:
                     official_lookup = lambda: cache_arte_oficial_por_id_existente(
                         source, official_id, image_size
                     )
                     official_renderer = lambda raw: render_arte_oficial_cacheada_por_id(
-                        source, _canonical_official_illustration(raw), official_id, image_size
+                        source, raw, official_id, image_size
                     )
                 try:
                     official_path = await asyncio.to_thread(official_lookup)

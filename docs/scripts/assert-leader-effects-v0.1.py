@@ -28,8 +28,6 @@ LEADERS = {
     "rykard": ("sombra_caminhante", "Véu Carmesim"),
     "esgar": ("voz_caidos", "Véu Carmesim"),
     "papa": ("lider_papa_esquecido", "Os Esquecidos"),
-    "abadessa": ("lider_abadessa_ruinas", "Os Esquecidos"),
-    "martir": ("lider_martir_vigilia", "Os Esquecidos"),
     "rennala": ("arquimaga_eclipse", "Lua Negra"),
     "astel": ("mestre_eclipse", "Lua Negra"),
     "loretta": ("oraculo_tempestade", "Lua Negra"),
@@ -135,45 +133,6 @@ def test_papa():
     assert [card(p,x)["bonus"] for x in ("p_forget_a","p_forget_b","p_other_faction","p_other_row")] == [1,1,0,0]
     return {"leader":"Papa Esquecido","only_forgotten_selected_row":True}
 
-def test_abadessa():
-    status_keys = ("sangramento", "geada", "podrida", "loucura")
-    def cfg(s,p,o):
-        p["board"] = [
-            smoke.unit("ab_top", row="siege", faction="Os Esquecidos", power=7, sangramento=1, geada=1),
-            smoke.unit("ab_second", row="siege", faction="Os Esquecidos", power=6, podrida=1),
-            smoke.unit("ab_third", row="siege", faction="Os Esquecidos", power=3, loucura=1),
-            smoke.unit("ab_foreign", row="siege", faction="Lua Negra", power=9, sangramento=1),
-            smoke.unit("ab_other_row", row="ranged", faction="Os Esquecidos", power=10, geada=1),
-        ]
-    result,s,p,o=activate("abadessa",row="siege",configure=cfg)
-    assert "error" not in result,result
-    for cid in ("ab_top", "ab_second"):
-        u=card(p,cid)
-        assert all(u[key] == 0 for key in status_keys)
-        assert u["bonus"] == 1
-    assert card(p,"ab_third")["loucura"] == 1
-    assert card(p,"ab_foreign")["sangramento"] == 1
-    assert card(p,"ab_other_row")["geada"] == 1
-    return {"leader":"Abadessa das Ruínas","purified_two_strongest_eligible_forgotten_allies":True}
-
-def test_martir():
-    def cfg(s,p,o):
-        p["discard"] = [
-            smoke.unit("mar_small", faction="Os Esquecidos", power=3),
-            smoke.unit("mar_strong", faction="Os Esquecidos", power=5, bonus=2, escudo=1, sangramento=1, geada=1, podrida=1, loucura=1),
-            smoke.unit("mar_foreign", faction="Lua Negra", power=8),
-            smoke.unit("mar_over_cap", faction="Os Esquecidos", power=6),
-            smoke.unit("mar_special", faction="Os Esquecidos", power=0, special=True),
-        ]
-    result,s,p,o=activate("martir",row="ranged",configure=cfg)
-    assert "error" not in result,result
-    revived=card(p,"mar_strong")
-    assert revived is not None and revived["row"] == "ranged" and revived["fileira"] == "ranged"
-    assert revived["bonus"] == 3 and not revived.get("escudo")
-    assert all(revived[key] == 0 for key in ("sangramento", "geada", "podrida", "loucura"))
-    assert {x["id"] for x in p["discard"]} == {"mar_small", "mar_foreign", "mar_over_cap", "mar_special"}
-    return {"leader":"Mártir da Vigília","revived_strongest_forgotten_base_power_5_or_less":True,"cleared_status_and_shield":True}
-
 def test_rennala():
     def cfg(s,p,o):
         p["board"]=[smoke.unit("rn_siege_frost",row="siege",geada=1),smoke.unit("rn_siege_rot",row="siege",podrida=2),smoke.unit("rn_melee_frost",row="melee",geada=1),smoke.unit("rn_healthy",row="siege")]
@@ -209,8 +168,6 @@ for name, fn in [
     ("leader_rykard_sacrifices_weakest_and_buffs_remaining_row_allies",test_rykard),
     ("leader_esgar_revives_strongest_eligible_discard_unit",test_esgar),
     ("leader_papa_buffs_only_forgotten_in_selected_row",test_papa),
-    ("leader_abadessa_purifies_two_strongest_affected_forgotten_allies",test_abadessa),
-    ("leader_martir_revives_strongest_eligible_forgotten_unit",test_martir),
     ("leader_rennala_purifies_and_buffs_only_siege",test_rennala),
     ("leader_astel_marks_top_three_selected_row_with_stack_cap",test_astel),
     ("leader_loretta_buffs_top_two_ranged",test_loretta),
@@ -232,8 +189,6 @@ check("negative_mohg_requires_enemy_in_selected_row",lambda: negative_case("mohg
 check("negative_rykard_requires_two_allies",lambda: negative_case("rykard_one","rykard",configure=lambda s,p,o:p.update(board=[smoke.unit("one_ally")]),expected_error="ao menos 2"))
 check("negative_esgar_requires_eligible_discard_unit",lambda: negative_case("esgar_empty","esgar",configure=lambda s,p,o:p.update(discard=[smoke.unit("special",special=True,power=0),smoke.unit("too_strong",power=6)]),expected_error="poder 5 ou menos"))
 check("negative_papa_requires_forgotten_in_selected_row",lambda: negative_case("papa_none","papa",configure=lambda s,p,o:p.update(board=[smoke.unit("not_forgotten",faction="Lua Negra")]),expected_error="Esquecidos"))
-check("negative_abadessa_requires_affected_forgotten_ally",lambda: negative_case("abadessa_clean","abadessa",row="siege",configure=lambda s,p,o:p.update(board=[smoke.unit("clean_forgotten",faction="Os Esquecidos",row="siege")]),expected_error="afetado na fileira"))
-check("negative_martir_requires_eligible_forgotten_discard_unit",lambda: negative_case("martir_empty","martir",configure=lambda s,p,o:p.update(discard=[smoke.unit("foreign_unit",faction="Lua Negra",power=4),smoke.unit("forgotten_over_cap",faction="Os Esquecidos",power=6)]),expected_error="poder-base até 5"))
 check("negative_rennala_requires_frost_or_rot",lambda: negative_case("rennala_clean","rennala",configure=lambda s,p,o:p.update(board=[smoke.unit("clean")]),expected_error="Geada ou Podridão"))
 check("negative_astel_requires_enemy_in_selected_row",lambda: negative_case("astel_empty","astel",configure=lambda s,p,o:o.update(board=[smoke.unit("enemy_other",row="ranged")]),expected_error="Não há inimigos"))
 check("negative_loretta_rejects_non_ranged_row",lambda: negative_case("loretta_wrong_row","loretta",row="melee",configure=lambda s,p,o:p.update(board=[smoke.unit("l_melee",row="melee")]),expected_error="Longa Distância"))
@@ -254,7 +209,7 @@ check("negative_leader_cannot_be_reused",test_leader_reuse)
 report={
     "metadata":{
         "document":"Leader effect behavioral assertions v0.1",
-        "status":"DIAGNOSTIC ONLY; ALL TWELVE LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
+        "status":"DIAGNOSTIC ONLY; ALL TEN LEADER HANDLERS, SELECTED POSITIVE AND NEGATIVE SCENARIOS",
         "baseline":"soulsbo-main(1).zip",
         "engine":"sistemas.gwent.aplicar_jogada(..., action='leader')",
         "scope":"Synthetic controlled states; no database/API/site/Discord/R2/production match"
@@ -262,7 +217,7 @@ report={
     "counts":{"assertions":len(cases),"passed":sum(x["status"]=="passed" for x in cases),"failed":sum(x["status"]=="failed" for x in cases)},
     "cases":cases,
     "limitations":[
-        "All twelve leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
+        "All ten leader branches are exercised at least once, with selected negative/limit conditions; exhaustive combinations of board states are not covered.",
         "The tests use rarity-independent synthetic unit records; leadership upgrades or external campaign modifiers are not represented.",
         "The action flow is exercised in memory; persistent match serialization, HTTP API, frontend target choices, Discord command flow and production database are not tested.",
         "Passing behavior assertions do not measure strategic strength, balance or win rate."

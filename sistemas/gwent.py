@@ -138,10 +138,13 @@ def canonical_faction(value: str | None) -> str | None:
 
 
 def faction_for_card(card: dict | None) -> str | None:
-    """Resolve primeiro pelo ID canônico; snapshots antigos herdam a facção atual do catálogo."""
+    """Resolve a facção canônica; snapshots antigos são atualizados pelo ID do catálogo, nunca pelo tipo legado."""
     if not isinstance(card, dict):
         return None
-    card_id = str(card.get("card_id") or card.get("id") or "").split("::", 1)[0]
+    faction = canonical_faction(card.get("faccao"))
+    if faction in FACTION_TYPES:
+        return faction
+    card_id = str(card.get("id") or card.get("card_id") or "")
     if card_id:
         try:
             from sistemas.cartas import get_carta
@@ -150,27 +153,31 @@ def faction_for_card(card: dict | None) -> str | None:
                 return model.faccao
         except Exception:
             pass
-    faction = canonical_faction(card.get("faccao"))
-    return faction if faction in FACTION_TYPES else None
+    return None
 
 
 
 def row_for_card(card: dict | None) -> str:
-    """Resolve primeiro a fileira registrada no catálogo; campos antigos são fallback."""
+    """Resolve a posição tática por campo canônico ou ID do catálogo, nunca por classe antiga."""
     if not isinstance(card, dict):
         return "melee"
-    card_id = str(card.get("card_id") or card.get("id") or "").split("::", 1)[0]
+    row = str(card.get("fileira") or card.get("row") or "")
+    if row in ROWS:
+        return row
+    card_id = str(card.get("id") or card.get("card_id") or "")
     if card_id:
         try:
             from sistemas.cartas import get_carta, FILEIRAS_POR_CARTA
             model = get_carta(card_id)
-            row = str((model.fileira if model else "") or FILEIRAS_POR_CARTA.get(card_id) or "")
+            if model is not None:
+                row = str(model.fileira or FILEIRAS_POR_CARTA.get(card_id) or "")
+            else:
+                row = str(FILEIRAS_POR_CARTA.get(card_id) or "")
             if row in ROWS:
                 return row
         except Exception:
             pass
-    row = str(card.get("fileira") or card.get("row") or "")
-    return row if row in ROWS else "melee"
+    return "melee"
 
 def embaralhar_deck(deck: list[dict], rng=None) -> list[dict]:
     """Retorna uma cópia embaralhada; produção usa SystemRandom e testes podem injetar RNG."""
@@ -215,7 +222,7 @@ HABILIDADES_UNIDADE_IMPLEMENTADAS = frozenset({
     "guardiao_fileira", "cacador_solitario", "estandarte", "resistencia_climatica",
     "eco_arcano", "dupla_fornalha", "irmandade_veu", "circulo_arcano",
     # Etapa 1: efeitos de ciclo de vida (escudo, queda, ressurreição, glória).
-    "vinganca", "escudo_ferro", "ressurgir", "devorar", "gloria", "sobrevivente", "espolios",
+    "vinganca", "escudo_ferro", "ressurgir", "devorar", "gloria", "espolios",
     # Etapa 4: novas mecânicas estratégicas simples e profundas.
     "legado", "devoto", "escolha_ritmo", "sinergia_faccao",
 })
@@ -226,42 +233,13 @@ HABILIDADES_ESPECIAIS_IMPLEMENTADAS = frozenset({
     "gwent_egide", "gwent_requiem", "gwent_passo",
     "gwent_sangramento", "gwent_geada_cariana", "gwent_podrida", "gwent_loucura",
     "gwent_chama", "gwent_invocacao",
-    "gwent_v77_ord_egide", "gwent_v77_ord_hino", "gwent_v77_ord_silencio",
-    "gwent_v77_veu_sangramento", "gwent_v77_veu_podrida", "gwent_v77_veu_loucura", "gwent_v77_veu_execucao",
-    "gwent_v77_esq_muralha", "gwent_v77_esq_chifre", "gwent_v77_esq_medico", "gwent_v77_esq_egide",
-    "gwent_v77_esq_passo", "gwent_v77_esq_chama", "gwent_v77_esq_vinculo", "gwent_v77_esq_batedor",
-    "gwent_v77_esq_purificar", "gwent_v77_esq_clima",
     "reliquia_godrick", "reliquia_renala", "reliquia_morte", "reliquia_noite_chama", "reliquia_lamina_negra", "reliquia_algemas",
 })
-
-# IDs declarados nas cartas V77 mantêm nomes temáticos; o motor executa o handler
-# já validado correspondente. A interface recebe o ID efetivo para mostrar
-# controles de fileira/alvo exatamente como nas cartas originais.
-SPECIAL_EFFECT_ALIASES = {
-    "gwent_v77_ord_egide": "gwent_egide",
-    "gwent_v77_ord_hino": "gwent_chifre",
-    "gwent_v77_ord_silencio": "gwent_purificar",
-    "gwent_v77_veu_sangramento": "gwent_sangramento",
-    "gwent_v77_veu_podrida": "gwent_podrida",
-    "gwent_v77_veu_loucura": "gwent_loucura",
-    "gwent_v77_veu_execucao": "gwent_execucao",
-    "gwent_v77_esq_muralha": "gwent_muralha",
-    "gwent_v77_esq_chifre": "gwent_chifre",
-    "gwent_v77_esq_medico": "gwent_medico",
-    "gwent_v77_esq_egide": "gwent_egide",
-    "gwent_v77_esq_passo": "gwent_passo",
-    "gwent_v77_esq_chama": "gwent_chama",
-    "gwent_v77_esq_vinculo": "gwent_vinculo",
-    "gwent_v77_esq_batedor": "gwent_batedor",
-    "gwent_v77_esq_purificar": "gwent_purificar",
-    "gwent_v77_esq_clima": "gwent_clima",
-}
-
 FACTION_ARCHETYPES = {
     "Ordem Áurea": {"name": "Formação e Resistência", "description": "Proteção de fileira, fortalecimento de aliados e +1 na primeira unidade da Ordem Áurea jogada em cada rodada."},
     "Lua Negra": {"name": "Feitiçaria e Controle", "description": "Magia lunar, cosmos, gravidade, congelamento e +1 na primeira unidade da Lua Negra jogada em cada rodada."},
     "Véu Carmesim": {"name": "Sangue e Sacrifício", "description": "Sangramento, sacrifício, heresia e +1 na primeira unidade do Véu Carmesim jogada em cada rodada."},
-    "Os Esquecidos": {"name": "Fé e Renascimento", "description": "Devoção, proteção, purificação, glória e retorno das unidades esquecidas; a primeira unidade dos Esquecidos jogada em cada rodada recebe +1."},
+    "Os Esquecidos": {"name": "Fé e Glória", "description": "Devoção, evangelho, irmandade e +1 na primeira unidade dos Esquecidos jogada em cada rodada."},
 }
 LEADERS = {
     # Ordem Áurea — força régia, proteção e purificação.
@@ -274,8 +252,6 @@ LEADERS = {
     "voz_caidos": {"name": "Esgar", "faction": "Véu Carmesim", "description": "Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus.", "effect": "esgar_blood_priest"},
     # Líder próprio dos Esquecidos, baseado na identidade do Papa Esquecido.
     "lider_papa_esquecido": {"name": "Papa Esquecido", "faction": "Os Esquecidos", "description": "Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida.", "effect": "forgotten_blessing"},
-    "lider_abadessa_ruinas": {"name": "Abadessa das Ruínas", "faction": "Os Esquecidos", "description": "Purifica até 2 aliados dos Esquecidos afetados e de maior poder efetivo na fileira escolhida, removendo Sangramento, Geada, Podridão e Loucura. Cada um recebe +1 de bônus.", "effect": "forgotten_purification"},
-    "lider_martir_vigilia": {"name": "Mártir da Vigília", "faction": "Os Esquecidos", "description": "Ressuscita do descarte a unidade mais forte dos Esquecidos com poder-base até 5 na fileira escolhida, com +1 de bônus.", "effect": "forgotten_revival"},
     # Lua Negra — feitiçaria, gravidade e domínio astral.
     "arquimaga_eclipse": {"name": "Rennala", "faction": "Lua Negra", "description": "Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus.", "effect": "rennala_full_moon"},
     "mestre_eclipse": {"name": "Astel", "faction": "Lua Negra", "description": "A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes.", "effect": "astel_gravity"},
@@ -364,31 +340,6 @@ CARD_SYNERGY_TAGS = {
     "luterano_profeta": {"fe", "soberania"},
     "luterano_vigia": {"fe", "gloria_divina"},
     "luterano_anjo2": {"fe", "gloria_divina"},
-    "gwent_v76_esq_cavaleiro_penitente": {"fe", "irmandade"},
-    "gwent_v76_esq_peregrino_cinza": {"fe", "evangelho"},
-    "gwent_v76_esq_guardiao_vitrais": {"fe", "sacerdos"},
-    "gwent_v76_esq_irma_ruinas": {"fe", "irmandade"},
-    "gwent_v76_esq_confessor_velado": {"fe", "devocao"},
-    "gwent_v76_esq_guardia_santuario": {"fe", "sacerdos"},
-    "gwent_v76_esq_cantor_hino": {"fe", "gloria_divina"},
-    "gwent_v76_esq_diaconisa_altar": {"fe", "devocao"},
-    "gwent_v76_esq_oraculo_silencioso": {"fe", "sacerdos"},
-    "gwent_v76_esq_serafim_caido": {"fe", "gloria_divina"},
-    "gwent_v76_esq_martir_cinzento": {"fe", "irmandade"},
-    "gwent_v76_esq_prelado_ruinas": {"fe", "soberania"},
-    "gwent_v76_esq_arauto_cantico": {"fe", "gloria_divina"},
-    "gwent_v76_esq_guardiao_relicario": {"fe", "sacerdos"},
-    "gwent_v76_esq_santo_sem_nome": {"fe", "soberania"},
-    "gwent_v76_esq_anjo_selo": {"fe", "gloria_divina"},
-    "gwent_v76_ordem_guardiao_graal": {"muralha", "ordem_dourada"},
-    "gwent_v76_ordem_sentinela_luz": {"estandarte", "ordem_dourada"},
-    "gwent_v76_lua_tecela_nevoa": {"astral", "lua_cariana"},
-    "gwent_v76_lua_cavaleiro_astral": {"lua_cariana", "v75_lunar_paths"},
-    "gwent_v76_veu_flagelante": {"sangue_mohgwyn", "v75_blood_mark"},
-    "gwent_v76_veu_lamina_hemantica": {"sangue_mohgwyn", "v75_blood_mark"},
-    "gwent_v76_veu_carrasco_altar": {"sangue_mohgwyn", "v75_blood_feast"},
-    "gwent_v76_veu_arauto_sangue": {"sangue_mohgwyn", "banquete"},
-    "gwent_v76_veu_cao_rubro": {"sangue_mohgwyn", "banquete"},
 }
 SYNERGY_COMBOS = {
     "cinzas_fornalha": {"priority": 10, "name": "Aliança da Árvore Áurea", "tags": {"cinzas", "fornalha"}, "minimum": 2, "bonus": 2, "description": "Um Cavaleiro da Árvore Áurea (ou de Radahn) e uma unidade da Fornalha, em cartas distintas, coordenam a formação (+2)."},
@@ -397,15 +348,15 @@ SYNERGY_COMBOS = {
     "mare_abissal": {"priority": 40, "name": "Maré Abissal", "tags": {"abismo"}, "minimum": 2, "bonus": 2, "description": "Godfrey e Cavaleiro Carmesim despertam a mesma força (+2)."},
     "juramento_estandarte": {"priority": 50, "name": "Juramento de Leyndell", "tags": {"estandarte"}, "minimum": 2, "bonus": 1, "team_bonus": 1, "description": "Porta-estandarte e Guardas da Árvore Áurea fortalecem a formação (+1 para a carta participante que ativa o combo e +1 aos aliados na mesma fileira)."},
     "passos_duas_luas": {"priority": 60, "name": "Dança da Lua Negra", "tags": {"duas_luas"}, "minimum": 2, "bonus": 2, "description": "Dançarina, Gêmea ou Cartógrafa sincronizam seus movimentos (+2)."},
-    "eco_convergente": {"priority": 70, "name": "Eco das Pedras Cintilantes", "tags": {"eco", "astral"}, "minimum": 2, "bonus": 2, "description": "O Erudito das Pedras e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."},
+    "eco_convergente": {"priority": 70, "name": "Eco das Pedras Cintilantes", "tags": {"eco", "astral"}, "minimum": 2, "bonus": 2, "description": "O Erudito das Pedras Cintilantes e outra unidade Astral, em cartas distintas, amplificam a mesma magia (+2)."},
     "chama_dupla": {"priority": 80, "name": "Chamas do Monte Gelmir", "tags": {"chama"}, "minimum": 2, "bonus": 2, "description": "Piromante e Feiticeira da Lua Gélida equilibram suas chamas (+2)."},
     "muralha_inabalavel": {"priority": 90, "name": "Defesa de Leyndell", "tags": {"muralha"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Muralha Rubra erguem a linha (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
     "banquete_guerra": {"priority": 100, "name": "Banquete de Sangue", "tags": {"banquete"}, "minimum": 2, "bonus": 3, "description": "Carniceiro da Forja e Intendente dividem o butim (+3)."},
     "procissao_fantasma": {"priority": 110, "name": "Procissão dos que Vivem na Morte", "tags": {"fantasmas"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades fantasmas marcham juntas (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
     "caravana_saqueadora": {"priority": 120, "name": "Saque da Cidade Eterna", "tags": {"caravana"}, "minimum": 2, "bonus": 2, "description": "Saqueadora e Contrabandista fecham o negócio (+2)."},
     "ritual_runico": {"priority": 130, "name": "Ritual das Runas", "tags": {"runico"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades rúnicas completam o círculo (+2 para a carta participante que ativa o combo e +1 aos aliados na fileira)."},
-    "eclipse_voraz": {"priority": 140, "name": "Eclipse Sanguíneo", "tags": {"eclipse_voraz"}, "minimum": 2, "bonus": 3, "description": "Cavaleiro Sangrento e Bibliotecária eclipsam a mesma fonte (+3)."},
-    "rota_peregrina": {"priority": 150, "name": "Caminho do Maculado", "tags": {"peregrino"}, "minimum": 2, "bonus": 1, "description": "Duelista e Batedor de Gelmir coordenam o avanço (+1)."},
+    "eclipse_voraz": {"priority": 140, "name": "Eclipse Sanguíneo", "tags": {"eclipse_voraz"}, "minimum": 2, "bonus": 3, "description": "Cavaleiro de Sangue de Mohg e Bibliotecária eclipsam a mesma fonte (+3)."},
+    "rota_peregrina": {"priority": 150, "name": "Caminho do Maculado", "tags": {"peregrino"}, "minimum": 2, "bonus": 1, "description": "Duelista e Batedor da Mansão Vulcânica coordenam o avanço (+1)."},
     "juramento_erdtree": {"priority": 160, "name": "Juramento da Árvore Áurea", "tags": {"ordem_dourada"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades da Ordem Áurea reforçam a formação: +2 para a carta participante que ativa o combo e +1 aos aliados da mesma fileira."},
     "convergencia_lunar": {"priority": 170, "name": "Convergência da Lua Negra", "tags": {"lua_cariana"}, "minimum": 2, "bonus": 2, "description": "Duas unidades ligadas à Lua Negra convergem e recebem +2."},
     "ritual_dinastia": {"priority": 180, "name": "Ritual do Véu Carmesim", "tags": {"sangue_mohgwyn"}, "minimum": 2, "bonus": 2, "team_bonus": 1, "description": "Duas unidades do Véu Carmesim fortalecem a carta participante que ativa o ritual (+2) e os aliados na fileira (+1)."},
@@ -426,12 +377,12 @@ SYNERGY_COMBOS = {
 # Habilidades de identidade: efeitos próprios de cartas-chave, além das habilidades
 # gerais e dos combos de facção. Cada efeito é resolvido uma vez ao entrar em campo.
 CARD_IDENTITY_ABILITIES = {
-    "chefe_guardiao_cinzas": {"name": "Égide das Cinzas", "text": "Se já houver um aliado na mesma fileira, ele recebe +1 de bônus e esta carta também recebe +1.", "effect": "ash_guardian"},
+    "chefe_guardiao_cinzas": {"name": "Égide das Cinzas", "text": "Ao entrar em campo, dá +1 de bônus a um aliado da mesma fileira. Se já houver um aliado nessa fileira, esta carta também ganha +1.", "effect": "ash_guardian"},
     "chefe_dama_vazio": {"name": "Fenda do Vazio", "text": "Ao entrar em campo, tira 2 pontos de bônus da unidade inimiga mais forte. O bônus dela não pode ficar abaixo de -2.", "effect": "void_rend"},
     "chefe_cervo_sombrio": {"name": "Passagem Sombria", "text": "Ganha +1 para cada outra fileira que tenha um aliado seu, até +2.", "effect": "shadow_paths"},
-    "chefe_rei_afogado": {"name": "Dízimo do Abismo", "text": "Recebe +2 se houver qualquer carta no seu descarte; caso contrário, recebe +1 se o adversário tiver mais unidades em campo.", "effect": "abyss_tithe"},
-    "chefe_oraculo_ruina": {"name": "Presságio da Ruína", "text": "A unidade inimiga de maior poder efetivo perde 1 de bônus (mín. -2). Se sua pontuação estiver menor ao entrar, esta carta recebe +1.", "effect": "ruin_omen"},
-    "chefe_cacador_sem_rosto": {"name": "Marca da Presa", "text": "Recebe +2 se qualquer inimigo tiver poder efetivo maior que o poder-base desta carta.", "effect": "faceless_hunt"},
+    "chefe_rei_afogado": {"name": "Dízimo do Abismo", "text": "Ganha +2 se você tiver uma unidade no descarte. Se não tiver, ganha +1 caso o adversário tenha mais unidades em campo.", "effect": "abyss_tithe"},
+    "chefe_oraculo_ruina": {"name": "Presságio da Ruína", "text": "Tira 1 ponto de bônus da unidade inimiga mais forte. Também ganha +1 se o adversário estiver vencendo.", "effect": "ruin_omen"},
+    "chefe_cacador_sem_rosto": {"name": "Marca da Presa", "text": "Ganha +2 se o adversário tiver uma unidade com poder atual maior que o poder-base desta carta.", "effect": "faceless_hunt"},
     "chefe_vigia_cinzento": {"name": "Vigília Cinzenta", "text": "Dá +1 de bônus a todos os seus outros aliados na mesma fileira.", "effect": "grey_watch"},
     "chefe_aparicao_veio": {"name": "Deslocamento Espectral", "text": "Ganha +2 se sua unidade anterior foi jogada em outra fileira.", "effect": "veil_shift"},
     "arma_lamina_peregrino": {"name": "Duelo do Peregrino", "text": "Ganha +2 se o adversário jogou uma unidade na mesma fileira no turno anterior.", "effect": "pilgrim_duel"},
@@ -439,34 +390,34 @@ CARD_IDENTITY_ABILITIES = {
     "arma_cajado_marulho": {"name": "Ressonância das Marés", "text": "Ganha +2 se o adversário tiver uma unidade do Véu Carmesim. Caso contrário, ganha +1 se ele tiver mais unidades em campo.", "effect": "tide_resonance"},
     "arma_duas_luas": {"name": "Dança Espelhada", "text": "Ganha +1 se você tiver outro aliado em uma fileira diferente.", "effect": "twin_dance"},
     "arma_grande_sino": {"name": "Sino do Último Bastião", "text": "Ganha +2 quando sua pontuação total for menor que a do adversário.", "effect": "last_bell"},
-    "arma_agulha_astro": {"name": "Fio Astral", "text": "O inimigo de maior poder efetivo perde 1 de bônus (mín. -2). A próxima unidade Astral jogada nesta rodada recebe +1; a preparação permanece até essa unidade entrar ou a rodada terminar.", "effect": "astral_thread"},
+    "arma_agulha_astro": {"name": "Fio Astral", "text": "Marca o inimigo mais forte e tira 1 ponto de bônus dele. A próxima unidade Astral que você jogar ganha +1 nesta rodada.", "effect": "astral_thread"},
     "arma_lanca_fornalha": {"name": "Investida da Fornalha", "text": "Ganha +1 se já houver outra unidade da Ordem Áurea em campo.", "effect": "furnace_charge"},
-    "arma_arco_peregrino": {"name": "Tiro de Cobertura", "text": "O aliado de menor poder efetivo em outra fileira recebe +1 de bônus, se existir.", "effect": "covering_shot"},
+    "arma_arco_peregrino": {"name": "Tiro de Cobertura", "text": "Dá +1 de bônus ao seu aliado mais fraco que esteja em outra fileira.", "effect": "covering_shot"},
     "magia_brasa_errante": {"name": "Brasa Persistente", "text": "Ganha +1 para cada fileira que tenha inimigos e esteja sob efeito climático, até +2.", "effect": "wandering_ember"},
-    "magia_selo_vigilia": {"name": "Selo de Vigília", "text": "Esta carta recebe Resistência Climática 1. Se houver aliado na mesma fileira, o primeiro recebe +1 de bônus.", "effect": "vigil_seal"},
-    "magia_trovao_oco": {"name": "Descarga Oca", "text": "Cada inimigo na mesma fileira perde 1 de bônus (mín. -2).", "effect": "hollow_thunder"},
+    "magia_selo_vigilia": {"name": "Selo de Vigília", "text": "Reduz em 1 o dano do clima sofrido por esta carta e dá +1 de bônus a um aliado da mesma fileira.", "effect": "vigil_seal"},
+    "magia_trovao_oco": {"name": "Descarga Oca", "text": "Tira 1 ponto de bônus de cada unidade inimiga na mesma fileira.", "effect": "hollow_thunder"},
     "magia_nevoa_antiga": {"name": "Névoa Ancestral", "text": "Ganha +2 se houver efeito climático em qualquer fileira.", "effect": "ancient_mist"},
     "magia_sol_negro": {"name": "Eclipse Devorador", "text": "Ganha +2 se algum inimigo tiver bônus acima de zero.", "effect": "devouring_eclipse"},
     "magia_fagulha": {"name": "Faísca Condutora", "text": "Ganha +1 se houver outra unidade da Lua Negra do seu lado do campo.", "effect": "conductive_spark"},
     "magia_orbe_eco": {"name": "Orbe Refrator", "text": "Ganha +1 para cada carta especial no seu descarte, até +2.", "effect": "echo_orb"},
-    "magia_chama_fria": {"name": "Contrafogo", "text": "Até 2 inimigos com maior bônus na mesma fileira perdem 1 de bônus cada (mín. -2).", "effect": "counterflame"},
-    "covenant_lua_velada": {"name": "Aliança Lunar", "text": "Esta carta recebe +1. O aliado de menor poder efetivo em outra fileira também recebe +1 de bônus, se existir.", "effect": "veiled_moon"},
+    "magia_chama_fria": {"name": "Contrafogo", "text": "Tira 1 ponto de bônus de até dois inimigos na mesma fileira.", "effect": "counterflame"},
+    "covenant_lua_velada": {"name": "Aliança Lunar", "text": "Esta carta ganha +1 e dá +1 de bônus a um aliado em outra fileira.", "effect": "veiled_moon"},
     "covenant_sentinelas": {"name": "Sentinela Compartilhada", "text": "Ganha +1 se você tiver pelo menos um aliado em cada uma das outras duas fileiras.", "effect": "shared_sentinel"},
     "covenant_ultimos": {"name": "Último Juramento", "text": "Ganha +2 se você tiver menos unidades em campo que o adversário.", "effect": "last_oath"},
     "covenant_filhos_brasa": {"name": "Herança da Brasa", "text": "Esta carta ganha +1 e dá +1 de bônus a um aliado da Ordem Áurea na mesma fileira.", "effect": "ember_kin"},
     "covenant_peregrinos_nevoa": {"name": "Rastro na Névoa", "text": "Ganha +1 se sua unidade anterior foi jogada em outra fileira.", "effect": "mist_trail"},
-    "chefe_malenia_lamina_miquella": {"name": "Flor Escarlate", "text": "Cada inimigo da fileira recebe 1 marca de Podridão (máx. 2); cada marca reduz 1 de poder efetivo. Ao atingir 2, bônus positivo perde 1 (mín. 0). Primordial: até 3 alvos nessa transição perdem mais 1 (mín. -2). Não reduz de novo com 2 marcas.", "effect": "scarlet_bloom"},
-    "chefe_radahn_flagelo_estrelas": {"name": "Gravidade do Flagelo", "text": "Ao entrar, move o inimigo de maior poder efetivo para esta fileira e reduz seu bônus em 2 (mín. -2).", "effect": "star_gravity"},
-    "chefe_maliketh_morte_destinada": {"name": "Morte Destinada", "text": "Ao entrar, o inimigo de maior poder efetivo perde 2 de bônus (mín. -2).", "effect": "destined_death"},
-    "chefe_messmer_impalador": {"name": "Lança do Impalador", "text": "Ao entrar, cada inimigo da fileira recebe 1 marca de Sangramento. A segunda marca consome as marcas e causa -2 de bônus (mín. -2); estados expiram no fim da rodada.", "effect": "impaling_spear"},
-    "chefe_placidusax_lorde_dragao": {"name": "Tempestade do Tempo", "text": "Ao entrar, cada inimigo da fileira recebe 1 marca de Geada (máx. 2); esta carta recebe +1 por inimigo atingido, até +3.", "effect": "time_storm"},
+    "chefe_malenia_lamina_miquella": {"name": "Flor Escarlate", "text": "Ao entrar em campo, aplica Podridão Escarlate aos inimigos da fileira. Quem já estiver contaminado recebe uma segunda marca.", "effect": "scarlet_bloom"},
+    "chefe_radahn_flagelo_estrelas": {"name": "Gravidade do Flagelo", "text": "Ao entrar em campo, move o inimigo mais forte para sua fileira e tira 2 pontos de bônus dele.", "effect": "star_gravity"},
+    "chefe_maliketh_morte_destinada": {"name": "Morte Destinada", "text": "Ao entrar em campo, tira até 2 pontos de bônus do inimigo mais forte.", "effect": "destined_death"},
+    "chefe_messmer_impalador": {"name": "Lança do Impalador", "text": "Ao entrar em campo, marca os inimigos da fileira com Sangramento. A segunda marca causa Hemorragia.", "effect": "impaling_spear"},
+    "chefe_placidusax_lorde_dragao": {"name": "Tempestade do Tempo", "text": "Ao entrar em campo, aplica Geada aos inimigos da fileira e ganha +1 para cada inimigo atingido, até +3.", "effect": "time_storm"},
     # Expansão V75 — efeitos individuais das doze novas unidades.
-    "gwent_v75_ordem_veterano_juramento": {"name": "Juramento Dourado", "text": "Ao entrar, esta carta recebe +1; o aliado de menor poder efetivo na mesma fileira também recebe +1, se existir.", "effect": "v75_golden_vow"},
-    "gwent_v75_ordem_confessora_graca": {"name": "Regressão Serena", "text": "Purifica até 2 aliados da fileira de Sangramento, Geada, Podridão ou Loucura; cada um recebe +1. Se ninguém precisar, o aliado mais fraco recebe +1; sem aliados, esta carta recebe +1.", "effect": "v75_grace_mender"},
-    "gwent_v75_veu_acolito_sangue": {"name": "Marca da Dinastia", "text": "Marca o inimigo de maior poder efetivo na fileira. Na segunda marca, consome Sangramento, reduz 2 de bônus (mín. -2) e esta carta recebe +1.", "effect": "v75_blood_mark"},
-    "gwent_v75_veu_carrasco_preco": {"name": "Preço em Sangue", "text": "Sacrifica o aliado de menor poder efetivo da mesma fileira e recebe bônus igual ao poder efetivo dele (mín. +1, máx. +3). Sem aliado, recebe +1.", "effect": "v75_blood_price"},
-    "gwent_v75_lua_oraculo_geada": {"name": "Presságio da Geada", "text": "O inimigo de maior poder efetivo na fileira recebe 1 marca de Geada (máx. 2). Se já tinha marca, esta carta recebe +1.", "effect": "v75_frost_oracle"},
-    "gwent_v75_lua_graviturgista": {"name": "Cisalhamento Gravitacional", "text": "Até 2 inimigos com bônus positivo na fileira perdem 1 (mín. -2). Se atingir 2 alvos, esta carta recebe +1.", "effect": "v75_gravity_shear"},
+    "gwent_v75_ordem_veterano_juramento": {"name": "Juramento Dourado", "text": "Ao entrar, recebe +1; se houver aliado na mesma fileira, o aliado mais fraco também recebe +1.", "effect": "v75_golden_vow"},
+    "gwent_v75_ordem_confessora_graca": {"name": "Regressão Serena", "text": "Purifica até dois aliados da mesma fileira de estados negativos; cada aliado purificado recebe +1. Se ninguém precisar de purificação, fortalece o aliado mais fraco em +1.", "effect": "v75_grace_mender"},
+    "gwent_v75_veu_acolito_sangue": {"name": "Marca da Dinastia", "text": "Aplica uma marca de Sangramento ao inimigo mais forte da fileira; a segunda marca provoca Hemorragia e reduz 2 de bônus.", "effect": "v75_blood_mark"},
+    "gwent_v75_veu_carrasco_preco": {"name": "Preço em Sangue", "text": "Sacrifica o aliado mais fraco da mesma fileira e recebe bônus igual ao seu poder efetivo, até +3; sem aliado, recebe +1.", "effect": "v75_blood_price"},
+    "gwent_v75_lua_oraculo_geada": {"name": "Presságio da Geada", "text": "Aplica uma marca de Geada ao inimigo mais forte da fileira; se já tinha uma marca, completa a segunda e recebe +1.", "effect": "v75_frost_oracle"},
+    "gwent_v75_lua_graviturgista": {"name": "Cisalhamento Gravitacional", "text": "Reduz em 1 o bônus de até dois inimigos com bônus positivo na fileira; se atingir dois, recebe +1.", "effect": "v75_gravity_shear"},
 }
 
 
@@ -574,23 +525,11 @@ def _aplicar_habilidade_identidade(player: dict, other: dict, card: dict, state:
     elif effect == "mist_trail":
         if player.get("last_row") is not None and player.get("last_row") != row: card["bonus"] += 1
     elif effect == "scarlet_bloom":
-        corroded_targets = []
         for unit in enemy_row:
-            # Uma aplicação acrescenta uma única marca; a consequência só
-            # ocorre ao cruzar de 1 para 2, nunca enquanto o alvo fica no limite.
-            marks = max(0, min(2, int(unit.get("podrida", 0))))
-            if marks >= 2:
-                continue
-            unit["podrida"] = marks + 1
-            # A regra-base de Podridão só remove bônus que ainda sejam positivos.
-            if marks == 1 and int(unit.get("bonus", 0)) > 0:
+            marks = int(unit.get("podrida", 0))
+            unit["podrida"] = min(2, marks + (2 if marks else 1))
+            if unit["podrida"] >= 2 and int(unit.get("bonus", 0)) > 0:
                 unit["bonus"] = max(0, int(unit.get("bonus", 0)) - 1)
-                corroded_targets.append(unit)
-        # A raridade Primordial de Malenia é explícita e limitada: até três
-        # alvos que realmente sofreram a corrosão perdem mais 1, com piso -2.
-        # Isso substitui o amplificador genérico para esta identidade específica.
-        for unit in corroded_targets[:3]:
-            unit["bonus"] = max(-2, int(unit.get("bonus", 0)) - 1)
     elif effect == "star_gravity" and strongest:
         strongest["row"] = row
         strongest["bonus"] = max(-2, int(strongest.get("bonus", 0)) - 2)
@@ -754,33 +693,24 @@ def _aplicar_potencia_raridade(card: dict, player: dict, other: dict,
 
 
 def preparar_carta(card: dict) -> dict:
-    catalog_id = str(card.get("card_id") or card.get("id") or "").split("::", 1)[0]
-    model = None
+    special = str(card.get("categoria", "")).casefold() == "especial"
+    skill = str(card.get("habilidade", ""))
     try:
-        from sistemas.cartas import HABILIDADES, FILEIRAS_POR_CARTA, CUSTO_RARIDADE, get_carta
-        model = get_carta(catalog_id)
+        from sistemas.cartas import HABILIDADES, FILEIRAS_POR_CARTA, get_carta
+        skill_data = HABILIDADES.get(skill, {})
+        model = get_carta(str(card.get("id", "")))
+        fileira_catalogo = (model.fileira or FILEIRAS_POR_CARTA.get(model.id, "melee")) if model else FILEIRAS_POR_CARTA.get(str(card.get("id", "")), "melee")
     except Exception:
-        HABILIDADES, FILEIRAS_POR_CARTA, CUSTO_RARIDADE = {}, {}, {}
-    special = str(model.categoria if model else card.get("categoria", "")).casefold() == "especial"
-    skill = str(model.habilidade if model else card.get("habilidade", ""))
-    skill_effect = SPECIAL_EFFECT_ALIASES.get(skill, skill) if special else skill
-    skill_data = HABILIDADES.get(skill, {})
-    fileira_catalogo = (model.fileira or FILEIRAS_POR_CARTA.get(model.id, "melee")) if model else FILEIRAS_POR_CARTA.get(catalog_id, "melee")
+        skill_data = {}
+        fileira_catalogo = "melee"
     # Cartas antigas salvas no banco recebem a classificação tática atual pelo ID.
     row = row_for_card(card)
     faction = faction_for_card(card) or "Ordem Áurea"
     category = "Especial" if special else "Unidade"
-    identity = CARD_IDENTITY_ABILITIES.get(catalog_id, {})
+    identity = CARD_IDENTITY_ABILITIES.get(str(card["id"]), {})
     raridade = str(card.get("raridade", "Comum"))
-    # Sinergias são regras de combate e precisam ser visíveis na carta, mesmo
-    # quando ela não possui uma habilidade individual.
-    own_tags = CARD_SYNERGY_TAGS.get(catalog_id, set())
-    has_synergy = bool(own_tags)
-    combos_compativeis = [
-        {"id": combo_id, "nome": combo["name"], "descricao": combo["description"]}
-        for combo_id, combo in SYNERGY_COMBOS.items()
-        if own_tags & set(combo["tags"])
-    ]
+    # Sem habilidade, só recebe orçamento se puder completar um combo registrado.
+    has_synergy = bool(CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set()))
     # Relíquias possuem potência fixa no próprio texto do item; a raridade não
     # acrescenta modificadores ocultos como ocorre com cartas especiais comuns.
     budget = (0 if skill.startswith("reliquia_") else
@@ -796,61 +726,41 @@ def preparar_carta(card: dict) -> dict:
         textos_habilidade.append(str(card["habilidade_texto"]))
     elif skill_data.get("texto"):
         textos_habilidade.append(str(skill_data["texto"]))
-    # Sem habilidade é ausência de dados, não uma regra textual. O front-end decide
-    # exibir um único rótulo; não duplicamos o mesmo placeholder como título e efeito.
-    texto_habilidade = str(" ".join(textos_habilidade))[:420]
-    alvo_label = "alvo" if budget == 1 else "alvos"
-    combo_count = len(combos_compativeis)
-    combo_label = "combo" if combo_count == 1 else "combos"
-    if not identity and not skill and combos_compativeis:
-        texto_habilidade = (
-            f"Sinergia: participa de {combo_count} {combo_label}; ativa ao reunir as tags exigidas "
-            "e 2 unidades distintas. Cada combo ativa 1 vez por jogador/rodada. Requisitos e bônus no site."
-        )
+    texto_habilidade = str(" ".join(textos_habilidade) or "Sem habilidade especial.")[:420]
     if budget:
+        quantidade_alteracoes = "alteração" if budget == 1 else "alterações"
         upgrades = {
-            "gwent_medico": f" Raridade {raridade}: o limite de poder-base sobe até {min(7, 4 + budget)}.",
-            "gwent_execucao": f" Raridade {raridade}: alcança poder efetivo até {min(9, 6 + budget)}; pode reforçar bônus gerados por efeitos de queda em até {budget} {alvo_label}.",
-            "gwent_requiem": f" Raridade {raridade}: o limite de poder-base sobe até {min(9, 6 + budget)}.",
-            "gwent_batedor": f" Raridade {raridade}: compra até {min(2, 1 + budget)} cartas da reserva.",
-            "gwent_invocacao": f" Raridade {raridade}: invoca Lobos Espirituais com {min(6, 3 + budget)} de poder.",
-            "gwent_egide": f" Raridade {raridade}: protege até {min(3, 1 + budget)} aliados sem Escudo.",
-            "gwent_passo": f" Raridade {raridade}: move até {min(3, 1 + budget)} aliados.",
-            "gwent_sangramento": f" Raridade {raridade}: aplica a segunda marca a até {min(3, budget)} {'alvo' if min(3, budget) == 1 else 'alvos'} sem marca; reforça a redução de bônus em até {budget} {alvo_label} (mín. -2).",
-            "gwent_geada_cariana": f" Raridade {raridade}: aplica a segunda marca imediatamente a até {min(3, budget)} alvos sem Geada prévia.",
-            "gwent_chuva": f" Raridade {raridade}: reforça a redução de bônus da Hemorragia em até {budget} {alvo_label} (mín. -2).",
-            "gwent_chifre": f" Raridade {raridade}: acrescenta +1 de bônus a até {budget} aliados afetados.",
-            "gwent_vinculo": f" Raridade {raridade}: acrescenta +1 de bônus a até {budget} aliados afetados.",
-            "gwent_muralha": f" Raridade {raridade}: acrescenta +1 de bônus a até {budget} aliados afetados.",
-            "gwent_queima": f" Raridade {raridade}: reforça bônus gerados por efeitos de queda em até {budget} {alvo_label}; não amplia remoções nem atravessa Escudos.",
-            "gwent_podrida": f" Raridade {raridade}: aplica a segunda marca imediatamente a até {min(3, budget)} alvos sem marca prévia; reforça reduções de bônus causadas, até -2.",
-            "gwent_loucura": f" Raridade {raridade}: aplica a segunda marca imediatamente a até {min(3, budget)} alvos sem marca prévia; reforça reduções de bônus causadas, até -2.",
-            "gwent_chama": f" Raridade {raridade}: acrescenta +1 de bônus a até {budget} aliados purificados.",
+            "gwent_nevoa": f" Raridade {raridade}: pode aplicar uma segunda marca de Podridão Escarlate.",
+            "gwent_chuva": " Aplica Sangramento às unidades inimigas da fileira de Cerco; a segunda marca provoca Hemorragia.",
+            "gwent_geada": f" Raridade {raridade}: pode aplicar uma segunda marca de Geada.",
+            "gwent_medico": f" Raridade {raridade}: recupera unidade com poder-base até {min(8, 4 + budget)}.",
+            "gwent_execucao": f" Raridade {raridade}: alcança poder efetivo até {min(6, 6 + budget)}.",
+            "gwent_requiem": f" Raridade {raridade}: recupera unidade com poder-base até {min(10, 6 + budget)}.",
+            "gwent_batedor": f" Raridade {raridade}: compra até {min(2, 1 + budget)} cartas.",
+            "gwent_invocacao": f" Raridade {raridade}: invoca lobos com {min(6, 3 + budget)} de poder.",
+            "gwent_egide": f" Raridade {raridade}: protege até {min(3, 1 + budget)} unidades.",
+            "gwent_passo": f" Raridade {raridade}: move até {min(3, 1 + budget)} unidades.",
+            "gwent_sangramento": f" Raridade {raridade}: aplica uma marca extra a até {min(3, budget)} alvo(s), podendo ativar hemorragia imediatamente.",
+            "gwent_geada_cariana": f" Raridade {raridade}: aplica uma segunda marca a até {min(3, budget)} alvo(s).",
+            "gwent_queima": "",
             "gwent_purificar": "",
-            # Clima altera estado climático e poder efetivo, sem alterar bônus.
-            "gwent_clima": "",
+            "gwent_podrida": f" Raridade {raridade}: pode aplicar a segunda marca imediatamente a até {min(3, budget)} alvo(s).",
+            "gwent_loucura": f" Raridade {raridade}: pode aplicar a segunda marca imediatamente a até {min(3, budget)} alvo(s).",
         }
-        if skill_effect in {"gwent_nevoa", "gwent_geada"}:
+        if skill in {"gwent_nevoa", "gwent_geada"}:
             # Esses dois efeitos globais só aplicam a segunda marca a partir
             # do orçamento 2 (Lendária+), não em Rara/Épica.
             if budget >= 2:
-                label = "Podridão Escarlate" if skill_effect == "gwent_nevoa" else "Geada"
+                label = "Podridão Escarlate" if skill == "gwent_nevoa" else "Geada"
                 texto_habilidade = (texto_habilidade + f" Raridade {raridade}: aplica a segunda marca de {label} a todas as unidades elegíveis da fileira/campo afetado.").strip()
-        elif skill_effect in upgrades:
-            texto_habilidade = (texto_habilidade + upgrades[skill_effect]).strip()
-        elif skill_effect and str(card.get("id", "")) == "chefe_malenia_lamina_miquella":
-            # A Flor Escarlate já descreve e resolve sua amplificação Primordial
-            # dedicada; não acrescentar uma segunda explicação genérica.
-            pass
-        elif skill_effect:
-            texto_habilidade = (texto_habilidade + f" Raridade {raridade}: se esta entrada alterar bônus, reforça até {budget} {alvo_label}: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.").strip()
+        elif skill in upgrades:
+            texto_habilidade = (texto_habilidade + upgrades[skill]).strip()
+        elif skill:
+            texto_habilidade = (texto_habilidade + f" Raridade {raridade}: reforça até {budget} bônus já alterados pela habilidade: +1 nos positivos ou -1 nos negativos. Não muda o poder inicial nem os escudos.").strip()
         elif identity:
-            texto_habilidade = (texto_habilidade + f" Raridade {raridade}: se esta entrada alterar bônus, reforça até {budget} {alvo_label}: aliados +1; inimigos -1 (mín. -2). Não muda poder-base.").strip()
+            texto_habilidade = (texto_habilidade + f" Raridade {raridade}: reforça até {budget} bônus já alterados pela habilidade: +1 nos positivos ou -1 nos negativos. Não muda o poder inicial nem os escudos.").strip()
         elif has_synergy:
-            if not skill and not identity:
-                texto_habilidade = (texto_habilidade + f" Raridade {raridade}: quando o combo alterar bônus, reforça até {budget} {alvo_label} (+1 aliado; -1 inimigo, mín. -2).").strip()
-            else:
-                texto_habilidade = (texto_habilidade + f" Raridade {raridade}: se um combo desta entrada alterar bônus, reforça até {budget} {alvo_label}: aliados +1; inimigos -1 (mín. -2).").strip()
+            texto_habilidade = (texto_habilidade + f" Raridade {raridade}: ao completar combo compatível, reforça até {budget} bônus já alterados: +1 nos positivos ou -1 nos negativos.").strip()
     # Monte os parâmetros fora da f-string para manter compatibilidade com Python 3.11.
     image_params = {
         "rarity": raridade,
@@ -865,31 +775,31 @@ def preparar_carta(card: dict) -> dict:
         f"{urlencode(image_params)}"
     )
     return {
-        "id": str(card["id"]), "nome": str(model.nome if model else card.get("nome", "Carta")),
+        "id": str(card["id"]), "nome": str(card.get("nome", "Carta")),
         "categoria": category,
         "papel_gwent": str(card.get("papel_gwent", "Tática" if special else ROW_LABELS[row])),
         "tipo_combate": "Carta especial" if special else ROW_LABELS[row],
         "especial": special,
         "poder": 0 if special else max(1, min(15, int(card.get("poder", 1)))),
-        "raridade": raridade,
-        "custo": int(card.get("custo", CUSTO_RARIDADE.get(raridade, 0)) or 0),
-        "potencia_raridade": budget,
+        "raridade": raridade, "potencia_raridade": budget,
         "faccao": faction,
         "arquetipo_faccao": FACTION_ARCHETYPES.get(faction, {}).get("name", "Estratégia Geral"),
         "arquetipo_descricao": FACTION_ARCHETYPES.get(faction, {}).get("description", ""),
         "fileira": row,
-        "row": row, "row_label": "Carta especial" if special else ROW_LABELS[row], "habilidade": skill,
-        "habilidade_id_declarada": skill,
-        "habilidade_id_efetiva": str(identity.get("effect") or skill_effect),
+        "row": row, "row_label": ROW_LABELS[row], "habilidade": skill,
         "habilidade_nome": str(
             identity.get("name") if identity
-            else (card.get("habilidade_nome") or skill_data.get("nome") or (skill.replace("_", " ").title() if skill else ("Sinergia de combate" if combos_compativeis else "")))
+            else card.get("habilidade_nome", skill_data.get("nome", skill.replace("_", " ").title()))
         ),
         "habilidade_texto": texto_habilidade,
         "habilidade_identidade": bool(identity),
-        "sinergias": sorted(CARD_SYNERGY_TAGS.get(catalog_id, set())),
-        "combos_compativeis": combos_compativeis,
-        "descricao": str(model.descricao if model else card.get("descricao", ""))[:700],
+        "sinergias": sorted(CARD_SYNERGY_TAGS.get(str(card["id"]), set())),
+        "combos_compativeis": [
+            {"id": combo_id, "nome": combo["name"], "descricao": combo["description"]}
+            for combo_id, combo in SYNERGY_COMBOS.items()
+            if CARD_SYNERGY_TAGS.get(str(card["id"]), set()) & set(combo["tags"])
+        ],
+        "descricao": str(card.get("descricao", ""))[:240],
         "image_url": image_url,
     }
 
@@ -1143,20 +1053,19 @@ def opcoes_de_alvo(state: dict, user_id) -> dict:
     for card in player.get("hand", []):
         if not (card.get("especial") or str(card.get("categoria", "")).casefold() == "especial"):
             continue
-        declared_skill = str(card.get("habilidade", ""))
-        skill = SPECIAL_EFFECT_ALIASES.get(declared_skill, declared_skill)
+        skill = card.get("habilidade", "")
         if skill == "gwent_execucao":
-            info = {"rotulo": f"Escolha a unidade inimiga a eliminar (poder efetivo {min(9, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos)",
+            info = {"rotulo": f"Escolha a unidade inimiga a eliminar (poder efetivo {min(6, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos)",
                     "filtro_fileira": "mesma",
-                    "opcoes": [u for u in other.get("board", []) if _poder_efetivo(u, state.get("weather")) <= min(9, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0)))]}
+                    "opcoes": [u for u in other.get("board", []) if _poder_efetivo(u, state.get("weather")) <= min(6, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0)))]}
         elif skill == "gwent_medico":
-            info = {"rotulo": f"Escolha a unidade (poder {min(7, 4 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos) que volta para a sua mão",
+            info = {"rotulo": f"Escolha a unidade (poder {min(8, 4 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos) que volta para a sua mão",
                     "filtro_fileira": None,
-                    "opcoes": [c for c in player.get("discard", []) if not c.get("especial") and int(c["poder"]) <= min(7, 4 + int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0)))]}
+                    "opcoes": [c for c in player.get("discard", []) if not c.get("especial") and int(c["poder"]) <= min(8, 4 + int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0)))]}
         elif skill == "gwent_requiem":
-            info = {"rotulo": f"Escolha a unidade (poder {min(9, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos) que retorna ao campo",
+            info = {"rotulo": f"Escolha a unidade (poder {min(10, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get('raridade', 'Comum')), 0)))} ou menos) que retorna ao campo",
                     "filtro_fileira": None,
-                    "opcoes": [c for c in player.get("discard", []) if not c.get("especial") and int(c["poder"]) <= min(9, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0)))]}
+                    "opcoes": [c for c in player.get("discard", []) if not c.get("especial") and int(c["poder"]) <= min(10, 6 + int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0)))]}
         elif skill == "gwent_egide":
             info = {"rotulo": "Escolha a unidade que receberá o escudo", "filtro_fileira": None,
                     "opcoes": [u for u in player.get("board", []) if int(u.get("escudo", 0)) <= 0]}
@@ -1256,7 +1165,7 @@ def _resolve_round(state: dict) -> None:
         rodagem_vencida = pid == winner
         # Legado verifica diretamente o resultado da rodada imediatamente anterior.
         player["legado_vitoria"] = rodagem_vencida
-        keepers_gloria = [u for u in board if u.get("habilidade") in {"gloria", "sobrevivente"}]
+        keepers_gloria = [u for u in board if u.get("habilidade") == "gloria"]
         keeper_gloria = max(keepers_gloria, key=lambda u: _poder_efetivo(u, previous_weather), default=None) if rodagem_vencida else None
 
         # Unidades vão para o descarte
@@ -1576,44 +1485,6 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 return {"error": "O Papa Esquecido precisa de ao menos uma unidade dos Esquecidos na fileira escolhida."}
             for unit in targets:
                 unit["bonus"] = int(unit.get("bonus", 0)) + 1
-        elif effect == "forgotten_purification":
-            status_keys = ("sangramento", "geada", "podrida", "loucura")
-            targets = sorted(
-                (
-                    unit for unit in player["board"]
-                    if unit.get("row") == row
-                    and faction_for_card(unit) == "Os Esquecidos"
-                    and any(int(unit.get(key, 0)) > 0 for key in status_keys)
-                ),
-                key=lambda unit: _poder_efetivo(unit, state.get("weather")),
-                reverse=True,
-            )[:2]
-            if not targets:
-                return {"error": "A Abadessa precisa de ao menos um aliado dos Esquecidos afetado na fileira escolhida."}
-            for unit in targets:
-                for key in status_keys:
-                    unit[key] = 0
-                unit["bonus"] = int(unit.get("bonus", 0)) + 1
-        elif effect == "forgotten_revival":
-            eligible = [
-                card for card in player["discard"]
-                if not card.get("especial")
-                and str(card.get("categoria", "Unidade")).casefold() != "especial"
-                and faction_for_card(card) == "Os Esquecidos"
-                and int(card.get("poder", 99)) <= 5
-            ]
-            if not eligible:
-                return {"error": "A Mártir precisa de uma unidade dos Esquecidos com poder-base até 5 no descarte."}
-            revived = deepcopy(max(eligible, key=lambda card: int(card.get("poder", 0))))
-            revived_id = revived.get("id")
-            player["discard"] = [card for card in player["discard"] if card.get("id") != revived_id]
-            revived["row"] = row
-            revived["fileira"] = row
-            revived["bonus"] = int(revived.get("bonus", 0)) + 1
-            revived.pop("escudo", None)
-            for key in ("sangramento", "geada", "podrida", "loucura"):
-                revived[key] = 0
-            player["board"].append(revived)
         else:
             return {"error": "Habilidade de líder não reconhecida."}
         player["leader_used"] = True
@@ -1636,8 +1507,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
         bonus_card_antes = int(card.get("bonus", 0))
         # Cartas com habilidade de identidade substituem a habilidade genérica do
         # campo `habilidade`; executar ambas criava efeitos ocultos não descritos.
-        declared_skill = "" if str(card.get("id", "")) in CARD_IDENTITY_ABILITIES else str(card.get("habilidade", ""))
-        skill = SPECIAL_EFFECT_ALIASES.get(declared_skill, declared_skill)
+        skill = "" if str(card.get("id", "")) in CARD_IDENTITY_ABILITIES else card.get("habilidade", "")
         eventos_especial: list[str] = []
         potencia_raridade = int(RARITY_EFFECT_BUDGET.get(str(card.get("raridade", "Comum")), 0))
         if card.get("especial") or str(card.get("categoria", "")).casefold() == "especial":
@@ -1655,7 +1525,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                         unit["geada"] = 0; unit["podrida"] = 0; unit["bonus"] = int(unit.get("bonus", 0)) + 1; purificados += 1
                 if not purificados: return {"error": "Não há aliados com Geada ou Podridão para purificar."}
                 player["relic_used"] = True
-                eventos_especial.append(f"Runa dos Não Nascidos purificou {purificados} aliado(s) e concedeu +1.")
+                eventos_especial.append(f"Grande Runa dos Não Nascidos purificou {purificados} aliado(s) e concedeu +1.")
             elif skill == "reliquia_morte":
                 alvos=[]
                 for fileira in ROWS:
@@ -1700,7 +1570,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 state.setdefault("weather", {r: 0 for r in ROWS})
                 state["weather"][row] = max(1, int(state["weather"].get(row, 0) or 0))
                 eventos_especial.append(
-                    f"{card['nome']} cobriu {ROW_LABELS[row]}; todas as unidades da fileira sofrem -1 de poder efetivo enquanto o clima durar."
+                    f"Tempestade dos Picos cobriu {ROW_LABELS[row]}; todas as unidades da fileira sofrem -1 de poder efetivo enquanto o clima durar."
                 )
             elif skill == "gwent_nevoa":
                 if row not in ROWS:
@@ -1728,48 +1598,44 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
             elif skill == "gwent_chifre":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
-                alvos = [unit for unit in player["board"] if unit["row"] == row]
-                for unit in alvos:
-                    unit["bonus"] = int(unit.get("bonus", 0)) + 2
-                eventos_especial.append(f"{card['nome']} fortaleceu {len(alvos)} aliado(s) em {ROW_LABELS[row]}.")
+                for unit in player["board"]:
+                    if unit["row"] == row:
+                        unit["bonus"] = int(unit.get("bonus", 0)) + 2
             elif skill == "gwent_medico":
-                candidates = [c for c in player["discard"] if not c.get("especial") and int(c["poder"]) <= min(7, 4 + potencia_raridade)]
+                candidates = [c for c in player["discard"] if not c.get("especial") and int(c["poder"]) <= min(8, 4 + potencia_raridade)]
                 if not candidates:
                     return {"error": "Não há unidade elegível no descarte."}
                 if target_id:
                     revived = next((c for c in candidates if c["id"] == str(target_id)), None)
                     if revived is None:
-                        return {"error": f"Essa unidade não pode ser recuperada (poder-base até {min(7, 4 + potencia_raridade)}, no seu descarte)."}
+                        return {"error": "Essa unidade não pode ser recuperada (poder 4 ou menos, no seu descarte)."}
                 else:
                     revived = candidates[-1]
                 player["discard"].remove(revived)
                 player["hand"].append(revived)
-                eventos_especial.append(f"{card['nome']} devolveu {revived['nome']} à sua mão.")
             elif skill == "gwent_queima":
                 for side in (player, other):
                     if side["board"]:
                         strongest = max(side["board"], key=lambda u: _poder_efetivo(u, state.get("weather")))
                         eventos_especial.append(_remover_unidade(side, strongest))
             elif skill == "gwent_purificar":
-                removido = sum(1 for value in state.get("weather", {}).values() if int(value or 0) > 0)
                 state["weather"] = {r: 0 for r in ROWS}
-                eventos_especial.append(f"{card['nome']} dissipou o clima ativo em {removido} fileira(s).")
             elif skill == "gwent_execucao":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
                 targets = [c for c in other["board"] if c["row"] == row]
                 if not targets:
                     return {"error": "Não há unidade inimiga nessa fileira."}
-                elegiveis = [c for c in targets if _poder_efetivo(c, state.get("weather")) <= min(9, 6 + potencia_raridade)]
+                elegiveis = [c for c in targets if _poder_efetivo(c, state.get("weather")) <= min(6, 6 + potencia_raridade)]
                 if not elegiveis:
-                    return {"error": f"A Lâmina da Morte Destinada só alcança unidades com poder efetivo {min(9, 6 + potencia_raridade)} ou menos."}
+                    return {"error": f"A Lâmina da Morte Destinada só alcança unidades com poder efetivo {min(6, 6 + potencia_raridade)} ou menos."}
                 if target_id:
                     victim = next((c for c in elegiveis if c["id"] == str(target_id)), None)
                     if victim is None:
-                        return {"error": f"O alvo escolhido não está nessa fileira ou excede poder efetivo {min(9, 6 + potencia_raridade)}."}
+                        return {"error": "O alvo escolhido não está nessa fileira ou excede poder efetivo 6."}
                 else:
                     victim = min(elegiveis, key=lambda u: _poder_efetivo(u, state.get("weather")))
-                eventos_especial.append(f"{card['nome']}: " + _remover_unidade(other, victim, "execucao"))
+                eventos_especial.append(_remover_unidade(other, victim, "execucao"))
             elif skill == "gwent_vinculo":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
@@ -1778,21 +1644,19 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     return {"error": "O Juramento exige pelo menos duas unidades na fileira."}
                 for unit in allies:
                     unit["bonus"] = int(unit.get("bonus", 0)) + 2
-                eventos_especial.append(f"{card['nome']} fortaleceu {len(allies)} aliados em {ROW_LABELS[row]}.")
             elif skill == "gwent_batedor":
                 quantidade = min(2, 1 + potencia_raridade, len(player["draw_pile"]))
                 if quantidade <= 0:
                     return {"error": "Sua reserva de compra está vazia."}
                 for _ in range(quantidade):
                     player["hand"].append(player["draw_pile"].pop(0))
-                eventos_especial.append(f"{card['nome']} comprou {quantidade} carta(s) da reserva.")
+                eventos_especial.append(f"Passo do Cão de Caça comprou {quantidade} carta(s).")
             elif skill == "gwent_muralha":
                 if row not in ROWS:
                     return {"error": "Escolha uma fileira válida."}
-                alvos = [unit for unit in player["board"] if unit["row"] == row]
-                for unit in alvos:
-                    unit["bonus"] = int(unit.get("bonus", 0)) + 1
-                eventos_especial.append(f"{card['nome']} fortaleceu {len(alvos)} aliado(s) em {ROW_LABELS[row]}.")
+                for unit in player["board"]:
+                    if unit["row"] == row:
+                        unit["bonus"] = int(unit.get("bonus", 0)) + 1
             elif skill == "gwent_chama":
                 purificados = 0
                 for unit in player["board"]:
@@ -1801,7 +1665,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                         unit["geada"] = 0
                         unit["bonus"] = int(unit.get("bonus", 0)) + 1
                         purificados += 1
-                eventos_especial.append(f"{card['nome']} removeu Geada de {purificados} unidade(s) aliada(s); cada uma recebeu +1.")
+                eventos_especial.append(f"Chama removeu Geada de {purificados} unidade(s) aliada(s); cada uma recebeu +1.")
             elif skill == "gwent_invocacao":
                 if row not in ROWS:
                     return {"error": "Escolha a fileira para a invocação."}
@@ -1894,11 +1758,11 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 escolhidos = [alvo] + [u for u in sorted(protegiveis, key=lambda u: _poder_efetivo(u, state.get("weather")), reverse=True) if u is not alvo]
                 for protegida in escolhidos[:min(3, 1 + potencia_raridade)]:
                     protegida["escudo"] = 1
-                eventos_especial.append(f"{card['nome']} concedeu Escudo a {len(escolhidos[:min(3, 1 + potencia_raridade)])} unidade(s).")
+                eventos_especial.append(f"{len(escolhidos[:min(3, 1 + potencia_raridade)])} unidade(s) receberam escudo.")
             elif skill == "gwent_requiem":
-                elegiveis = [c for c in player["discard"] if not c.get("especial") and int(c["poder"]) <= min(9, 6 + potencia_raridade)]
+                elegiveis = [c for c in player["discard"] if not c.get("especial") and int(c["poder"]) <= min(10, 6 + potencia_raridade)]
                 if not elegiveis:
-                    return {"error": f"Não há unidade elegível (poder-base até {min(9, 6 + potencia_raridade)}) no descarte."}
+                    return {"error": "Não há unidade elegível (poder 6 ou menos) no descarte."}
                 if target_id:
                     revivida = next((c for c in elegiveis if c["id"] == str(target_id)), None)
                     if revivida is None:
@@ -1931,7 +1795,7 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                     origem = unidade["row"]
                     unidade["row"] = row
                     movidos.append(unidade["nome"])
-                eventos_especial.append(f"{card['nome']}: {', '.join(movidos)} moveram-se para {ROW_LABELS[row]}.")
+                eventos_especial.append(f"{', '.join(movidos)} moveram-se para {ROW_LABELS[row]}.")
             else:
                 return {"error": "Efeito especial desconhecido."}
             # Relíquias têm efeitos fixos descritos no catálogo; sua raridade não
@@ -1962,29 +1826,11 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
             enemy_last_row = other.get("last_row")
             extras_entrada: list[str] = []
             unidade_revivida = None
-            # Habilidades genéricas declaradas no catálogo devem ser resolvidas
-            # no caminho normal de entrada; o handler de identidade só se aplica
-            # às cartas listadas explicitamente em CARD_IDENTITY_ABILITIES.
-            if skill == "legado":
-                card["bonus"] += 2 if player.get("legado_vitoria", False) else 0
-            elif skill == "devoto":
-                same_faction_allies = sum(
-                    1 for ally in player["board"]
-                    if faction_for_card(ally) == faction_for_card(card)
-                )
-                if same_faction_allies >= 2:
-                    card["bonus"] += 1
-            elif skill == "sinergia_faccao":
-                card["bonus"] += sum(
-                    1 for ally in player["board"]
-                    if faction_for_card(ally) == faction_for_card(card)
-                )
-            elif skill == "primeira_luz" and state["round"] == 1: card["bonus"] += 1
+            if skill == "primeira_luz" and state["round"] == 1: card["bonus"] += 1
             elif skill == "lei_primeva" and state["round"] == 1: card["bonus"] += 2
             elif skill == "ultimo_folego" and state["round"] == 3: card["bonus"] += 1
             elif skill == "paradoxo_eterno" and state["round"] == 3 and state["rounds"] and state["rounds"][-1]["winner_id"] not in (None, uid): card["bonus"] += 2
             elif skill == "precisao" and row == "ranged": card["bonus"] += 1
-            elif skill == "escolha_ritmo": card["bonus"] += 1
             elif skill in {"instinto", "fome_abismo"} and own_score < enemy_score: card["bonus"] += 2
             elif skill == "retaliacao" and own_score < enemy_score: card["bonus"] += 1
             elif skill == "contragolpe" and own_score < enemy_score: card["bonus"] += 2
@@ -2053,18 +1899,16 @@ def aplicar_jogada(state: dict, user_id: int, card_id: str | None = None,
                 card["bonus"] += 2
             # Habilidade exclusiva da carta, depois das habilidades gerais e antes dos combos.
             identidade_ativada = _aplicar_habilidade_identidade(player, other, card, state, row)
-            if player.get("astral_thread_ready", False) and "astral" in CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set()):
-                player.pop("astral_thread_ready", None)
+            if player.pop("astral_thread_ready", False) and "astral" in CARD_SYNERGY_TAGS.get(str(card.get("id", "")), set()):
                 card["bonus"] += 1
                 state["last_event"] += " O Fio Astral foi consumido (+1)."
             # Combos temáticos entre cartas específicas, além das sinergias de fileira acima.
             combo_ativado = _aplicar_combo_de_cartas(player, card)
             # A raridade amplifica apenas os efeitos da carta e combos; não multiplica
             # a passiva fixa da facção, evitando bônus oculto por composição do deck.
-            potencia_aplicada = (0 if str(card.get("id", "")) == "chefe_malenia_lamina_miquella"
-                                 else _aplicar_potencia_raridade(
-                                     card, player, other, bonus_antes, bonus_card_antes
-                                 ))
+            potencia_aplicada = _aplicar_potencia_raridade(
+                card, player, other, bonus_antes, bonus_card_antes
+            )
             if potencia_aplicada:
                 extras_entrada.append(
                     f"A raridade {card.get('raridade', 'Comum')} ampliou a habilidade em {potencia_aplicada} ponto(s)."
@@ -2111,8 +1955,7 @@ def _ai_hand_strength(player: dict) -> float:
 
 
 def _ai_candidate_value(before: dict, after: dict, ai_uid: str, human_uid: str,
-                        action: str, card: dict | None = None,
-                        difficulty: str = "normal") -> float:
+                        action: str, card: dict | None = None) -> float:
     """Avalia uma jogada com base no efeito real calculado pelo motor de regras."""
     before_score = placar(before)
     after_score = placar(after)
@@ -2121,17 +1964,9 @@ def _ai_candidate_value(before: dict, after: dict, ai_uid: str, human_uid: str,
     before_human = before_score.get(human_uid, {})
     after_human = after_score.get(human_uid, {})
 
-    difficulty = str(difficulty or "normal").casefold()
-    weights = {
-        "facil": {"denial": 0.95, "resources": 0.04, "shields": 0.50, "crowns": 10.0, "unit_cost": 0.04, "special_cost": 0.10},
-        "normal": {"denial": 1.20, "resources": 0.18, "shields": 0.80, "crowns": 12.0, "unit_cost": 0.08, "special_cost": 0.18},
-        "dificil": {"denial": 1.45, "resources": 0.30, "shields": 1.05, "crowns": 15.0, "unit_cost": 0.12, "special_cost": 0.24},
-    }.get(difficulty, None)
-    if weights is None:
-        weights = {"denial": 1.20, "resources": 0.18, "shields": 0.80, "crowns": 12.0, "unit_cost": 0.08, "special_cost": 0.18}
     ai_gain = int(after_ai.get("score", 0)) - int(before_ai.get("score", 0))
     human_loss = int(before_human.get("score", 0)) - int(after_human.get("score", 0))
-    value = float(ai_gain) + weights["denial"] * float(human_loss)
+    value = float(ai_gain) + 1.20 * float(human_loss)
 
     ai_before = before.get("players", {}).get(ai_uid, {})
     ai_after = after.get("players", {}).get(ai_uid, {})
@@ -2139,170 +1974,152 @@ def _ai_candidate_value(before: dict, after: dict, ai_uid: str, human_uid: str,
     human_after = after.get("players", {}).get(human_uid, {})
 
     # Cartas não gastas continuam sendo recursos para as próximas rodadas.
-    value += weights["resources"] * (_ai_hand_strength(ai_after) - _ai_hand_strength(ai_before))
+    value += 0.18 * (_ai_hand_strength(ai_after) - _ai_hand_strength(ai_before))
     # Escudos têm valor defensivo, mesmo quando ainda não alteram a pontuação.
     ai_shields_before = sum(int(unit.get("escudo", 0)) for unit in ai_before.get("board", []))
     ai_shields_after = sum(int(unit.get("escudo", 0)) for unit in ai_after.get("board", []))
     human_shields_before = sum(int(unit.get("escudo", 0)) for unit in human_before.get("board", []))
     human_shields_after = sum(int(unit.get("escudo", 0)) for unit in human_after.get("board", []))
-    value += weights["shields"] * ((ai_shields_after - ai_shields_before) - (human_shields_after - human_shields_before))
+    value += 0.8 * ((ai_shields_after - ai_shields_before) - (human_shields_after - human_shields_before))
 
     # Valoriza encerrar uma rodada favorável e penaliza entregar uma coroa.
     ai_crowns_before = int(before.get("crowns", {}).get(ai_uid, 0))
     ai_crowns_after = int(after.get("crowns", {}).get(ai_uid, 0))
     human_crowns_before = int(before.get("crowns", {}).get(human_uid, 0))
     human_crowns_after = int(after.get("crowns", {}).get(human_uid, 0))
-    value += weights["crowns"] * ((ai_crowns_after - ai_crowns_before) - (human_crowns_after - human_crowns_before))
+    value += 12.0 * ((ai_crowns_after - ai_crowns_before) - (human_crowns_after - human_crowns_before))
 
     if action == "play" and card:
         # O desconto de recurso favorece usar primeiro cartas de menor poder quando
         # duas opções produzem resultado de campo semelhante.
-        is_special = card.get("especial") or str(card.get("categoria", "")).casefold() == "especial"
-        cost = weights["special_cost"] if is_special else weights["unit_cost"] * max(1, int(card.get("poder", 1)))
+        cost = 0.18 if (card.get("especial") or str(card.get("categoria", "")).casefold() == "especial") else 0.08 * max(1, int(card.get("poder", 1)))
         value -= cost
     return value
 
 
-def executar_uma_jogada_ia(
-    state: dict,
-    ai_user_id: int = AI_PLAYER_ID,
-    difficulty: str = "normal",
-) -> dict:
-    """Resolve exatamente uma decisão da NARA pelo motor normal de partidas.
+def executar_turno_ia(state: dict, ai_user_id: int = AI_PLAYER_ID) -> dict:
+    """Executa as ações da NARA enquanto ela conservar o turno.
 
-    A função não faz sleeps nem controla o relógio: a camada HTTP agenda a
-    decisão em uma tarefa assíncrona para não manter transações abertas.
+    A IA usa o mesmo motor `aplicar_jogada` das pessoas. Assim, validações,
+    habilidades, clima, líderes, pontuação e resolução de rodada são idênticos.
+    O deck da IA é preparado pelo endpoint de criação da partida.
     """
-    from random import SystemRandom
-
     current = deepcopy(state)
     ai_uid = str(ai_user_id)
-    difficulty = str(difficulty or "normal").casefold()
-    if difficulty not in {"facil", "normal", "dificil"}:
-        difficulty = "normal"
     if current.get("status") != "active" or ai_uid not in current.get("players", {}):
         return current
-    if str(current.get("turn")) != ai_uid:
-        return current
 
-    players = current.get("players", {})
-    ai = players.get(ai_uid, {})
-    human_uid = next((uid for uid in players if uid != ai_uid), None)
-    if human_uid is None:
-        return current
-    human = players.get(human_uid, {})
-
-    if current.get("phase") == "mulligan":
-        if ai.get("mulligan_done", False):
-            return current
-        result = aplicar_jogada(current, ai_user_id, action="keep")
-        return result.get("state", current) if "error" not in result else current
-
-    if current.get("phase", "battle") != "battle" or ai.get("passed", False):
-        return current
-    if not ai.get("hand"):
-        result = aplicar_jogada(current, ai_user_id, action="pass")
-        return result.get("state", current) if "error" not in result else current
-
-    scores = placar(current)
-    ai_score = int(scores.get(ai_uid, {}).get("score", 0))
-    human_score = int(scores.get(human_uid, {}).get("score", 0))
-    margin = ai_score - human_score
-
-    # O conteúdo da mão humana é informação privada. A NARA usa somente a
-    # quantidade pública de cartas restantes para estimar o potencial adversário.
-    hidden_hand_count = len(human.get("hand", []))
-    average_card_estimate = {"facil": 4.4, "normal": 5.0, "dificil": 5.6}[difficulty]
-    human_potential_estimate = hidden_hand_count * average_card_estimate
-    should_pass = bool(human.get("passed") and margin > 0)
-    if difficulty == "normal":
-        should_pass = should_pass or margin > human_potential_estimate + 2
-    elif difficulty == "dificil":
-        should_pass = should_pass or margin > human_potential_estimate + 1
-    if should_pass:
-        result = aplicar_jogada(current, ai_user_id, action="pass")
-        return result.get("state", current) if "error" not in result else current
-
-    candidates: list[tuple[float, dict]] = []
-
-    def consider(action: str, row: str | None = None, card: dict | None = None,
-                 target_id: str | None = None) -> None:
-        result = aplicar_jogada(
-            current,
-            ai_user_id,
-            card_id=str(card.get("id", "")) if card else "",
-            action=action,
-            row=row,
-            target_id=target_id,
-        )
-        if "error" in result or not isinstance(result.get("state"), dict):
-            return
-        after = result["state"]
-        value = _ai_candidate_value(current, after, ai_uid, human_uid, action, card, difficulty)
-        candidates.append((value, {"state": after, "action": action, "row": row, "card": card}))
-
-    for card in list(ai.get("hand", [])):
-        is_special = bool(card.get("especial") or str(card.get("categoria", "")).casefold() == "especial")
-        legal_rows = ROWS if is_special else (row_for_card(card),)
-        for row in legal_rows:
-            consider("play", row, card)
-
-    if not ai.get("leader_used", False):
-        for row in ROWS:
-            consider("leader", row)
-
-    if ai.get("equipped_relic_id") and not ai.get("relic_used", False):
-        relic_id = str(ai.get("equipped_relic_id"))
-        if relic_id in {"reliquia_grande_runa_godrick", "reliquia_runa_nao_nascidos", "reliquia_runa_morte"}:
-            consider("relic")
-        elif relic_id == "reliquia_noite_chama":
-            for row in ROWS:
-                if any(unit.get("row") == row for unit in human.get("board", [])):
-                    consider("relic", row, target_id="noite")
-                    consider("relic", row, target_id="chama")
-        elif relic_id in {"reliquia_lamina_negra", "reliquia_algemas_margit"}:
-            for row in ROWS:
-                for target in human.get("board", []):
-                    if target.get("row") == row:
-                        consider("relic", row, target_id=str(target.get("id", "")))
-
-    if not candidates:
-        result = aplicar_jogada(current, ai_user_id, action="pass")
-        return result.get("state", current) if "error" not in result else current
-
-    candidates.sort(key=lambda item: item[0], reverse=True)
-    best_value = candidates[0][0]
-    if best_value <= 0.05:
-        result = aplicar_jogada(current, ai_user_id, action="pass")
-        return result.get("state", current) if "error" not in result else current
-
-    if difficulty == "facil":
-        # A Aprendiz não escolhe sempre a linha matematicamente perfeita. Ela
-        # alterna entre até três opções próximas, sem executar jogadas inválidas.
-        near_best = [item for item in candidates[:3] if item[0] >= best_value - 3.0]
-        chosen = SystemRandom().choice(near_best or candidates[:1])
-    else:
-        chosen = candidates[0]
-    return chosen[1]["state"]
-
-
-def executar_turno_ia(state: dict, ai_user_id: int = AI_PLAYER_ID) -> dict:
-    """Compatibilidade: executa decisões sucessivas até devolver o turno.
-
-    O modo de treino usa `executar_uma_jogada_ia` e agenda cada decisão com
-    intervalo de 3–5 segundos. Esta função permanece para consumidores legados.
-    """
-    current = deepcopy(state)
+    # Limite defensivo: até 12 cartas, habilidade de líder, relíquia e passe por chamada.
     for _ in range(16):
-        if current.get("status") != "active" or str(current.get("turn")) != str(ai_user_id):
+        if current.get("status") != "active" or str(current.get("turn")) != ai_uid:
             break
-        before = current
-        current = executar_uma_jogada_ia(
-            current, ai_user_id, str(current.get("ai_difficulty", "normal"))
+        players = current.get("players", {})
+        ai = players.get(ai_uid, {})
+        human_uid = next((uid for uid in players if uid != ai_uid), None)
+        if human_uid is None:
+            break
+
+        if current.get("phase") == "mulligan":
+            if ai.get("mulligan_done", False):
+                break
+            result = aplicar_jogada(current, ai_user_id, action="keep")
+            if "error" in result:
+                break
+            current = result["state"]
+            continue
+
+        if current.get("phase", "battle") != "battle" or ai.get("passed", False):
+            break
+        human = players.get(human_uid, {})
+        if not ai.get("hand"):
+            result = aplicar_jogada(current, ai_user_id, action="pass")
+            if "error" in result:
+                break
+            current = result["state"]
+            continue
+
+        scores = placar(current)
+        ai_score = int(scores.get(ai_uid, {}).get("score", 0))
+        human_score = int(scores.get(human_uid, {}).get("score", 0))
+        margin = ai_score - human_score
+        human_potential = sum(
+            (6 if c.get("especial") or str(c.get("categoria", "")).casefold() == "especial"
+             else max(1, int(c.get("poder", 1))))
+            for c in human.get("hand", [])
         )
-        if current == before:
+
+        # Se o adversário já passou e a NARA está na frente, fecha a rodada.
+        # Se a vantagem supera o potencial restante da mão humana, conserva recursos.
+        should_pass = bool(human.get("passed") and margin > 0)
+        should_pass = should_pass or (margin > human_potential + 1)
+        if should_pass:
+            result = aplicar_jogada(current, ai_user_id, action="pass")
+            if "error" in result:
+                break
+            current = result["state"]
+            continue
+
+        candidates: list[tuple[float, dict]] = []
+
+        def consider(action: str, row: str | None = None, card: dict | None = None,
+                     target_id: str | None = None) -> None:
+            result = aplicar_jogada(
+                current, ai_user_id,
+                card_id=str(card.get("id", "")) if card else "",
+                action=action, row=row, target_id=target_id,
+            )
+            if "error" in result or not isinstance(result.get("state"), dict):
+                return
+            after = result["state"]
+            score = _ai_candidate_value(current, after, ai_uid, human_uid, action, card)
+            candidates.append((score, {"state": after, "action": action, "row": row, "card": card}))
+
+        # Unidades têm fileira fixa; cartas especiais podem escolher uma fileira quando o efeito pede.
+        for card in list(ai.get("hand", [])):
+            is_special = bool(card.get("especial") or str(card.get("categoria", "")).casefold() == "especial")
+            legal_rows = ROWS if is_special else (row_for_card(card),)
+            for row in legal_rows:
+                consider("play", row, card)
+
+        # A habilidade de líder permanece separada das cartas.
+        # Clima agora só entra em campo por uma carta especial jogada da mão.
+        if not ai.get("leader_used", False):
+            for row in ROWS:
+                consider("leader", row)
+
+        # A Relíquia é avaliada pelo mesmo motor que valida as ações humanas.
+        if ai.get("equipped_relic_id") and not ai.get("relic_used", False):
+            relic_id = str(ai.get("equipped_relic_id"))
+            if relic_id in {"reliquia_grande_runa_godrick", "reliquia_runa_nao_nascidos", "reliquia_runa_morte"}:
+                consider("relic")
+            elif relic_id == "reliquia_noite_chama":
+                for row in ROWS:
+                    if any(u.get("row") == row for u in human.get("board", [])):
+                        consider("relic", row, target_id="noite")
+                        consider("relic", row, target_id="chama")
+            elif relic_id in {"reliquia_lamina_negra", "reliquia_algemas_margit"}:
+                for row in ROWS:
+                    for target in human.get("board", []):
+                        if target.get("row") == row:
+                            consider("relic", row, target_id=str(target.get("id", "")))
+
+        best = max(candidates, key=lambda item: item[0], default=None)
+        if best is None or best[0] <= 0.05:
+            result = aplicar_jogada(current, ai_user_id, action="pass")
+            if "error" in result:
+                break
+            current = result["state"]
+            continue
+
+        current = best[1]["state"]
+        # Se a outra pessoa ainda não passou, a vez volta para ela.
+        # Se ela já passou, a IA mantém a vez e reavalia sua próxima ação.
+        if current.get("status") != "active" or str(current.get("turn")) != ai_uid:
             break
-    if current.get("status") == "active" and str(current.get("turn")) == str(ai_user_id):
+
+    # Fail-safe: a IA não pode deixar a partida presa no próprio turno por
+    # atingir o limite defensivo do loop.
+    if current.get("status") == "active" and str(current.get("turn")) == ai_uid:
         fallback = aplicar_jogada(current, ai_user_id, action="pass")
         if "error" not in fallback:
             current = fallback["state"]

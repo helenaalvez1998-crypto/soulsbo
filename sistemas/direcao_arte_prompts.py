@@ -373,7 +373,7 @@ FIELD PLACEMENT:
 - CARD NAME: exact name in the horizontal title panel below the artwork.
 - TACTICAL POSITION: exact label “{row_label}” in the dark horizontal strip below the title.
 - FACTION: exact faction identity {faction}, represented by the faction's vertical side banner and its emblem. The faction name may appear vertically as in its supplied reference.
-- LORE: print only the exact supplied lore text in the lower parchment panel. Do not print a “LORE” heading, ability name/rule, combat effect, synergy, explanatory fallback or duplicate text.
+- LORE: reproduce the supplied lore in the lower parchment panel, preserving its meaning and wording. Do not add a lore heading unless the faction reference contains one.
 - RARITY: exact value “{rarity}” in the bottom-right rarity plaque.
 
 VISUAL TEMPLATE — FACTION-SPECIFIC, NOT UNIVERSAL:

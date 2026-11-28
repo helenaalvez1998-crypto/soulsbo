@@ -1,37 +1,34 @@
-# Auditoria de sobreposição de combos — runtime V76
+# Auditoria de combos após aplicação da política — v0.2
 
-**Status:** auditoria pós-política, executada sobre o catálogo V76.  
-**Política:** mínimo de participantes explícito, prioridade única e contribuição de tag pela carta que recebe o combo.  
+**Status:** auditoria pós-correção executada no runtime atualizado.  
+**Política:** `card-game-combo-policy-v0.1.md` (aprovada pelo usuário e implementada).  
 **Script:** `docs/scripts/audit-combo-overlap-v0.2.py`.  
-**Dados completos:** `docs/card-game-combo-overlap-v0.2.json`.
+**Dados:** `docs/card-game-combo-overlap-v0.2.json`.
 
-## 1. Resultado atual
+## 1. Resultado
 
-A enumeração percorreu as 92 unidades do catálogo atual que possuem tags de sinergia e os 27 combos registrados. Foram examinados todos os pares ordenados e trincas ordenadas de IDs de unidade distintos.
+A enumeração foi repetida contra o resolvedor corrigido, usando as mesmas 67 unidades atuais com tags, 27 combos, todos os pares ordenados e todas as trincas ordenadas de IDs distintos.
 
-| Medida | Resultado V76 |
-|---|---:|
-| IDs de unidade com tags | 92 |
-| IDs órfãos excluídos | 5 |
-| Combos registrados | 27 |
-| Combos sem mínimo explícito | 0 |
-| Prioridades duplicadas | 0 |
-| Ativações com uma única carta | 0 |
-| Pares ordenados examinados | 8.372 |
-| Pares ordenados com mais de um combo elegível | 720 (8,6001%) |
-| Pares não ordenados distintos com sobreposição | 360 |
-| Combos envolvidos em sobreposição de pares | 17 |
-| Trincas ordenadas examinadas | 753.480 |
-| Trincas com dois ou mais combos em jogadas sucessivas | 24.886 (3,3028%) |
-| Trincas multi-combo da mesma facção | 24.516 |
-| Gatilhos posteriores que contribuíram com uma tag exigida | 24.886/24.886 (100%) |
-| Transições ordenadas distintas entre combos | 58 |
+| Medida | Baseline anterior | Após a política | Interpretação |
+|---|---:|---:|---|
+| Combos sem `minimum` explícito | 3 | 0 | Todos exigem dois participantes distintos. |
+| Ativações solo | 1 | 0 | `eco_convergente` não ativa mais com apenas o Erudito híbrido. |
+| Pares ordenados com mais de um combo elegível | 154/4.422 (3,4826%) | 152/4.422 (3,4374%) | Ainda existem sobreposições; agora têm prioridade explícita. |
+| Combos envolvidos em sobreposição de pares | 15 | 14 | O catálogo pós-patch foi reavaliado. |
+| Trincas que ativam dois ou mais combos em jogadas sucessivas | 11.780/287.430 (4,0984%) | 2.582/287.430 (0,8983%) | A regra de contribuição reduz as transições legítimas/persistentes no universo enumerado. |
+| Trincas multi-combo da mesma facção | 1.088 | 666 | Ainda existem sequências multi-combo da mesma facção. |
+| Eventos posteriores cuja carta fornece tag requerida | 3.688/11.784 (31,2967%) no baseline; 8.096 sem tag | 2.582/2.582 (100%) | Todos os acionamentos posteriores observados respeitam participação por tag. |
+| Transições ordenadas distintas entre combos | 102 | 54 | Ainda há diversidade de sequências de combos pendentes. |
 
-**Interpretação:** sobreposições continuam existindo no universo enumerado, mas o resolvedor aplica a prioridade declarada e ativa no máximo um combo por jogada. Um combo posterior só pode ser recolhido por uma carta que contribua com ao menos uma das tags exigidas por ele. Cada instância de unidade conta uma única vez para o mínimo de participantes.
+**Nota:** os valores percentuais são condicionados ao universo de pares/trincas enumerados. Não são taxa de ativação em partidas reais, EV, win rate ou prova de balanceamento.
 
-## 2. Relação com Os Esquecidos
+## 2. O que mudou
 
-A expansão V76 elevou a facção a 30 unidades sem aumentar o número de combos globais. As novas cartas reutilizam as seis sinergias de fé já existentes (`fe_gloria`, `fe_devocao`, `fe_evangelho`, `fe_irmandade`, `fe_soberania` e `fe_sacerdos`). Isso preserva a política de 27 combos e evita criar uma regra de sinergia paralela apenas para a facção nova.
+- O resolvedor agora filtra combos pelo cruzamento entre tags da carta atual e tags exigidas pelo combo.
+- O mínimo de dois participantes é obrigatório em todos os 27 combos.
+- A ordem é controlada por `priority` exclusivo (menor primeiro), e não pela inserção do dicionário.
+- No máximo um combo ativa por jogada. Combos adiados permanecem disponíveis, mas uma jogada posterior precisa contribuir com tag requerida.
+- A auditoria pós-correção encontrou zero ativações solo e zero acionamentos posteriores por carta sem tag requerida.
 
 ## 3. Reproduzir
 
@@ -39,11 +36,12 @@ A expansão V76 elevou a facção a 30 unidades sem aumentar o número de combos
 python docs/scripts/audit-combo-overlap-v0.2.py
 ```
 
-O script gera o JSON completo, incluindo pares elegíveis, transições e exemplos. A enumeração usa o resolvedor real em estados sintéticos em memória e não modifica o runtime persistido.
+O relatório JSON inclui pares e exemplos de transições; o script faz chamadas ao resolvedor real em estados sintéticos em memória. Não modifica o runtime.
 
 ## 4. Limitações
 
-- A varredura usa IDs de unidade catalogados e não constrói todas as combinações possíveis de decks legais de 12 cartas.
-- Não valida posse, líderes, relíquias, mãos reais, clima, IA, histórico completo de partidas, API hospedada, Discord ou estado do banco de produção.
-- Percentuais representam somente o universo de pares/trincas enumerados; não são taxa real de ativação, win rate, EV nem prova estatística de equilíbrio entre facções.
-- Cinco IDs órfãos no mapa de tags continuam documentados e foram excluídos da enumeração porque não pertencem ao catálogo atual.
+- A enumeração cobre 4.422 pares e 287.430 trincas de três IDs distintos entre as 67 unidades com tags.
+- Não valida deck completo de 12 cartas, posse, líder, relíquia, mão, clima, IA, snapshots reais, DB, API, site, Discord ou R2.
+- A sobreposição ainda existe e a regra resolve-a por prioridade, mas não foram testadas todas as sequências de 12 cartas em partidas completas.
+- A nova política não calibra bônus, EFP, custo, raridade ou equilíbrio de facções.
+- Partidas ativas persistidas preservam bônus já concedidos pelo comportamento anterior; não há DB de produção neste pacote para inspecionar ou migrar.

@@ -12,7 +12,7 @@ SUITES = [
     ("generic_units", "card-game-generic-unit-assertions-v0.1.json", "Generic unit effects, selected positive and negative cases"),
     ("lifecycle", "card-game-lifecycle-assertions-v0.1.json", "Removal and round-end lifecycle effects"),
     ("specials_relics", "card-game-special-relic-assertions-v0.1.json", "Selected special effects and all six relic handlers"),
-    ("leaders", "card-game-leader-assertions-v0.1.json", "All twelve leader handlers plus negative/limit cases"),
+    ("leaders", "card-game-leader-assertions-v0.1.json", "All ten leader handlers plus negative/limit cases"),
     ("combos_faction_passive", "card-game-combo-faction-assertions-v0.1.json", "All 27 combos plus four faction passives and special exclusion"),
     ("approved_combo_policy", "card-game-combo-policy-assertions-v0.1.json", "Approved combo policy: explicit priority, tag contribution, two participants, pending combo targeting, public play entrypoint"),
 ]
@@ -55,7 +55,7 @@ summary = {
         "document": "Card game behavioral validation aggregate v0.3",
         "status": "POST-POLICY DIAGNOSTIC; SYNTHETIC CONTROLLED STATES; NOT BALANCE OR PRODUCTION INTEGRATION",
         "baseline": "current source tree after approved combo policy v0.1",
-        "date": "2026-11-28",
+        "date": "2026-11-27",
         "runtime_modified": True,
         "runner": "docs/scripts/summarize-card-game-behavior-v0.3.py",
     },

@@ -21,55 +21,22 @@ import PIL
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from config import get_data_dir
 
-from .cartas import VERSAO_ARTES
+from .cartas import HABILIDADES, VERSAO_ARTES
 from .arte_gwent_efeitos import desenhar_aura_unidade, desenhar_emblema_especial
-from . import molduras_cartas, templates_cartas, pintura_procedural
+from . import molduras_cartas, templates_cartas
 
 
-def _dados_lore_visual(card: dict[str, Any]) -> str:
-    """Retorna exclusivamente a lore canônica que pode ser impressa na imagem."""
-    lore = card.get("descricao") or card.get("lore") or ""
-    return " ".join(str(lore).split())
-
-
-def _layout_texto_lore(
-    draw: ImageDraw.ImageDraw, texto: str, largura: int = 342, altura: int = 74,
-    *, escala: float = 1.0,
-) -> tuple[ImageFont.ImageFont, list[str], float]:
-    """Ajusta a lore inteira à área da carta; nunca substitui, corta ou resume o texto."""
-    conteudo = " ".join(str(texto or "").split())
-    if not conteudo:
-        return _font(max(6, round(8 * escala))), [], max(7, round(9 * escala))
-    for tamanho_base in (9, 8, 7, 6):
-        tamanho = max(6, round(tamanho_base * escala))
-        fonte = _font(tamanho)
-        linhas = _wrap(draw, conteudo, fonte, largura)
-        passo = max(tamanho + 1, round((tamanho_base + 1.5) * escala))
-        if linhas and len(linhas) <= 12 and len(linhas) * passo <= altura and all(
-            draw.textbbox((0, 0), linha, font=fonte)[2] <= largura for linha in linhas
-        ):
-            return fonte, linhas, passo
-    raise ValueError("A lore completa não cabe no painel da carta sem ser truncada.")
-
-
-def _layout_painel_lore_template(
-    draw: ImageDraw.ImageDraw, lore: str, retangulo: tuple[int, int, int, int],
-) -> tuple[ImageFont.ImageFont, list[str], int, int, int]:
-    """Mede o painel do template para imprimir somente o texto da lore, sem cabeçalho."""
-    x1, y1, x2, y2 = retangulo
-    margem_x, margem_y = 24, 12
-    largura_util = (x2 - x1) - margem_x * 2
-    texto_y = y1 + margem_y
-    altura_disponivel = y2 - margem_y - texto_y
-    for tamanho in range(18, 9, -1):
-        fonte = _font(tamanho)
-        linhas = _wrap(draw, lore, fonte, largura_util)
-        passo = max(tamanho + 3, round(tamanho * 1.2))
-        if linhas and len(linhas) <= 13 and len(linhas) * passo <= altura_disponivel and all(
-            draw.textbbox((0, 0), linha, font=fonte)[2] <= largura_util for linha in linhas
-        ):
-            return fonte, linhas, passo, margem_x, texto_y
-    raise ValueError("A lore completa não cabe no painel do template sem ser truncada.")
+def _dados_habilidade_visual(card: dict[str, Any]) -> tuple[str, str]:
+    """Retorna o texto mecânico efetivo, priorizando habilidades exclusivas do motor."""
+    try:
+        # Usa exatamente o mesmo texto preparado para a partida, inclusive os ajustes de raridade.
+        from .gwent import preparar_carta
+        prepared = preparar_carta(card)
+        tem_efeito = bool(prepared.get("habilidade") or prepared.get("habilidade_identidade"))
+        return (str(prepared.get("habilidade_nome") or "Habilidade") if tem_efeito else "Sem habilidade"), str(prepared.get("habilidade_texto") or "Sem habilidade especial.")
+    except Exception:
+        ability = HABILIDADES.get(str(card.get("habilidade", "")), {})
+        return str(ability.get("nome") or "Tática"), str(ability.get("texto") or "Sem habilidade especial.")
 
 
 def _fingerprint_renderizador() -> str:
@@ -81,7 +48,10 @@ def _fingerprint_renderizador() -> str:
         root / "sistemas" / "molduras_cartas.py",
         root / "sistemas" / "arte_gwent_efeitos.py",
         root / "sistemas" / "templates_cartas.py",
-        root / "sistemas" / "pintura_procedural.py",
+        root / "sistemas" / "arte_ilustracao_base.py",
+        root / "sistemas" / "arte_ilustracao_cenarios.py",
+        root / "sistemas" / "arte_ilustracao_figuras.py",
+        root / "sistemas" / "arte_ilustracao_cartas.py",
         root / "fonts" / "DejaVuSans.ttf",
         root / "fonts" / "DejaVuSans-Bold.ttf",
         root / "fonts" / "DejaVuSerif.ttf",
@@ -100,7 +70,7 @@ def _fingerprint_renderizador() -> str:
 
 # A versão explícita documenta releases; a impressão digital também invalida
 # automaticamente o cache quando o código/overlay/fonte muda sem bump manual.
-VERSAO_RENDERIZADOR = f"{VERSAO_ARTES}-V16-LORE-ONLY-{_fingerprint_renderizador()}"
+VERSAO_RENDERIZADOR = f"{VERSAO_ARTES}-V13-ILUSTRACAO-CODIGO-{_fingerprint_renderizador()}"
 
 # Cor principal da moldura por raridade; facção e fileira tática têm sinais próprios.
 CORES_RARIDADE = {
@@ -1050,41 +1020,24 @@ def _draw_gwent_unit(draw: ImageDraw.ImageDraw, box, faction: str, row: str, acc
 
 
 
-def extrair_ilustracao_de_carta_completa(illustration_bytes: bytes) -> bytes:
-    """Extrai a janela de ilustração de uma carta 2:3 completa do Ateliê.
-
-    O texto antigo do arquivo completo não é reutilizado: nome, poder, raridade,
-    fileira, facção e efeito são compostos novamente a partir do catálogo atual.
-    """
-    if not validar_imagem_bytes(illustration_bytes):
-        raise ValueError("A carta completa enviada não é uma imagem válida.")
-    try:
-        with Image.open(io.BytesIO(illustration_bytes)) as uploaded:
-            if getattr(uploaded, "n_frames", 1) > 1:
-                raise ValueError("A carta completa precisa ser uma imagem estática.")
-            original = ImageOps.exif_transpose(uploaded).convert("RGB")
-            canvas = ImageOps.fit(
-                original, templates_cartas.TAMANHO_TEMPLATE,
-                method=Image.Resampling.LANCZOS, centering=(0.5, 0.5),
-            )
-            x1, y1, x2, y2 = templates_cartas.carregar_layout()["arte"]
-            illustration = canvas.crop((int(x1), int(y1), int(x2), int(y2)))
-            output = io.BytesIO()
-            illustration.save(output, format="PNG", optimize=True)
-            return output.getvalue()
-    except (OSError, UnidentifiedImageError) as exc:
-        raise ValueError("Não foi possível extrair a ilustração da carta completa.") from exc
-
-
 def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = ALTURA_PADRAO,
                illustration_bytes: bytes | None = None) -> Image.Image:
-    """Renderiza a carta com dados canônicos; a área narrativa contém somente a lore."""
-    width, height = max(120, int(width)), max(180, int(height))
-    # A miniatura deriva da composição legível em 420×620. Não tentamos espremer
-    # centenas de caracteres numa tela de 210 px antes de reduzir a imagem.
-    if width < LARGURA_PADRAO or height < ALTURA_PADRAO:
-        base = _draw_card(card, LARGURA_PADRAO, ALTURA_PADRAO, illustration_bytes)
-        return base.resize((width, height), Image.Resampling.LANCZOS)
+    """Renderiza a carta-base ou, se houver arte oficial completa, usa-a sem overlays."""
+    if illustration_bytes is not None:
+        # Arte oficial completa substitui a carta gerada: não aplicar template,
+        # moldura, nome, raridade, poder, ícones, habilidade ou efeitos por cima.
+        try:
+            with Image.open(io.BytesIO(illustration_bytes)) as uploaded:
+                if getattr(uploaded, "n_frames", 1) > 1:
+                    raise ValueError("A arte oficial precisa ser uma imagem estática.")
+                original = ImageOps.exif_transpose(uploaded).convert("RGBA")
+                return original.resize(
+                    (max(1, int(width)), max(1, int(height))),
+                    Image.Resampling.LANCZOS,
+                )
+        except (OSError, UnidentifiedImageError) as exc:
+            raise ValueError("Não foi possível abrir a arte oficial da carta.") from exc
+
     rarity = str(card.get("raridade", "Comum"))
     category = "Especial" if str(card.get("categoria", "Unidade")).casefold() == "especial" else "Unidade"
     faction = molduras_cartas.normalizar_faccao(card.get("faccao"))
@@ -1114,37 +1067,254 @@ def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = 
     B=lambda a,b,c,d:(X(a),Y(b),X(c),Y(d))
     im=Image.new("RGBA",(width,height),(7,8,10,255))
     d=ImageDraw.Draw(im,"RGBA")
-    aw, ah = X(384), Y(430)
 
-    # Motor de pintura procedural sem NumPy: direção semântica, profundidade,
-    # figura/objeto, materiais e acabamento são renderizados em camadas próprias.
-    art = pintura_procedural.renderizar_pintura_carta(
-        card,
-        (aw, ah),
-        (top, mid, accent, metal),
-        seed=seed,
-    )
-    # Arte enviada pelo jogador substitui integralmente a cena procedural.
-    custom = False
+    # Pintura procedural com atmosfera, ruínas e profundidade em camadas.
+    aw,ah=X(384),Y(430)
+    art=Image.new("RGBA",(aw,ah),(*top,255)); a=ImageDraw.Draw(art,"RGBA")
+    for yy in range(ah):
+        t=yy/max(1,ah-1); col=_mix(top,mid,t*.82)
+        a.line((0,yy,aw,yy),fill=(*col,255))
+    sx0=rng.randint(int(aw*.28),int(aw*.72)); sy0=rng.randint(int(ah*.16),int(ah*.37))
+    rad=rng.randint(int(ah*.10),int(ah*.18))
+    for mul,alpha in ((2.1,12),(1.5,24),(1,76)):
+        rr=int(rad*mul); a.ellipse((sx0-rr,sy0-rr,sx0+rr,sy0+rr),fill=(*accent,alpha))
+    # Silhuetas de serras e muralhas.
+    for layer in range(3):
+        pts=[(0,ah)]; base_y=int(ah*(.51+layer*.105))
+        for xx in range(-20,aw+45,max(26,aw//8)):
+            peak=base_y-rng.randint(int(ah*.04),int(ah*.19))
+            pts.extend([(xx,peak),(xx+max(18,aw//13),base_y+rng.randint(-8,9))])
+        pts.append((aw,ah))
+        shade=_mix(top,(7,10,13),.28+layer*.18)
+        a.polygon(pts,fill=(*shade,250))
+    # Torres, paliçadas, bandeiras e fumaça.
+    for i in range(5):
+        bx=rng.randint(-8,max(0,aw-24)); by=rng.randint(int(ah*.55),int(ah*.75))
+        bw=rng.randint(max(12,aw//20),max(20,aw//9)); bh=rng.randint(int(ah*.10),int(ah*.27))
+        stone=_mix(mid,(7,10,12),.52)
+        a.rectangle((bx,by-bh,bx+bw,by),fill=(*stone,235))
+        a.polygon([(bx-4,by-bh),(bx+bw//2,by-bh-8),(bx+bw+4,by-bh)],fill=(*stone,235))
+        for wx in range(bx+5,bx+bw-3,10):
+            a.rectangle((wx,by-bh+8,wx+3,by-bh+16),fill=(*accent,65))
+    for side in (-1,1):
+        pole=int(aw*(.13 if side<0 else .86)); py=int(ah*rng.uniform(.29,.47))
+        a.line((pole,py,pole,int(ah*.82)),fill=(*metal,165),width=max(2,X(3)))
+        fw=int(aw*.12); fh=int(ah*.12)
+        a.polygon([(pole,py),(pole+side*fw,py+Y(7)),(pole+side*fw*.82,py+fh),(pole,py+fh-Y(5))],
+                  fill=(*accent,115),outline=(*metal,150))
+    for i in range(8):
+        yy=rng.randint(int(ah*.63),int(ah*.96))
+        a.line((0,yy,aw,yy+rng.randint(-8,8)),fill=(*metal,rng.randint(12,34)),width=max(1,Y(5)))
+
+    # Camada de cenário exclusiva fica atrás do personagem/motivo principal.
+    _draw_unique_scene(art, card, rng, accent, metal, top)
+
+    # Motivo narrativo individual: o ID define a família visual e o nome/descrição
+    # refinam o tema. Tudo é vetorial, determinístico e não depende de assets externos.
+    card_id = str(card.get("id", "")).casefold()
+    identity = " ".join((card_id, str(card.get("nome", "")), str(card.get("descricao", "")))).casefold()
+    motif = ImageDraw.Draw(art, "RGBA")
+    mx, my = aw // 2, int(ah * .39)
+    glow = (*accent, 38)
+    if card_id.startswith("chefe_") or any(k in identity for k in ("chefe", "guardiao", "guardião", "cervo", "dama", "rei afogado", "sem rosto")):
+        # Arco de ameaça e chifres/coroa variáveis para chefes.
+        motif.ellipse((mx-int(aw*.27), my-int(ah*.26), mx+int(aw*.27), my+int(ah*.20)), outline=(*accent,105), width=max(2,X(4)))
+        points=[]
+        for j in range(12):
+            ang=-math.pi/2+j*math.pi/6
+            rad=int(aw*(.19 if j%2==0 else .145))
+            points.append((mx+int(math.cos(ang)*rad), my-int(ah*.06)+int(math.sin(ang)*rad)))
+        motif.line(points+[points[0]], fill=(*metal,150), width=max(2,X(3)), joint="curve")
+        for side in (-1,1):
+            motif.line((mx+side*int(aw*.12),my-int(ah*.12),mx+side*int(aw*.22),my-int(ah*.31),mx+side*int(aw*.18),my-int(ah*.12)), fill=(*accent,185), width=max(3,X(6)))
+    elif card_id.startswith("arma_") or any(k in identity for k in ("lâmina", "lamina", "martelo", "cajado", "arco", "sino", "lança", "lanca", "agulha")):
+        # Silhueta de equipamento grande ao fundo, com forma conforme o nome.
+        if any(k in identity for k in ("arco", "batedor")):
+            motif.arc((mx-int(aw*.30),my-int(ah*.27),mx+int(aw*.30),my+int(ah*.28)),260,100,fill=(*metal,190),width=max(4,X(8)))
+            motif.line((mx,my-int(ah*.27),mx,my+int(ah*.28)),fill=(*accent,180),width=max(2,X(3)))
+        elif any(k in identity for k in ("martelo", "sino")):
+            motif.line((mx-int(aw*.18),my+int(ah*.28),mx+int(aw*.18),my-int(ah*.25)),fill=(*metal,175),width=max(7,X(12)))
+            motif.polygon([(mx+int(aw*.08),my-int(ah*.29)),(mx+int(aw*.29),my-int(ah*.25)),(mx+int(aw*.27),my-int(ah*.08)),(mx+int(aw*.06),my-int(ah*.12))],fill=(*accent,100),outline=(*metal,220))
+        else:
+            motif.polygon([(mx,my-int(ah*.34)),(mx+int(aw*.045),my-int(ah*.02)),(mx+int(aw*.018),my+int(ah*.24)),(mx,my+int(ah*.31)),(mx-int(aw*.018),my+int(ah*.24)),(mx-int(aw*.045),my-int(ah*.02))],fill=(*metal,115),outline=(*accent,210))
+            motif.line((mx-int(aw*.12),my+int(ah*.14),mx+int(aw*.12),my+int(ah*.14)),fill=(*accent,220),width=max(3,X(6)))
+    elif card_id.startswith("magia_") or any(k in identity for k in ("orbe", "oráculo", "oraculo", "brasa", "trovão", "trovao", "névoa", "nevoa", "sol negro", "fagulha", "chama")):
+        # Portal arcano com órbitas e partículas em posições exclusivas.
+        for j in range(4):
+            rr=int(aw*(.12+j*.055))
+            motif.ellipse((mx-rr,my-int(rr*.82),mx+rr,my+int(rr*.82)),outline=(*accent,max(48,160-j*24)),width=max(2,X(3)))
+        for j in range(9):
+            ang=math.radians(j*40+seed%31)
+            ex=mx+int(math.cos(ang)*aw*.29); ey=my+int(math.sin(ang)*ah*.24)
+            motif.line((mx,my,ex,ey),fill=(*metal,95),width=max(1,X(2)))
+            motif.ellipse((ex-X(3),ey-Y(3),ex+X(3),ey+Y(3)),fill=(*accent,210))
+    elif card_id.startswith("covenant_") or any(k in identity for k in ("covenant", "pacto", "irmandade", "lobos", "lua velada", "sentinelas", "abismo")):
+        # Estandarte e brasão da ordem, com variação heráldica por carta.
+        pole=int(aw*.19); motif.line((pole,int(ah*.13),pole,int(ah*.79)),fill=(*metal,190),width=max(3,X(5)))
+        motif.polygon([(pole,my-int(ah*.17)),(pole+int(aw*.25),my-int(ah*.10)),(pole+int(aw*.21),my+int(ah*.12)),(pole,my+int(ah*.16))],fill=(*accent,105),outline=(*metal,220))
+        motif.ellipse((mx-int(aw*.10),my-int(aw*.10),mx+int(aw*.10),my+int(aw*.10)),outline=(*metal,220),width=max(3,X(4)))
+        motif.line((mx-int(aw*.08),my,mx+int(aw*.08),my),fill=(*accent,230),width=max(3,X(4)))
+    else:
+        # Brasão singular para cartas geradas de jogos/patentes e demais famílias.
+        sides=5+(seed%4); radius=int(aw*(.13+(seed%5)*.012))
+        pts=[(mx+int(math.cos(-math.pi/2+j*2*math.pi/sides)*radius),my+int(math.sin(-math.pi/2+j*2*math.pi/sides)*radius)) for j in range(sides)]
+        motif.polygon(pts,fill=glow,outline=(*metal,175))
+        motif.ellipse((mx-X(8),my-Y(8),mx+X(8),my+Y(8)),fill=(*accent,210))
+
+    # Arte enviada pelo jogador ocupa a janela toda, mas recebe a moldura nova.
+    custom=False
     if illustration_bytes:
         try:
             with Image.open(io.BytesIO(illustration_bytes)) as src:
-                art = ImageOps.fit(
-                    src.convert("RGB"), (aw, ah), method=Image.Resampling.LANCZOS,
-                    centering=(.5, .46),
-                ).convert("RGBA")
-            tint = Image.new("RGBA", art.size, (*top, 12))
-            art = Image.alpha_composite(art, tint)
-            custom = True
-        except (OSError, ValueError):
-            custom = False
-
-    if not custom and category == "Unidade":
-        # Aura mecânica vem por cima da pintura, sem substituir anatomia ou materiais.
-        desenhar_aura_unidade(
-            art, str(card.get("habilidade", "")), aw, ah,
-            aw // 2, int(ah * .94), accent, metal, seed,
-        )
+                art=ImageOps.fit(src.convert("RGB"),(aw,ah),method=Image.Resampling.LANCZOS,
+                                 centering=(.5,.46)).convert("RGBA")
+            tint=Image.new("RGBA",art.size,(*top,18)); art=Image.alpha_composite(art,tint); custom=True
+        except (OSError,ValueError):
+            custom=False
+    ilustrada=False
+    if not custom:
+        try:
+            from .arte_ilustracao_cartas import pintar_ilustracao
+            art=pintar_ilustracao(card,aw,ah,seed,faction,row,rarity,category)
+            ilustrada=True
+            if category=="Unidade":
+                desenhar_aura_unidade(art, str(card.get("habilidade", "")), aw, ah, aw//2, int(ah*.85), accent, metal, seed)
+        except Exception:
+            logging.getLogger(__name__).exception("Ilustração por código falhou; usando arte básica.")
+    if ilustrada:
+        pass
+    elif not custom and category=="Unidade":
+        a=ImageDraw.Draw(art,"RGBA")
+        cx=int(aw*rng.uniform(.44,.57)); ground=int(ah*.94)
+        archetype=seed%8
+        # Arquétipos narrativos dirigidos pelo conteúdo da carta, não apenas pelo acaso.
+        # O seed ainda varia pose, proporções, ornamentos e cenário dentro de cada família.
+        if card_id.startswith("chefe_"):
+            if any(k in identity for k in ("cervo", "lobo", "fera")): archetype=3
+            elif any(k in identity for k in ("dama", "aparição", "aparicao", "oráculo", "oraculo")): archetype=2
+            elif any(k in identity for k in ("afogado", "abismo", "esqueleto")): archetype=4
+            elif any(k in identity for k in ("caçador", "cacador", "sem rosto")): archetype=5
+            else: archetype=0
+        elif card_id.startswith("magia_"):
+            archetype=6 if any(k in identity for k in ("brasa", "chama", "fagulha", "fogo")) else 2
+        elif card_id.startswith("arma_"):
+            if any(k in identity for k in ("duelista", "dançarina", "dancarino", "batedor")): archetype=5
+            elif any(k in identity for k in ("oráculo", "oraculo", "tecela", "tecelã")): archetype=2
+            else: archetype=0
+        elif card_id.startswith("covenant_"):
+            if any(k in identity for k in ("lobo", "lobos")): archetype=3
+            elif any(k in identity for k in ("lua", "véu", "veu")): archetype=2
+            elif any(k in identity for k in ("abismo", "coroa")): archetype=4
+            else: archetype=0
+        body=_mix((12,16,20),accent,.22); cloth=_mix(top,metal,.18)
+        # capa, com pontas e dobras ao vento
+        cape=cx+rng.choice((-1,1))*int(aw*.27)
+        a.polygon([(cx-X(20),int(ah*.38)),(cx+X(20),int(ah*.38)),(cape,ground),
+                   (cx+X(9),int(ah*.82)),(cx-X(18),ground-Y(8))],
+                  fill=(*_mix(top,(4,6,9),.25),245),outline=(*accent,175))
+        head_y=int(ah*(.30 if archetype!=3 else .38)); hr=int(ah*(.064 if archetype!=3 else .105))
+        if archetype==3: # fera / criatura
+            a.ellipse((cx-hr,head_y-hr,cx+hr,head_y+hr),fill=(*body,255),outline=(*metal,235),width=max(2,X(3)))
+            a.polygon([(cx-hr+4,head_y-hr+8),(cx-hr-X(24),head_y-hr-Y(38)),(cx-hr//3,head_y-hr+3)],
+                      fill=(*body,255),outline=(*accent,245))
+            a.polygon([(cx+hr-4,head_y-hr+8),(cx+hr+X(24),head_y-hr-Y(38)),(cx+hr//3,head_y-hr+3)],
+                      fill=(*body,255),outline=(*accent,245))
+            a.ellipse((cx-hr//2,head_y-2,cx-hr//2+X(7),head_y+Y(6)),fill=(*accent,255))
+            a.ellipse((cx+hr//2-X(7),head_y-2,cx+hr//2,head_y+Y(6)),fill=(*accent,255))
+            a.polygon([(cx-hr,head_y+hr//2),(cx+hr,head_y+hr//2),(cx+int(aw*.21),ground),
+                       (cx-int(aw*.21),ground)],fill=(*body,255),outline=(*metal,180))
+        else:
+            # elmo/rosto e pescoço
+            a.ellipse((cx-hr,head_y-hr,cx+hr,head_y+hr),fill=(151,119,96,255),outline=(*metal,220),width=max(1,X(2)))
+            a.pieslice((cx-hr-X(5),head_y-hr-Y(10),cx+hr+X(5),head_y+hr),180,360,
+                       fill=(*body,255),outline=(*metal,210))
+            if archetype in (1,7):
+                a.polygon([(cx,head_y-hr-Y(20)),(cx-hr-X(17),head_y-hr+Y(5)),
+                           (cx+hr+X(17),head_y-hr+Y(5))],fill=(*_mix(body,accent,.15),255),outline=(*accent,220))
+            shoulder=int(aw*(.17 if archetype not in (2,5) else .14))
+            torso_top=head_y+hr; torso_bottom=int(ah*(.75 if archetype!=2 else .84))
+            waist=int(shoulder*.58)
+            if archetype==2: # arcanista de manto
+                shape=[(cx-shoulder,torso_top),(cx+shoulder,torso_top),(cx+int(aw*.22),ground),
+                       (cx-int(aw*.22),ground)]
+            elif archetype==5: # assassino leve
+                shape=[(cx-int(shoulder*.8),torso_top),(cx+int(shoulder*.8),torso_top),
+                       (cx+waist,torso_bottom),(cx-waist,torso_bottom)]
+            else:
+                shape=[(cx-shoulder,torso_top+8),(cx-int(shoulder*.7),torso_top-2),
+                       (cx+int(shoulder*.7),torso_top-2),(cx+shoulder,torso_top+8),
+                       (cx+waist,torso_bottom),(cx-waist,torso_bottom)]
+            a.polygon(shape,fill=(*body,255),outline=(*metal,235),width=max(2,X(3)))
+            a.polygon([(cx-int(shoulder*.64),torso_top+8),(cx+int(shoulder*.64),torso_top+8),
+                       (cx+int(shoulder*.42),torso_top+int(ah*.19)),(cx,torso_bottom-Y(10)),
+                       (cx-int(shoulder*.42),torso_top+int(ah*.19))],
+                      fill=(*cloth,255),outline=(*accent,245),width=max(1,X(2)))
+            # placas de ombro, rebites, brasão e cintura
+            for side in (-1,1):
+                qx=cx+side*int(shoulder*.82)
+                a.polygon([(qx-side*X(13),torso_top+5),(qx+side*X(16),torso_top+8),
+                           (qx+side*X(22),torso_top+Y(31)),(qx,torso_top+Y(39)),
+                           (qx-side*X(17),torso_top+Y(24))],fill=(*_mix(body,metal,.22),255),
+                          outline=(*metal,230))
+                a.ellipse((qx-X(3),torso_top+Y(18),qx+X(3),torso_top+Y(24)),fill=(*accent,255))
+            a.polygon([(cx,torso_top+Y(15)),(cx+X(15),torso_top+Y(31)),
+                       (cx,torso_top+Y(48)),(cx-X(15),torso_top+Y(31))],
+                      fill=(*accent,245),outline=(*metal,255))
+            a.line((cx-int(shoulder*.5),torso_top+int(ah*.24),cx+int(shoulder*.5),torso_top+int(ah*.24)),
+                   fill=(*metal,185),width=max(2,X(3)))
+            # braços em pose assimétrica e pernas em passada
+            arm_l=(cx-int(shoulder*.84),torso_top+Y(12)); elbow_l=(cx-int(shoulder*1.16),int(ah*.57))
+            hand_l=(cx-int(shoulder*.72),int(ah*.66)); arm_r=(cx+int(shoulder*.82),torso_top+Y(10))
+            elbow_r=(cx+int(shoulder*1.12),int(ah*.48)); hand_r=(cx+int(aw*.19),int(ah*.58))
+            for aa,bb,cc in ((arm_l,elbow_l,hand_l),(arm_r,elbow_r,hand_r)):
+                a.line((aa[0],aa[1],bb[0],bb[1]),fill=(*body,255),width=max(8,X(17)))
+                a.line((bb[0],bb[1],cc[0],cc[1]),fill=(*body,255),width=max(7,X(14)))
+                a.ellipse((bb[0]-X(9),bb[1]-Y(9),bb[0]+X(9),bb[1]+Y(9)),
+                          fill=(*_mix(body,metal,.3),255),outline=(*metal,235),width=max(1,X(2)))
+            hip=int(ah*.74)
+            for side in (-1,1):
+                hx=cx+side*int(waist*.55); kx=cx+side*int(aw*.07); ky=int(ah*(.80 if side<0 else .77))
+                bx=cx+side*int(aw*(.12 if side<0 else .085))
+                a.line((hx,hip,kx,ky),fill=(*body,255),width=max(10,X(19)))
+                a.line((kx,ky,bx,ground),fill=(*body,255),width=max(9,X(16)))
+                a.polygon([(kx-X(12),ky-Y(10)),(kx+X(12),ky-Y(10)),
+                           (kx+X(14),ky+Y(12)),(kx-X(14),ky+Y(12))],
+                          fill=(*_mix(body,metal,.25),255),outline=(*metal,230))
+                a.line((bx-X(9),ground-Y(3),bx+X(14),ground-Y(3)),fill=(*metal,225),width=max(2,X(4)))
+            # armas e adereços distintos por fileira
+            hx,hy=hand_r
+            if row=="melee":
+                a.line((hx,hy,cx+int(aw*.28),int(ah*.16)),fill=(211,215,210,255),width=max(4,X(7)))
+                a.line((hx-X(13),hy-Y(12),hx+X(13),hy+Y(10)),fill=(*accent,255),width=max(3,X(5)))
+            elif row=="ranged":
+                bx=cx+int(aw*.23)
+                a.arc((bx-int(aw*.10),int(ah*.27),bx+int(aw*.10),int(ah*.69)),270,90,fill=(*accent,255),width=max(4,X(6)))
+                a.line((bx,int(ah*.28),bx,int(ah*.70)),fill=(*metal,255),width=max(2,X(2)))
+            else:
+                ox=cx+int(aw*.24); oy=int(ah*.17)
+                a.line((hx,hy,ox,oy),fill=(*metal,255),width=max(5,X(8)))
+                rr=int(aw*.06); a.ellipse((ox-rr,oy-rr,ox+rr,oy+rr),fill=(*accent,215),outline=(*metal,255),width=max(2,X(3)))
+            # aura visual da habilidade (escudo, vingança, ressurgir, devorar, sobrevivente, espólios)
+            desenhar_aura_unidade(art, str(card.get("habilidade", "")), aw, ah, cx, int(ah * .85), accent, metal, seed)
+            # partículas, runas e luz de recorte
+            for _ in range(42):
+                qx=rng.randint(4,aw-4); qy=rng.randint(int(ah*.18),ah-4); rr=rng.choice((1,2,3))
+                a.ellipse((qx-rr,qy-rr,qx+rr,qy+rr),fill=(*accent,rng.randint(35,125)))
+    elif not custom:
+        # Especiais: tempestade, selo, fogo ou ruptura arcana.
+        a=ImageDraw.Draw(art,"RGBA"); cx,cy=aw//2,int(ah*.5); motif=seed%6
+        for i in range(6):
+            rr=int(min(aw,ah)*(.11+i*.065))
+            a.ellipse((cx-rr,cy-rr,cx+rr,cy+rr),outline=(*accent,max(28,135-i*17)),width=max(1,X(2)))
+        for ang in range(0,360,30 if motif%2==0 else 45):
+            rad=math.radians(ang+rng.randint(-5,5))
+            ex=cx+int(math.cos(rad)*aw*.46); ey=cy+int(math.sin(rad)*ah*.43)
+            a.line((cx,cy,ex,ey),fill=(*metal,105),width=max(1,X(2)))
+        if not desenhar_emblema_especial(art, str(card.get("habilidade", "")), aw, ah, accent, metal, seed):
+            a.polygon([(cx,cy-int(ah*.28)),(cx+int(aw*.18),cy),
+                       (cx,cy+int(ah*.28)),(cx-int(aw*.18),cy)],
+                      fill=(*accent,75),outline=(*metal,235),width=max(2,X(3)))
+            rr=int(aw*.07); a.ellipse((cx-rr,cy-rr,cx+rr,cy+rr),fill=(*accent,180),outline=(*metal,255),width=max(2,X(3)))
     im.alpha_composite(art,(X(18),Y(90)))
     # Acabamento: vinheta, brilho de borda e foil conforme a raridade.
     im=molduras_cartas.aplicar_efeitos_arte(im,rarity,seed,X,Y)
@@ -1201,38 +1371,26 @@ def _draw_card(card: dict[str, Any], width: int = LARGURA_PADRAO, height: int = 
     _texto_rastreado(d,(X(rx),Y(ry)+max(1,X(1))),rar_txt,f_rar,(0,0,0,210),X(1.6),centro=True)
     _texto_rastreado(d,(X(rx),Y(ry)),rar_txt,f_rar,(255,250,236,255),X(1.6),centro=True)
 
-    # Painel: identidade tática acima; somente a lore no rodapé da imagem.
+    # Painel: facção + fileira, habilidade e texto de efeito.
     f_lbl=_font(max(8,X(9.5)),True)
     row_label={"melee":"CORPO A CORPO","ranged":"LONGA DISTÂNCIA","siege":"CERCO"}.get(row,"TÁTICA") if not especial else "CARTA ESPECIAL"
     _texto_rastreado(d,(X(38),Y(491)),faction.upper(),f_lbl,(*fac["cor"],255),X(1.0))
     larg=_largura_rastreada(d,row_label,f_lbl,X(1.0))
     _texto_rastreado(d,(X(386)-larg,Y(491)),row_label,f_lbl,(*fac["metal"],225),X(1.0))
-    lore = _dados_lore_visual(card)
-    if lore:
-        # O painel narrativo contém somente a lore. Não há título "LORE", nome de
-        # habilidade nem texto substituto como "Sem habilidade especial".
-        fonte_lore, linhas_lore, passo_lore = _layout_texto_lore(
-            d, lore, largura=X(342), altura=Y(94), escala=sx,
-        )
-        for i, line in enumerate(linhas_lore):
-            d.text((X(38), Y(516) + i * passo_lore), line, font=fonte_lore,
-                   fill=(228, 224, 212, 255), anchor="lm")
+    aname, atext = _dados_habilidade_visual(card)
+    f_hab=_font(max(10,X(13.5)),True,serif=True)
+    txt((X(38),Y(518)),aname,f_hab,(*est["luz"],255),anchor="lm")
+    # O texto usa o maior tamanho que couber em 3 linhas (12 → 9); só no mínimo aceita 4 linhas.
+    for tam in (12, 11, 10, 9):
+        fonte_txt=_font(max(8,X(tam))); linhas_txt=_wrap(d,atext,fonte_txt,X(342))
+        if len(linhas_txt)<=3: break
+    passo=tam+3.4 if len(linhas_txt)<=3 else 12.6
+    for i,line in enumerate(linhas_txt[:4]):
+        d.text((X(38),Y(538+i*passo)),line,font=fonte_txt,fill=(228,224,212,255),anchor="lm")
 
-    # Nenhum nome/regra de habilidade é impresso na imagem; a regra continua
-    # disponível na ficha de combate e no site, fora do arquivo visual.
+    # O sistema atual não usa custo de carta/deck: o espaço inferior é reservado
+    # integralmente para o texto da habilidade.
     return im.convert("RGB")
-
-
-def renderizar_carta_com_arte_completa(
-    card: dict[str, Any], illustration_bytes: bytes, *,
-    tamanho: tuple[int, int] = (LARGURA_PADRAO, ALTURA_PADRAO),
-) -> Image.Image:
-    """Recompõe carta aprovada com arte recortada e dados/efeito atuais do jogo."""
-    art_only = extrair_ilustracao_de_carta_completa(illustration_bytes)
-    return _draw_card(
-        card, width=max(120, int(tamanho[0])), height=max(180, int(tamanho[1])),
-        illustration_bytes=art_only,
-    )
 
 
 # Cartas com template completo (somente quando o membro enviou uma arte)
@@ -1356,15 +1514,32 @@ def _draw_card_com_template(card: dict[str, Any], illustration_bytes: bytes) -> 
                    ROTULOS_FILEIRA.get(row, "UNIDADE"), maximo=22, minimo=12,
                    cor=suave, alinhamento="direita", margem=22, negrito=True)
 
-    # O painel inferior do template passa a conter somente a lore canônica.
-    lore = _dados_lore_visual(card)
-    if lore:
-        hx1, hy1, _hx2, _hy2 = layout["habilidade"]
-        fonte_lore, linhas_lore, altura_linha, margem_x, y_texto = (
-            _layout_painel_lore_template(draw, lore, tuple(layout["habilidade"]))
+    # Habilidade: o guia reserva uma placa de 92 px. O título e até duas linhas
+    # de descrição são dimensionados dentro da área segura, sem invadir o relevo.
+    nome_hab, texto_hab = _dados_habilidade_visual(card)
+    nome_hab = nome_hab.strip()
+    texto_hab = texto_hab.strip()
+    hx1, hy1, hx2, hy2 = layout["habilidade"]
+    margem_x, margem_y = 24, 9
+    y_texto = hy1 + margem_y
+    largura_util = (hx2 - hx1) - margem_x * 2
+    if nome_hab:
+        fonte_nome, linhas_nome, altura_nome = _ajustar_texto(
+            draw, nome_hab.upper(), largura_util, 27,
+            maximo=23, minimo=15, negrito=True, max_linhas=1, espaco=1.0,
         )
-        for indice, linha in enumerate(linhas_lore):
-            draw.text((hx1 + margem_x, y_texto + indice * altura_linha), linha, font=fonte_lore,
+        titulo = linhas_nome[0] if linhas_nome else nome_hab.upper()[:36]
+        draw.text((hx1 + margem_x, y_texto), titulo, font=fonte_nome,
+                  fill=(*accent, 255), stroke_width=1, stroke_fill=(8, 10, 16, 255))
+        y_texto += max(25, altura_nome) + 1
+    if texto_hab and y_texto < hy2 - margem_y:
+        altura_disponivel = hy2 - margem_y - y_texto
+        fonte, linhas, altura_linha = _ajustar_texto(
+            draw, texto_hab, largura_util, altura_disponivel,
+            maximo=19, minimo=13, max_linhas=2, espaco=1.08,
+        )
+        for indice, linha in enumerate(linhas[:2]):
+            draw.text((hx1 + margem_x, y_texto + indice * altura_linha), linha, font=fonte,
                       fill=(230, 231, 227, 255), stroke_width=1, stroke_fill=(8, 10, 16, 255))
     return imagem.convert("RGB")
 
@@ -1421,7 +1596,7 @@ def render_previa_template(raridade: str, *, calibracao: bool = False) -> io.Byt
         "fileira": "siege",
         "poder": 88,
         "custo": 3,
-        "habilidade": "",
+        "habilidade": next(iter(HABILIDADES), ""),
         "descricao": "Prévia do template completo enviado.",
     }
     imagem = _draw_card_com_template(exemplo, _arte_de_exemplo(exemplo))
@@ -1493,7 +1668,6 @@ def preparar_payload_carta_base(card: Any) -> dict[str, Any]:
         "papel_gwent": gwent["papel_gwent"],
         "habilidade_nome": gwent["habilidade_nome"],
         "habilidade_texto": gwent["habilidade_texto"],
-        "_habilidade_canonica_preparada": True,
     })
     return source
 

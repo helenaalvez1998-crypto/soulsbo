@@ -913,14 +913,54 @@ def registrar_rotas(bot, app: web.Application) -> None:
         return web.FileResponse(page)
 
     async def catalogo_cartas_api(request: web.Request) -> web.Response:
-        """Catálogo público; payload compartilhado com o motor de combate."""
+        """Catálogo público de modelos; não depende de o jogador possuir a carta."""
         try:
-            from sistemas.catalogo_publico import montar_catalogo_publico_cartas
-            payload = montar_catalogo_publico_cartas()
-            await bot._gwent_mark_custom_art(payload.get("cartas", []))
-            for card in payload.get("cartas", []):
-                bot._gwent_canonicalize_malenia_card(card)
-            return web.json_response(payload, headers={"Cache-Control": "public, max-age=300"})
+            from sistemas.cartas import CARTAS_POR_ID, CARTAS_PACOTE, CARTAS_EXPANSAO_V75, HABILIDADES
+            ids_pacote = {str(c.id) for c in CARTAS_PACOTE}
+            ids_expansao_v75 = {str(c.id) for c in CARTAS_EXPANSAO_V75}
+            from sistemas.arte_cartas import preparar_payload_carta_base, etag_carta_base
+            items = []
+            for carta in CARTAS_POR_ID.values():
+                data = carta.para_dict()
+                public_image_version = etag_carta_base(preparar_payload_carta_base(carta))
+                habilidade_id = str(data.get("habilidade") or "")
+                habilidade = HABILIDADES.get(habilidade_id, {})
+                fileira_raw = str(data.get("fileira") or carta.fileira)
+                fileira_labels = {
+                    "melee": "Corpo a corpo",
+                    "ranged": "Longa distância",
+                    "siege": "Cerco",
+                    "agile": "Ágil",
+                    "any": "Qualquer fileira",
+                    "special": "Especial",
+                }
+                items.append({
+                    "card_id": str(carta.id),
+                    "image_url": (
+                        f"/api/gwent/public-cards/{quote(str(carta.id), safe='')}/image?"
+                        f"v={public_image_version}&thumb=1"
+                    ),
+                    "nome": str(carta.nome),
+                    "categoria": str(data.get("categoria") or carta.categoria),
+                    "faccao": str(data.get("faccao") or carta.faccao),
+                    "fileira": fileira_labels.get(fileira_raw.casefold(), fileira_raw),
+                    "raridade": str(carta.raridade),
+                    "poder": int(carta.poder),
+                    "custo": int(carta.custo),
+                    "habilidade": str(habilidade.get("nome") or habilidade_id or "Sem habilidade"),
+                    "habilidade_texto": str(habilidade.get("texto") or carta.descricao or ""),
+                    "descricao": str(carta.descricao or ""),
+                    "no_pacote": str(carta.id) in ids_pacote,
+                    "expansao_v75": str(carta.id) in ids_expansao_v75,
+                })
+            ordem = {nome: i for i, nome in enumerate(("Singular", "Primordial", "Mítica", "Lendária", "Épica", "Rara", "Comum"))}
+            items.sort(key=lambda item: (ordem.get(item["raridade"], 99), item["nome"].casefold()))
+            return web.json_response({
+                "total": len(items),
+                "total_pacote": len(ids_pacote),
+                "total_expansao_v75": sum(1 for item in items if item["expansao_v75"]),
+                "cartas": items,
+            }, headers={"Cache-Control": "public, max-age=300"})
         except Exception:
             import logging
             logging.getLogger("site_hub").exception("Falha ao montar o catálogo público de cartas.")

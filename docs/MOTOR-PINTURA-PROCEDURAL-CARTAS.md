@@ -2,7 +2,7 @@
 
 ## Objetivo e escopo
 
-O motor cria a janela de ilustração de cada carta a partir dos próprios dados do catálogo: nome, descrição/lore, habilidade (como referência visual), categoria, facção e identificador. No texto impresso da carta, o painel narrativo contém somente a lore; habilidade, regra, combo ou aviso de ausência de habilidade nunca são impressos na imagem. A saída é uma imagem RGBA determinística, sem carregar ilustrações externas.
+O motor cria a janela de ilustração de cada carta a partir dos próprios dados do catálogo: nome, descrição/lore, habilidade, categoria, facção e identificador. A saída é uma imagem RGBA determinística, sem carregar ilustrações externas.
 
 A implementação usa Pillow e a biblioteca padrão do Python. Não usa NumPy, OpenCV, modelos remotos ou arquivos de imagem de terceiros. O estilo é uma pintura digital procedural estilizada: volumes, pigmento, névoa, luz e textura são sintetizados por código.
 

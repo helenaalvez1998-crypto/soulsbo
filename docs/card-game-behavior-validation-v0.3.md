@@ -1,60 +1,83 @@
-# Validação comportamental — runtime V76
+# Validação comportamental do motor de cartas — v0.3 (pós-política de combos)
 
-**Data:** 2026-11-28  
-**Estado:** 255/255 assertivas comportamentais aprovadas em 8 suítes; zero falhas no agregado.  
-**Fonte de resultados:** `docs/card-game-behavior-validation-v0.3.json`.
+> **STATUS: validação sintética pós-alteração funcional.** A política de combos foi aprovada pelo usuário e implementada em `sistemas/gwent.py`. Os asserts executam funções reais do motor em estados controlados em memória; não são teste de integração de produção nem prova de equilíbrio competitivo.
 
-## 1. Suítes executadas
+- Data: 2026-11-27.
+- Runner: `docs/scripts/summarize-card-game-behavior-v0.3.py`.
+- Relatório JSON: `docs/card-game-behavior-validation-v0.3.json`.
+- Runtime modificado: sim, exclusivamente `sistemas/gwent.py` nesta etapa funcional.
 
-| Suíte | Assertivas | Aprovadas | Falhas |
+## 1. Resultado agregado
+
+**251/251 asserts aprovados em 8 suites; zero falhas.**
+
+| Suite | Assertions | Aprovados | Falhas |
 |---|---:|---:|---:|
-| Compra inicial e mulligan | 13 | 13 | 0 |
-| Identidades ativas | 33 | 33 | 0 |
-| Habilidades genéricas de unidade | 39 | 39 | 0 |
-| Efeitos de ciclo de rodada | 7 | 7 | 0 |
-| Cartas especiais | 18 | 18 | 0 |
-| Os doze líderes | 26 | 26 | 0 |
-| Combos e passivas de facção | 87 | 87 | 0 |
-| Política de combos | 32 | 32 | 0 |
-| **Total** | **255** | **255** | **0** |
+| Initial representative effect cases | 13 | 13 | 0 |
+| 22 active identity effects plus negative/limit cases | 33 | 33 | 0 |
+| Generic unit effects, selected positive and negative cases | 39 | 39 | 0 |
+| Removal and round-end lifecycle effects | 7 | 7 | 0 |
+| Selected special effects and all six relic handlers | 18 | 18 | 0 |
+| All ten leader handlers plus negative/limit cases | 22 | 22 | 0 |
+| All 27 combos plus four faction passives and special exclusion | 87 | 87 | 0 |
+| Approved combo policy: explicit priority, tag contribution, two participants, pending combo targeting, public play entrypoint | 32 | 32 | 0 |
+| **Total** | **251** | **251** | **0** |
 
-O conjunto de fim de rodada confirma que `gloria` e `sobrevivente` compartilham o mesmo comportamento: a unidade elegível permanece no campo após vencer a rodada. A carta V76 `Cantor do Último Hino` usa o segundo alias e possui teste direto.
+As contagens representam cenários, não efeitos únicos. Há sobreposição deliberada entre suites; especialmente, a suite combo/facção cobre a ativação básica e a suite da política cobre invariantes novos.
 
-## 2. Liderança de Os Esquecidos
+## 2. Política de combos validada
 
-| Líder | Comportamento exercitado | Negativo/limite |
-|---|---|---|
-| Papa Esquecido | +1 em aliados da facção na fileira escolhida | exige aliado dos Esquecidos |
-| Abadessa das Ruínas | purifica até 2 aliados afetados de maior poder efetivo na fileira e concede +1 | exige aliado afetado elegível |
-| Mártir da Vigília | revive a unidade mais forte dos Esquecidos com poder-base até 5, concede +1 e limpa estados | exige unidade elegível no descarte |
+Ver `card-game-combo-policy-v0.1.md`.
 
-Os doze líderes são verificados pelo registro `LEADERS`, pelos handlers de `aplicar_jogada()` e pelo fallback do site. Ações e efeitos continuam dentro do fluxo normal de partida.
+- Os 27 combos têm `minimum: 2` explícito.
+- Os 27 combos têm `priority` inteiro único; menor número resolve primeiro.
+- A carta recém-jogada precisa contribuir com ao menos uma tag exigida pelo combo específico.
+- O mínimo conta instâncias distintas de unidades participantes; uma carta híbrida não vale como dois participantes.
+- No máximo um combo por jogada. Um combo pendente só pode ser ativado por jogada posterior que também contribua com tag exigida.
+- O bônus individual vai para a carta participante que ativa o combo. `team_bonus` existente continua indo para aliados na mesma fileira.
+- `synergy_used` continua limitando uma ativação de cada combo por jogador/rodada e é resetado no fechamento da rodada.
 
-## 3. Auditoria de sobreposição de combos V76
+A suite nova tem 32 assertions: 27 tentativas solo (uma por combo), integridade de mínimos/prioridades, precedência independente da ordem de inserção, sequência pendente com uma carta não participante e uma carta participante posterior, deduplicação de instância e uma jogada de integração via `aplicar_jogada(action="play")`.
 
-A enumeração atual percorre 92 unidades catalogadas com tags de sinergia e 27 combos registrados:
+## 3. Auditoria enumerativa pós-correção
 
-| Medida | Resultado |
+O script `docs/scripts/audit-combo-overlap-v0.2.py` reproduz a enumeração completa do universo observado de cartas com tags:
+
+| Medida | Resultado pós-política |
 |---|---:|
-| Pares ordenados | 8.372 |
-| Pares com mais de um combo elegível | 720 (8,6001%) |
-| Trincas ordenadas | 753.480 |
-| Trincas com dois ou mais combos em jogadas sucessivas | 24.886 (3,3028%) |
-| Gatilhos posteriores que contribuíram com tag exigida | 24.886/24.886 |
+| Unidades atuais com tags | 67 |
+| Combos | 27 |
 | Ativações solo | 0 |
+| Pares ordenados examinados | 4,422 |
+| Pares com múltiplos combos elegíveis | 152 |
+| Trincas ordenadas examinadas | 287,430 |
+| Trincas que ativam pelo menos dois combos | 2,582 |
+| Eventos posteriores analisados | 2,582 |
+| Eventos posteriores com tag exigida | 2,582 |
 
-A carta que completa um combo precisa contribuir com ao menos uma tag exigida; os participantes são instâncias distintas e respeitam o mínimo de cada combo. A enumeração não equivale a taxa real de ativação nem a win rate.
+A política elimina os casos solo e os acionamentos posteriores por cartas sem tag exigida no universo enumerado. Ainda há sobreposições legítimas; elas são resolvidas por prioridade explícita. Os detalhes, exemplos e comparação com o baseline estão em `card-game-combo-overlap-v0.2.md/.json`.
 
-## 4. Alterações V76 exercitadas
+## 4. Alterações funcionais e compatibilidade
 
-- 30 unidades de combate por facção; 16 unidades novas para Os Esquecidos e reposições nas demais facções.
-- 12 líderes, três por facção; dois líderes novos com efeitos testados.
-- Decks-base de 9 unidades e 1 especial, todos alinhados à facção.
-- Reclassificação canônica de snapshots Luteranos antigos; nomes e lore são reidratados pelo ID do catálogo.
-- Geração de recompensas de jogos e patentes agora inclui Os Esquecidos.
-- Todos os títulos do índice têm até 28 caracteres e não há duplicatas.
-- As 25 novas cartas têm habilidades registradas e executadas por handlers já existentes; `sobrevivente` foi verificado no ciclo de rodada.
+- `SYNERGY_COMBOS` em `sistemas/gwent.py`: adicionado `priority` único e `minimum: 2` explícito em todas as 27 definições; descrições de participação atualizadas.
+- `_aplicar_combo_de_cartas()`: filtragem por tag exigida da carta atual, contagem de instâncias distintas, ordenação explícita por prioridade e uma ativação por jogada.
+- Não houve mudança no schema de banco, deck builder, endpoints, frontend, imagens, custo, raridade ou valores de bônus.
+- Partidas persistidas conservam bônus já concedidos antes da atualização. A política nova se aplica às novas resoluções de jogada após o deploy; não foi possível inspecionar DB/produção.
 
 ## 5. Limitações
 
-A enumeração de combos utiliza estados sintéticos em memória e IDs de unidade distintos; não constrói todas as combinações legais de decks de 12 cartas e não mede win rate. Os testes de unidade exercitam efeitos específicos, mas não equivalem a uma simulação exaustiva de todas as ordens de jogada, clima, relíquias, líderes, IA, Discord, API hospedada ou banco de produção. O pacote está validado localmente, mas não foi implantado no host.
+- Suites sintéticas em memória; não validam 12 cartas completas, snapshots serializados, HTTP, browser, Discord, DB de produção, Cloudflare R2 nem artes publicadas.
+- A suite nova cobre um exemplo de sobreposição pendente, além dos 27 casos solo. Não executa todas as sequências de 12 cartas.
+- A enumeração cobre pares e trincas de IDs distintos, não todas as combinações de deck/partida.
+- Os asserts não estimam valor esperado, EFP, taxa de vitória ou equilíbrio por facção.
+- As 28 ramificações antigas de identidade seguem sem decisão de keep/merge/redesign/remove; `gloria` e `sobrevivente` permanecem pendências separadas.
+- Banco de produção, configuração operacional, estado de R2 e imagens aprovadas não vieram no pacote fonte.
+
+## 6. Próximos passos
+
+1. Estender regressões a sequências stateful de 12 cartas e pares sobrepostos adicionais.
+2. Testar serialização/desserialização de snapshots e o payload de `/api/gwent/cards` após a mudança de descrição.
+3. Definir o tratamento operacional de partidas já ativas no deploy.
+4. Cobrir clima, mudanças de rodada, IA e interações cruzadas.
+5. Resolver destino das 28 ramificações antigas e dos hooks `gloria`/`sobrevivente`.
+6. Construir simulador determinístico de partidas por facção; só depois calibrar EFP, custos, raridades e orçamento de deck.

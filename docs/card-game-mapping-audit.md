@@ -1,32 +1,3 @@
-# Estado vigente V77 — 2026-11-28
-
-- Catálogo: **179 modelos**; payload público do site: **179 modelos**.
-- Pacote jogável: **164 cartas**; cada facção possui **30 unidades + 11 especiais**.
-- Líderes: **12**, três por facção.
-- Os Esquecidos receberam dez novas cartas especiais; os dois líderes adicionais da V76 foram preservados.
-- Títulos: únicos e limitados a 27 caracteres; IDs antigos preservados.
-- Auditoria catálogo → motor → site: **zero divergências**. Consulte `docs/v77-normalizacao-faccoes-e-nomes.md` e `docs/AUDITORIA-FIDELIDADE-CARTAS.md/.json`.
-
----
-
-# Registro histórico V76 — estado daquele release, supersedido pela V77 (2026-11-28)
-
-Este bloco registra o snapshot V76 e foi preservado para histórico. Seus números de catálogo, limite de nomes e suíte não representam o estado atual: a V77 o supersede. Para os dados atuais, consulte o cabeçalho deste documento e `docs/v77-normalizacao-faccoes-e-nomes.md`.
-
-- `CARTAS_POR_ID`: **162 modelos**; payload de catálogo do site: **162 modelos**.
-- `CARTAS_PACOTE`: 147 cartas estáticas, incluindo 120 unidades e 27 especiais.
-- Unidades por facção: **30 / 30 / 30 / 30** (Ordem Áurea, Véu Carmesim, Lua Negra, Os Esquecidos).
-- Líderes: **12**, três por facção.
-- Combos: **27**; as novas unidades dos Esquecidos usam os seis combos de fé existentes, sem alterar a política aprovada. A auditoria V76 examina 92 unidades com tags, 8.372 pares e 753.480 trincas. Os Esquecidos agora tem Papa Esquecido, Abadessa das Ruínas e Mártir da Vigília.
-- Títulos: até 28 caracteres, sem duplicatas no registro atual.
-- Decks-base: 9 unidades e 1 especial por facção, sem cartas de outra facção.
-- Os seis IDs Luteranos conflitantes foram reclassificados como Os Esquecidos; os IDs foram preservados. `faction_for_card()` e `preparar_carta()` agora consultam o ID canônico antes de confiar em snapshots antigos. `gwent_especial_requiem` também migrou para Os Esquecidos.
-- No snapshot V76, a auditoria apresentou 162 modelos. Esse resultado foi substituído pela auditoria V77, com 179 modelos e 340 testes + 109 subtestes aprovados; não use esta contagem histórica como atual.
-
-As seções abaixo preservam a análise histórica do baseline e não devem ser lidas como contagem atual quando indicarem 137 modelos, 110 unidades ou 10 líderes. Para o estado atual, use também `docs/v76-expansao-os-esquecidos.md`.
-
----
-
 # Atualização mais recente: estados negativos v0.1 (2026-11-27)
 
 A auditoria complementar `docs/card-game-status-effects-review-v0.1.md` cruza as regras legadas de Geada, Podridão Escarlate, Sangramento e Loucura com o motor. Foram mapeadas 15 aplicações, cinco purificadores e os defeitos de transição/raridade/limpeza. O `status-registry-candidate.v1.json` e `sistemas/card_status_candidate.py` são candidatos isolados, não aprovados e não conectados ao runtime. Para resultado de testes e hashes, consultar `docs/card-game-status-effects-validation-v0.1.md/.json`. O resolvedor cobre transições/limiares/poder/purificação, não os seletores completos e handlers de cada carta. Não interpretar esta proposta como alteração das regras atualmente executadas.
@@ -537,8 +508,6 @@ Esses cinco IDs têm tags, mas não são modelos atuais do catálogo. Antes de r
 | sombra_caminhante | Rykard | Véu Carmesim | rykard_devour | Sacrifica seu aliado mais fraco na fileira escolhida; os demais aliados dessa fileira recebem +2 de bônus. |
 | voz_caidos | Esgar | Véu Carmesim | esgar_blood_priest | Ressuscita do descarte a unidade mais forte de poder 5 ou menos na fileira escolhida, com +1 de bônus. |
 | lider_papa_esquecido | Papa Esquecido | Os Esquecidos | forgotten_blessing | Concede +1 de bônus às unidades dos Esquecidos na fileira escolhida. |
-| lider_abadessa_ruinas | Abadessa das Ruínas | Os Esquecidos | forgotten_purification | Purifica até 2 aliados afetados de maior poder efetivo na fileira escolhida; limpa Sangramento, Geada, Podridão e Loucura e dá +1. |
-| lider_martir_vigilia | Mártir da Vigília | Os Esquecidos | forgotten_revival | Ressuscita a unidade mais forte dos Esquecidos com poder-base até 5 no descarte, na fileira escolhida, com +1. |
 | arquimaga_eclipse | Rennala | Lua Negra | rennala_full_moon | Remove Geada e Podridão dos aliados; cada aliado purificado em Cerco recebe +1 de bônus. |
 | mestre_eclipse | Astel | Lua Negra | astel_gravity | A gravidade atinge os inimigos da fileira escolhida: aplica uma marca de Geada a até 3 unidades mais fortes. |
 | oraculo_tempestade | Loretta | Lua Negra | loretta_knight | Concede +2 de bônus às 2 unidades aliadas mais fortes de Longa Distância. |
@@ -677,30 +646,32 @@ Para os 22 IDs de identidade ativa, `aplicar_jogada()` define `skill = ''`; a ha
 
 Os cinco IDs listados na seção 7 permanecem em `CARD_SYNERGY_TAGS`, sem modelo em `CARTAS_POR_ID`.
 
-### 10.8 Facção conflitante na expansão dos Esquecidos — corrigido em V76
+### 10.8 Facção conflitante na expansão dos Esquecidos
 
-A inconsistência do baseline foi corrigida. Os IDs Luteranos abaixo agora pertencem a `Os Esquecidos` no catálogo e os snapshots antigos são normalizados pela facção canônica do ID, em vez de manter a facção antiga armazenada.
+A seção da lista `CARTAS_EXPANSAO_V75` introduz “Nova facção: Os Esquecidos — fé, tradição e rituais sagrados”; o comentário de `CARD_SYNERGY_TAGS` também agrupa os IDs abaixo como unidades dos Esquecidos. No entanto, os campos atuais de facção em `Carta(...)` não são todos `Os Esquecidos`:
 
-| card_id | Nome atual | Facção atual |
-| --- | --- | --- |
-| `luterano_apostolo` | Apóstolo Esquecido | Os Esquecidos |
-| `luterano_profeta` | Profeta Esquecido | Os Esquecidos |
-| `luterano_pastor` | Pastor Esquecido | Os Esquecidos |
-| `luterano_vigia` | Vigia da Noite | Os Esquecidos |
-| `luterano_mistico` | Místico Esquecido | Os Esquecidos |
-| `luterano_anjo2` | Anjo de Segunda Ordem | Os Esquecidos |
 
-A revisão V76 também adicionou 16 unidades novas a Os Esquecidos e reposições nas outras facções, encerrando com 30 unidades por facção. `gwent_especial_requiem` passou a Os Esquecidos por afinidade com o tema de retorno dos mortos. Os IDs originais das cartas foram preservados.
+| card_id | Nome | Facção atualmente cadastrada | Habilidade nominal | Tags |
+| --- | --- | --- | --- | --- |
+| luterano_apostolo | Apóstolo Esquecido | Ordem Áurea | — | evangelho, fe |
+| luterano_pastor | Pastor Esquecido | Véu Carmesim | legado | fe, irmandade |
+| luterano_mistico | Místico Esquecido | Lua Negra | devoto | devocao, fe |
+| luterano_profeta | Profeta Esquecido | Ordem Áurea | sinergia_faccao | fe, soberania |
+| luterano_vigia | Vigia da Noite | Véu Carmesim | gloria | fe, gloria_divina |
+| luterano_anjo2 | Anjo de Segunda Ordem | Lua Negra | gloria | fe, gloria_divina |
 
-### 10.9 Texto mecânico e arte aprovada
+A discrepância é demonstrável entre agrupamento/comentários e o campo de facção. A intenção provável é que os seis sejam `Os Esquecidos`, mas isso é uma inferência contextual; confirmar a regra de facção antes de mudar dados, especialmente porque facção influencia predominância e passiva da partida.
 
-- `preparar_payload_carta_base()` chama `preparar_carta()` e marca o texto resultante como canônico para evitar reaplicar os sufixos de raridade durante a renderização.
-- `_dados_habilidade_visual()` preserva os metadados de combate para a interface, mas não os imprime. Os painéis procedural e de template são compostos somente com a lore canônica; se a lore inteira não couber, a renderização falha em vez de publicar texto truncado.
-- Arte completa aprovada no Ateliê permanece vinculada ao par `card_id + exemplar_id`, mas não é mais servida como pixels finais intocados. O renderizador extrai a janela da ilustração e recompõe os elementos de carta e a lore atual a partir do catálogo/motor; o texto de habilidade fica fora da imagem. O texto antigo incorporado à imagem não é usado como fonte mecânica.
-- A rota privada também exige dados canônicos para compor uma carta com arte aprovada. Se o modelo/snapshot não estiver disponível, não serve uma imagem isolada como se fosse uma carta validada.
-- A validação de baseline cruzava 137 cartas; a auditoria V76 cruza atualmente 162 registros com o payload público do site, incluindo identidade, efeito, sinergias e combos; verifica 65 definições de efeito, 22 efeitos de identidade e o pool de 13 habilidades de recompensas dinâmicas.
+### 10.9 Imagem pode divergir dos dados e da habilidade executada
 
-**Impacto:** alteração de efeito, raridade, poder ou fileira invalida o cache e atualiza a carta exibida a partir dos dados atuais. O arquivo original aprovado é preservado no armazenamento, mas os textos embutidos nele não controlam mais o cartão renderizado.
+- `preparar_payload_carta_base()` chama `preparar_carta()` e replica `habilidade_nome`/`habilidade_texto` para a renderização gerada.
+- Em `_draw_card()`, quando `illustration_bytes` contém arte oficial completa, o renderizador abre e redimensiona a imagem e retorna imediatamente; não sobrepõe nome, poder, raridade, habilidade, moldura ou efeitos. Os textos antigos estão literalmente incorporados nos pixels.
+- A documentação do Ateliê (`docs/ATELIE_CARTA_COMPLETA.md`) confirma que a arte oficial é associada a `card_id + exemplar_id` e que imagens antigas já aprovadas não são reescritas pelo código.
+- A imagem-base desenha aura usando `card['habilidade']`, não `habilidade_identidade` nem `CARD_IDENTITY_ABILITIES[card_id]['effect']`. Assim, as auras só cobrem algumas habilidades genéricas.
+- `_AURAS` contém 6 entradas: `escudo_ferro`, `vinganca`, `ressurgir`, `devorar`, `sobrevivente`, `espolios`. A última lista inclui `sobrevivente`, que não tem resolução no motor.
+- `_EMBLEMAS` de especiais também é um mapeamento específico e parcial; se o ID não for desenhado, o renderer usa emblema genérico.
+
+**Impacto:** corrigir catálogo/motor não atualiza imagem completa aprovada. Uma carta pode continuar visualmente mostrando regra/nome/poder antigo mesmo após os dados atuais serem atualizados. As imagens precisam ser identificadas por revisão/fingerprint ou regeneradas/reaprovadas segundo política explícita.
 
 ### 10.10 Cobertura da lista V18 não equivale a carta pura
 
@@ -831,7 +802,7 @@ A validação posterior está detalhada em [`card-game-balance-validation-v0.1.m
 - `HABILIDADES` tem 59 IDs. A auditoria AST encontrou 56 habilidades com comparações/resolução no caminho direto de `aplicar_jogada()`; `instinto` e `fome_abismo` compartilham uma condição de conjunto e estão incluídas nessa contagem. `vinganca` e `espolios` são hooks de ciclo de vida em `_remover_unidade()` e `_resolve_round()`. `sobrevivente` não tem handler correspondente encontrado.
 - `gloria` é um hook de retenção de unidade em `_resolve_round()`, mas não está em `HABILIDADES`. O teste sintético confirma a retenção ao vencer a rodada.
 - Existem 22 identidades ativas, todas com ramo no resolvedor; o código mantém 50 valores de `effect` e 28 não têm mapeamento ativo. Não remover sem decidir se são legados a aposentar ou mecânicas a recuperar.
-- Há 27 combos; as tags obrigatórias de todos têm provedores no catálogo. `CARD_SYNERGY_TAGS` tem 97 IDs mapeados, dos quais 92 são unidades atuais e cinco são IDs órfãos.
+- Há 27 combos; as tags obrigatórias de todos têm provedores no catálogo. `CARD_SYNERGY_TAGS` tem 72 IDs mapeados, dos quais 67 são unidades atuais e cinco são IDs órfãos.
 - Testes de fumaça chamaram o motor real em estados sintéticos: 56 ações diretas foram concluídas sem exceção; 22/22 identidades geraram evento de ativação; `vinganca` e `espolios` foram testados nos respectivos hooks; `sobrevivente` caiu no descarte. Isso não é cobertura completa dos ramos condicionais nem equilíbrio competitivo.
 - Amostragem de 100.000 decks, seed 42: 57,19% ativaram pelo menos um combo; média 0,956 ativação na mão de dez cartas assumida jogada na mesma rodada. O resultado é sensível à ordem aleatória e não mede valor de pontuação/vitória.
 - A amostragem de custo v0.2 reproduz: teto 32 aceita 68,8% sem relíquia e 45,4% com relíquia nas hipóteses do script. EFP e `leader_load` continuam provisórios.
@@ -892,7 +863,7 @@ A política descrita em `card-game-combo-policy-v0.1.md` foi aprovada pelo usuá
 
 ### Resultado pós-política
 
-A auditoria V76 `card-game-combo-overlap-v0.2.md/.json` percorreu 8.372 pares ordenados e 753.480 trincas ordenadas de IDs distintos entre 92 unidades com tags. Resultado: zero ativações solo; 720 pares têm sobreposição de elegibilidade, resolvida por prioridade; 24.886 trincas ativam múltiplos combos em jogadas sucessivas; todas as 24.886 cartas posteriores observadas contribuem com tag requerida. Esses resultados não são taxas de partida ou provas de equilíbrio.
+A auditoria `card-game-combo-overlap-v0.2.md/.json` percorreu 4.422 pares ordenados e 287.430 trincas ordenadas de IDs distintos entre 67 unidades com tags. Resultado: zero ativações solo; 152/4.422 pares têm sobreposição de elegibilidade, agora resolvida por prioridade; 2.582 trincas ativam múltiplos combos em jogadas sucessivas; todas as 2.582 cartas posteriores observadas contribuem com tag requerida. Esses resultados não são taxas de partida ou provas de equilíbrio.
 
 O relatório agregado atual é `card-game-behavior-validation-v0.3.md/.json`: oito suites, 251/251 asserts, incluindo 32 regressões específicas para a política. As suites são sintéticas e não substituem integração de partidas completas, serialização, API/site/Discord, DB ou R2.
 
@@ -904,7 +875,7 @@ O relatório agregado atual é `card-game-behavior-validation-v0.3.md/.json`: oi
 - Mapa AST pós-política: `scripts/build-effect-source-map-v0.2.py` e `card-game-effect-source-map-v0.2.json`.
 - Agregado: `scripts/summarize-card-game-behavior-v0.3.py` e `card-game-behavior-validation-v0.3.md/.json`.
 
-A matriz individual de 137 cartas é o snapshot histórico do baseline. O catálogo atual de 162 registros e a semântica V76 estão em `docs/AUDITORIA-FIDELIDADE-CARTAS.json` e `docs/v76-expansao-os-esquecidos.md`; use esses arquivos como referência corrente. Nenhum deck, exemplar, schema, API, frontend, imagem ou DB de produção foi migrado nesta etapa. Partidas já persistidas conservam bônus anteriores; o DB de produção não veio no ZIP.
+A matriz individual das 137 cartas continua sendo snapshot dos atributos/campos do catálogo e não foi regenerada com semântica nova de nomes/lore/poder/custo; use este catálogo de combos atual junto da matriz baseline. Nenhum deck, exemplar, schema, API, frontend, imagem ou DB de produção foi migrado nesta etapa. Partidas já persistidas conservam bônus anteriores; o DB de produção não veio no ZIP.
 
 
 ## 22. Integração stateful de partidas, snapshots e persistência (2026-11-27)

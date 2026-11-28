@@ -201,7 +201,7 @@ report = {
     "metadata": {
         "document": "Combo overlap and precedence audit v0.2",
         "status": "POST-POLICY STATIC/IN-MEMORY RESOLVER DIAGNOSTIC; NOT A FULL MATCH OR BALANCE SIMULATION",
-        "baseline": "post-policy runtime after V76 faction expansion (2026-11-28)",
+        "baseline": "post-policy runtime in soulsbo-main-handoff.zip",
         "runtime_modified": True,
         "resolver": "sistemas.gwent._aplicar_combo_de_cartas",
         "deck_constraint_reference": "bot.py::_api_gwent_deck_save (12 distinct card models)",
@@ -249,12 +249,12 @@ report = {
     },
     "example_card_metadata": example_card_metadata,
     "interpretation": [
-        "The resolver sorts combo definitions by their unique priority and activates at most one combo per card play. Other eligible combos remain deferred until a later card play.",
-        "The newly played card must contribute at least one tag required by the combo it activates. Participants are distinct unit instances, and each combo enforces its explicit minimum participant count.",
-        "All 27 registered combos have an explicit minimum of two participants and unique integer priorities. The current catalog scan found zero single-card activations.",
-        "The V76 scan uses 92 current catalog units with synergy tags; five orphan tag-map IDs absent from the catalog are excluded. It examines 8,372 ordered pairs and 753,480 ordered triples of distinct current unit IDs.",
-        "The scans call the real in-memory resolver but do not instantiate complete legal 12-card decks, verify ownership, or simulate full matches, leaders, relics, weather, opponents, or persistent database state.",
-        "Pair and triple frequencies describe the enumerated unit-ID universe only. They are not real-match activation rates, expected value, win rates, or proof of faction balance.",
+        "The resolver iterates SYNERGY_COMBOS in dictionary insertion order and returns immediately after applying the first eligible combo. Other eligible combos are deferred to later card plays.",
+        "The resolver checks only that the current card has at least one synergy tag. It does not require that the current card contribute a tag required by the combo currently being activated. If the board already satisfies the required tag set and minimum participant count, a later tagged card unrelated to that combo can receive its bonus.",
+        "Three combos omit an explicit minimum participant count: cinzas_fornalha, vazio_astral and eco_convergente. In the current catalog, gwent_unidade_eco alone activates eco_convergente because it carries both required tags. Its description refers to the Erudite and another Astral unit.",
+        "The scans use distinct current catalog unit IDs and call the real resolver. They do not instantiate all 12 deck slots, prove ownership, verify a fully legal saved deck, or simulate opponents, weather and the complete match state.",
+        "The findings establish deterministic trigger semantics and description/participation ambiguity; they do not by themselves establish unfairness or win-rate impact. The intended policy needs approval before runtime changes.",
+        "Five tag-map IDs absent from the current catalog are excluded and remain documented as orphan references.",
     ],
 }
 OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

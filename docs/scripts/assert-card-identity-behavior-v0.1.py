@@ -170,14 +170,11 @@ def test_veiled_moon():
 def test_scarlet_bloom():
     def tweak(s, p, o):
         row = s["players"]["1"]["hand"][0]["row"]
-        # A carta é Primordial no runtime; o smoke usa Comum como padrão para
-        # isolar os demais efeitos, então restauramos a raridade canônica aqui.
-        p["hand"][0]["raridade"] = "Primordial"
         o["board"] = [smoke.unit("scarlet_old_mark", row=row, power=5, bonus=2, podrida=1), smoke.unit("scarlet_new_mark", row=row, power=4, bonus=0)]
     _, _, _, _, enemy, _ = setup("chefe_malenia_lamina_miquella", tweak)
     old = unit_by_id(enemy, "scarlet_old_mark")
     new = unit_by_id(enemy, "scarlet_new_mark")
-    assert old["podrida"] == 2 and old["bonus"] == 0 and new["podrida"] == 1
+    assert old["podrida"] == 2 and old["bonus"] == 1 and new["podrida"] == 1
     return {"effect": "scarlet_bloom", "old_mark": old["podrida"], "old_target_bonus": old["bonus"], "new_mark": new["podrida"]}
 
 

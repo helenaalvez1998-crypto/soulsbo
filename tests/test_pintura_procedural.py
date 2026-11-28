@@ -110,9 +110,6 @@ class ProceduralPaintingTests(unittest.TestCase):
             "gwent_unidade_gigante": ("giant", "frozen highlands"),
             "gwent_unidade_portaestandarte": ("standard bearer", "sacred golden citadel"),
             "luterano_anjo": ("winged celestial", "forgotten cathedral"),
-            "gwent_v76_esq_serafim_caido": ("winged celestial", "forgotten cathedral"),
-            "gwent_v76_esq_santo_sem_nome": ("cleric or preacher", "forgotten cathedral"),
-            "gwent_v76_esq_diaconisa_altar": ("cleric or preacher", "forgotten cathedral"),
         }
         for card_id, expected in expectations.items():
             with self.subTest(card_id=card_id):
