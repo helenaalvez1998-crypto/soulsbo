@@ -16,6 +16,9 @@ class RuntimePreflightTests(unittest.TestCase):
             path = self.root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("# fixture\n", encoding="utf-8")
+        faq_fixture = self.root / "dados" / "nara_faq.json"
+        faq_fixture.parent.mkdir(parents=True, exist_ok=True)
+        faq_fixture.write_text('{"intents": [{"intent": "fixture"}]}', encoding="utf-8")
         self.data_dir = self.root / "persistent"
         self.database = self.data_dir / "colizeu.db"
         self.data_dir.mkdir()

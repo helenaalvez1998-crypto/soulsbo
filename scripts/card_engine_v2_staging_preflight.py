@@ -196,7 +196,7 @@ def run_preflight(
     # Static wiring checks ensure the runtime entrypoints still reference v2.
     static_checks = {
         "bot_extension_panel": (root / "bot.py", '"cogs.painel_jogo"'),
-        "discord_v2_button": (root / "cogs/painel_jogo.py", "Partidas v2 · Alpha"),
+        "site_v2_entry": (root / "cogs/painel_jogo.py", "/card-engine-v2"),
         "site_v2_routes": (root / "site_hub.py", "registrar_card_engine_v2"),
         "oauth_callback": (root / "bot.py", '"/auth/discord/callback"'),
     }

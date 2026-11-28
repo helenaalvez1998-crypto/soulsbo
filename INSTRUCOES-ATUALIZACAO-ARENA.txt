@@ -22,3 +22,7 @@ VALIDACAO
 - Estrutura de CSS analisada sem erros de parser.
 - JavaScript existente passou em node --check.
 - O pacote ZIP foi verificado apos a criacao.
+
+
+IMPORTANTE — ARQUIVO DA CENTRAL DE AJUDA DA NARA
+O deploy deve incluir a base `dados/nara_faq.json`. O código também contém uma cópia de contingência em `nara/nara_faq.json` e procura ambas. Não publique apenas os arquivos .py: inclua os arquivos JSON. Em ambientes que usem caminho customizado, configure `NARA_FAQ_PATH` com o caminho absoluto do JSON. O preflight bloqueia a inicialização se a FAQ estiver ausente ou inválida.

@@ -2,15 +2,15 @@
 
 > **Continuidade rev. 31 (2026-11-28):** o motor continua em alpha isolada. O pacote inclui agora operação de deploy Docker/Compose, preflight e backup SQLite, conquistas autoritativas e bloqueio seguro de apostas/evolução com risco incompletas. A validação local atual é 240 testes + 61 subtests; sem Docker CLI, secrets, banco real ou staging conectado, não houve build nem deploy. Leia `docs/card-engine-v2-rev31-product-completion.md` e `deploy/README.md` antes de iniciar.
 
-Este pacote contém uma fatia funcional alpha do motor novo: persistência transacional, resolvedor genérico, controlador de uma partida de teste melhor de três, 12 famílias de efeitos de entrada, combos, passivas de facção e líderes. A revisão 28 acrescenta uma primeira UI/transport Discord alpha através do botão **Partidas v2 · Alpha** no `/jogo`; não é uma integração de produção nem uma substituição do motor legado.
+Este pacote contém uma fatia funcional alpha do motor novo: persistência transacional, resolvedor genérico, controlador de uma partida de teste melhor de três, famílias de efeitos, combos, passivas de facção e líderes.
 
-## Integração Discord alpha (rev. 28)
+## Interface e entrada do jogador
 
-A UI está em `cogs/card_engine_v2_ui.py`; a fronteira de transporte e autorização está em `discord_gateway.py`. O botão é adicionado à view existente em `cogs/painel_jogo.py`, com import lazy, sem novo Cog e sem alteração de `bot.py`.
+A interface web do motor v2 é servida em `/card-engine-v2` por `site_card_engine_v2.py`, usando a sessão Discord assinada. O comando `/jogo` é intencionalmente um painel de entrada compacto: aponta para Arena, Deck e Coleção e para o Card Engine v2 no site. Ele não replica deckbuilding, convites ou ações de partida dentro do Discord.
 
-O caminho inclui criação de decks com 30 exemplares físicos, máximo três cópias por modelo, escolha do líder/facção, convites diretos, revalidação da coleção no matchmaking, ações básicas de partida e reabertura por **Minhas partidas**. As views privadas usam somente `view_match_for_player`; a UI não lê ou grava SQLite diretamente. Os dois bancos do motor ficam separados do banco legado em `DATA_DIR/card_engine_v2/`.
+`cogs/card_engine_v2_ui.py` e `docs/card-engine-v2-discord-alpha-v0.1.md` documentam a primeira integração Discord alpha (rev. 28), mantida como implementação histórica/dormente. Ela não é mais exposta como botão no `/jogo`; a experiência ativa do Card Engine v2 fica no site. O gateway e a aplicação compartilhada continuam sendo a fronteira de autorização e persistência usada pelo site.
 
-A documentação completa está em `docs/card-engine-v2-discord-alpha-v0.1.md`. Os convites são temporários (10 minutos, em memória); decks e partidas são persistentes. A UI exige que o usuário atualize manualmente a própria view para ver jogadas do oponente.
+O painel Discord mantém somente o `Ritual de Convergência` porque a operação de sacrificar três exemplares do mesmo modelo/raridade para criar um exemplar da raridade seguinte não é substituída pelas receitas de Linhagem, pelos Rituais Ancestrais ou pela Transmutação do site. Consulte `docs/painel-jogo.md` para o mapa atual dos botões.
 
 **Limite de validação desta revisão:** o ambiente de análise não possui `discord.py==2.7.1` nem `aiosqlite==0.22.1`, e não recebeu token Discord. A UI foi compilada e protegida por testes estáticos AST; o gateway e as regras foram executados em SQLite temporário. Login, despacho real de componentes, duas contas em servidor de staging e deploy ainda precisam ser testados no ambiente do bot.
 

@@ -109,6 +109,21 @@ def validate_runtime(
         exists = (root / relative).is_file()
         add(f"file:{relative}", "pass" if exists else "block", "presente" if exists else "arquivo obrigatório ausente")
 
+    faq_candidates = (root / "dados" / "nara_faq.json", root / "nara" / "nara_faq.json")
+    faq_path = next((candidate for candidate in faq_candidates if candidate.is_file()), None)
+    if faq_path is None:
+        add("nara_faq_asset", "block", "nara_faq.json ausente em dados/ e nara/; inclua o arquivo no deploy")
+    else:
+        try:
+            with faq_path.open("r", encoding="utf-8") as faq_file:
+                faq_data = json.load(faq_file)
+            faq_valid = isinstance(faq_data, dict) and isinstance(faq_data.get("intents"), list) and bool(faq_data["intents"])
+            add("nara_faq_asset", "pass" if faq_valid else "block",
+                f"FAQ válida: {len(faq_data.get('intents', []))} intenções ({faq_path.relative_to(root)})" if faq_valid
+                else f"JSON da FAQ inválido ou sem intenções ({faq_path.relative_to(root)})")
+        except (OSError, json.JSONDecodeError) as exc:
+            add("nara_faq_asset", "block", f"não foi possível ler a FAQ: {type(exc).__name__}")
+
     for name in REQUIRED_ENV:
         value = env(name)
         folded = value.casefold()

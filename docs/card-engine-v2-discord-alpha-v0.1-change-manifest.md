@@ -1,3 +1,5 @@
+> **Manifesto histórico.** O botão Discord `Partidas v2 · Alpha` descrito neste registro não faz mais parte da view atual de `/jogo`. A entrada ativa é o link do site `/card-engine-v2`; veja `docs/painel-jogo.md`.
+
 # Manifesto de mudanças — integração Discord Card Engine v2 alpha v0.1 (rev. 28)
 
 **Baseline:** rev. 27.  

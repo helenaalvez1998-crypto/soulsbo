@@ -1,3 +1,5 @@
+> **Registro histórico — não representa a navegação atual.** A interface Discord alpha descrita abaixo foi substituída como ponto de entrada: `/jogo` agora abre os links do site e `Card Engine v2 · Alpha` aponta para `/card-engine-v2`. A UI Discord antiga permanece no código como referência/dormante, mas não é exposta pelo painel atual. Consulte `docs/painel-jogo.md` e `sistemas/card_engine_v2/README.md` para a arquitetura em uso.
+
 # Card Engine v2 — integração Discord alpha v0.1
 
 **Baseline:** `soulsbo-main-continuity-2026-11-28-rev27.zip`  

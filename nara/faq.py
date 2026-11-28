@@ -6,13 +6,33 @@ prontas para Discord; intenções com `handler` consultam código/SQLite já exi
 from __future__ import annotations
 
 import json
+import os
 import re
 import unicodedata
 from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
 
-BASE_PATH = Path(__file__).resolve().parents[1] / "dados" / "nara_faq.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+# Caminho padrão do repositório e cópia junto ao pacote nara (fallback de deploy).
+# NARA_FAQ_PATH permite configurar um caminho absoluto no ambiente de produção.
+FAQ_CANDIDATES = (
+    Path(os.environ["NARA_FAQ_PATH"]).expanduser() if os.environ.get("NARA_FAQ_PATH", "").strip() else None,
+    PROJECT_ROOT / "dados" / "nara_faq.json",
+    Path(__file__).resolve().parent / "nara_faq.json",
+    Path.cwd() / "dados" / "nara_faq.json",
+)
+
+
+def _resolver_base_path() -> Path:
+    for candidate in FAQ_CANDIDATES:
+        if candidate is not None and candidate.is_file():
+            return candidate.resolve()
+    # Mantém um caminho previsível para que o erro final aponte o local principal.
+    return (PROJECT_ROOT / "dados" / "nara_faq.json").resolve()
+
+
+BASE_PATH = _resolver_base_path()
 STOPWORDS = {
     "a", "o", "as", "os", "um", "uma", "uns", "umas", "de", "da", "do", "das", "dos",
     "em", "no", "na", "nos", "nas", "por", "para", "pra", "com", "sem", "e", "ou", "que",
@@ -39,10 +59,21 @@ def _tokens_normalizados(texto_normalizado: str) -> frozenset[str]:
 
 @lru_cache(maxsize=1)
 def carregar_base() -> dict:
+    global BASE_PATH
+    # Reavalia no primeiro carregamento: alguns hosts montam os assets após importar
+    # os módulos Python. O fallback evita falha quando a pasta /dados não é copiada.
+    BASE_PATH = _resolver_base_path()
+    if not BASE_PATH.is_file():
+        procurados = [str(p) for p in FAQ_CANDIDATES if p is not None]
+        raise FileNotFoundError(
+            "Base FAQ da NARA não encontrada. Caminhos verificados: " + "; ".join(procurados)
+        )
     with BASE_PATH.open("r", encoding="utf-8") as arquivo:
         data = json.load(arquivo)
-    if not isinstance(data.get("intents"), list):
-        raise ValueError("Base FAQ inválida: campo 'intents' ausente")
+    if not isinstance(data, dict) or not isinstance(data.get("intents"), list):
+        raise ValueError(f"Base FAQ inválida em {BASE_PATH}: campo 'intents' ausente ou inválido")
+    if not data["intents"]:
+        raise ValueError(f"Base FAQ vazia em {BASE_PATH}")
     return data
 
 

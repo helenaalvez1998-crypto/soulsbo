@@ -804,11 +804,20 @@ def registrar_rotas(bot, app: web.Application) -> None:
         try:
             body = await request.json()
             exemplar_id = int(body.get("exemplar_id"))
+            action = str(body.get("action") or "").strip().casefold()
         except (ValueError, TypeError, AttributeError):
             return web.json_response({"error": "Dados inválidos."}, status=400)
         if exemplar_id <= 0:
             return web.json_response({"error": "Exemplar inválido."}, status=400)
-        result = await bot.db.coliseu_evoluir_exemplar(uid, exemplar_id)
+        if action == "lapidar":
+            result = await bot.db.coliseu_aprimorar_exemplar(uid, exemplar_id)
+        elif action == "ascender":
+            result = await bot.db.coliseu_evoluir_exemplar(uid, exemplar_id)
+        else:
+            return web.json_response(
+                {"status": "acao_invalida", "error": "Escolha Lapidar ou Ascender."},
+                status=400,
+            )
         return web.json_response(result, headers={"Cache-Control": "no-store"})
 
     app.router.add_get("/api/hub/prefs", prefs_get)

@@ -51,7 +51,7 @@ class CardEngineV2StagingPreflightTests(unittest.TestCase):
             "intents.message_content = True\nintents.members = True\nintents.presences = True\n",
             encoding="utf-8",
         )
-        (self.root / "cogs/painel_jogo.py").write_text("Partidas v2 · Alpha", encoding="utf-8")
+        (self.root / "cogs/painel_jogo.py").write_text("/card-engine-v2", encoding="utf-8")
         (self.root / "site_hub.py").write_text("registrar_card_engine_v2", encoding="utf-8")
         self.env = {
             "DISCORD_TOKEN": "test-bot-token-not-a-real-secret",
