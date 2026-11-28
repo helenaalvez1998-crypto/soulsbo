@@ -1661,7 +1661,7 @@ footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--pro-line);fon
 
 /* Gwent: escudo em campo e seletor de alvo */
 .gwent-shield{display:inline-block;margin-top:4px;padding:1px 6px;border:1px solid var(--gold);border-radius:999px;color:var(--gold);font-size:.62rem;letter-spacing:.04em;text-transform:uppercase}
-.gwent-target-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,10,.78)}
+.gwent-target-modal{position:fixed;inset:0;z-index:1400; /* seleção de alvo */display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,10,.78)}
 .gwent-target-box{width:min(460px,100%);max-height:85vh;overflow:auto;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--text)}
 .gwent-target-box h3{margin:0 0 12px;font-size:1rem}
 .gwent-target-list{display:grid;gap:8px}
@@ -2232,7 +2232,7 @@ body.gwent-match-active .gwent-battle-line span {
 .gwent-result-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 1600; /* resultado final */
   display: grid;
   place-items: center;
   padding: 20px;
@@ -4315,7 +4315,7 @@ body.gwent-match-active .gwent-hand-zone { backdrop-filter: blur(8px); }
   #gwent-hand-hover-preview { position:fixed; z-index:20000; inset:0; display:grid; place-items:center; pointer-events:none; background:radial-gradient(ellipse at center,rgba(0,0,0,.16),rgba(0,0,0,.03) 40%,transparent 70%); }
   #gwent-hand-hover-preview img { width:min(23vw,320px); height:min(76vh,520px); object-fit:contain; border:2px solid rgba(236,194,120,.9); border-radius:10px; background:#080d18; box-shadow:0 24px 90px #000e,0 0 38px rgba(190,139,230,.38); }
 
-  .gwent-play-card-modal { position:fixed; z-index:21000; inset:0; display:grid; place-items:center; padding:24px; background:rgba(2,5,12,.84); backdrop-filter:blur(8px); }
+  .gwent-play-card-modal { position:fixed; z-index:1450; /* modal de confirmação de jogada */ inset:0; display:grid; place-items:center; padding:24px; background:rgba(2,5,12,.84); backdrop-filter:blur(8px); }
   .gwent-play-card-dialog { position:relative; display:grid; grid-template-columns:minmax(220px,300px) minmax(300px,480px); align-items:center; gap:clamp(22px,3vw,42px); width:min(860px,94vw); max-height:90vh; padding:clamp(22px,3vw,38px); overflow:auto; border:2px solid transparent; border-image:linear-gradient(135deg,#f1d58f,#7955a9,#d9b46e) 1; background:radial-gradient(ellipse at 15% 5%,rgba(116,75,151,.22),transparent 42%),linear-gradient(145deg,#151c30,#080c16 75%); box-shadow:0 24px 100px #000e; }
   .gwent-play-card-art { display:flex; align-items:center; justify-content:center; min-width:0; }
   .gwent-play-card-art img { display:block; width:100%; max-height:78vh; object-fit:contain; filter:drop-shadow(0 12px 20px #000b); }
@@ -5707,7 +5707,7 @@ body.gwent-match-active .gwent-weather-vfx > span { pointer-events: none; }
 body.gwent-match-active .gwent-history > ol { display: none !important; }
 body.gwent-match-active .gwent-history-popover {
   position: fixed !important;
-  z-index: 2147483000 !important;
+  z-index: 1200 !important; /* camada de histórico: acima da arena, abaixo dos modais */
   display: block !important;
   max-width: calc(100vw - 24px);
   overflow: auto !important;
@@ -6154,7 +6154,7 @@ body.gwent-match-active .gwent-leader-card.is-spent { filter:saturate(.4); opaci
 body.gwent-match-active .gwent-hand-info { flex:1 1 auto; }
 body.gwent-match-active .gwent-hand-toggle { margin-left:auto; }
 
-.gwent-leader-modal { position:fixed; inset:0; z-index:10050; display:grid; place-items:center; padding:18px; background:rgba(2,5,12,.82); backdrop-filter:blur(9px); }
+.gwent-leader-modal { position:fixed; inset:0; z-index:1500; /* modal de líder */ display:grid; place-items:center; padding:18px; background:rgba(2,5,12,.82); backdrop-filter:blur(9px); }
 .gwent-leader-dialog { position:relative; display:grid; grid-template-columns:minmax(160px,220px) minmax(260px,450px); gap:22px; width:min(720px,95vw); max-height:90vh; overflow:auto; padding:24px; border:1px solid #b9945e; border-radius:15px; background:radial-gradient(circle at 15% 15%,rgba(135,93,48,.2),transparent 40%),linear-gradient(145deg,#151e2e,#080d17); box-shadow:0 24px 80px #000e; color:#eadfc9; }
 .gwent-leader-close { position:absolute; top:10px; right:12px; width:34px; height:34px; border:1px solid #8a714c; border-radius:50%; background:#111a28; color:#f4d69b; font-size:22px; cursor:pointer; }
 .gwent-leader-art { display:grid; align-content:center; justify-items:center; gap:14px; min-height:250px; border:1px solid rgba(215,177,107,.55); border-radius:10px; background:radial-gradient(circle at center,rgba(157,111,54,.35),transparent 50%),linear-gradient(145deg,#252434,#0a101c); }
@@ -6731,7 +6731,7 @@ body.gwent-match-active.gwent-theme-eldenring :is(button,[role="button"],a):focu
 body.gwent-match-active #gwent-hand-hover-preview {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 30000 !important;
+  z-index: 900 !important; /* prévia da carta na mão */
   display: grid !important;
   place-items: center !important;
   padding: 2vh 2vw !important;
@@ -6782,7 +6782,7 @@ body.gwent-match-active .gwent-board-card:focus-visible {
 body.gwent-match-active .gwent-leader-card-dock {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 9400 !important;
+  z-index: 100 !important; /* dock do líder */
   pointer-events: none !important;
 }
 body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
@@ -6790,7 +6790,7 @@ body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
   left: clamp(8px, 1vw, 18px) !important;
   bottom: clamp(10px, 1.5vh, 20px) !important;
   pointer-events: auto !important;
-  z-index: 9400 !important;
+  z-index: 100 !important; /* dock do líder */
   display: block !important;
   width: clamp(112px, 10.5vw, 148px) !important;
   height: clamp(176px, 25vh, 226px) !important;
@@ -7954,3 +7954,64 @@ body.gwent-match-active #gwent-arena .gwent-crystal-meter[data-side="opponent"] 
   font:500 10px/1.45 Inter,sans-serif;
 }
 .gwent-bonus-origin-empty { margin:0; }
+
+
+/* =====================================================================
+   GWENT — HIERARQUIA ÚNICA DE CAMADAS (stacking order)
+   0-19: estrutura e efeitos internos da arena
+   20-49: cartas no campo e seus estados
+   50-79: mão do jogador e interação local
+   100: dock do líder
+   900: projeção da carta da mão
+   1200: histórico flutuante
+   1400-1500: modais de alvo/líder/jogada
+   1600: resultado da partida
+   ===================================================================== */
+body.gwent-match-active {
+  --gwent-z-board: 20;
+  --gwent-z-board-card: 30;
+  --gwent-z-hand: 50;
+  --gwent-z-hand-card: 60;
+  --gwent-z-leader-dock: 100;
+  --gwent-z-hand-preview: 900;
+  --gwent-z-history: 1200;
+  --gwent-z-target-modal: 1400;
+  --gwent-z-play-modal: 1450;
+  --gwent-z-leader-modal: 1500;
+  --gwent-z-result: 1600;
+}
+body.gwent-match-active .gwent-battlefield,
+body.gwent-match-active .gwent-board-side,
+body.gwent-match-active .gwent-hand-zone {
+  isolation: isolate;
+}
+body.gwent-match-active .gwent-board-side { z-index: var(--gwent-z-board) !important; }
+body.gwent-match-active .gwent-board-cards { z-index: var(--gwent-z-board-card) !important; }
+body.gwent-match-active .gwent-board-card,
+body.gwent-match-active .gwent-board-card:hover,
+body.gwent-match-active .gwent-board-card:focus-visible {
+  z-index: var(--gwent-z-board-card) !important;
+}
+body.gwent-match-active .gwent-hand-zone { position: relative; z-index: var(--gwent-z-hand) !important; }
+body.gwent-match-active .gwent-hand { position: relative; z-index: var(--gwent-z-hand) !important; }
+body.gwent-match-active .gwent-hand > .gwent-hand-card,
+body.gwent-match-active .gwent-hand > .gwent-hand-card:hover,
+body.gwent-match-active .gwent-hand > .gwent-hand-card:focus-visible {
+  z-index: var(--gwent-z-hand-card) !important;
+}
+body.gwent-match-active #gwent-leader-card-dock,
+body.gwent-match-active .gwent-leader-card-dock,
+body.gwent-match-active .gwent-leader-card-dock .gwent-leader-card {
+  z-index: var(--gwent-z-leader-dock) !important;
+}
+body.gwent-match-active #gwent-hand-hover-preview { z-index: var(--gwent-z-hand-preview) !important; }
+body.gwent-match-active .gwent-history-popover { z-index: var(--gwent-z-history) !important; }
+body.gwent-match-active .gwent-target-modal { z-index: var(--gwent-z-target-modal) !important; }
+body.gwent-match-active .gwent-play-card-modal { z-index: var(--gwent-z-play-modal) !important; }
+body.gwent-match-active .gwent-leader-modal { z-index: var(--gwent-z-leader-modal) !important; }
+body.gwent-match-active .gwent-result-overlay,
+.gwent-result-overlay { z-index: var(--gwent-z-result, 1600) !important; }
+/* Efeitos climáticos ficam contidos na própria fileira; não competem com UI. */
+body.gwent-match-active .gwent-row.has-weather { isolation: isolate !important; }
+body.gwent-match-active .gwent-weather-vfx,
+body.gwent-match-active .gwent-row.has-weather::after { z-index: 5 !important; }

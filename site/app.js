@@ -1247,7 +1247,7 @@ const GWENT_LEADER_SIMPLE = {
   mestre_eclipse: 'Na fileira escolhida, até três unidades inimigas mais fortes recebem uma marca de Geada.',
   oraculo_tempestade: 'As duas unidades suas mais fortes de Longa Distância ganham +2 de bônus.'
 };
-window.gwentLeaderIcon = function gwentLeaderIcon(leaderId) { return GWENT_LEADER_ICONS[String(leaderId || '')] || '♜'; };
+function gwentLeaderIcon(leaderId) { return GWENT_LEADER_ICONS[String(leaderId || '')] || '♜'; }
 function gwentLeaderSimpleExplanation(leaderId, fallback = '') {
   return GWENT_LEADER_SIMPLE[String(leaderId || '')] || fallback || 'Ativa a habilidade especial do líder. Consulte a descrição para ver os alvos e as condições.';
 }
@@ -1276,7 +1276,7 @@ function openGwentLeaderModal() {
   modal.setAttribute('aria-label',`Líder ${leaderName}`);
   modal.innerHTML = `<section class="gwent-leader-dialog">
     <button type="button" class="gwent-leader-close" data-leader-close aria-label="Fechar">×</button>
-    <div class="gwent-leader-art"><span class="gwent-leader-portrait">${gwentLeaderArtMarkup(leaderId, 'gwent-leader-modal-image')}<i hidden>${window.gwentLeaderIcon(leaderId)}</i></span><small>${escapeHTML(faction)}</small></div>
+    <div class="gwent-leader-art"><span class="gwent-leader-portrait">${gwentLeaderArtMarkup(leaderId, 'gwent-leader-modal-image')}<i hidden>${gwentLeaderIcon(leaderId)}</i></span><small>${escapeHTML(faction)}</small></div>
     <div class="gwent-leader-details"><small class="eyebrow">CARTA DE LÍDER</small><h2>${escapeHTML(leaderName)}</h2>
       <span class="gwent-leader-state ${data.leader_used ? 'spent' : canActivate ? 'ready' : ''}">${status}</span>
       <section class="gwent-leader-ability"><small>HABILIDADE</small><p>${escapeHTML(description)}</p></section>
@@ -2140,7 +2140,7 @@ function renderGwentArena(data) {
   const leaderIdForCard = String(data.leader_id || '');
   const leaderSimpleText = gwentLeaderSimpleExplanation(leaderIdForCard, data.leader_description || 'Habilidade especial do líder.');
   const leaderCardMarkup = `<button type="button" class="gwent-leader-card ${data.leader_used ? 'is-spent' : ''}" data-gwent-leader-card title="Consultar e ativar a habilidade de ${escapeHTML(data.leader_name || 'líder')}" aria-label="Carta do líder ${escapeHTML(data.leader_name || 'líder')}. ${escapeHTML(leaderSimpleText)}">
-      <span class="gwent-leader-card-art">${gwentLeaderArtMarkup(leaderIdForCard, 'gwent-leader-full-image')}<i hidden>${window.gwentLeaderIcon(leaderIdForCard)}</i></span>
+      <span class="gwent-leader-card-art">${gwentLeaderArtMarkup(leaderIdForCard, 'gwent-leader-full-image')}<i hidden>${gwentLeaderIcon(leaderIdForCard)}</i></span>
       <span class="gwent-leader-card-meta"><small class="gwent-leader-eyebrow">CARTA DE LÍDER</small><b>${escapeHTML(data.leader_name || 'Líder')}</b><small>${escapeHTML(factionName)}</small><span class="gwent-leader-card-ability">${escapeHTML(leaderSimpleText)}</span><em>${data.leader_used ? 'HABILIDADE USADA' : 'CLIQUE PARA VER / ATIVAR'}</em></span>
     </button>`;
   const actionDisabled = !data.is_your_turn || data.status !== 'active' || prep;
@@ -2823,26 +2823,19 @@ function openGwentPlayCardModal(cardId) {
 }
 // A carta original permanece na mão/campo; o preview HD é uma projeção separada,
 // centralizada na viewport, sem retirar a imagem do cartão nem empurrar vizinhas.
+// Projeção ampliada é exclusiva das cartas na mão do jogador.
+// Cartas posicionadas no campo não devem abrir o preview gigante.
 document.addEventListener('mouseover', event => {
   const handCard = event.target.closest('[data-gwent-hand-card]');
   if (handCard && !handCard.contains(event.relatedTarget)) {
     showGwentHandHoverPreview(handCard.dataset.gwentHandCard);
-    return;
-  }
-  const boardCard = event.target.closest('.gwent-board-card');
-  if (boardCard && !boardCard.contains(event.relatedTarget)) {
-    const image = boardCard.querySelector('img[data-card-src]');
-    if (image) showGwentImageHoverPreview(image.dataset.cardSrc || image.currentSrc || image.src, image.alt);
   }
 });
 document.addEventListener('mouseout', event => {
   const handCard = event.target.closest('[data-gwent-hand-card]');
   if (handCard && !handCard.contains(event.relatedTarget)) {
     closeGwentHandHoverPreview();
-    return;
   }
-  const boardCard = event.target.closest('.gwent-board-card');
-  if (boardCard && !boardCard.contains(event.relatedTarget)) closeGwentHandHoverPreview();
 });
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
